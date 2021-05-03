@@ -1,0 +1,353 @@
+ORG 0x00
+V0: WORD $INOUT, 0x180		;программное прерывание для read/write
+V1: WORD $INOUTVY, 0x180		;любое прерывание от ВУ (изменить)
+V2: WORD $DEFAULT, 0x180
+V3: WORD $DEFAULT, 0x180
+V4: WORD $DEFAULT, 0x180
+V5: WORD $DEFAULT, 0x180
+V6: WORD $DEFAULT, 0x180
+V7: WORD $DEFAULT, 0x180 ;вектор 7 для прерываний программных
+DEFAULT:IRET
+
+		
+ORG 0x10	;Для массива запросов
+
+
+ORG	0x50
+REQ_IT:			WORD	0x10	;Текущий итератор
+REQ_FIRST:		WORD	0x10	;Кол-во запросов-64
+REQ_CAPACITY: 	WORD	0x4F	;Последний элемент
+
+REQ_VY:			WORD	0x00	;ВУ, от которого прерывание
+CURRENT_VY_IT:	WORD	0x00	;Текущий индекс элемента запроса
+REQ_SIZE:		WORD	0x00	;Размер текущего массива запросов
+REQ_SIZE_2:		WORD	0x00	;Вспомогательная копия переменной выше
+
+CLEANER_IT:		WORD	0x00	;Размер cleaner_IT, который будет 
+CLEANER_SIZE:	WORD	0x00	;Размер cleaner, через сколько выполненных запросов из массива будет вызываться дефрагментация.
+
+MASK_1:	WORD	0x0080
+MASK_2:	WORD	0x007F
+
+INOUT:
+		PUSH				;проверить, то ли записалось
+		AND		MASK_1					;проверить флаги
+		BEQ		READ		;Если равно нулю, то GOTO READ
+		BNE		WRITE		;Если не равно, то GOTO	WRITE
+
+READ:	;(AC: старший байт - номер ВУ)
+		POP
+SWITCH_IN:
+		PUSH				;Запушен запром
+		AND		MASK_2 
+		
+VY2I:	CMP		#0x02
+		BNE		VY3I
+		IN		5
+		CMP 	#0x40
+		BLT		PUT_ARRAY
+		POP
+		IN 		4
+		IRET
+		
+VY3I:	CMP		#0x03
+		BNE		VY4I
+		IN 		7
+		CMP 	#0x40
+		BLT 	PUT_ARRAY 
+		POP
+		IN 		6
+		IRET
+		
+VY4I:	CMP		#0x04
+		BNE		VY8I
+		IN 		0x0A
+		CMP 	#0x40 
+		BLT 	PUT_ARRAY
+		POP
+		IN 		8
+		IRET
+		
+VY8I:	CMP		#0x08
+		BNE		VY9I
+		IN		0x1A
+		CMP 	#0x40 
+		BLT 	PUT_ARRAY
+		POP
+		IN 		0x18
+		IRET
+		
+VY9I:	CMP		#0x09
+		BEQ		VY9CI
+		POP
+		IRET
+VY9CI:	IN 		0x1E
+		CMP 	#0x40 
+		BLT 	PUT_ARRAY
+		POP
+		IN 		0x1C
+		IRET
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+TAKE_ARRAY:
+		LD	-(CURRENT_VY_IT)
+							HLT
+		PUSH 
+		LD	#0xFF 
+		ST (REQ_IT) 		;За место ячейки записали -1
+		POP
+		LOOP 	CLEANER_IT		;CLEANER для того, чтобы чистить пустые места в очереди.
+		
+CLEANER_DONE_T:	BR	INOUT
+				LD	#0x01 
+				PUSH
+				BR	CLEANER
+		
+PUT_ARRAY:
+		LD 	$REQ_IT
+		CMP $REQ_CAPACITY 
+							HLT
+		BLT		NEXT_IT
+							HLT
+		
+		BR	CLEANER
+							HLT
+NEXT_IT:
+		POP 				;Достаем запрос
+		ST 	(REQ_IT)+		;Сохраняем в следующую ячейку
+							HLT
+		IRET	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+REQ_FINDER:
+		LD 	REQ_IT
+		ST 	CURRENT_VY_IT		;итератор для цикла VY в начало
+		SUB REQ_FIRST
+		ST	REQ_SIZE			;размер массива, который необходимо пройти
+		ST	REQ_SIZE_2
+REQ_F_LOOP:
+		LOOP REQ_SIZE_2
+		BR REQ_FINDER_CYCLE
+		IRET					;Если размер массива равен 0 или меньше, то IRET
+	
+REQ_FINDER_CYCLE:
+		LD 	(CURRENT_VY_IT)+
+		SUB	REQ_VY
+		AND		#0x007F
+		BEQ		TAKE_ARRAY
+		BR 	REQ_F_LOOP
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	
+CLEANER:
+		LD	$REQ_SIZE 
+		ST	$REQ_SIZE_2
+		
+CLEANER_IN:
+		LOOP $REQ_SIZE_2
+		BR	CLEANER_CYCLE_IN
+		BR	CLEANER_OUT
+		
+CLEANER_CYCLE_IN:
+		LD	-(REQ_IT)
+		INC
+		BEQ	CLEANER_CYCLE_IN
+		DEC 
+		PUSH
+		BR	CLEANER_IN
+	
+CLEANER_OUT:
+		LD	$REQ_SIZE 
+		SUB	$CLEANER_SIZE
+		ST	$REQ_SIZE 
+		ST	$REQ_SIZE_2
+		
+CLEANER_OUT_2:
+		LOOP	$REQ_SIZE_2
+		BR	CLEANER_CYCLE_OUT
+		POP 
+		CMP #0x01 
+		BEQ CLEANER_DONE_T
+		BNE	NEXT_IT
+		
+CLEANER_CYCLE_OUT:
+		POP
+		ST	(REQ_IT)+
+		POP
+		BR	CLEANER_OUT_2
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+
+REQ_FINDER_L1:	BR REQ_FINDER		;Красиво, я даже в рамочку возьму.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+WRITE:	;(AC: младший байт - номер ВУ, старший байт - данные)
+		POP
+		
+SWITCH_OUT:
+		PUSH				;Запушен запром
+		AND		$MASK_2
+		
+VY1O:	CMP		#0x01
+		BNE		VY3O
+		IN		3
+		CMP 	#0x40
+		BLT		PUT_ARRAY
+		POP
+		SWAB
+		OUT 	2
+		IRET
+		
+VY3O:	CMP		#0x03
+		BNE		VY4O
+		IN 		7
+		CMP 	#0x40
+		BLT 	PUT_ARRAY
+		POP
+		SWAB	
+		OUT 	6
+		IRET
+		
+VY4O:	CMP		#0x04
+		BNE		VY5O
+		IN 		0x0A
+		CMP 	#0x40 
+		BLT 	PUT_ARRAY
+		POP
+		SWAB
+		OUT 	9
+		IRET
+		
+VY5O:	CMP		#0x05
+		BNE		VY6O
+		IN		0x0E
+		CMP 	#0x40
+		BLT 	PUT_ARRAY
+		POP 
+		SWAB
+		OUT 	0x0D
+		IRET
+		
+VY6O:	CMP		#0x06
+		BNE		VY7O
+		IN		0x12
+		CMP 	#0x40	
+		BLT 	PUT_ARRAY
+		POP 
+		SWAB
+		OUT 	0x11
+		IRET
+		
+VY7O:	CMP		#0x07
+		BEQ		VY7CO
+		POP
+		IRET
+VY7CO:	IN 		0x16
+		CMP 	#0x40 
+		BLT 	PUT_ARRAY
+		POP 
+		SWAB
+		OUT 	0x15
+		IRET
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+INOUTVY:	
+		CLA
+VY1:	
+		IN 3
+		CMP #0x40
+		BEQ VY2
+		LD #0x01
+VY2:	
+		IN 5
+		CMP #0x40
+		BEQ VY3
+		LD #0x02
+VY3:	
+		IN 7
+		CMP #0x40
+		BEQ VY4
+		LD #0x03
+VY4:	
+		IN 0x0A
+		CMP #0x40
+		BEQ VY5
+		LD #0x04
+VY5:	
+		IN 0x0E
+		CMP #0x40
+		BEQ VY6
+		LD #0x05
+VY6:	
+		IN 0x12
+		CMP #0x40
+		BEQ VY7
+		LD #0x06
+VY7:	
+		IN 0x16
+		CMP #0x40
+		BEQ VY8 
+		LD #0x07
+VY8:	
+		IN 0x1A
+		CMP #0x40
+		BEQ VY9
+		LD #0x08
+VY9:	
+		IN 0x1E
+		CMP #0x40
+		BEQ VY9C
+		LD #0x09
+		ST $REQ_VY 
+		BR REQ_FINDER_L1
+VY9C:	
+		IRET
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Данные для проверки
+A:		WORD	0x3281	;ВУ-2 
+B:		WORD	0x5183	;ВУ-3	
+C:		WORD	0x1588	;ВУ-8 
+D:		WORD	0x1289	;ВУ-9 
+E:		WORD	0x558B	;ВУ-11, Которой нет. 
+		
+START:	
+		DI					;Установка ВУ на вектор 1
+		CLA
+		LD	#0x09
+		OUT	0x01	;ВУ-0
+		OUT	0x03	;ВУ-1
+		OUT	0x05	;ВУ-2
+		OUT	0x07	;ВУ-3
+		OUT	0x0B	;ВУ-4
+		OUT 0x0F	;ВУ-5
+		OUT	0x13	;ВУ-6
+		OUT	0x17	;ВУ-7
+		OUT 0x1B	;ВУ-8
+		OUT	0x1F	;ВУ-9
+							HLT 		;Проверка всех ВУ
+		CLA
+		LD	$CLEANER_SIZE
+		ST	$CLEANER_IT					;Установка cleaner_IT
+		CLA
+		BR 	MAIN
+MAIN:	
+		EI
+		LD 		$A 
+		INT 	0x00 
+							HLT
+		LD 		$B 
+		INT 	0x00 
+							HLT
+		LD 		$C
+		INT 	0x00 
+							HLT
+		LD 		$D 
+		INT 	0x00 
+							HLT
+		LD 		$E 
+		INT 	0x00 
+							HLT
+LOOOP:	SWAB 
+		BR LOOOP
