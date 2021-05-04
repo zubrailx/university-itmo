@@ -23,19 +23,23 @@ CURRENT_VY_IT:	WORD	0x00	;Текущий индекс элемента запр�
 REQ_SIZE:		WORD	0x00	;Размер текущего массива запросов
 REQ_SIZE_2:		WORD	0x00	;Вспомогательная копия переменной выше
 
-CLEANER_IT:		WORD	0x00	;Размер cleaner_IT, который будет 
+CLEANER_IT:		WORD	0x00	;Итератор для cleaner, когда равен нулю, то выполняется очистка. По умолчанию равен cleaner_size
 CLEANER_SIZE:	WORD	0x00	;Размер cleaner, через сколько выполненных запросов из массива будет вызываться дефрагментация.
 
 MASK_1:	WORD	0x0080
 MASK_2:	WORD	0x007F
 
-INOUT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+INOUT:															;В AC лежит запрос.
 		PUSH				;проверить, то ли записалось
 		AND		MASK_1					;проверить флаги
 		BEQ		READ		;Если равно нулю, то GOTO READ
 		BNE		WRITE		;Если не равно, то GOTO	WRITE
 
-READ:	;(AC: старший байт - номер ВУ)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+READ:	;(AC: старший байт - номер ВУ)						Работает!
 		POP
 SWITCH_IN:
 		PUSH				;Запушен запром
@@ -95,25 +99,29 @@ TAKE_ARRAY:
 							HLT
 		PUSH 
 		LD	#0xFF 
-		ST (REQ_IT) 		;За место ячейки записали -1
-		POP
+		ST (CURRENT_VY_IT) 		;За место ячейки записали -1
 		LOOP 	CLEANER_IT		;CLEANER для того, чтобы чистить пустые места в очереди.
 		
-CLEANER_DONE_T:	BR	INOUT
-				LD	#0x01 
-				PUSH
+CLEANER_DONE_T:	BR	TAKE_ARRAY_2
+				LD 	#0x01 
+				PUSH 			;Для того, чтобы потом cleaner вернуться в правильное место.
 				BR	CLEANER
+				
+TAKE_ARRAY_2:
+		POP
+		BR INOUT
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 		
 PUT_ARRAY:
 		LD 	$REQ_IT
 		CMP $REQ_CAPACITY 
 							HLT
-		BLT		NEXT_IT
+		BLT		PUT_ARRAY_2
 							HLT
-		
 		BR	CLEANER
 							HLT
-NEXT_IT:
+PUT_ARRAY_2:
 		POP 				;Достаем запрос
 		ST 	(REQ_IT)+		;Сохраняем в следующую ячейку
 							HLT
@@ -122,22 +130,24 @@ NEXT_IT:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 REQ_FINDER:
-		LD 	REQ_IT
+		LD 	REQ_FIRST 
 		ST 	CURRENT_VY_IT		;итератор для цикла VY в начало
+		
+		LD 	REQ_IT
 		SUB REQ_FIRST
 		ST	REQ_SIZE			;размер массива, который необходимо пройти
-		ST	REQ_SIZE_2
-REQ_F_LOOP:
+		ST	REQ_SIZE_2			;размер для вспомогательной переменной, от которой будет LOOP
+REQ_LOOP:
 		LOOP REQ_SIZE_2
-		BR REQ_FINDER_CYCLE
+		BR REQ_LOOP_2
 		IRET					;Если размер массива равен 0 или меньше, то IRET
 	
-REQ_FINDER_CYCLE:
+REQ_LOOP_2:
 		LD 	(CURRENT_VY_IT)+
 		SUB	REQ_VY
 		AND		#0x007F
 		BEQ		TAKE_ARRAY
-		BR 	REQ_F_LOOP
+		BR 	REQ_LOOP
 		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -147,13 +157,14 @@ CLEANER:
 		
 CLEANER_IN:
 		LOOP $REQ_SIZE_2
-		BR	CLEANER_CYCLE_IN
+		
+		BR	CLEANER_IN_2
 		BR	CLEANER_OUT
 		
-CLEANER_CYCLE_IN:
+CLEANER_IN_2:
 		LD	-(REQ_IT)
 		INC
-		BEQ	CLEANER_CYCLE_IN
+		BEQ	CLEANER_IN
 		DEC 
 		PUSH
 		BR	CLEANER_IN
@@ -164,26 +175,25 @@ CLEANER_OUT:
 		ST	$REQ_SIZE 
 		ST	$REQ_SIZE_2
 		
-CLEANER_OUT_2:
+CLEANER_OUT_1:
 		LOOP	$REQ_SIZE_2
-		BR	CLEANER_CYCLE_OUT
+		BR	CLEANER_OUT_2
 		POP 
-		CMP #0x01 
+		CMP #0x01 				;если в метод передавалась 1, то переходим в CLEANER_DONE_T, иначе в PUT_ARRAY_2
 		BEQ CLEANER_DONE_T
-		BNE	NEXT_IT
+		BNE	PUT_ARRAY
 		
-CLEANER_CYCLE_OUT:
+CLEANER_OUT_2:
 		POP
 		ST	(REQ_IT)+
-		POP
 		BR	CLEANER_OUT_2
 		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 
-REQ_FINDER_L1:	BR REQ_FINDER		;Красиво, я даже в рамочку возьму.
+REQ_FINDER_L1:	BR REQ_FINDER		;Красиво, я даже в рамочку возьму.		Работает!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-WRITE:	;(AC: младший байт - номер ВУ, старший байт - данные)
+WRITE:	;(AC: младший байт - номер ВУ, старший байт - данные)				
 		POP
 		
 SWITCH_OUT:
@@ -254,57 +264,85 @@ VY7CO:	IN 		0x16
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-INOUTVY:	
+INOUTVY:							;Работает!	Одновременно он выключает готовность ВУ, чтобы та не спинлупила.
 		CLA
 VY1:	
 		IN 3
 		CMP #0x40
-		BEQ VY2
+		BNE VY2
+				CLA
+		OUT 2
 		LD #0x01
+		BR SAVEVY
 VY2:	
 		IN 5
 		CMP #0x40
-		BEQ VY3
+		BNE VY3
+				CLA
+		IN 4
 		LD #0x02
+		BR SAVEVY
 VY3:	
 		IN 7
 		CMP #0x40
-		BEQ VY4
+		BNE VY4
+				CLA
+		IN 6
 		LD #0x03
+		BR SAVEVY
 VY4:	
 		IN 0x0A
 		CMP #0x40
-		BEQ VY5
+		BNE VY5
+				CLA
+		IN 8
 		LD #0x04
+		BR SAVEVY
 VY5:	
 		IN 0x0E
 		CMP #0x40
-		BEQ VY6
+		BNE VY6
+				CLA
+		IN 0x0C
 		LD #0x05
+		BR SAVEVY
 VY6:	
 		IN 0x12
 		CMP #0x40
-		BEQ VY7
+		BNE VY7
+				CLA
+		IN 0x10
 		LD #0x06
+		BR SAVEVY
 VY7:	
 		IN 0x16
 		CMP #0x40
-		BEQ VY8 
+		BNE VY8 
+				CLA
+		IN 0x14
 		LD #0x07
+		BR SAVEVY
 VY8:	
 		IN 0x1A
 		CMP #0x40
-		BEQ VY9
+		BNE VY9
+				CLA
+		IN 0x18
 		LD #0x08
+		BR SAVEVY
 VY9:	
 		IN 0x1E
 		CMP #0x40
-		BEQ VY9C
+				CLA
+		IN 0x1C
 		LD #0x09
-		ST $REQ_VY 
+SAVEVY:
+		ST $REQ_VY
+							HLT
 		BR REQ_FINDER_L1
-VY9C:	
-		IRET
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Данные для проверки
 A:		WORD	0x3281	;ВУ-2 
 B:		WORD	0x5183	;ВУ-3	
@@ -326,7 +364,7 @@ START:
 		OUT	0x17	;ВУ-7
 		OUT 0x1B	;ВУ-8
 		OUT	0x1F	;ВУ-9
-							HLT 		;Проверка всех ВУ
+							NOP 		;Проверка всех ВУ
 		CLA
 		LD	$CLEANER_SIZE
 		ST	$CLEANER_IT					;Установка cleaner_IT
@@ -336,18 +374,5 @@ MAIN:
 		EI
 		LD 		$A 
 		INT 	0x00 
-							HLT
-		LD 		$B 
-		INT 	0x00 
-							HLT
-		LD 		$C
-		INT 	0x00 
-							HLT
-		LD 		$D 
-		INT 	0x00 
-							HLT
-		LD 		$E 
-		INT 	0x00 
-							HLT
 LOOOP:	SWAB 
 		BR LOOOP
