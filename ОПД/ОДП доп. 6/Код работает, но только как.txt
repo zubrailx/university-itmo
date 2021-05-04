@@ -1,204 +1,216 @@
 ORG 0x00
-V0: WORD $INOUT, 0x180		;программное прерывание для read/write
-V1: WORD $INOUTVY, 0x180		;любое прерывание от ВУ (изменить)
+V0: WORD $INOUT, 0x180				;программное прерывание для read/write
+V1: WORD $INOUTVY, 0x180			;любое прерывание от ВУ (изменить)
 V2: WORD $DEFAULT, 0x180
 V3: WORD $DEFAULT, 0x180
 V4: WORD $DEFAULT, 0x180
 V5: WORD $DEFAULT, 0x180
 V6: WORD $DEFAULT, 0x180
-V7: WORD $DEFAULT, 0x180 ;вектор 7 для прерываний программных
+V7: WORD $DEFAULT, 0x180
 DEFAULT:IRET
 
 		
-ORG 0x10	;Для массива запросов
+ORG 0x11	;Для массива запросов
 
 
 ORG	0x50
-REQ_IT:			WORD	0x10	;Текущий итератор
-REQ_FIRST:		WORD	0x10	;Кол-во запросов-64
-REQ_CAPACITY: 	WORD	0x4F	;Последний элемент
+REQ_IT:			WORD	0x11		;Текущий итератор
+REQ_FIRST:		WORD	0x11		;Кол-во запросов-64
+REQ_CAPACITY: 	WORD	0x50		;Следующий за последним элемент.
 
-REQ_VY:			WORD	0x00	;ВУ, от которого прерывание
-CURRENT_VY_IT:	WORD	0x00	;Текущий индекс элемента запроса
-REQ_SIZE:		WORD	0x00	;Размер текущего массива запросов
-REQ_SIZE_2:		WORD	0x00	;Вспомогательная копия переменной выше
+REQ_VY:			WORD	0x00		;ВУ, от которого прерывание
+CURRENT_VY_IT:	WORD	0x00		;Текущий индекс элемента запроса
+REQ_SIZE:		WORD	0x00		;Размер текущего массива запросов
+REQ_SIZE_2:		WORD	0x00		;Вспомогательная копия переменной выше
 
-CLEANER_IT:		WORD	0x00	;Итератор для cleaner, когда равен нулю, то выполняется очистка. По умолчанию равен cleaner_size
-CLEANER_SIZE:	WORD	0x00	;Размер cleaner, через сколько выполненных запросов из массива будет вызываться дефрагментация. (если 1, то без остановки (не ставить), то проверка выполняется после каждой операции).
+CLEANER_IT:		WORD	0x00		;Итератор для cleaner, когда равен нулю, то выполняется очистка. По умолчанию равен cleaner_size
+CLEANER_SIZE:	WORD	0x03		;Размер cleaner, через сколько выполненных запросов из массива будет вызываться дефрагментация. (если 1, то без остановки (не ставить), то проверка выполняется после каждой операции).
 
 MASK_1:	WORD	0x0080
 MASK_2:	WORD	0x007F
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО. (AC - request)
 
-INOUT:															;В AC лежит запрос.
-		PUSH				;проверить, то ли записалось
-		AND		MASK_1					;проверить флаги
-		BEQ		READ		;Если равно нулю, то GOTO READ
-		BNE		WRITE		;Если не равно, то GOTO	WRITE
+INOUT:															
+		PUSH						;проверить, то ли записалось
+		AND		MASK_1				;проверить флаги
+		BEQ		READ				;Если равно нулю, то GOTO READ
+		BNE		WRITE				;Если не равно, то GOTO	WRITE
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО. (null)
 
 READ:	;(AC: старший байт - номер ВУ)						Работает!
 		POP
 SWITCH_IN:
-		PUSH				;Запушен запром
-		AND		MASK_2 
-		
-VY2I:	CMP		#0x02
+		PUSH						;Запушен запром
+		AND		MASK_2 		
+VY2I:	
+		CMP		#0x02
 		BNE		VY3I
 		IN		5
 		CMP 	#0x40
 		BLT		PUT_ARRAY
 		POP
 		IN 		4
-		IRET
-		
-VY3I:	CMP		#0x03
+		IRET		
+VY3I:	
+		CMP		#0x03
 		BNE		VY4I
 		IN 		7
 		CMP 	#0x40
 		BLT 	PUT_ARRAY 
 		POP
 		IN 		6
-		IRET
-		
-VY4I:	CMP		#0x04
+		IRET		
+VY4I:	
+		CMP		#0x04
 		BNE		VY8I
 		IN 		0x0A
 		CMP 	#0x40 
 		BLT 	PUT_ARRAY
 		POP
 		IN 		8
-		IRET
-		
-VY8I:	CMP		#0x08
+		IRET		
+VY8I:	
+		CMP		#0x08
 		BNE		VY9I
 		IN		0x1A
 		CMP 	#0x40 
 		BLT 	PUT_ARRAY
 		POP
 		IN 		0x18
-		IRET
-		
-VY9I:	CMP		#0x09
+		IRET		
+VY9I:	
+		CMP		#0x09
 		BEQ		VY9CI
 		POP
 		IRET
-VY9CI:	IN 		0x1E
+VY9CI:	
+		IN 		0x1E
 		CMP 	#0x40 
 		BLT 	PUT_ARRAY
 		POP
 		IN 		0x1C
 		IRET
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.
 
 TAKE_ARRAY:
-		LD	-(CURRENT_VY_IT)
-							HLT
+		LD		-(CURRENT_VY_IT)
 		PUSH 
-		LD	#0xFF 
-		ST (CURRENT_VY_IT) 		;За место ячейки записали -1
-		LOOP 	CLEANER_IT		;CLEANER для того, чтобы чистить пустые места в очереди.
+							HLT
+		LD		#0xFF 
+		ST 		(CURRENT_VY_IT) 		;За место ячейки записали -1
+		LOOP 	CLEANER_IT				;CLEANER для того, чтобы чистить пустые места в очереди.
 		
-CLEANER_DONE_T:	BR	TAKE_ARRAY_2
-				LD 	#0x01 
-				PUSH 			;Для того, чтобы потом cleaner вернуться в правильное место.
-				BR	CLEANER
+CLEANER_DONE_T:
+		BR		TAKE_ARRAY_2
+		LD 		#0x01 
+		PUSH 							;Для того, чтобы потом cleaner вернуться в правильное место.
+		BR		CLEANER
 				
 TAKE_ARRAY_2:
 		POP
-		BR INOUT
+		BR 		INOUT
 		
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.	
 		
 PUT_ARRAY:
-		LD 	$REQ_IT
-		CMP $REQ_CAPACITY 
-							HLT
+		LD 		$REQ_IT
+		CMP 	$REQ_CAPACITY 
 		BLT		PUT_ARRAY_2
-							HLT
-		BR	CLEANER
-							HLT
+		BR		CLEANER
 PUT_ARRAY_2:
-		POP 				;Достаем запрос
-		ST 	(REQ_IT)+		;Сохраняем в следующую ячейку
-							HLT
+		POP 							;Достаем запрос
+		ST 		(REQ_IT)+				;Сохраняем в следующую ячейку
 		IRET	
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.
 
 REQ_FINDER:
-		LD 	REQ_FIRST 
-		ST 	CURRENT_VY_IT		;итератор для цикла VY в начало
-		
-		LD 	REQ_IT
-		SUB REQ_FIRST
-		ST	REQ_SIZE			;размер массива, который необходимо пройти
-		INC						;увеличиваем на 1, поскольку проверка идет сначала.
-		ST	REQ_SIZE_2			;размер для вспомогательной переменной, от которой будет LOOP
+		LD 		REQ_FIRST 
+		ST 		CURRENT_VY_IT			;итератор для цикла VY в начало
+		LD 		REQ_IT
+		SUB 	REQ_FIRST
+		ST		REQ_SIZE				;размер массива, который необходимо пройти
+		INC								;увеличиваем на 1, поскольку проверка идет сначала.
+		ST		REQ_SIZE_2				;размер для вспомогательной переменной, от которой будет LOOP
 REQ_LOOP:
-		LOOP REQ_SIZE_2
-		BR REQ_LOOP_2
-		BR SWITCH_OFF_VY_L1					;Если размер массива равен 0 или меньше, то выключаем ВУ, от которого производился запрос.
+		LOOP 	REQ_SIZE_2
+		BR 		REQ_LOOP_2
+		BR 		SWITCH_OFF_VY_L1		;Если размер массива равен 0 или меньше, то выключаем ВУ, от которого производился запрос.
 	
 REQ_LOOP_2:
-		LD 	(CURRENT_VY_IT)+
-		SUB	REQ_VY
+		LD 		(CURRENT_VY_IT)+
+		SUB		REQ_VY
 		AND		#0x007F
 		BEQ		TAKE_ARRAY
-		BR 	REQ_LOOP
+		BR 		REQ_LOOP
 		
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 CLEANER:
-		LD	$REQ_SIZE 
-		ST	$REQ_SIZE_2
+		LD		$REQ_SIZE
+		INC
+		ST		$REQ_SIZE_2
 		
 CLEANER_IN:
-		LOOP $REQ_SIZE_2
+		LOOP 	$REQ_SIZE_2
 		
-		BR	CLEANER_IN_2
-		BR	CLEANER_OUT
+		BR		CLEANER_IN_2
+		BR		CLEANER_OUT
 		
 CLEANER_IN_2:
-		LD	-(REQ_IT)
+		LD		-(REQ_IT)
+		PUSH
+		CLA 
+		ST (REQ_IT)
+		POP
 		INC
-		BEQ	CLEANER_IN
+		BEQ		CLEANER_IN
 		DEC 
 		PUSH
-		BR	CLEANER_IN
+							HLT
+		BR		CLEANER_IN
 	
 CLEANER_OUT:
-		LD	$REQ_SIZE 
-		SUB	$CLEANER_SIZE
-		ST	$REQ_SIZE 
-		ST	$REQ_SIZE_2
+		LD		$REQ_SIZE 
+							
+		SUB		$CLEANER_SIZE
+		ST		$REQ_SIZE
+							HLT
+		INC
+							HLT
+		ST		$REQ_SIZE_2
 		
 CLEANER_OUT_1:
 		LOOP	$REQ_SIZE_2
-		BR	CLEANER_OUT_2
+		BR		CLEANER_OUT_2
+							HLT
 		POP 
-		CMP #0x01 				;если в метод передавалась 1, то переходим в CLEANER_DONE_T, иначе в PUT_ARRAY_2
-		BEQ CLEANER_DONE_T
-		BNE	PUT_ARRAY
+		CMP 	#0x01 					;если в метод передавалась 1, то переходим в CLEANER_DONE_T, иначе в PUT_ARRAY_2
+		BEQ 	CLEANER_DONE_T
+							HLT
+		BNE		PUT_ARRAY
 		
 CLEANER_OUT_2:
 		POP
-		ST	(REQ_IT)+
-		BR	CLEANER_OUT_2
-		
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+		ST		(REQ_IT)+
+							HLT
+		BR		CLEANER_OUT_1
 
-REQ_FINDER_L1:	BR REQ_FINDER		;Красиво, я даже в рамочку возьму.		Работает!
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.
+
+REQ_FINDER_L1:		BR REQ_FINDER		;Красиво, я даже в рамочку возьму.		перемычка для относительных адресаций.
 SWITCH_OFF_VY_L1:	BR SWITCH_OFF_VY 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-WRITE:	;(AC: младший байт - номер ВУ, старший байт - данные)				
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.		
+WRITE:			
 		POP
 		
 SWITCH_OUT:
-		PUSH				;Запушен запром
+		PUSH							;Запушен запром
 		AND		$MASK_2
 		
 VY1O:	CMP		#0x01
@@ -263,143 +275,158 @@ VY7CO:	IN 		0x16
 		OUT 	0x15
 		IRET
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.
 
-INOUTVY:							;Работает!	Одновременно он выключает готовность ВУ, чтобы та не спинлупила.
+INOUTVY:								;Определяет, от какого ВУ пришел запрос.
 		CLA
 VY1:	
-		IN 3
-		CMP #0x40
-		BNE VY2
-		LD #0x01
-		BR SAVEVY
+		IN 		3
+		CMP 	#0x40
+		BNE 	VY2
+		LD 		#0x01
+		BR 		SAVEVY
 VY2:	
-		IN 5
-		CMP #0x40
-		BNE VY3
-		LD #0x02
-		BR SAVEVY
+		IN 		5
+		CMP 	#0x40
+		BNE 	VY3
+		LD 		#0x02
+		BR 		SAVEVY
 VY3:	
-		IN 7
-		CMP #0x40
-		BNE VY4
-		LD #0x03
-		BR SAVEVY
+		IN 		7
+		CMP 	#0x40
+		BNE 	VY4
+		LD 		#0x03
+		BR 		SAVEVY
 VY4:	
-		IN 0x0A
-		CMP #0x40
-		BNE VY5
-		LD #0x04
-		BR SAVEVY
+		IN 		0x0A
+		CMP 	#0x40
+		BNE 	VY5
+		LD 		#0x04
+		BR 		SAVEVY
 VY5:	
-		IN 0x0E
-		CMP #0x40
-		BNE VY6
-		LD #0x05
-		BR SAVEVY
+		IN 		0x0E
+		CMP 	#0x40
+		BNE 	VY6
+		LD 		#0x05
+		BR 		SAVEVY
 VY6:	
-		IN 0x12
-		CMP #0x40
-		BNE VY7
-		LD #0x06
-		BR SAVEVY
+		IN 		0x12
+		CMP 	#0x40
+		BNE 	VY7
+		LD 		#0x06
+		BR 		SAVEVY
 VY7:	
-		IN 0x16
-		CMP #0x40
-		BNE VY8 
-		LD #0x07
-		BR SAVEVY
+		IN 		0x16
+		CMP 	#0x40
+		BNE 	VY8 
+		LD 		#0x07
+		BR 		SAVEVY
 VY8:	
-		IN 0x1A
-		CMP #0x40
-		BNE VY9
-		LD #0x08
-		BR SAVEVY
+		IN 		0x1A
+		CMP 	#0x40
+		BNE 	VY9
+		LD 		#0x08
+		BR 		SAVEVY
 VY9:	
-		LD #0x09
+		LD 		#0x09
 SAVEVY:
-		ST $REQ_VY
-							HLT
-		BR REQ_FINDER_L1
+		ST 		$REQ_VY
+		BR 		REQ_FINDER_L1
 		
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SWITCH_OFF_VY:
-		LD 		$REQ_VY
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 		ЗАДЕБАЖЕНО.
+														;Выключает необходимое ВУ, если от него нет запроса.
+SWITCH_OFF_VY:				
+		LD 		$REQ_VY	
 		
-VY1OFF:	CMP		#0x01
+VY1OFF:	
+		CMP		#0x01
 		BNE		VY2OFF
 		OUT 	2
-		IRET
-		
-VY2OFF:	CMP		#0x02
+		IRET	
+VY2OFF:	
+		CMP		#0x02
 		BNE		VY3OFF	
 		IN 		4
-		IRET
-		
-VY3OFF:	CMP		#0x03
+		IRET		
+VY3OFF:	
+		CMP		#0x03
 		BNE		VY4OFF	
 		IN 		6
-		IRET
-		
-VY4OFF:	CMP		#0x04
+		IRET		
+VY4OFF:	
+		CMP		#0x04
 		BNE		VY5OFF
 		IN 		8
-		IRET
-		
-VY5OFF:	CMP		#0x05
+		IRET		
+VY5OFF:	
+		CMP		#0x05
 		BNE		VY6OFF
 		IN		0x0C
-		IRET
-		
-VY6OFF:	CMP		#0x06
+		IRET	
+VY6OFF:	
+		CMP		#0x06
 		BNE		VY7OFF
 		IN 		0x10
-		IRET
-		
-VY7OFF:	CMP		#0x07
+		IRET	
+VY7OFF:	
+		CMP		#0x07
 		BNE		VY8OFF
 		IN 		0x14
 		IRET
-
-VY8OFF:	CMP		#0x08
+VY8OFF:	
+		CMP		#0x08
 		BNE		VY9OFF	
 		IN 		0x18
 		IRET
-
 VY9OFF:		
 		IN 		0x1C
 		IRET
 	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Данные для проверки
-A:		WORD	0x3281	;ВУ-2 
-B:		WORD	0x5183	;ВУ-3	
-C:		WORD	0x1588	;ВУ-8 
-D:		WORD	0x1289	;ВУ-9 
-E:		WORD	0x558B	;ВУ-11, Которой нет. 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.
+
+A:		WORD	0x3281				;ВУ-2 
+B:		WORD	0x5183				;ВУ-3	
+C:		WORD	0x1588				;ВУ-8 
+D:		WORD	0x1289				;ВУ-9 
+E:		WORD	0x558B				;ВУ-11, Которой нет. 
 		
 START:	
-		DI					;Установка ВУ на вектор 1
+		DI							;Установка ВУ на вектор 1
 		CLA
-		LD	#0x09
-		OUT	0x01	;ВУ-0
-		OUT	0x03	;ВУ-1
-		OUT	0x05	;ВУ-2
-		OUT	0x07	;ВУ-3
-		OUT	0x0B	;ВУ-4
-		OUT 0x0F	;ВУ-5
-		OUT	0x13	;ВУ-6
-		OUT	0x17	;ВУ-7
-		OUT 0x1B	;ВУ-8
-		OUT	0x1F	;ВУ-9
-							NOP 		;Проверка всех ВУ
+		LD		#0x09
+		OUT		0x01				;ВУ-0
+		OUT		0x03				;ВУ-1
+		OUT		0x05				;ВУ-2
+		OUT		0x07				;ВУ-3
+		OUT		0x0B				;ВУ-4
+		OUT 	0x0F				;ВУ-5
+		OUT		0x13				;ВУ-6
+		OUT		0x17				;ВУ-7
+		OUT 	0x1B				;ВУ-8
+		OUT		0x1F				;ВУ-9
+							NOP 	;Проверка всех ВУ
 		CLA
-		LD	$CLEANER_SIZE
-		ST	$CLEANER_IT					;Установка cleaner_IT
+		LD		$CLEANER_SIZE
+		ST		$CLEANER_IT			;Установка cleaner_IT
 		CLA
-		BR 	MAIN
-MAIN:	
+		BR 		MAIN
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+MAIN:								;Ввод для пользователя.
 		EI
 		LD 		$A 
 		INT 	0x00 
+		CLA
+		LD 		$A 
+		INT 	0x00 
+		LD 		$B 
+		INT 	0x00 
+		LD 		$A 
+		INT 	0x00
+		LD 		$B 
+		INT 	0x00
 LOOOP:	SWAB 
-		BR LOOOP
+		BR 	LOOOP
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

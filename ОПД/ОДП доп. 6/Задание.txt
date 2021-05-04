@@ -24,3 +24,328 @@ CLEANER_SIZE:	WORD	0x00	;Размер cleaner, через сколько вып�
 MASK_1:	WORD	0x0080
 MASK_2:	WORD	0x007F
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+000| V0: WORD  0x5b
+001| WORD  0x180
+002| V1: WORD  0x10d
+003| WORD  0x180
+004| V2: WORD  0x10
+005| WORD  0x180
+006| V3: WORD  0x10
+007| WORD  0x180
+008| V4: WORD  0x10
+009| WORD  0x180
+00a| V5: WORD  0x10
+00b| WORD  0x180
+00c| V6: WORD  0x10
+00d| WORD  0x180
+00e| V7: WORD  0x10
+00f| WORD  0x180
+010| DEFAULT: IRET  	; type=NONADDR value=0xb00
+050| REQ_IT: WORD  0x11
+051| REQ_FIRST: WORD  0x11
+052| REQ_CAPACITY: WORD  0x50
+053| REQ_VY: WORD  0x0
+054| CURRENT_VY_IT: WORD  0x0
+055| REQ_SIZE: WORD  0x0
+056| REQ_SIZE_2: WORD  0x0
+057| CLEANER_IT: WORD  0x0
+058| CLEANER_SIZE: WORD  0x2
+059| MASK_1: WORD  0x80
+05a| MASK_2: WORD  0x7f
+05b| PUSH  	; type=NONADDR value=0xc00
+05c| AND MASK_1 	; type=ADDR value=0x2efc
+05d| BEQ  label=READ 	; type=BRANCH value=0xf001
+05e| BNE  label=WRITE 	; type=BRANCH value=0xf173
+05f| POP  	; type=NONADDR value=0x800
+060| PUSH  	; type=NONADDR value=0xc00
+061| AND MASK_2 	; type=ADDR value=0x2ef8
+062| CMP #2 	; type=ADDR value=0x7f02
+063| BNE  label=VY3I 	; type=BRANCH value=0xf106
+064| IN  	; type=IO value=0x1205
+065| CMP #64 	; type=ADDR value=0x7f40
+066| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf832
+067| POP  	; type=NONADDR value=0x800
+068| IN  	; type=IO value=0x1204
+069| IRET  	; type=NONADDR value=0xb00
+06a| CMP #3 	; type=ADDR value=0x7f03
+06b| BNE  label=VY4I 	; type=BRANCH value=0xf106
+06c| IN  	; type=IO value=0x1207
+06d| CMP #64 	; type=ADDR value=0x7f40
+06e| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf82a
+06f| POP  	; type=NONADDR value=0x800
+070| IN  	; type=IO value=0x1206
+071| IRET  	; type=NONADDR value=0xb00
+072| CMP #4 	; type=ADDR value=0x7f04
+073| BNE  label=VY8I 	; type=BRANCH value=0xf106
+074| IN  	; type=IO value=0x120a
+075| CMP #64 	; type=ADDR value=0x7f40
+076| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf822
+077| POP  	; type=NONADDR value=0x800
+078| IN  	; type=IO value=0x1208
+079| IRET  	; type=NONADDR value=0xb00
+07a| CMP #8 	; type=ADDR value=0x7f08
+07b| BNE  label=VY9I 	; type=BRANCH value=0xf106
+07c| IN  	; type=IO value=0x121a
+07d| CMP #64 	; type=ADDR value=0x7f40
+07e| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf81a
+07f| POP  	; type=NONADDR value=0x800
+080| IN  	; type=IO value=0x1218
+081| IRET  	; type=NONADDR value=0xb00
+082| CMP #9 	; type=ADDR value=0x7f09
+083| BEQ  label=VY9CI 	; type=BRANCH value=0xf002
+084| POP  	; type=NONADDR value=0x800
+085| IRET  	; type=NONADDR value=0xb00
+086| IN  	; type=IO value=0x121e
+087| CMP #64 	; type=ADDR value=0x7f40
+088| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf810
+089| POP  	; type=NONADDR value=0x800
+08a| IN  	; type=IO value=0x121c
+08b| IRET  	; type=NONADDR value=0xb00
+08c| LD -(CURRENT_VY_IT) 	; type=ADDR value=0xabc7
+08d| NOP  	; type=NONADDR value=0x0
+08e| PUSH  	; type=NONADDR value=0xc00
+08f| HLT  	; type=NONADDR value=0x100
+090| LD #255 	; type=ADDR value=0xafff
+091| ST (CURRENT_VY_IT) 	; type=ADDR value=0xe8c2
+092| LOOP CLEANER_IT 	; type=ADDR value=0x8ec4
+093| BR  label=TAKE_ARRAY_2 	; type=BRANCH value=0xce03
+094| LD #1 	; type=ADDR value=0xaf01
+095| PUSH  	; type=NONADDR value=0xc00
+096| BR  label=CLEANER 	; type=BRANCH value=0xce21
+097| POP  	; type=NONADDR value=0x800
+098| BR  label=INOUT 	; type=BRANCH value=0xcec2
+099| LD $REQ_IT 	; type=ADDR value=0xa050
+09a| CMP $REQ_CAPACITY 	; type=ADDR value=0x7052
+09b| BLT  label=PUT_ARRAY_2 	; type=BRANCH value=0xf802
+09c| HLT  	; type=NONADDR value=0x100
+09d| BR  label=CLEANER 	; type=BRANCH value=0xce1a
+09e| POP  	; type=NONADDR value=0x800
+09f| ST (REQ_IT)+ 	; type=ADDR value=0xeab0
+0a0| IRET  	; type=NONADDR value=0xb00
+0a1| LD REQ_FIRST 	; type=ADDR value=0xaeaf
+0a2| ST CURRENT_VY_IT 	; type=ADDR value=0xeeb1
+0a3| HLT  	; type=NONADDR value=0x100
+0a4| LD REQ_IT 	; type=ADDR value=0xaeab
+0a5| SUB REQ_FIRST 	; type=ADDR value=0x6eab
+0a6| ST REQ_SIZE 	; type=ADDR value=0xeeae
+0a7| HLT  	; type=NONADDR value=0x100
+0a8| INC  	; type=NONADDR value=0x700
+0a9| HLT  	; type=NONADDR value=0x100
+0aa| ST REQ_SIZE_2 	; type=ADDR value=0xeeab
+0ab| HLT  	; type=NONADDR value=0x100
+0ac| LOOP REQ_SIZE_2 	; type=ADDR value=0x8ea9
+0ad| BR  label=REQ_LOOP_2 	; type=BRANCH value=0xce02
+0ae| HLT  	; type=NONADDR value=0x100
+0af| BR  label=SWITCH_OFF_VY_L1 	; type=BRANCH value=0xce21
+0b0| LD (CURRENT_VY_IT)+ 	; type=ADDR value=0xaaa3
+0b1| HLT  	; type=NONADDR value=0x100
+0b2| SUB REQ_VY 	; type=ADDR value=0x6ea0
+0b3| AND #127 	; type=ADDR value=0x2f7f
+0b4| HLT  	; type=NONADDR value=0x100
+0b5| BEQ  label=TAKE_ARRAY 	; type=BRANCH value=0xf0d6
+0b6| HLT  	; type=NONADDR value=0x100
+0b7| BR  label=REQ_LOOP 	; type=BRANCH value=0xcef4
+0b8| LD $REQ_SIZE 	; type=ADDR value=0xa055
+0b9| ST $REQ_SIZE_2 	; type=ADDR value=0xe056
+0ba| LOOP $REQ_SIZE_2 	; type=ADDR value=0x8056
+0bb| BR  label=CLEANER_IN_2 	; type=BRANCH value=0xce01
+0bc| BR  label=CLEANER_OUT 	; type=BRANCH value=0xce06
+0bd| LD -(REQ_IT) 	; type=ADDR value=0xab92
+0be| INC  	; type=NONADDR value=0x700
+0bf| BEQ  label=CLEANER_IN 	; type=BRANCH value=0xf0fa
+0c0| DEC  	; type=NONADDR value=0x740
+0c1| PUSH  	; type=NONADDR value=0xc00
+0c2| BR  label=CLEANER_IN 	; type=BRANCH value=0xcef7
+0c3| LD $REQ_SIZE 	; type=ADDR value=0xa055
+0c4| SUB $CLEANER_SIZE 	; type=ADDR value=0x6058
+0c5| ST $REQ_SIZE 	; type=ADDR value=0xe055
+0c6| ST $REQ_SIZE_2 	; type=ADDR value=0xe056
+0c7| LOOP $REQ_SIZE_2 	; type=ADDR value=0x8056
+0c8| BR  label=CLEANER_OUT_2 	; type=BRANCH value=0xce04
+0c9| POP  	; type=NONADDR value=0x800
+0ca| CMP #1 	; type=ADDR value=0x7f01
+0cb| BEQ  label=CLEANER_DONE_T 	; type=BRANCH value=0xf0c7
+0cc| BNE  label=PUT_ARRAY 	; type=BRANCH value=0xf1cc
+0cd| POP  	; type=NONADDR value=0x800
+0ce| ST (REQ_IT)+ 	; type=ADDR value=0xea81
+0cf| BR  label=CLEANER_OUT_2 	; type=BRANCH value=0xcefd
+0d0| REQ_FINDER_L1: BR  label=REQ_FINDER 	; type=BRANCH value=0xced0
+0d1| SWITCH_OFF_VY_L1: BR  label=SWITCH_OFF_VY 	; type=BRANCH value=0xce68
+0d2| POP  	; type=NONADDR value=0x800
+0d3| PUSH  	; type=NONADDR value=0xc00
+0d4| AND $MASK_2 	; type=ADDR value=0x205a
+0d5| VY1O: CMP #1 	; type=ADDR value=0x7f01
+0d6| BNE  label=VY3O 	; type=BRANCH value=0xf107
+0d7| IN  	; type=IO value=0x1203
+0d8| CMP #64 	; type=ADDR value=0x7f40
+0d9| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf8bf
+0da| POP  	; type=NONADDR value=0x800
+0db| SWAB  	; type=NONADDR value=0x680
+0dc| OUT  	; type=IO value=0x1302
+0dd| IRET  	; type=NONADDR value=0xb00
+0de| VY3O: CMP #3 	; type=ADDR value=0x7f03
+0df| BNE  label=VY4O 	; type=BRANCH value=0xf107
+0e0| IN  	; type=IO value=0x1207
+0e1| CMP #64 	; type=ADDR value=0x7f40
+0e2| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf8b6
+0e3| POP  	; type=NONADDR value=0x800
+0e4| SWAB  	; type=NONADDR value=0x680
+0e5| OUT  	; type=IO value=0x1306
+0e6| IRET  	; type=NONADDR value=0xb00
+0e7| VY4O: CMP #4 	; type=ADDR value=0x7f04
+0e8| BNE  label=VY5O 	; type=BRANCH value=0xf107
+0e9| IN  	; type=IO value=0x120a
+0ea| CMP #64 	; type=ADDR value=0x7f40
+0eb| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf8ad
+0ec| POP  	; type=NONADDR value=0x800
+0ed| SWAB  	; type=NONADDR value=0x680
+0ee| OUT  	; type=IO value=0x1309
+0ef| IRET  	; type=NONADDR value=0xb00
+0f0| VY5O: CMP #5 	; type=ADDR value=0x7f05
+0f1| BNE  label=VY6O 	; type=BRANCH value=0xf107
+0f2| IN  	; type=IO value=0x120e
+0f3| CMP #64 	; type=ADDR value=0x7f40
+0f4| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf8a4
+0f5| POP  	; type=NONADDR value=0x800
+0f6| SWAB  	; type=NONADDR value=0x680
+0f7| OUT  	; type=IO value=0x130d
+0f8| IRET  	; type=NONADDR value=0xb00
+0f9| VY6O: CMP #6 	; type=ADDR value=0x7f06
+0fa| BNE  label=VY7O 	; type=BRANCH value=0xf107
+0fb| IN  	; type=IO value=0x1212
+0fc| CMP #64 	; type=ADDR value=0x7f40
+0fd| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf89b
+0fe| POP  	; type=NONADDR value=0x800
+0ff| SWAB  	; type=NONADDR value=0x680
+100| OUT  	; type=IO value=0x1311
+101| IRET  	; type=NONADDR value=0xb00
+102| VY7O: CMP #7 	; type=ADDR value=0x7f07
+103| BEQ  label=VY7CO 	; type=BRANCH value=0xf002
+104| POP  	; type=NONADDR value=0x800
+105| IRET  	; type=NONADDR value=0xb00
+106| VY7CO: IN  	; type=IO value=0x1216
+107| CMP #64 	; type=ADDR value=0x7f40
+108| BLT  label=PUT_ARRAY 	; type=BRANCH value=0xf890
+109| POP  	; type=NONADDR value=0x800
+10a| SWAB  	; type=NONADDR value=0x680
+10b| OUT  	; type=IO value=0x1315
+10c| IRET  	; type=NONADDR value=0xb00
+10d| CLA  	; type=NONADDR value=0x200
+10e| IN  	; type=IO value=0x1203
+10f| CMP #64 	; type=ADDR value=0x7f40
+110| BNE  label=VY2 	; type=BRANCH value=0xf102
+111| LD #1 	; type=ADDR value=0xaf01
+112| BR  label=SAVEVY 	; type=BRANCH value=0xce24
+113| IN  	; type=IO value=0x1205
+114| CMP #64 	; type=ADDR value=0x7f40
+115| BNE  label=VY3 	; type=BRANCH value=0xf102
+116| LD #2 	; type=ADDR value=0xaf02
+117| BR  label=SAVEVY 	; type=BRANCH value=0xce1f
+118| IN  	; type=IO value=0x1207
+119| CMP #64 	; type=ADDR value=0x7f40
+11a| BNE  label=VY4 	; type=BRANCH value=0xf102
+11b| LD #3 	; type=ADDR value=0xaf03
+11c| BR  label=SAVEVY 	; type=BRANCH value=0xce1a
+11d| IN  	; type=IO value=0x120a
+11e| CMP #64 	; type=ADDR value=0x7f40
+11f| BNE  label=VY5 	; type=BRANCH value=0xf102
+120| LD #4 	; type=ADDR value=0xaf04
+121| BR  label=SAVEVY 	; type=BRANCH value=0xce15
+122| IN  	; type=IO value=0x120e
+123| CMP #64 	; type=ADDR value=0x7f40
+124| BNE  label=VY6 	; type=BRANCH value=0xf102
+125| LD #5 	; type=ADDR value=0xaf05
+126| BR  label=SAVEVY 	; type=BRANCH value=0xce10
+127| IN  	; type=IO value=0x1212
+128| CMP #64 	; type=ADDR value=0x7f40
+129| BNE  label=VY7 	; type=BRANCH value=0xf102
+12a| LD #6 	; type=ADDR value=0xaf06
+12b| BR  label=SAVEVY 	; type=BRANCH value=0xce0b
+12c| IN  	; type=IO value=0x1216
+12d| CMP #64 	; type=ADDR value=0x7f40
+12e| BNE  label=VY8 	; type=BRANCH value=0xf102
+12f| LD #7 	; type=ADDR value=0xaf07
+130| BR  label=SAVEVY 	; type=BRANCH value=0xce06
+131| IN  	; type=IO value=0x121a
+132| CMP #64 	; type=ADDR value=0x7f40
+133| BNE  label=VY9 	; type=BRANCH value=0xf102
+134| LD #8 	; type=ADDR value=0xaf08
+135| BR  label=SAVEVY 	; type=BRANCH value=0xce01
+136| LD #9 	; type=ADDR value=0xaf09
+137| ST $REQ_VY 	; type=ADDR value=0xe053
+138| HLT  	; type=NONADDR value=0x100
+139| BR  label=REQ_FINDER_L1 	; type=BRANCH value=0xce96
+13a| LD $REQ_VY 	; type=ADDR value=0xa053
+13b| CMP #1 	; type=ADDR value=0x7f01
+13c| BNE  label=VY2OFF 	; type=BRANCH value=0xf102
+13d| OUT  	; type=IO value=0x1302
+13e| IRET  	; type=NONADDR value=0xb00
+13f| CMP #2 	; type=ADDR value=0x7f02
+140| BNE  label=VY3OFF 	; type=BRANCH value=0xf102
+141| IN  	; type=IO value=0x1204
+142| IRET  	; type=NONADDR value=0xb00
+143| CMP #3 	; type=ADDR value=0x7f03
+144| BNE  label=VY4OFF 	; type=BRANCH value=0xf102
+145| IN  	; type=IO value=0x1206
+146| IRET  	; type=NONADDR value=0xb00
+147| CMP #4 	; type=ADDR value=0x7f04
+148| BNE  label=VY5OFF 	; type=BRANCH value=0xf102
+149| IN  	; type=IO value=0x1208
+14a| IRET  	; type=NONADDR value=0xb00
+14b| CMP #5 	; type=ADDR value=0x7f05
+14c| BNE  label=VY6OFF 	; type=BRANCH value=0xf102
+14d| IN  	; type=IO value=0x120c
+14e| IRET  	; type=NONADDR value=0xb00
+14f| CMP #6 	; type=ADDR value=0x7f06
+150| BNE  label=VY7OFF 	; type=BRANCH value=0xf102
+151| IN  	; type=IO value=0x1210
+152| IRET  	; type=NONADDR value=0xb00
+153| CMP #7 	; type=ADDR value=0x7f07
+154| BNE  label=VY8OFF 	; type=BRANCH value=0xf102
+155| IN  	; type=IO value=0x1214
+156| IRET  	; type=NONADDR value=0xb00
+157| CMP #8 	; type=ADDR value=0x7f08
+158| BNE  label=VY9OFF 	; type=BRANCH value=0xf102
+159| IN  	; type=IO value=0x1218
+15a| IRET  	; type=NONADDR value=0xb00
+15b| IN  	; type=IO value=0x121c
+15c| IRET  	; type=NONADDR value=0xb00
+15d| A: WORD  0x3281
+15e| B: WORD  0x5183
+15f| C: WORD  0x1588
+160| D: WORD  0x1289
+161| E: WORD  0x558b
+162| DI  	; type=NONADDR value=0x1000
+163| CLA  	; type=NONADDR value=0x200
+164| LD #9 	; type=ADDR value=0xaf09
+165| OUT  	; type=IO value=0x1301
+166| OUT  	; type=IO value=0x1303
+167| OUT  	; type=IO value=0x1305
+168| OUT  	; type=IO value=0x1307
+169| OUT  	; type=IO value=0x130b
+16a| OUT  	; type=IO value=0x130f
+16b| OUT  	; type=IO value=0x1313
+16c| OUT  	; type=IO value=0x1317
+16d| OUT  	; type=IO value=0x131b
+16e| OUT  	; type=IO value=0x131f
+16f| NOP  	; type=NONADDR value=0x0
+170| CLA  	; type=NONADDR value=0x200
+171| LD $CLEANER_SIZE 	; type=ADDR value=0xa058
+172| ST $CLEANER_IT 	; type=ADDR value=0xe057
+173| CLA  	; type=NONADDR value=0x200
+174| BR  label=MAIN 	; type=BRANCH value=0xce00
+175| EI  	; type=NONADDR value=0x1100
+176| LD $A 	; type=ADDR value=0xa15d
+177| INT  	; type=IO value=0x1800
+178| CLA  	; type=NONADDR value=0x200
+179| LD $A 	; type=ADDR value=0xa15d
+17a| INT  	; type=IO value=0x1800
+17b| LD $B 	; type=ADDR value=0xa15e
+17c| INT  	; type=IO value=0x1800
+17d| LD $A 	; type=ADDR value=0xa15d
+17e| INT  	; type=IO value=0x1800
+17f| LD $B 	; type=ADDR value=0xa15e
+180| INT  	; type=IO value=0x1800
+181| LOOOP: SWAB  	; type=NONADDR value=0x680
+182| BR  label=LOOOP 	; type=BRANCH value=0xcefe
