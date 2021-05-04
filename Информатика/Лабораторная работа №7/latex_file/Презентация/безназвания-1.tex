@@ -1,0 +1,184 @@
+\documentclass[aspectratio=169, 11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usetheme{Pittsburgh}
+\usecolortheme{dove}
+\usepackage{ragged2e}
+\usepackage{color}
+\usepackage[absolute, overlay]{textpos}
+\usepackage{graphicx}  % Для вставки рисунков
+\graphicspath{{images/}}  % папки с картинками
+\usepackage{setspace}
+\setstretch{0,9}
+
+\title{Определение термина Информатика}
+\subtitle{Лекция №1}
+\author{Кулаков Н.\,В. P3130}
+\date{2020 год}
+\institute{Факультет ПИиКТ}
+
+% установка единиц измерения по горизонтали и вертикали
+\setlength{\TPHorizModule}{1mm}
+\setlength{\TPVertModule}{1mm}
+\begin{document}
+		
+	\begin{frame}
+		\maketitle
+	\end{frame}
+
+
+	\begin{frame}
+		
+		\begin{textblock}{50}(32,13)
+			\includegraphics[scale=0.4]{Screenshot_1.png}
+		\end{textblock}
+		
+		\begin{textblock}{50}(4,4)
+			\includegraphics[scale=0.25]{Screenshot_2.png}
+		\end{textblock}
+		
+
+		\frametitle{\textbf{\textcolor[rgb]{0.4,0.4,0.4}{\textcolor[rgb]{0,0,1}{О}пределение термина <<Информатика>>}}}
+		
+		\textcolor[rgb]{0,0.64,0.09}{Информатика} - дисциплина, изучающая свойства и структуру информации, закономерности ее создания, преобразования, накопления, передачи и использования.
+		
+		\textcolor[rgb]{0,0.64,0.09}{Англ}: informatics = information technology $+$ computer science $ + $ information theory
+\vspace{3mm}
+	
+		\begin{center}
+			\textbf{Важные даты}
+		\end{center}
+	\begin{itemize}
+		\item1956 - появление термина <<Информатика>> (нем. Informatik, Штейнбух)
+		
+		\item1968 - первое упоминание в СССР (информология, Харкевич)
+		
+		\item197X - информатика стала отдельной наукой
+		
+		\item4 декабря - день российской информатики
+	\end{itemize}
+	\end{frame}
+	
+	
+	\begin{frame}
+		\frametitle{\textbf{\textcolor[rgb]{0.4,0.4,0.4}{\textcolor[rgb]{0,0,1}{Т}ерминолония: информация и данные}}}
+		
+\begin{textblock}{50}(32,13)
+	\includegraphics[scale=0.4]{Screenshot_1.png}
+\end{textblock}
+		
+		\begin{textblock}{50}(4,4)
+			\includegraphics[scale=0.25]{Screenshot_2.png}
+		\end{textblock}
+	
+		Международный стандарт ISO/IEC 2382:2015
+		
+		<<Information technology - Vocabulary>> (вольный пересказ):
+		\vspace{2mm}
+		
+		~~~~~~\textcolor[rgb]{0,0.64,0.09}{Информация} - знания относительно фактов, событий, вещей, идей и понятий.
+		
+		~~~~~~\textcolor[rgb]{0,0.64,0.09}{Данные} - форма представления информации в виде, пригодном для передачи или обработки.
+		\vspace{4mm}
+		
+		\begin{itemize}
+		\itemЧто есть предмет информатики: информация или данные?
+		
+		\itemКак измерить информацию? Как измерить данные?
+		\end{itemize}
+		~~~~~~Пример: <<Байкал - самое глубокое озерол Земли>>.
+	\end{frame}
+	
+	
+	\begin{frame}
+		\frametitle{\textbf{\textcolor[rgb]{0.4,0.4,0.4}{\textcolor[rgb]{0,0,1}{И}змерение количества информации}}}
+		
+\begin{textblock}{50}(32,13)
+	\includegraphics[scale=0.4]{Screenshot_1.png}
+\end{textblock}
+		
+		\begin{textblock}{50}(4,4)
+			\includegraphics[scale=0.25]{Screenshot_2.png}
+		\end{textblock}
+	
+		\textcolor[rgb]{0,0.64,0.09}{Количество информации $\equiv$ информационная энтропия} - это численная мера непредсказуемости информации. Количество информации в некотором объекте определяется непредсказуемостью состояния, в котором находится этот объект.
+		\vspace{4mm}
+		
+		Пусть i (s) -  функция для измерения количеств информации в объекте s, состоящем из n независимых частей sk, где k  измеряется от 1 до n. \textcolor[rgb]{0,0.64,0.09}{Тогда свойства меры количества информации} \textbf{i(s)} таковы:
+		\begin{itemize}
+		\itemНеотрицательность: i(s) >= 0.
+		
+		\itemПринцип предопределенности: если об объекте уже все известно, то i(s) = 0.
+		
+		\itemАддитивность: i(s) = sum i(sk) по всем k.
+		
+		\itemМонотонность: i(s) монотонна при монотонности измерени вероятностей.
+		\end{itemize}
+		\end{frame}
+	
+	
+	\begin{frame}
+		\frametitle{\textbf{\textcolor[rgb]{0.4,0.4,0.4}{\textcolor[rgb]{0,0,1}{П}ример применения меры Хартли на практике}}}
+		
+\begin{textblock}{50}(12,13)
+	\includegraphics[height=0.08 cm, width = 13.6 cm]{Screenshot_1.png}
+\end{textblock}
+	
+		\textbf{Пример 1}. Ведущий загадывает число от 1 до 64. Какое количество вопросов типа <<да-нет>> понадобится, чтобы гарантировано угадать число?
+		\begin{itemize}
+		\itemПервый вопрос: <<Загаданное число меньше 32?>>. Ответ: <<Да>>.
+		
+		\itemВторой вопрос: <<Загаданное число меньше 16?>>. Ответ: <<Нет>>.
+		
+		\item$\dots$
+		
+		\itemШестой вопрос (в худшем случае) точно приведет к верному ответу.
+		
+		\itemЗначит, в соответствии с мерой Хартли в загадке ведущего содержится ровно log 2 64 = 6 бит непредсказуемости (т.е информации).
+		\end{itemize}
+		\vspace{4mm}
+		
+		\textbf{Пример 2}. Ведущий держит за спиной ферзя и собирается поставить его на произвольную клетку доски. Насколько непредсказуемо его решение?
+		\begin{itemize}
+		\itemВсего на доске 8x8 клеток, а цвет ферзя может быть белым или черным, т.е всего возможно 8x8x2 = 128 равновероятных состояний.
+		
+		\itemЗначит, количество информации по Хартли равно log 2 128 = 7 бит.
+		\end{itemize}
+	\end{frame}
+	
+	
+	\begin{frame}
+		\frametitle{\textbf{\textcolor[rgb]{0.4,0.4,0.4}{\textcolor[rgb]{0,0,1}{А}нализ свойств меры Хартли}}}
+		
+		\begin{textblock}{50}(32,13)
+			\includegraphics[scale=0.4]{Screenshot_1.png}
+		\end{textblock}
+		
+		\begin{textblock}{50}(4,4)
+			\includegraphics[scale=0.25]{Screenshot_2.png}
+		\end{textblock}
+	
+		Экспериментатор одновременно подбрасывает монету $ ( $M$ ) $ и кидает игральную кость$ ( $K$ ) $. Какое количество информации содержится в эксперименте $ ( $Э$ ) $?
+		\vspace{4 mm}
+		
+		\textcolor[rgb]{0,0.64,0.09}{Аддитивность}:
+		
+		\qquad $i($Э$)  = i($M$)  + i($K$) \geq i($2 исхода$) + i($6 исходов$): \log_x 12 = \log_x 2 + \log_x 6$
+		
+		\vspace{2mm}
+		\textcolor[rgb]{0,0.64,0.09}{Неотрицательность}:
+		
+		\qquad Функция $\log_x N$ неотрицательна при любом $x > 1$ и $N \geq 1.$
+		\vspace{2 mm}
+		
+		\textcolor[rgb]{0,0.64,0.09}{Монотонность}:
+		
+		\qquad С увеличением $p($M$)$ или $p($K$)$ функция $i($Э$)$ монотонно возрастает.
+		\vspace{2 mm}
+		
+		\textcolor[rgb]{0,0.64,0.09}{Принцип предопределенности}:
+		
+		\qquad При наличии всегда только одного исхода (монета и кость с магнитом) количество информации равно нулю: $\log_x 1 + \log_x 1 = 0.$
+	\end{frame}
+
+\end{document}

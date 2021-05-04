@@ -1,0 +1,5 @@
+update 4
+name nigga
+stop
+execute_script C:\Users\Home\Desktop\ss1.txt
+exit

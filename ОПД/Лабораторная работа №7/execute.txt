@@ -1,0 +1,108 @@
+java -Dmode=cli -jar C:\Users\Home\Desktop\ОПД лаба 7\bcomp-ng.jar
+
+a[ddress]       - Пультовая операция "Ввод адреса"
+w[rite]         - Пультовая операция "Запись"
+r[ead]          - Пультовая операция "Чтение"
+s[tart]         - Пультовая операция "Пуск"
+c[continue]     - Пультовая операция "Продолжить"
+ru[n]           - Переключение режима Работа/Останов
+cl[ock]         - Переключение режима потактового выполнения
+ma[ddress]      - Переход на микрокоманду
+mw[rite] value  - Запись микрокоманды
+mr[ead]         - Чтение микрокоманды
+md[ecode]       - Декодировать текущую микрокоманду
+mdecodea[ll]    - Декодировать всю микропрограмму
+stat[e]         - Вывести регистр состояния БЭВМ
+io              - Вывод состояния всех ВУ
+io addr         - Вывод состояния указанного ВУ
+io addr value   - Запись value в указанное ВУ
+flag addr       - Установка флага готовности указанного ВУ
+asm             - Ввод программы на ассемблере
+sleep value     - Задержка между тактами при фоновом выполнении
+{exit|quit}     - Выход из эмулятора
+(0000-FFFF)     - Ввод шестнадцатеричного значения в клавишный регистр
+labelname       - Ввод адреса метки в клавишный регистр
+
+mr
+mw 81C4805010
+mw 815C405010
+mw 815C205010
+mw 815C105010
+mw 80C4101040
+
+ORG 0x426
+START:
+		CLA
+		CALL  TEST_1
+		CALL  TEST_2
+		CALL  TEST_3
+		CALL  TEST_4
+		CALL  CHECK_RESULT
+		HLT
+
+END_RESULT:  WORD  0x00
+
+AC1:  WORD  0xF000	;Отрцательное число
+AC2:  WORD  0x1000	;Число, равное 4096
+AC3:  WORD  0x2000	;Число, равное 8192, при этом AC(12)=0
+AC4:  WORD  0x0F00	;Число, меньшее 4096
+
+RESULT_1:  WORD  0x00
+RESULT_2:  WORD  0x00
+RESULT_3:  WORD  0x00
+RESULT_4:  WORD  0x00
+
+TEST_1:  LD  AC1 
+		WORD  0xFD03
+		LD  #0x01
+		ST  RESULT_1
+		RET
+		
+TF_1:  LD  #0x00 
+		ST  RESULT_1
+		RET
+		
+TEST_2:	LD  AC2 
+		WORD  0xFD03
+		LD  #0x00
+		ST  RESULT_2
+		RET
+TF_2:
+		LD  #0x01 
+		ST  RESULT_2
+		RET
+		
+TEST_3:
+		LD  AC3 
+		WORD  0xFD03
+		LD  #0x00
+		ST  RESULT_3
+		RET
+TF_3:
+		LD  #0x01 
+		ST  RESULT_3
+		RET
+		
+TEST_4:
+		LD  AC4 
+		WORD  0xFD03
+		LD  #0x01
+		ST  RESULT_4
+		RET
+TF_4:
+		LD  #0x00 
+		ST  RESULT_4
+		RET
+
+CHECK_RESULT:
+		LD  RESULT_1
+		AND  RESULT_2
+		AND  RESULT_3
+		AND  RESULT_4
+		ST  END_RESULT
+		RET
+		
+		
+		
+		
+		

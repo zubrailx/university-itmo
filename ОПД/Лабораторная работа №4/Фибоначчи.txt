@@ -1,0 +1,35 @@
+ORG	0x00
+
+N:	WORD	4;Номер числа фибоначчи
+RES:	WORD	0;Результат программы
+
+ORG	0x10
+START:	CLA
+	ST	RES
+	LD N
+	PUSH
+	CALL FUNC
+	POP
+	HLT
+
+FUNC:	LD	&1
+	CMP	#0x01
+	BNE	BR1
+	ADD	RES
+	ST	RES
+	RET
+BR1:	CMP	#0x00
+	BNE 	BR2
+	RET
+	
+BR2:	DEC
+	PUSH
+	CALL	FUNC
+	POP
+	LD &1
+	DEC
+	DEC
+	PUSH
+	CALL	FUNC
+	POP
+	RET

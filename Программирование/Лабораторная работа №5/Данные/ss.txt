@@ -1,0 +1,3 @@
+execute_script C:\Users\Home\Desktop\ss.txt
+name nigga
+stop

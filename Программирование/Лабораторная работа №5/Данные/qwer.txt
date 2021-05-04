@@ -1,0 +1,46 @@
+<?xml version = "1.0"?>
+<treemap>
+	<dragon>
+		<name>field</name>
+		<coordinate_x>10.4</coordinate_x>
+		<coordinate_y></coordinate_y>
+		<creation_date>2017-12-03T10:15:30+01:00</creation_date>
+		<color>GREEN</color>
+		<type>UNDERGROUND</type>
+		<character>EVIL</character>
+		<depth>0.4</depth>
+	</dragon>
+	<dragon>
+		<name>field</name>
+		<coordinate_x>-1000005</coordinate_x>
+		<age></age>
+		<color>GREEN</color>
+		<type>UNDERGROUND</type>
+		<character>EVIL</character>
+	</dragon>
+	<dragon>
+		<name>field</name>
+		<coordinate_x>10.5</coordinate_x>
+		<age>155</age>
+		<color>GREEN</color>
+		<type>UNDERGROUND</type>
+		<character>EVIL</character>
+	</dragon>
+	<dragon>
+		<name>ыафы</name>
+		<coordinate_x>10.5</coordinate_x>
+		<age>-155</age>
+		<color>GRE</color>
+		<type>UNDERGROUND</type>
+		<character>EVIL</character>
+	</dragon>
+	<dragon>
+		<name>ыафы</name>
+		<coordinate_x>105</coordinate_x>
+		<coordinate_y>105.4</coordinate_y>
+		<age>-155</age>
+		<color>GRE</color>
+		<type>UNDERGROUND</type>
+		<character>EVIL</character>
+	</dragon>
+</treemap>

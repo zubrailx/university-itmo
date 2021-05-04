@@ -1,0 +1,83 @@
+Function Граница(k)
+With ActiveSheet.Rows(k).Columns("A:E")
+.Borders(xlEdgeBottom).Weight = xlThin
+.Borders(xlEdgeTop).Weight = xlThin
+.Borders(xlEdgeLeft).Weight = xlThin
+.Borders(xlEdgeRight).Weight = xlThin
+.Borders(xlInsideHorizontal).Weight = xlThin
+.Borders(xlInsideVertical).Weight = xlThin
+End With
+End Function
+
+Sub TaskG()
+
+Static n As Integer
+Dim k As Integer
+Dim m As Integer
+Dim current As Integer
+Static EndDate
+
+k = 2
+m = 5
+current = 0
+
+If EndDate = "" Then GoTo Line1 Else GoTo Line2
+
+Line1:
+EndDate = DateValue(InputBox(prompt:="Введите дату отсчета в формате dd.mm.yyyy"))
+
+Line2:
+'Создание нового листа
+Sheets.Add After:=Worksheets(Worksheets.Count)
+ActiveSheet.Name = "Задание G" & n + 1
+
+'Верхнее поле с названиями ячеек + вставка начальной даты
+
+
+ActiveSheet.Cells(1, 1) = "ФИО сотрудника"
+Cells(1, 1).ColumnWidth = 15.25
+ActiveSheet.Cells(1, 2) = "Начало дежурства"
+Cells(1, 2).ColumnWidth = 16.75
+ActiveSheet.Cells(1, 3) = "Конец дежурства"
+Cells(1, 3).ColumnWidth = 15.75
+ActiveSheet.Cells(1, 4) = "Надбавка за месяц 1"
+Cells(1, 4).ColumnWidth = 18.75
+ActiveSheet.Cells(1, 5) = "Надбавка за месяц 2"
+Cells(1, 5).ColumnWidth = 18.75
+ActiveSheet.Range("A1:E1").Font.Bold = True
+
+'Конец задачи заголовка
+
+
+'Заполнение первого абзаца именами
+ActiveSheet.Cells(2, 2) = EndDate
+While Not ActiveSheet.Cells(k - 1, 1) = ""
+    ActiveSheet.Cells(k, 1) = Application.InputBox(prompt:="Введите имя сотрудника (Иначе нажмите ОК)")
+    temp = Граница(k - 1)
+    k = k + 1
+
+    If k > 3 Then
+        ActiveSheet.Cells(k - 1, 2) = DateAdd("d", 7, ActiveSheet.Cells(k - 2, 2))
+        ActiveSheet.Cells(k - 2, 3) = DateAdd("d", 5, ActiveSheet.Cells(k - 2, 2))
+        current = DatePart("d", ActiveSheet.Cells(k - 2, 3))
+        If current >= 5 Then
+            ActiveSheet.Cells(k - 2, 4) = "5,000.00р."
+        Else
+            ActiveSheet.Cells(k - 2, 5) = current & ",000.00р."
+            ActiveSheet.Cells(k - 2, 4) = (5 - current) & ",000.00р."
+        End If
+    End If
+Wend
+ActiveSheet.Cells(k - 1, 2).Clear
+EndDate = DateAdd("d", 7, ActiveSheet.Cells(k - 2, 2))
+'Конец заполнения
+
+'Форматирование вида таблицы
+Cells(2, 1).EntireColumn.AutoFit
+ActiveSheet.Cells(2, 4).EntireColumn.HorizontalAlignment = xlRight
+ActiveSheet.Cells(2, 5).EntireColumn.HorizontalAlignment = xlRight
+ActiveSheet.Cells(2, 3).EntireColumn.HorizontalAlignment = xlLeft
+ActiveSheet.Cells(2, 2).EntireColumn.HorizontalAlignment = xlLeft
+
+n = n + 1
+End Sub

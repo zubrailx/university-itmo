@@ -1,0 +1,80 @@
+ORG 0x0
+V0: WORD $DEFAULT, 0x180
+V1: WORD $INT1, 0x180
+V2: WORD $DEFAULT, 0x180
+V3: WORD $INT3, 0x180
+V4: WORD $DEFAULT, 0x180
+V5: WORD $DEFAULT, 0x180
+V6: WORD $DEFAULT, 0x180
+V7: WORD $DEFAULT, 0x180
+DEFAULT:IRET
+
+ORG 0x020
+START:	
+		DI
+		CLA
+		OUT	1
+		OUT	5
+		LD #9
+		OUT 3
+		LD #0xB
+		OUT 7
+		BR PROG
+		
+PROG:	
+		EI
+		LD	$X
+INCLP:	
+		ADD	#0x03
+		BR	INCLP
+		
+ORG 	0x040
+INT1:	
+		ST	$X
+		HLT ;Проверка, какое число записалось в качестве X
+		ASL
+		INC
+		NEG
+		HLT ;Проверка образа X
+		CALL	CHECKER
+		OUT	2
+		LD	$X
+		IRET
+
+ORG		0x050
+INT3:	
+		PUSH
+		HLT ;Проверка, какое число записалось в качестве X
+		IN	6
+		ST	$X ; Сюда записывается промежуточный результат с ВУ-3. Можно было использовать 
+		ASL;									доп.ячейку, но я не стал
+		ADD	$X
+		NEG
+		ST	$X
+		POP
+		ADD	$X
+		ST	$X
+		HLT ;Проверка образа X.
+		CALL	CHECKER
+		IRET
+		
+ORG		0x070
+CHECKER:	
+		DEC
+		CMP	#0x7F
+		HLT;Проверка флагов 1
+		BGE	OVERFLOW
+		INC
+		CMP	#0x80
+		HLT; Проверка флагов 2
+		BLT OVERFLOW
+		RET
+OVERFLOW:
+		LD	#0xC0
+		HLT; Проверка на непопадание в ОДЗ
+		ST	$X
+		RET
+		
+		
+ORG 0x716
+X:	WORD	0x00

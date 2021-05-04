@@ -1,0 +1,57 @@
+Sub hohoh()
+Static n As Long
+n = n + 1
+If n And 1 Then 'нечетный вызов - существующий код
+Dim s As Integer
+Dim r As Byte
+Dim g As Byte
+Dim b As Byte
+Dim letters As Long
+Dim a
+letters = 0
+
+s = Selection.Characters.Count
+For i = 1 To s
+a = Selection.Characters(i)
+If (a >= "a" And a <= "z") Or (a >= "A" And a <= "Z") Or (a >= "a" And a <= "y") Or (a >= "A" And a <= "?") Then
+letters = letters + 1
+End If
+Next
+
+MsgBox (letters)
+ReDim rgbs(letters)
+Dim TempColor
+For i = 1 To letters
+j = 1
+Randomize (Timer)
+r = Int(Rnd() * 256)
+g = Int(Rnd() * 256)
+b = Int(Rnd() * 256)
+TempColor = rgb(r, g, b)
+While Not j = i
+If TempColor = rgbs(j) Then
+j = 1
+Randomize (Timer)
+r = Int(Rnd() * 256)
+g = Int(Rnd() * 256)
+b = Int(Rnd() * 256)
+TempColor = rgb(r, g, b)
+Else: j = j + 1
+End If
+Wend
+rgbs(i) = TempColor
+Next
+letters = 1
+For i = 1 To s
+a = Selection.Characters(i)
+If (a >= "a" And a <= "z") Or (a >= "A" And a <= "Z") Or (a >= "a" And a <= "y") Or (a >= "A" And a <= "?") Then
+With Selection.Characters(i)
+.Font.Color = rgbs(letters)
+End With
+letters = letters + 1
+End If
+Next
+Else 'четный вызов
+ActiveDocument.Content.Font.Color = wdColorAutomatic
+End If
+End Sub

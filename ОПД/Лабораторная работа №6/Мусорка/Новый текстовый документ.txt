@@ -1,0 +1,80 @@
+ORG 0x0
+V0: WORD $DEFAULT, 0x180
+V1: WORD $INT1, 0x180
+V2: WORD $DEFAULT, 0x180
+V3: WORD $INT3, 0x180
+V4: WORD $DEFAULT, 0x180
+V5: WORD $DEFAULT, 0x180
+V6: WORD $DEFAULT, 0x180
+V7: WORD $DEFAULT, 0x180
+DEFAULT:IRET
+
+ORG 0x020
+START:	
+		DI
+		CLA
+		OUT	1
+		OUT	5
+		LD 	#9
+		OUT 	3
+		LD 	#0xB
+		OUT	7
+		BR 	PROG
+		
+PROG:	
+		EI
+		LD	$X
+INCLP:	
+		ADD	#0x03
+		BR	INCLP
+		
+ORG 0x040
+INT1:	
+		ST	$X
+		NOP			;Запись числа X
+		ASL
+		INC
+		NEG
+NOP 			;Образ X до проверки на валидность.
+		CALL	CHECKER
+		OUT	2
+		LD	$X
+		IRET
+
+ORG		0x050
+INT3:	
+		PUSH
+		NOP 			;Запись числа X
+		IN	6
+		ST	$X 		;Сюда записывается промежуточный результат с ВУ-3.
+		ASL;			
+		ADD	$X
+		NEG
+		ST	$X
+		POP
+		ADD	$X
+		ST	$X
+		NOP 			;Образ X до проверки на валидность.
+		CALL	CHECKER
+		IRET
+		
+ORG		0x070
+CHECKER:	
+		DEC
+		CMP	#0x7F
+		NOP			;Проверка ОДЗ: F(x) < 128  (Если F(x) >= 128, то GOTO OVERFLOW).
+		BGE	OVERFLOW
+		INC
+		CMP	#0x80
+		NOP			;Проверка ОДЗ 2: F(x) >= -128 (Если F(x) < -128, то GOTO OVERFLOW)
+		BLT 	OVERFLOW
+		RET
+OVERFLOW:
+		LD	#0xC0
+		NOP			;Изменение числа X на -64.
+		ST	$X
+		RET
+		
+		
+ORG 0x716
+X:		WORD	0x00

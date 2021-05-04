@@ -1,0 +1,200 @@
+ORG 0x00
+;Данные
+C:	WORD	0x43
+VC:	WORD	0x64 
+L:	WORD	0x4C
+VL:	WORD	0x32
+X:	WORD	0x58
+VX:	WORD	0x0A
+V:	WORD	0x56
+VV:	WORD	0x05
+I:	WORD	0x49
+VI:	WORD	0x01
+
+VALUEADD:	WORD	0x09; Указывает на VI, чтобы перевести числа из псевдодесятичной в нормальную СС.
+
+MAXVAL:	WORD	0x100; Максимальное число, может быть увеличено при добавлении новых буковок и значения чекера IT на кол-во символов.
+
+;Строка при ошибке ввода
+ORG	0x10
+ADRERR:	WORD	0x11
+WORD	0xFEC9
+WORD	0xD3CC
+WORD	0xCF20
+WORD	0xCEC5
+WORD	0x20D0
+WORD	0xD2C9
+WORD	0xCEC1
+WORD	0xC4CC
+WORD	0xC5D6
+WORD	0xC9D4
+WORD	0x20EF
+WORD	0xE4FA
+WORD	0x2121
+
+;Введение данных
+ORG	0x20
+
+START:	CLA
+
+ZEROFC:	LD	IT; Проверка на ввод нулей перед значащими символами. Напр, 00232
+		BNE	cont
+
+READ:	IN	0x1D ;Чтение
+		AND	#0x40
+		BEQ	READ
+		IN	0x1C
+		CMP	#0x00
+		BEQ	ZEROFC
+cont:	CMP	#0x0F
+		BEQ	TOTEN
+		CMP	#0x0A
+		BGE	ERRLOOP
+		ST	(ADR)+
+		CMP	(IT)+
+		CLA
+next:	JUMP		READ
+
+
+ERRLOOP:	LD	(ADRERR)+ ;Вывод в случае ошибки
+			BEQ	STOP
+			SWAB
+			OUT	0x0C
+			SWAB
+			OUT	0x0C
+			CLA
+			JUMP	ERRLOOP
+			
+;Перевод чисел из псевдодесятичной в двоичную. Сохранение рез. в ячейке VALUETEN
+TOTEN:	LD	$IT
+		BEQ	WRITE
+		CMP	#0x04; Как раз-таки проверка на 4 или более значащих символа. Чтобы выводилась ошибка.
+		BGE	ERRLOOP
+		LD -(ADR)
+		
+TOTENV:	DEC
+		BLT	toNEXT
+		PUSH
+		LD $VALUETEN
+		ADD	(VALUEADD)
+		ST	$VALUETEN
+		POP
+		JUMP	TOTENV
+		
+toNEXT:	LD	VALUEADD
+		SUB	#0x04
+		ST	VALUEADD
+		CMP	-(IT)
+		CLA
+		ST		(ADR)
+		JUMP	TOTEN
+		
+		
+;Данные для массива чисел
+ADR:	WORD	0x5A3
+IT:	WORD	0x00
+VALUETEN:	WORD	0x00		
+
+
+;Программа, совершающая чтение
+WRITE:		LD		#0x09
+			ST	VALUEADD
+			LD	VALUETEN
+			CMP	MAXVAL
+			BGE	ERRLOOP
+			
+toHUNDRED:	LD	VALUETEN
+			SUB	$VC
+			BLT	toNINETY
+			ST	VALUETEN
+			LD	$C
+			OUT	0x0C
+			JUMP	toHUNDRED
+			
+toNINETY:	LD	VALUETEN
+			ADD	$VX
+			SUB	$VC
+			BLT	toFIFETY
+			ST	VALUETEN
+			LD	$X
+			OUT	0x0C
+			LD	$C
+			OUT	0x0C
+			
+toFIFETY:	LD	VALUETEN
+			SUB $VL
+			BLT	toFOURTY
+			ST VALUETEN
+			LD $L
+			OUT	0x0C
+			
+toFOURTY:	LD VALUETEN
+			ADD	$VX
+			SUB	$VL
+			BLT toTEN
+			ST	VALUETEN
+			LD	$X
+			OUT	0x0C
+			LD $L
+			OUT	0x0C		
+
+toTEN:	LD	VALUETEN
+			SUB	$VX
+			BLT	toNINE
+			ST	VALUETEN
+			LD	$X
+			OUT	0x0C
+			JUMP	toTEN
+			
+toNINE:	LD	VALUETEN
+			ADD	$VI
+			SUB	$VX
+			BLT	toFIVE
+			ST		VALUETEN
+			LD	$I
+			OUT	0x0C
+			LD	$X
+			OUT	0x0C
+			
+toFIVE:	LD	VALUETEN
+			SUB $VV
+			BLT	toFOUR
+			ST VALUETEN
+			LD $V
+			OUT	0x0C
+			
+toFOUR:	LD VALUETEN
+			ADD	$VI
+			SUB	$VV
+			BLT toONE
+			ST	VALUETEN
+			LD	$I
+			OUT	0x0C
+			LD $V
+			OUT	0x0C	
+			
+toONE:		LD	VALUETEN
+			SUB	$VI
+			BLT	STOP
+			ST	VALUETEN
+			LD	$I
+			OUT	0x0C
+			JUMP	toONE
+
+; Собственно, конец. Если есть ячейки, которые еще не были очищены, она их чистит. Для ошибки ставит указатель в начало.
+STOP:	LD	IT
+		BEQ	FULLSTOP
+		DEC
+		ST	IT
+		CLA
+		ST	-(ADR)
+		JUMP	STOP
+FULLSTOP:		LD	#0x11
+		ST		$ADRERR
+		LD	#0x0A
+		OUT	0x0C
+		CLA
+		ST	VALUETEN
+		HLT	
+
+;Входные данные ниже: с 5A3

@@ -1,0 +1,275 @@
+На ассемблере БЭВМ написать программу для конвертации десятичных чисел в римские.
+Ввод чисел с помощью клавиатуры (ВУ-8 или ВУ-9), вывод в устройство на ваше усмотрение.
+Обмен осуществлять асинхронно, без использования прерываний.
+Допустимо ограничение вводимых чисел (например, до 255),
+но в таком случае при вводе неправильных данных пользователь должен понять, что произошла ошибка.
+
+Кодировка КОИ-8-R
+Римские обозначения: - ОДЗ - [0..256]
+1(01) - I - 49
+5(05) - V - 56
+10(0A) - X - 58
+50(32) - L - 4C
+100(64) - C - 43
+
+179 -> проверка число больше ли 256 ? Число не принадлежит ОДЗ (вывести) : начать выводить число
+179 больше или равно ли 100 ? -100, вывести C, LOOP : идем дальше
+79 больше или равно ли 90 ? -90, XC, LOOP : идем дальше
+79 больше или равно ли 50 ? -50, вывести L : дальше
+29 больше или равно ли 10*4 ? -40, вывести XL : дальше
+29 больше или равно ли 10 ? -10, вывести X, LOOP : дальше
+9 больше или равно ли 9 ? -9, вывести IX : идем дальше
+9 больше или равно ли 5 ? -5, вывести V : дальше
+4 больше или равно ли 4 ? -4, вывести IV : дальше
+0 больше или равно 1 ? -1, вывести I, LOOP : стоп 
+
+Ч - FE
+и - C9
+с - D3
+л - CC
+о - CF
+ - 20
+н - CE
+е - C5
+ - 20
+п - D0
+р - D2
+и - C9
+н - CE
+а - C1
+д - C4
+л - CC
+е - C5
+ж - D6
+и - C9
+т - D4
+ - 20
+О - EF
+Д - E4
+З - FA
+ - 00
+ FEC9 D3CC CF20 CEC5 20D0 D2C9 CEC1 C4CC C5D6 C9D4 20EF E4FA
+Детерминирующий символ: 00
+
+Упрощение проверка больше или равно 90.
+прибавляем к числу 10
+Число >= 100 ? X, C - 100 : -10
+
+Этап 1:
+Представить числа в памяти.
+
+Этап 2:
+Организовать ввод чисел с ВУ-9.
+
+Этап 3:
+Пишем код.
+
+----------------------------------------------------
+ORG 0x00
+;Данные
+C:	WORD	0x43
+VC:	WORD	0x64 
+L:	WORD	0x4C
+VL:	WORD	0x32
+X:	WORD	0x58
+VX:	WORD	0x0A
+V:	WORD	0x56
+VV:	WORD	0x05
+I:	WORD	0x49
+VI:	WORD	0x01
+
+VALUEADD:	WORD	0x09
+
+MAXVAL:	WORD	0x100
+
+;Строка при ошибке ввода
+ORG	0x10
+ADRERR:	WORD	0x11
+WORD	0xFEC9
+WORD	0xD3CC
+WORD	0xCF20
+WORD	0xCEC5
+WORD	0x20D0
+WORD	0xD2C9
+WORD	0xCEC1
+WORD	0xC4CC
+WORD	0xC5D6
+WORD	0xC9D4
+WORD	0x20EF
+WORD	0xE4FA
+WORD	0x2121
+
+;Введение данных
+ORG	0x20
+ZEROFC:	LD	IT
+		BEQ	READ
+		
+STOP:	LD	IT
+		BEQ	FULLSTOP
+		DEC
+		ST	IT
+		CLA
+		ST	-(ADR)
+		JUMP	STOP
+FULLSTOP:		LD	#0x11
+		ST	ADRERR
+		LD	#0x0A
+		OUT	0x0C
+		HLT	
+START:	CLA
+
+READ:	IN	0x1D ;Чтение
+		AND	#0x40
+		BEQ	READ
+		IN	0x1C
+		BEQ	ZEROFC
+		CMP	#0x0F
+		BEQ	TOTEN
+		CMP	#0x0A
+		BGE	ERRLOOP
+		ST	(ADR)+
+		CMP	(IT)+
+		CLA
+next:	JUMP		READ
+
+
+ERRLOOP:	LD	(ADRERR)+ ;Вывод в случае ошибки
+			BEQ	STOP
+			SWAB
+			OUT	0x0C
+			SWAB
+			OUT	0x0C
+			CLA
+			JUMP	ERRLOOP
+			
+TOTEN:	LD	$IT
+		BEQ	WRITE
+		CMP	#0x04
+		BGE	ERRLOOP
+		LD -(ADR)
+		
+TOTENV:	DEC
+		BLT	toNEXT
+		PUSH
+		LD $VALUETEN
+		ADD	(VALUEADD)
+		ST	$VALUETEN
+		POP
+		JUMP	TOTENV
+		
+toNEXT:	LD	VALUEADD
+		SUB	#0x04
+		ST	VALUEADD
+		CMP	-(IT)
+		CLA
+		ST		(ADR)
+		JUMP	TOTEN
+		
+		
+;Данные для массива чисел
+ADR:	WORD	0x5A3
+IT:	WORD	0x00
+VALUETEN:	WORD	0x00		
+
+
+;Программа, совершающая чтение
+WRITE:		LD		#0x09
+			ST	VALUEADD
+			LD	VALUETEN
+			CMP	MAXVAL
+			BGE	ERRLOOP
+			
+toHUNDRED:	LD	VALUETEN
+			SUB	$VC
+			BLT	toNINETY
+			ST	VALUETEN
+			LD	$C
+			OUT	0x0C
+			JUMP	toHUNDRED
+			
+toNINETY:	LD	VALUETEN
+			ADD	$VX
+			SUB	$VC
+			BLT	toFIFETY
+			ST	VALUETEN
+			LD	$X
+			OUT	0x0C
+			LD	$C
+			OUT	0x0C
+			
+toFIFETY:	LD	VALUETEN
+			SUB $VL
+			BLT	toFOURTY
+			ST VALUETEN
+			LD $L
+			OUT	0x0C
+			
+toFOURTY:	LD VALUETEN
+			ADD	$VX
+			SUB	$VL
+			BLT toTEN
+			ST	VALUETEN
+			LD	$X
+			OUT	0x0C
+			LD $L
+			OUT	0x0C		
+
+toTEN:	LD	VALUETEN
+			SUB	$VX
+			BLT	toNINE
+			ST	VALUETEN
+			LD	$X
+			OUT	0x0C
+			JUMP	toTEN
+			
+toNINE:	LD	VALUETEN
+			ADD	$VI
+			SUB	$VX
+			BLT	toFIVE
+			ST		VALUETEN
+			LD	$I
+			OUT	0x0C
+			LD	$X
+			OUT	0x0C
+			
+toFIVE:	LD	VALUETEN
+			SUB $VV
+			BLT	toFOUR
+			ST VALUETEN
+			LD $V
+			OUT	0x0C
+			
+toFOUR:	LD VALUETEN
+			ADD	$VI
+			SUB	$VV
+			BLT toONE
+			ST	VALUETEN
+			LD	$I
+			OUT	0x0C
+			LD $V
+			OUT	0x0C	
+			
+toONE:		LD	VALUETEN
+			SUB	$VI
+			BLT	STOP
+			ST	VALUETEN
+			LD	$I
+			OUT	0x0C
+			JUMP	toONE
+
+
+;Входные данные ниже:
+---------------------------------------------------------------
+Тесты:
+0
+42
+1913
+932
+123
+45
+83*
+*
+1391
+0023
+21121*
+00232

@@ -1,0 +1,28 @@
+\documentclass[10pt,pdf,hyperref={unicode}]{beamer}
+\makeatletter
+\defbeamertemplate*{footline}{my theme}{
+	\leavevmode%
+	\hbox{%
+		\begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+			\usebeamerfont{author in head/foot}%
+			\insertauthor~~\beamer@ifempty{\insertshortinstitute}{}{(\insertshortinstitute)}
+		\end{beamercolorbox}%
+		\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+			\usebeamerfont{title in head/foot}\inserttitle
+		\end{beamercolorbox}%
+		\begin{beamercolorbox}[wd=.2\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+			\usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+			\insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+	\end{beamercolorbox}}%
+}
+\makeatother
+
+\defbeamertemplate*{frametitle}{shadow theme}{%
+	\vskip-2pt\leavevmode%
+	\hbox to \paperwidth{%
+		\hbox to 1.5em{\hskip -1.6ex\vbox to 0pt{\vskip
+				-1.8ex\includegraphics[width=1.5em]{penguin.jpg}}}%
+		\begin{beamercolorbox}[wd=\paperwidth,ht=2ex,dp=3pt,left]{title in head/foot}%
+			\ \insertframetitle
+	\end{beamercolorbox}}
+}

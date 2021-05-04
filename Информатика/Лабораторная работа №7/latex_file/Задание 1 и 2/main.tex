@@ -1,0 +1,33 @@
+%форматирование размера документа
+\documentclass[11pt, a4paper, twocolumn]{book}
+\usepackage[left=38mm,right=30mm, top=3cm,bottom=5.4cm,bindingoffset=0cm]{geometry}
+\columnsep 10mm
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{multicol}
+
+%работа с колонтитулами
+\renewcommand{\headrulewidth}{0 pt}
+\cfoot{}
+\footskip=5mm
+
+%текст, шрифты
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{setspace}
+\setstretch{0,9}
+
+%\raise 2mm\vbox{
+%работа с картинками и таблицами
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{wrapfig}
+\usepackage{tabularx}
+
+\begin{document}
+	\input{титульник}
+	\newpage
+	
+	\setcounter{page}{16}
+	\input{Task1 копия.tex} % это титульный лист
+\end{document}
