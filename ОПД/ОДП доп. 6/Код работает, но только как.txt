@@ -24,7 +24,7 @@ REQ_SIZE:		WORD	0x00		;Размер текущего массива запрос
 REQ_SIZE_2:		WORD	0x00		;Вспомогательная копия переменной выше
 
 CLEANER_IT:		WORD	0x00		;Итератор для cleaner, когда равен нулю, то выполняется очистка. По умолчанию равен cleaner_size
-CLEANER_SIZE:	WORD	0x03		;Размер cleaner, через сколько выполненных запросов из массива будет вызываться дефрагментация. (если 1, то без остановки (не ставить), то проверка выполняется после каждой операции).
+CLEANER_SIZE:	WORD	0x08		;Размер cleaner, через сколько выполненных запросов из массива будет вызываться дефрагментация. (если 1, то без остановки (не ставить), то проверка выполняется после каждой операции).
 
 MASK_1:	WORD	0x0080
 MASK_2:	WORD	0x007F
@@ -98,7 +98,6 @@ VY9CI:
 TAKE_ARRAY:
 		LD		-(CURRENT_VY_IT)
 		PUSH 
-							HLT
 		LD		#0xFF 
 		ST 		(CURRENT_VY_IT) 		;За место ячейки записали -1
 		LOOP 	CLEANER_IT				;CLEANER для того, чтобы чистить пустые места в очереди.
@@ -147,7 +146,7 @@ REQ_LOOP_2:
 		BEQ		TAKE_ARRAY
 		BR 		REQ_LOOP
 		
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		ЗАДЕБАЖЕНО.
 	
 CLEANER:
 		LD		$REQ_SIZE
@@ -170,7 +169,6 @@ CLEANER_IN_2:
 		BEQ		CLEANER_IN
 		DEC 
 		PUSH
-							HLT
 		BR		CLEANER_IN
 	
 CLEANER_OUT:
@@ -178,25 +176,20 @@ CLEANER_OUT:
 							
 		SUB		$CLEANER_SIZE
 		ST		$REQ_SIZE
-							HLT
 		INC
-							HLT
 		ST		$REQ_SIZE_2
 		
 CLEANER_OUT_1:
 		LOOP	$REQ_SIZE_2
 		BR		CLEANER_OUT_2
-							HLT
 		POP 
 		CMP 	#0x01 					;если в метод передавалась 1, то переходим в CLEANER_DONE_T, иначе в PUT_ARRAY_2
 		BEQ 	CLEANER_DONE_T
-							HLT
 		BNE		PUT_ARRAY
 		
 CLEANER_OUT_2:
 		POP
 		ST		(REQ_IT)+
-							HLT
 		BR		CLEANER_OUT_1
 
 
@@ -389,6 +382,16 @@ B:		WORD	0x5183				;ВУ-3
 C:		WORD	0x1588				;ВУ-8 
 D:		WORD	0x1289				;ВУ-9 
 E:		WORD	0x558B				;ВУ-11, Которой нет. 
+F:		WORD	0x3203
+G:		WORD	0x0002
+H:		WORD	0x0003
+J:		WORD	0x4383
+K:		WORD	0xAB83
+L:		WORD	0xBD83
+M:		WORD	0x0009
+N:		WORD	0x1208
+O:		WORD	0x4381
+P:		WORD	0x5303
 		
 START:	
 		DI							;Установка ВУ на вектор 1
@@ -417,15 +420,8 @@ MAIN:								;Ввод для пользователя.
 		EI
 		LD 		$A 
 		INT 	0x00 
-		CLA
-		LD 		$A 
-		INT 	0x00 
 		LD 		$B 
-		INT 	0x00 
-		LD 		$A 
-		INT 	0x00
-		LD 		$B 
-		INT 	0x00
+		INT 	0x00  		
 LOOOP:	SWAB 
 		BR 	LOOOP
 		
