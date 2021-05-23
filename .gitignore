@@ -2,3 +2,5 @@
 *.log
 *.gz
 .idea/
+*.iml
+target/
