@@ -1,0 +1,8 @@
+java -jar "D:\Projects\Java\University\lab6.client-server\server\target\server-1.0.0-jar-with-dependencies.jar" ^
+C:\Users\Home\Desktop\data\inputfile.txt
+
+java -jar "C:\Users\Home\Desktop\server-1.0.0-jar-with-dependencies.jar"
+
+java -jar "D:\Projects\Java\University\lab6.client-server\client\target\client-1.0.0-jar-with-dependencies.jar"
+
+cd command & mvn package install & cd .. & cd server & mvn package & cd .. & cd client & mvn package & cd ..
