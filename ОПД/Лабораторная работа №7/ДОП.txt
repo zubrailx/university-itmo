@@ -1,0 +1,2 @@
+* Бесплатный курс основ операционных систем (https://intuit.ru/studies/courses/1088/322/info), в частности, лекции 11-12 (Подсистема ввода-вывода)
+* Интернет-курс операционных систем на англ. языке (https://nptel.ac.in/courses/106/108/106108101/), в частности, модули 5 (Input Output (IO) Management) и 14 (Unix Kernel Architecture)
