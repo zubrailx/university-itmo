@@ -1,0 +1,7 @@
+java -jar "server\target\server-1.0.0-jar-with-dependencies.jar" 20
+
+java -jar "C:\Users\Home\Desktop\server-1.0.0-jar-with-dependencies.jar"
+
+java -jar "client\target\client-1.0.0-jar-with-dependencies.jar"
+
+cd command & mvn package install & cd .. & cd server & mvn package & cd .. & cd client & mvn package & cd ..
