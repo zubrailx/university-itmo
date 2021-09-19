@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Web-Lab1</title>
+	<script src="scripts/jquery-3.6.0.min.js"></script>
+	<style>
+		/*The main border*/
+		main.lab {
+			width:60%;
+			margin: 0 auto;
+			font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+			font-size: 18px;
+			color: rgb(0, 0, 0)
+		}
+
+		table{
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		table, th, td {
+			border-style: solid;
+			border-color: black;
+			border-width: 1px;
+		}
+
+		th {
+			padding: 1%;
+		}
+
+		/*The picture*/
+		.cell-picture {
+			width:30%;
+		}
+
+		svg.chart {
+			display:block;
+			margin:0 auto;
+		}
+
+		svg.chart:hover {
+			margin: -30%;
+		}
+
+		/*Form coordinates*/
+		form.coordinates {
+			width: 90%;
+			margin: 0 auto;
+		}
+
+		form.coordinates div {
+			margin: 2%;
+		}
+
+		form.coordinates input {
+			font: inherit;
+			align-items: center;
+		}
+
+		form.coordinates input[type="text"]{
+			margin: 2% auto 2% 3%;
+		}
+
+		form.coordinates ul.checkbox {
+			padding-inline-start: 1%;
+			margin-top: 1%;
+			margin-bottom: 2%;
+		}
+
+		form.coordinates ul.checkbox li {  
+		display:inline-block;
+		width:15em;
+		margin:1%;
+		}
+
+		/*Form coordinates -> buttons*/
+		form.coordinates div.result table,
+		form.coordinates div.result td {
+			border: 0px;
+		}
+
+		form.coordinates div.result td {
+			table-layout: fixed;
+			width: calc(100% / 3);
+		}
+
+		/*Response table*/
+		td.response-table > table{
+			border: 0;
+			font-size: 0.9em;
+		}
+
+		div.response-table > table td{
+			font: inherit;
+			align-items: center;
+		}
+
+		td.response-table > table th,
+		td.response-table > table td {
+			border-style: solid;
+			border-color: black;
+			border-width: 0 0 0 1px;
+		}
+
+		td.response-table > table th:first-child,
+		td.response-table > table td:first-child {
+			border-left-width: 0;
+		}
+
+		td.response-table > table td {
+			border-top-width: 1px;
+			text-align: center;
+			font-size: 0.9em;
+		}
+	</style>
+</head>
+<body>
+	<main class="lab 1">
+		<table>
+			<thead> 
+				<tr>
+					<th colspan="2">Кулаков Никита Васильевич P3230 Вариант 30009</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th class="cell-input">Поле ввода</th>
+					<th class="cell-picture">Координатная плоскость</th>
+				</tr>
+				<tr>
+					<td>
+						<form class="coordinates">
+							<div>
+								<legend><b>Значение параметра R:</b></legend>
+								<input type="text" name="value_R" value="">
+							</div>
+
+							<div>
+								<legend><b>Значение координаты X точки:</b></legend>
+								<ul class="checkbox">
+									<li><input type="checkbox" name="value_X" value="-4">
+									<label>-4</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="-3">
+									<label>-3</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="-2">
+									<label>-2</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="-1">
+									<label>-1</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="0">
+									<label>0</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="1">
+									<label>1</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="2">
+									<label>2</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="3">
+									<label>3</label>
+									</li>
+									<li><input type="checkbox" name="value_X" value="4">
+									<label>4</label>
+									</li>
+								</ul>
+							</div>
+							<div>
+								<legend><b>Значение координаты Y точки:</b></legend>
+								<input type="text" name="value_Y" value="">
+							</div>
+							<div class="result">
+								<table>
+									<tr>
+										<td><input type="reset" id="clear-button" value="Сбросить"></td>
+										<td><input type="button" id="submit-button" value="Отправить"></td>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</form>
+					</td>
+					<td>
+						<div class="with-svg">
+							 <svg class="chart" viewBox="-100 -100 200 200" xmlns="http://www.w3.org/2000/svg" version="1.1"> <!--min-x, min-y, width, height-->                           <svg></svg>
+								<!--Sample-->
+								<defs>
+									<marker id='arrow-head' orient="auto"
+										markerWidth='2' markerHeight='4'
+										refX='0.1' refY='2'>
+										<!-- triangle pointing right (+x) -->
+										<path d='M0,0 V4 L2,2 Z' fill="black"/>
+									</marker>
+								</defs>
+								<!--Figures-->
+								<polygon points="0 0, 0 -80, -80 0" fill="rgb(0, 140, 203)"/>
+								<rect x="-40" y="0" width="40" height="80" fill="rgb(0, 140, 203)"/>
+								<path fill="rgb(0, 140, 203)" d="M 80,0 a 80 80, 0, 0, 1, -80 80 L 0 0 Z" />
+								<path
+									d="M -95 0, h 190"
+									stroke="black"
+									stroke-width="1"
+									marker-end="url(#arrow-head)"
+								/>
+								<path
+									d="M 0 95, v -190"
+									stroke="black"
+									stroke-width="1"
+									marker-end="url(#arrow-head)"
+								/>
+								<!--Text-->
+								<style>
+									.inscription{
+										font-size:9px;
+										font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+										font-style: normal;
+									}   
+								</style>
+								<text x="90" y="-3" class="inscription">x</text>
+								<text x="3" y="-90" class="inscription">y</text>
+								<text x="40" y="-3" class="inscription">R/2</text>
+								<text x="-45" y="-3" class="inscription">-R/2</text>
+								<text x="3" y="40" class="inscription">-R/2</text>
+								<text x="3" y="-40" class="inscription">R/2</text>
+								<text x="80" y="-3" class="inscription">R</text>
+								<text x="-85" y="-3" class="inscription">-R</text>
+								<text x="3" y="80" class="inscription">-R</text>
+								<text x="3" y="-75" class="inscription">R</text>
+								<!--Points-->
+								<circle cx="0" cy="0" r="1.5" fill="black"/>                           
+								<circle cx="0" cy="40" r="1.5" fill="black"/>                           
+								<circle cx="0" cy="-40" r="1.5" fill="black"/>                           
+								<circle cx="40" cy="0" r="1.5" fill="black"/>                           
+								<circle cx="-40" cy="0" r="1.5" fill="black"/>                           
+								<circle cx="80" cy="0" r="1.5" fill="black"/>                           
+								<circle cx="-80" cy="0" r="1.5" fill="black"/>                           
+								<circle cx="0" cy="80" r="1.5" fill="black"/>                           
+								<circle cx="0" cy="-80" r="1.5" fill="black"/>                           
+							</svg>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+				<tfoot>
+					<tr>
+						<td class="response-table" colspan="2">
+							<table class="response">
+								<thead>
+									<tr>
+										<th width="2%">Координата X</th>
+										<th width="2%">Координата Y</th>
+										<th width="2%">Радиус</th>
+										<th width="3%">Факт попадания</th>
+										<th width="5%">Время запроса</th>
+										<th width="3%">Время исполнения</th>
+									</tr>
+								</thead>
+								<tbody class="response-table-body"></tbody>
+							</table>
+						</td>
+					</tr>
+				</tfoot>
+		</table>
+	</main>
+	<script>
+		let x, y, r;
+
+		function checkData(){
+			return checkX() && checkY() && checkR();
+		}
+
+		function checkX(){
+			x = document.querySelectorAll("form.coordinates ul.checkbox input:checked");
+			if(x.length === 1){
+				x = x.item(0).value;
+				return true;
+			}
+			return false;
+		}
+		function checkY(){
+			try {
+				y = document.querySelector("form.coordinates input[name=value_Y]").value.replace(",", ".");
+				return isNumeric(y) ? isInRange(y, -5, 3) : false;
+			}
+			catch(err){
+				return false;
+			}
+		}
+		function checkR(){
+			try{
+				r = document.querySelector("form.coordinates input[name=value_R]").value.replace(",",".");
+				return isNumeric(r) ? isInRange(r, 1, 4) : false;
+			}
+			catch(err){
+				return false;
+			}
+		}
+
+		function isNumeric(n) {
+			return !isNaN(parseFloat(n)) && isFinite(n);
+		}
+
+		function isInRange(n, min, max) {
+			return parseFloat(n) >= parseFloat(min) && parseFloat(n) <= parseFloat(max);
+		}
+
+
+		function createTableRow(json_object){
+			document.querySelector(".response-table-body").innerHTML += `
+			<tr>
+				<td>${json_object.value_X}</td>
+				<td>${json_object.value_Y}</td>
+				<td>${json_object.value_R}</td>
+				<td>${json_object.value_hit ? "Попадание" : "Промах"}</td>
+				<td>${json_object.current_time}</td>
+				<td>${(new Number(json_object.script_time_seconds * 1000)).toPrecision(3) + " ms"}</td>
+			</tr>
+			`;
+		}
+		//load table when page opening
+		function loadTable(){
+			for (let i = 0; i < localStorage.length; ++i){
+				createTableRow(JSON.parse(localStorage.getItem(i)));
+			}
+		}
+
+		function onAjaxSuccess(data){
+			localStorage.setItem(localStorage.length, JSON.stringify(data));
+			createTableRow(data);
+		}
+		//set actions on buttons 
+		let button_submit = document.getElementById("submit-button");
+		button_submit.onclick = function(){
+			if (!checkData()){
+				alert("Data is Incorrect. Check it.")
+			}
+			else {
+				$.ajax({
+					type:"GET",
+					url:"scripts/handler.php",
+					data: {
+						"value_R": r,
+						"value_X": x,
+						"value_Y": y,
+						"timezone_offset_minutes" : (new Date()).getTimezoneOffset()
+					},
+					success: onAjaxSuccess,
+					dataType:"json"
+				});
+			}
+		};
+
+		let button_clear = document.getElementById("clear-button");
+		button_clear.onclick = function(){
+			document.querySelector(".response-table-body").innerHTML = "";
+			localStorage.clear();
+		};
+
+		//load data in table from localStorage
+		loadTable();
+		//Only one checkbox
+		$(document).ready(function(){
+			$("form.coordinates ul.checkbox input").click(function(){
+				$("form.coordinates ul.checkbox input").not(this).prop("checked", false);
+			});
+		});
+	</script>
+</body>
+</html>
