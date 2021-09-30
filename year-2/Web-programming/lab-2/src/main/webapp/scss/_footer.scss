@@ -1,0 +1,12 @@
+.page-footer {
+  background-color: $header_color;
+  &__wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: $footer_height;
+  }
+  &__note {
+    padding: 16px;
+  }
+}
