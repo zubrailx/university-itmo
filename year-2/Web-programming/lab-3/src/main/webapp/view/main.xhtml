@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:body>
+    <ui:composition template="/view/template/template-layout.xhtml">
+        <ui:define name="css">
+            <h:outputStylesheet library="css" name="page-main.css"/>
+        </ui:define>
+        <ui:define name="content">
+            <div class="interactive">
+                <ui:include src="page/main/graph.xhtml"/>
+                <ui:include src="page/main/form.xhtml"/>
+                <ui:include src="page/main/table.xhtml"/>
+            </div>
+        </ui:define>
+        <ui:define name="js">
+            <h:outputScript library="js" name="form-validator.js"/>
+            <h:outputScript library="js" name="svg.js"/>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

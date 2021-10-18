@@ -1,0 +1,93 @@
+.form {
+  display: inherit;
+
+  &__wrapper {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 12px;
+    margin: 10px;
+    padding: 10px;
+    @extend .simple-shadow;
+    display: grid;
+    align-items: center;
+  }
+}
+
+.form-coordinate-x {
+  &__wrapper {
+    display: flex;
+    margin: 8px 4px;
+    flex-wrap: wrap;
+  }
+
+  &__label {
+    padding: 4px;
+    width: 100%;
+  }
+
+  &__input {
+    width: 80px !important;
+    display: inline-flex;
+    align-items: center;
+    -ms-transform: scale(1.2);
+    -moz-transform: scale(1.2);
+    -webkit-transform: scale(1.2);
+    -o-transform: scale(1.2);
+    transform: scale(1.2);
+    padding: 8px;
+  }
+}
+
+.form-coordinate-y {
+  &__wrapper {
+    display: flex;
+    margin: 8px 4px;
+    flex-wrap: wrap;
+  }
+
+  &__label {
+    color: black;
+  }
+
+  &__input {
+    border: 1px solid #acafc6bf;
+    border-radius: 4px;
+    margin: 4px;
+    padding: 8px;
+  }
+}
+
+.form-radius {
+  &__wrapper {
+    display: flex;
+    margin: 8px 4px;
+    flex-wrap: wrap;
+  }
+
+  &__label {
+    color: black;
+  }
+
+  &__input {
+    margin: 4px;
+  }
+}
+
+.form-userbuttons {
+  &__wrapper {
+    display: flex;
+    margin: 8px 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__submit {
+    @extend .simple-button;
+    width: 80px;
+  }
+
+  &__clean {
+    @extend .simple-button;
+    width: 80px;
+  }
+}

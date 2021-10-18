@@ -1,0 +1,38 @@
+.header {
+  &__top {
+    display: flex;
+    justify-content: flex-start;
+    background-color: #c6c6c6;
+  }
+
+  &__bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__navigation {
+    color: rgb(0, 0, 0);
+  }
+}
+
+.header-top {
+  &__item {
+    font-size: 1.2em;
+    padding: 12px 10px;
+  }
+
+  &_link {
+    margin-left: auto;
+    color: black;
+    text-decoration: underline;
+  }
+}
+
+.header-bottom {
+  &__lab {
+    padding: 6px;
+    margin: 4px;
+    font-size: 1.1em;
+  }
+}

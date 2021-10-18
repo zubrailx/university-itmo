@@ -1,0 +1,11 @@
+.interactive {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 1fr;
+  margin: 20px auto;
+  width: 70%;
+  max-width: 950px;
+  gap: 20px;
+  justify-content: center;
+  align-content: start;
+}

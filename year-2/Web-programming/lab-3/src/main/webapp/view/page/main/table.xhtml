@@ -1,0 +1,41 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core">
+    <div class="table-container">
+        <h:dataTable value="#{formView.dtoList}" var="points" id="datatable"
+                     styleClass="table-container__table table"
+        >
+            <h:column>
+                <f:facet name="header">Coordinate X</f:facet>
+                <h:outputText value="#{points.x}">
+                    <f:convertNumber pattern="#0.0000" />
+                </h:outputText>
+            </h:column>
+            <h:column>
+                <f:facet name="header">Coordinate Y</f:facet>
+                <h:outputText value="#{points.y}">
+                    <f:convertNumber pattern="#0.0000" />
+                </h:outputText>
+            </h:column>
+            <h:column>
+                <f:facet name="header">Radius</f:facet>
+                #{points.r}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Hit</f:facet>
+                #{points.hit}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Local Time</f:facet>
+                #{points.localDateTimeFormatted}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Script Time</f:facet>
+                <h:outputText value="#{points.scriptTime * 1000}">
+                    <f:convertNumber pattern="#0.0000" />
+                </h:outputText> ms
+            </h:column>
+        </h:dataTable>
+    </div>
+</ui:composition>

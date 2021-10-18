@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:head>
+    <h:outputStylesheet name="template.css" library="css"/>
+    <link rel="icon" type="image/x-icon" href="#{resource['images/favicon.ico']}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&amp;display=swap"
+          rel="stylesheet"/>
+
+    <ui:insert name="css"/>
+</h:head>
+
+<h:body styleClass="body flex-column">
+    <ui:insert name="header">
+        <ui:include src="/view/template/header.xhtml"/>
+    </ui:insert>
+
+    <ui:insert name="content">
+        <ui:include src="/view/template/content.xhtml"/>
+    </ui:insert>
+
+    <ui:insert name="footer">
+        <ui:include src="/view/template/footer.xhtml"/>
+    </ui:insert>
+
+    <ui:insert name="js"/>
+</h:body>
+</html>

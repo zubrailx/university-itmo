@@ -1,0 +1,83 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:form class="form">
+        <div class="form__wrapper">
+            <div class="svg-container__input">
+                <p:inputText class="svg-container__input-x" style="display: none" value="#{formView.svgX}"/>
+                <p:inputText class="svg-container__input-y" style="display: none" value="#{formView.svgY}"/>
+            </div>
+            <div class="form-coordinate-x">
+                <div class="form-coordinate-x__wrapper">
+                    <h:outputLabel class="form-coordinate-x__label" value="Choose coordinate x:"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[0]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[0]}"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[1]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[1]}"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[2]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[2]}"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[3]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[3]}"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[4]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[4]}"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[5]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[5]}"/>
+                    <p:selectBooleanCheckbox value="#{formView.booleanX[6]}" class="form-coordinate-x__input"
+                                             itemLabel="#{formView.valueX[6]}"/>
+                </div>
+            </div>
+            <div class="form-coordinate-y">
+                <div class="form-coordinate-y__wrapper">
+                    <h:outputLabel class="form-coordinate-y__label" value="Enter coordinate y:">
+                        <h:inputText class="form-coordinate-y__input" value="#{formView.inputY}"/>
+                    </h:outputLabel>
+                </div>
+            </div>
+            <div class="form-radius">
+                <div class="form-radius__wrapper">
+                    <h:outputLabel class="form-radius__label" value="Enter radius:">
+                        <p:spinner class="form-radius__input" value="#{formView.inputR}" widgetVar="wvr" min="0.1"
+                                   max="3" stepFactor="0.1"/>
+                    </h:outputLabel>
+                </div>
+            </div>
+            <div class="form-userbuttons">
+                <div class="form-userbuttons__wrapper">
+                    <!--Короче, сегодня с ajax-->
+                    <h:commandButton action="#{inputController.executeForm}" onclick="if (!checkData()) return false;"
+                                     value="Submit" type="submit"
+                                     styleClass="form-userbuttons__submit">
+                        <f:ajax execute="@form"
+                                render="datatable"
+                                onevent="(data) => { if (data.status === 'success') {
+                                    deletePoints();
+                                    loadPointsFromTable();
+                                }}"/>
+                    </h:commandButton>
+                    <h:commandButton action="#{inputController.clearTable}" value="Clean" type="submit"
+                                     styleClass="form-userbuttons__clean">
+                        <f:ajax execute="@form"
+                                render="datatable"
+                                onevent="(data) => { if (data.status === 'success') {
+                                    deletePoints();
+                                    loadPointsFromTable();
+                                }}"/>
+                    </h:commandButton>
+                    <h:commandButton action="#{inputController.executeSvg}" styleClass="svg-container__button"
+                                     value="SubmitSvg"
+                                     style="display: none" type="submit">
+                        <f:ajax execute="@form"
+                                render="datatable"
+                                onevent="(data) => { if (data.status === 'success') {
+                                    deletePoints();
+                                    loadPointsFromTable();
+                                }}"/>
+                    </h:commandButton>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</ui:composition>

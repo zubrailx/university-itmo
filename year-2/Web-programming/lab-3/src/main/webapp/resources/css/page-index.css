@@ -1,0 +1,29 @@
+.main { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; position: relative; }
+
+.clock { position: relative; height: 100%; width: 100%; }
+
+.clock__wrapper { position: absolute; -webkit-animation-name: hor-movement, ver-movement; animation-name: hor-movement, ver-movement; -webkit-animation-duration: 3.141s, 1.414s; animation-duration: 3.141s, 1.414s; -webkit-animation-iteration-count: infinite; animation-iteration-count: infinite; -webkit-animation-direction: alternate; animation-direction: alternate; -webkit-animation-timing-function: reverse; animation-timing-function: reverse; margin: 20px; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; border: 2px solid black; border-radius: 50%; padding: 20px; -webkit-box-shadow: 0px 3px 19px 3px rgba(0, 0, 0, 0.25); box-shadow: 0px 3px 19px 3px rgba(0, 0, 0, 0.25); -webkit-touch-callout: none; /* iOS Safari */ -webkit-user-select: none; /* Safari */ /* Konqueror HTML */ -moz-user-select: none; /* Old versions of Firefox */ -ms-user-select: none; /* Internet Explorer/Edge */ user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */ cursor: pointer; }
+
+.clock__date { font-size: 2em; padding: 6px; }
+
+.clock__time { padding: 6px; font-size: 2.5em; }
+
+@-webkit-keyframes hor-movement { from { left: 0; }
+  to { left: calc(100% - 260px); } }
+
+@keyframes hor-movement { from { left: 0; }
+  to { left: calc(100% - 260px); } }
+
+@-webkit-keyframes ver-movement { from { top: 0; }
+  to { top: calc(100% - 190px); } }
+
+@keyframes ver-movement { from { top: 0; }
+  to { top: calc(100% - 190px); } }
+
+.button { z-index: 2; }
+
+.button__wrapper { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
+
+.button__button { margin: 5px; font-size: 1.5em; font-style: inherit; border-radius: 8px; padding: 6px; border: 2px solid black; }
+
+.button__button:hover { background-color: #c6c6c6; }
