@@ -44,3 +44,10 @@
 * [ЛР 1](year-2/Web-programming/lab-1)
 * [ЛР 2](year-2/Web-programming/lab-2)
 * [ЛР 3](year-2/Web-programming/lab-3)
+
+
+### Языки-программирования
+
+* [ЛР 1](year-2/Programming-languages/assignment-1-io-library)
+* [ЛР 2](year-2/Programming-languages/assignment-2-dictionary)
+* [ЛР 3](year-2/Programming-languages/assignment-3-image-rotation)
