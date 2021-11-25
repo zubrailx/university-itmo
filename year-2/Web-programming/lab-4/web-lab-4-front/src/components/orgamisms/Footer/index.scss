@@ -1,0 +1,19 @@
+@import "../../templates/variables.scss";
+$footer-background-color: #b8d1e5;
+$footer-border-color: silver;
+
+.footer {
+    background-color: $footer-background-color;
+    border: 1px solid $footer-border-color;
+    display: flex;
+    justify-content: center;
+
+    &__item {
+        font-size: 17px;
+        padding: 10px;
+
+        @media screen and (max-width: $width-tablet) {
+            font-size: 17px;
+        }
+    }
+}

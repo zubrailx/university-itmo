@@ -1,0 +1,9 @@
+.button {
+    height: auto !important;
+    padding: 4px !important;
+    margin: 20px !important;
+    > span {
+        font-size: 18px;
+        font-weight: 400;
+    }
+}

@@ -4,3 +4,7 @@
 .idea/
 *.iml
 target/
+credentials.txt
+dist/
+node_modules/
+

@@ -1,0 +1,17 @@
+#root {
+    height: 100%;
+    > div {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: aliceblue;
+}

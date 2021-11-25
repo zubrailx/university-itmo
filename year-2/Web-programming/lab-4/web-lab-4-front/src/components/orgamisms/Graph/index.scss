@@ -1,0 +1,15 @@
+@import "../../templates/template_form.scss";
+@import "../../templates/variables.scss";
+
+.graph {
+    @extend .template-form;
+
+    @media screen and (max-width: $width-tablet) {
+        padding: 20px;
+        margin: 0px;
+    }
+
+    :hover {
+        cursor: crosshair
+    }
+}

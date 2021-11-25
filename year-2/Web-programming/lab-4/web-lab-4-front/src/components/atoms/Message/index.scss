@@ -1,0 +1,7 @@
+.message {
+    text-align: center;
+    padding: 5px;
+    &__error {
+        color: rgb(255, 0, 0);
+    }
+}

@@ -1,0 +1,21 @@
+@import "../../templates/variables.scss";
+
+.main-interactive {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 1fr;
+    justify-content: center;
+    align-content: start;
+
+    @media screen and (max-width: $width-tablet) {
+        gap: 30px;
+    }
+
+    @media screen and (max-width: $width-mobile) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.main {
+    justify-content: flex-start;
+    padding-top: 35px;
+}

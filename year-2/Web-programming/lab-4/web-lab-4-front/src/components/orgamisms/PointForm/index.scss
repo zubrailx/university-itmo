@@ -1,0 +1,55 @@
+@import "../../templates/template_form.scss";
+@import "../../templates/variables.scss";
+
+.chevron svg {
+    transition: transform 0.3s ease-out;
+    transform-origin: 50% 40%;
+    transform: rotate(0deg);
+}
+
+.rotated svg {
+    transform: rotate(180deg);
+}
+
+.form-point {
+    @extend .template-form;
+    @media screen and (max-width: $width-tablet) {
+        padding: 20px;
+        margin: 0px;
+    }
+
+    &__header {
+        @extend .template-form__header;
+    }
+
+    &__wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+}
+
+.form-point-x,
+.form-point-y,
+.form-point-r,
+.point-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-point-x__input,
+.form-point-y__input,
+.form-point-r__input {
+    @extend .template-form__input;
+    flex-grow: 1;
+}
+
+.point-buttons {
+    display: flex;
+    &__button {
+        min-width: 15ex;
+        @extend .template-form__button;
+    }
+}

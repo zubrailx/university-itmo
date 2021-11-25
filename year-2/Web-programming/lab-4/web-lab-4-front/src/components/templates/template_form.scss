@@ -1,0 +1,29 @@
+.template-form {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 2px 8px 2px rgba(34, 60, 80, 0.2);
+    border-radius: 30px;
+    padding: 30px;
+    margin: 30px;
+    background-color: white;
+    &__header {
+        text-align: center;
+    }
+    &__input {
+        min-width: 24em;
+        & > input {
+            font-size: 20px;
+            font-weight: 500;
+        }
+    }
+    &__button {
+        height: auto !important;
+        padding: 6px 12px !important;
+        margin: 20px !important;
+        > span {
+            font-size: 18px;
+            font-weight: 400;
+        }
+    }
+}
