@@ -8,6 +8,7 @@ extern read_word
 extern exit
 extern find_word
 extern print_newline
+extern string_length
 
 %define STD_OUT 0x01
 %define STD_ERR 0x02
@@ -37,7 +38,13 @@ _start:
     test rax, rax
     jz .print_not_found
 .print_key:
-    mov rdi, rax
+    mov rdi, rax 
+    add rdi, 8      ; address of key element
+    push rdi
+    call string_length
+    pop rdi
+    add rdi, rax  
+    inc rdi     ; goto value (key length + 1)
     mov rsi, STD_OUT
     call print_string
     call print_newline

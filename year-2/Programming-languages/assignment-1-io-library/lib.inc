@@ -1,5 +1,3 @@
-; привет, можно задать один вопрос - когда у нас начнут проверять лабораторные работы?
-
 section .text
 
 ; Params:
@@ -8,21 +6,19 @@ section .text
 ;   !exit
 exit: 
     mov rax, 60
-    mov rdi, 0
     syscall
     ret 
 
 ; Params:
 ;   rdi - string ptr
 ; Out:
-;   rax - string length
+;   rax - string length (not including null terminator)
 string_length:
-    xor rax, rax
+    mov rax, -1
 .loop:
     inc rax
-    cmp byte [rdi + rax - 1], 0 ;starts with 1, ends with 1+length-1
+    cmp byte [rdi + rax], 0 ;starts with 1, ends with 1+length-1
     jne .loop
-    dec rax
     ret
 
 ; Params:
@@ -38,6 +34,15 @@ print_string:
     syscall 
     ret
 
+
+; Params:
+;   -
+; Out:
+;   >1 - \n (0xA)
+print_newline:
+    mov rdi, 10
+
+
 ; Params:
 ;   rdi - code of char
 ; Out:
@@ -52,57 +57,46 @@ print_char:
     pop rdi
     ret
 
-; Params:
-;   -
-; Out:
-;   >1 - \n (0xA)
-print_newline:
-    mov rdi, 10
-    call print_char
-    ret 
-
-; Params:
-;   rdi - unsigned int 8 bytes
-; Out:
-;   >1 - unsigned int in decimal
-print_uint:
-    push 0          ; null terminated string
-    mov rbx, 10     ; devident
-    mov rax, rdi    ; put in rax for calculation
-    add rsp, 7
-.count:
-    xor rdx, rdx
-    div rbx         ; rax div rcx -% rax
-    add dl, '0'     ; one lowest byte
-    mov dh, byte [rsp]
-    add rsp, 1
-    push dx
-    test rax, rax
-    jne .count
-    mov rdi, rsp
-    call print_string
-    mov rdi, rsp
-    call string_length
-    add rsp, rax
-    inc rsp         ; jump over null-terminator
-    ret
 
 ; Params:
 ;   rdi - signed int 8 bytes
 ; Out:
 ;   >1 - signed in in decimal
 print_int:
-    push rbx
-    mov rbx, rdi
-    cmp rbx, 0
-    jns .count
+    mov r8, rdi    ; r11 is not affected by syscall of print_char
+    cmp r8, 0
+    jns print_uint
     mov rdi, '-'
     call print_char
-    mov rdi, rbx
+    mov rdi, r8
     neg rdi
+
+
+; Params:
+;   rdi - unsigned int 8 bytes
+; Out:
+;   >1 - unsigned int in decimal
+print_uint:
+    dec rsp
+    mov [rsp], byte 0    ; put null terminator
+    mov rbx, 10     ; devident
+    mov rax, rdi    ; put in rax for calculation
 .count:
-    call print_uint
-    pop rbx
+    xor rdx, rdx
+    div rbx         ; rax div rcx -% rax
+    add dl, '0'     ; one lowest byte
+    dec rsp
+    mov [rsp], dl
+    test rax, rax
+    jne .count
+    mov rdi, rsp
+    push rcx
+    call print_string
+    pop rcx
+    mov rdi, rsp
+    call string_length
+    add rsp, rax
+    inc rsp         ; jump over null-terminator
     ret
 
 ; Params:
@@ -261,13 +255,15 @@ parse_int:
     je .positive
     dec rdi
 .positive:
-    call parse_uint
-    ret
+    jmp parse_uint
 
 .negative:
     call parse_uint
+    test rdx, rdx
+    je .exception
     neg rax
     inc rdx         ; symbol minus
+.exception:
     ret 
 
 ; Params:
@@ -281,7 +277,7 @@ parse_int:
 string_copy:
     call string_length  ; return rax
     cmp rdx, rax
-    jb .else
+    jbe .else           ; string length + 1 (null terminator)
     mov rcx, rax
 .loop:
     test rcx, rcx
