@@ -56,6 +56,6 @@
 
 ### Матлогика
 
-* [Task-A] (year-2/Math-logic/Task-A)
-* [Task-B] (year-2/Math-logic/Task-B)
-* [Task-C] (year-2/Math-logic/Task-C)
+* [Task-A](year-2/Math-logic/Task-A)
+* [Task-B](year-2/Math-logic/Task-B)
+* [Task-C](year-2/Math-logic/Task-C)
