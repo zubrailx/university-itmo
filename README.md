@@ -52,3 +52,10 @@
 * [ЛР 1](year-2/Programming-languages/assignment-1-io-library)
 * [ЛР 2](year-2/Programming-languages/assignment-2-dictionary)
 * [ЛР 3](year-2/Programming-languages/assignment-3-image-rotation)
+
+
+### Матлогика
+
+* [Task-A] (year-2/Math-logic/Task-A)
+* [Task-B] (year-2/Math-logic/Task-B)
+* [Task-C] (year-2/Math-logic/Task-C)
