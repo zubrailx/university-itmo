@@ -1,24 +1,27 @@
 #include "rotate.h"
 
-#include <malloc.h>
 
-struct image rotate( struct image const source){
+struct image_optional rotate(const struct image source){
     uint64_t width = source.width;
     uint64_t height = source.height;
     struct pixel *data = source.data;
+    // create new image
+    struct image_optional optional = image_create_empty(width, height);
+    if (!optional.is_valid) {
+        return image_none;
+    }
 
-    struct pixel *temp_arr = malloc(sizeof(struct pixel) * height * width);
-//    if (!temp_arr) { return NULL; }
+    struct pixel *copy_data = optional.image.data;
 
-    for (uint64_t i = 0; i < height; ++i) {
-        for (uint64_t j = 0; j < width; ++j) {
-            *(temp_arr + j * height + (height - 1 - i)) = *(data + i * width + j);
+    for (uint64_t y = 0; y < height; ++y) {
+        for (uint64_t x = 0; x < width; ++x) {
+            *(copy_data + x * height + (height - 1 - y)) = *(data + y * width + x);
         }
     }
-    struct image img = {0};
-    img.width = height;
-    img.height = width;
-    img.data = temp_arr;
-    return img;
-}
 
+    return image_some((struct image) {
+        .width = optional.image.height,
+        .height = optional.image.width,
+        .data = copy_data
+    });
+}

@@ -1,0 +1,7 @@
+*.o
+build
+obj
+*.html
+.idea
+.gdb_history
+peda-session-main.txt

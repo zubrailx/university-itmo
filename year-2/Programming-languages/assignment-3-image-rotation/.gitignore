@@ -3,3 +3,6 @@ build
 obj
 *.html
 .idea
+
+input.bmp
+output.bmp

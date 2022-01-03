@@ -1,0 +1,7 @@
+#ifndef ASSIGNMENT_SEPIA_FILTER_TEST_H
+#define ASSIGNMENT_SEPIA_FILTER_TEST_H
+
+int test_c();
+int test_asm();
+
+#endif //ASSIGNMENT_SEPIA_FILTER_TEST_H

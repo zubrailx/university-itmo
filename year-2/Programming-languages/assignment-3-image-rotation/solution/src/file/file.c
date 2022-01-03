@@ -1,5 +1,6 @@
 #include "file.h"
 
+
 bool open_file(FILE **file, const char *name, const char *mode) {
     if (!file) return false;
     *file = fopen(name, mode);

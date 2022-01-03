@@ -52,6 +52,8 @@
 * [ЛР 1](year-2/Programming-languages/assignment-1-io-library)
 * [ЛР 2](year-2/Programming-languages/assignment-2-dictionary)
 * [ЛР 3](year-2/Programming-languages/assignment-3-image-rotation)
+* [ЛР 4](year-2/Programming-languages/assignment-4-memory-allocator)
+* [ЛР 5](year-2/Programming-languages/assignment-5-sepia-filter)
 
 
 ### Матлогика

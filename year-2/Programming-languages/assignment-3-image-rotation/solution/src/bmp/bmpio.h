@@ -1,5 +1,5 @@
-#ifndef LAB3_BMPIO_H
-#define LAB3_BMPIO_H
+#ifndef LAB_BMPIO_H
+#define LAB_BMPIO_H
 
 #include <stdint.h>
 #include <stdio.h>
@@ -31,7 +31,7 @@ enum read_status {
     READ_INVALID_HEADER,
     READ_STREAM_NULL,
     READ_TARGET_NULL,
-    READ_ERROR
+    READ_MALLOC_ERROR
 };
 
 enum write_status {
@@ -42,8 +42,8 @@ enum write_status {
 };
 
 
+enum read_status from_bmp(FILE *in, struct image *img);
 enum write_status to_bmp(FILE *out, struct image *img);
 
-enum read_status from_bmp(FILE *in, struct image *img);
 
-#endif //LAB3_BMPIO_H
+#endif //LAB_BMPIO_H

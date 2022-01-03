@@ -3,6 +3,8 @@
 
 #include "../image/image.h"
 
-struct image rotate(struct image source);
+
+struct image_optional rotate(struct image source);
+
 
 #endif //LAB3_ROTATE_H
