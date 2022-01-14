@@ -1,0 +1,80 @@
+\subsection*{Полная и замкнутая ортонормированная система.}
+
+\noindent \textasteriskcentered~Пусть $\{ e_n \}$ - ОНС в $H$.
+
+\smallskip 1)~ Если из $(x, e_n) = 0 \; \forall n \Rightarrow x = 0$. Тогда $\{ e_n\}$ - \textit{замкнутая ОНС}.
+
+\smallskip 2)~ Если $H = Cl V(e_1, e_2, \dots)$, то $\{ e_n\}$ - \textit{полная ОНС}. 
+
+
+\subsection*{Теорема Рисса-Фишера.}
+
+\begin{theorem*}[Теорема Рисса-Фишера]
+   Пусть $H$ - гильбертово пространство, $a_n \in \mathbb{C} : \sum_1^\infty \abs{a_n}^2 < + \infty$. Тогда для $\forall$ ОНС $\{ e_n \} \; \exists y \in H : (y, e_n) = a_n$ -
+   коэффициенты Фурье по этой системе равны $a_n$.
+\end{theorem*}
+
+\begin{proof}
+\smallskip
+\par\noindent \textbullet~Рассмотрим ортогональный ряд вида $\sum_1^\infty a_n e_n$. $\norm{a_n \cdot e_n}^2 = \abs{a_n}^2$, $\sum_1^\infty \abs{a_n}^2 < + \infty$,
+тогда по критерию сходимости ортогональных рядов $\Rightarrow \sum_1^\infty a_n e_n$ - сходится в $H$. Обозначим $y = \sum_1^\infty a_n e_n$ его сумму. 
+
+\smallskip
+\noindent \textbullet~Воспользуемся тем, что скалярное произведение точек - функционал непрерывный, то есть если $x_n \to x, y_n \to y \Rightarrow (x_n, y_n) \to (x, y)$.
+Это получается из неравенства Шварца: $(x_n, y_n) = (x, y_n) + (x_n - x, y_n) = (x, y_n) + (x_n - x, y_n - y) + (x_n - x, y) = (x, y_n - y) + (x, y) + (x_n - x, y_n -y) + 
+(x_n - x, y)$. Переносим и получаем: $\abs{(x_n, y_n) - (x, y)} \le \abs{(x, y_n - y)} + \abs{(x_n - x, y_n - y)} + \abs{(x_n - x, y)} \le $ (по неравенству Шварца) $\le
+\norm{x} \norm{y_n - y} + \norm{x_n - x} \norm{y_n - y} + \norm{x_n - x} \norm{y} \to 0$. Поскольку правая часть стремится к нулю, то и левая тоже будет стремиться.
+
+\smallskip
+\noindent \textbullet~Раз скалярное произведение непрерывно, то рассмотрим коэффициенты Фурье ряда $y = \sum_1^\infty a_j e_j$. $(y, e_k) = (\sum_1^\infty a_j e_j, 
+e_k) = \sum_1^\infty a_j (e_j, e_k) = a_k$, ну и понятно что $(e_j, e_k) = 1$ только в том случае, когда $k = j$. Сумму ряда мы можем выносить, поскольку 
+он непрерывный и сумма ряда равна пределу частичных сумм. 
+\end{proof}
+
+\bigskip
+\begin{theorem*}
+Пусть $\{ e_n\}$ - замкнутая ОНС. Тогда $\forall x \in H$ разлагается в ряд Фурье по этой системе. То есть выполняется равенство: $x = \sum_{j = 1}^\infty (x, e_j)e_j$.
+\end{theorem*}
+
+\begin{proof}
+\smallskip\par\noindent \textbullet~По неравенству Бесселя $\sum_{j = 1}^\infty \abs{(x, e_j)}^2 \le \norm{x}^2$, то есть ряд сходится. Тогда беря в т. Рисса-Фишера $a_j 
+= (x, e_j)$ получаем, что они удовлетворяют т. Рисса-Фишера, а значит по этой теореме $\exists y \in H : (y, e_j) = a_j = (x, e_j)$. Знаем, что $y = \sum_1^\infty a_j e_j
+= \sum_1^\infty (x, e_j) e_j$. В силу $(y, e_j) = (x, e_j)$ видим, что $(y - x, e_j) = 0$, а тогда по замкнутости системы $y - x = 0$ - нулевая точка, а значит $y = x$,
+тогда будем в $y = \sum_1^\infty (x, e_j) e_j$ писать вместо $y$ $x$ и получим нужную формулу. 
+\end{proof}
+
+\medskip
+\noindent \textbullet~Таким образом, по любой замкнутой системе мы может точку разложить в ряд Фурье по этой системе. Это позволяет установить следующее утверждение:
+
+\bigskip
+\noindent \textbf{Утверждение.} \textit{ Пусть $\{ e_j \}$ - ОНС в $H$. Тогда она замкнута $\Longleftrightarrow$ она полная (классы тождественны).}
+
+\begin{proof}
+\smallskip
+\par\noindent \textbullet~Если $\{ e_j \}$ - замкнута $\Rightarrow \forall x = \sum_1^\infty (x, e_j) e_j$, а значит $S_n = \sum_1^n (x, e_j) e_j \to x \Rightarrow 
+Cl V(e_1, e_2, \dots) = H$ - замыкание линейное оболочки есть все $H$. Тогда получится, что $ \{ e_j\}$ - полная система.
+
+\medskip
+\noindent \textbullet~Если система полная, то $\forall \epsilon > 0 \; \exists \sum_{k = 1}^n \alpha_k e_k : \norm{x - \sum_1^n \alpha_k e_k} \le \epsilon$, но по 
+экстремальному свойству частичных сумм ряда Фурье, если $S_n = \sum_1^n (x, e_k)e_k \Rightarrow \norm{x - S_n} \le \norm{x - \sum_1^n \alpha_k e_k} \le \epsilon$. Тогда 
+в силу произвольности $\epsilon$ $x$ окажется пределом этих частичных сумм или разложится в ряд Фурье: $x = \lim S_n$, $x = \sum_1^\infty (x, e_k) e_k$. Тогда если 
+все $(x, e_k) = 0 \Rightarrow x = 0$, а значит $\{ e_n\}$ - замкнуто.
+\end{proof}
+
+
+\subsection*{Равенство Парсеваля.}
+
+\noindent \textbullet~Таким образом, для того, чтобы $\forall x$ выполнялось равенство $\norm{x}^2 = \sum_1^\infty \abs{(x, e_k)}^2 \Longleftrightarrow$ $\{ e_n\}$
+замкнута.
+
+\smallskip
+\noindent \textbullet~$\{ e_n \}$ - замкнутая ОНС. Берем пару точек $x = \sum_1^\infty (x, e_j) e_j$, $y = \sum_1^\infty (y, e_j) e_j$. Если вычислить скалярное 
+произведение, то за счет непрерывности скалярного произведения можно написать двойную сумму, за счет ортогональности все обнуляется кроме одинаковых индексов
+$(x, y) = \sum_{i, j = 1}^\infty (x, e_i) \overline{(y,e_j)} (e_i, e_j) = \sum_{i = 1}^\infty (x, e_i)\overline{(y, e_i)}$. Полученное равенство называется \textit{
+равенством Парсеваля}.
+
+\smallskip
+\noindent \textbullet~В качестве примера, $l_2$, $\overline{e_n} = (0, \dots, 0, 1, 0, \dots)$. Теперь если взять некоторую последовательность $\overline{x} = (x_1, 
+x_2, \dots)$ и начать считать ее коэффициенты Фурье по этой системе: $(\overline{x}, \overline{e}_n) = \sum_1^\infty x_k \overline{e}_k^{(n)} = x_k$. Поэтому если 
+все $(\overline{x}, \overline{e_n}) = 0 \Rightarrow $ все $x_n = 0 \Rightarrow \overline{x} = \overline{0}$. Тогда данная система является замкнутой. Поэтому любая 
+точка $\overline{x} = \sum_1^\infty x_k \overline{e_k}$ в $l_2$.

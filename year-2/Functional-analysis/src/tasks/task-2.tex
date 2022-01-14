@@ -1,0 +1,60 @@
+\subsection*{Неравенства Гельдера и Минковского.}
+\noindent \textbf{Неравенство Гельдера.} \textit{Если $f(t) \in L_p(a, b)$, $p > 1$ и $g(t) \in L_q(a, b)$, где $\dfrac{1}{p} + \dfrac{1}{q} = 1$, то произведение 
+$f(t)$ и $g(t)$ - суммируемая на $[a, b]$ функция и } 
+\[
+    \int_a^b \abs{f(t) g(t)} dt \le \left(\int_a^b \abs{f(t)}^p dt\right)^{\frac{1}{p}} \left(\int_a^b \abs{g(t)}^q dt\right)^{\frac{1}{q}}
+\]
+
+\medskip 
+\noindent \textbf{Неравенство Минковского.} \textit{Если $f(t), g(t) \in L_p(a, b)$, то} 
+\[
+    \left(\int_a^b \abs{f(t) + g(t)}^p dt\right)^{\frac{1}{p}} \le 
+    \left(\int_a^b \abs{f(t)}^p dt \right)^{\frac{1}{p}} + \left( \int_a^b \abs{g(t)}^p dt\right)^{\frac{1}{p}}
+\]
+
+\subsection*{Пространство последовательностей $l_p$.}
+
+\noindent \textbullet~$l_p, \; p \ge 1$;
+$l_p = \{\overline{x} = (x_1, x_2, \dots) : \sum_{n = 1}^{\infty} \abs{x_n}^p < +\infty\}$
+
+\begin{proofexpr*}
+    $\overline{x}$, $\overline{y} \in l_p \Rightarrow \overline{x} + \overline{y} \in l_p$
+\end{proofexpr*}
+\begin{proof}
+\par \noindent \textbullet~$\overline{x} + \overline{y} = (x_1 + y_1, x_2 + y_2, \dots)$.
+
+\smallskip
+\noindent \textbullet~$\sum_{n = 1}^{\infty} \abs{x_n + y_n}^p \le 
+\sum (\abs{x_n} + \abs{y_n})^p = 
+\sum_{n : \abs{x_n} \ge \abs{y_n}} + \sum_{n : \abs{x_n} < \abs{y_n}} \le 
+2^p \sum_{n : \abs{x_n} \ge \abs{y_n}} \abs{x_n}^p + 2^p \sum_{n : \abs{x_n} < \abs{y_n}} \abs{y_n}^p \le
+2^p \left(\sum_{n = 1}^{\infty} \abs{x_n}^p + \abs{y_n}^p \right) < +\infty$ 
+
+\medskip
+\noindent \textbullet~Последнее выражение конечно по условию: $\sum_{n = 1}^\infty \abs{x_n}^p < +\infty$
+
+\end{proof}
+
+
+\begin{proofexpr*}
+$\overline{x} \in l_p \Rightarrow \alpha \overline{x} \in l_p$
+\end{proofexpr*}
+
+\begin{proof}
+\par\noindent \textbullet~$\alpha \overline{x} = (\alpha x_1, \alpha x_2, \dots)$. 
+
+\smallskip
+\noindent \textbullet~$\sum_{n = 1}^{\infty} \abs{\alpha x_n}^p =
+\abs{\alpha}^p \sum_{n = 1}^{\infty}\abs{x_n}^p < +\infty$
+\end{proof}
+
+\subsection*{Пространство непрерывно-дифференцируемых функций $C[a, b]$.}
+
+\noindent \textbullet~$C^{(p)}[a, b], \; p = 0, 1, 2, 3 \dots$;
+$C^{(p)}[a, b] = \{ f : [a, b] \rightarrow \mathbb{R}$, которые $p$ раз непрерывно дифф на отрезке $[a, b]$$\}$
+
+\medskip
+\noindent \textbullet~При $p = 0$ $f^{(0)} = f$, по определению.
+
+\smallskip
+\noindent \textbullet~$(f + g)^{(k)} = f^{(k)} + g^{(k)}$.

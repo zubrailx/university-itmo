@@ -1,0 +1,87 @@
+\noindent \textbullet~Пусть дано какое-либо линейное многообразие $X$ и на нем определена не одна норма: $\norm{\cdot}_1$, $\norm{\cdot}_2$, $\norm{\cdot}_3 \dots$.
+Если взять линейное многообразие $C[a, b]$ и определить на нем нормы $\norm{\delta} = max_{[a, b]} \abs{f}$, $\norm{f}_1 = \int_a^b \abs{f(x)} dx$.
+
+\smallskip
+\noindent \textbullet~Если брать $n$-мерное пространство: $\mathbb{R}^n = \{ \overline{x} = (x_1, x_2, \dots, x_n)\}$, то на нем можно например определить нормы:
+$\norm{\overline{x}}_e = \sqrt{\sum_{j = 1}^n \abs{x_j}^2}$ - классическая евклидовская норма, $\norm{\overline{x}}_1 = \sum_{j = 1}^n \abs{x_j}$, $\norm{\overline{x}}_2 =
+max{\abs{x_1}, \abs{x_2}, \dots, \abs{x_n}}$.
+
+\smallskip 
+\noindent \textbullet~Тогда встает вопрос, чем отличаются топологии?
+
+
+\smallskip
+\noindent \textbullet~Например, рассмотрим пространство $\mathbb{R}^2$. Задана евклидовская норма $\norm{\overline{x}}_e = \sqrt{x^2_1 + x^2_2}$ 
+и норма $\norm{\overline{x}}_1 = \sum_{j = 1}^n \abs{x_j}$. Определим шар: $V_r(0) = \{ x_1^2 + x_2^2 < r\}$ по первой норме и квадрат по второй.
+
+\begin{tikzpicture}
+\begin{axis}[
+    xmin=-11,xmax=11,
+    ymin=-11,ymax=11,
+    grid=both,
+    grid style={line width=.1pt, draw=gray!10},
+    major grid style={line width=.2pt,draw=gray!50},
+    axis lines=middle,
+    minor tick num=4,
+    ticklabel style={font=\tiny,fill=white},
+    xlabel style={at={(ticklabel* cs:1)},anchor=north west},
+    ylabel style={at={(ticklabel* cs:1)},anchor=south west},
+    axis equal,
+    xlabel={$x$},
+    ylabel={$y$}
+]
+
+\coordinate (O) at (0,0);
+\node[fill=white,circle,inner sep=0pt] (O-label) at ($(O)+(-135:10pt)$) {$O$};
+\node[fill=white,circle,inner sep=0pt] (r-label) at (5,3) {$r$};
+
+\draw (axis cs: 5, 0) -- (axis cs: 0, 5);
+\draw (axis cs: 0, 5) -- (axis cs: -5, 0);
+\draw (axis cs: 5, 0) -- (axis cs: 0, -5);
+\draw (axis cs: -5, 0) -- (axis cs: 0, -5);
+
+\draw (O) circle [blue, radius=5];
+
+\draw (O) circle [blue, radius=3];
+\end{axis}
+\end{tikzpicture}
+
+\noindent \textbullet~В любом круге содержится квадрат, а в любом квадрате содержится соответствующий круг, а это сразу приводит к тому, что топология, порожденная
+первой нормой, просто совпадет с топологией, порожденной второй, т.е. они тождественны. $\tau_e = \tau_1$.
+
+\smallskip
+\noindent \textbullet~Пример топологий, которые не совпадают: $\int$ и $max$, описанные выше.
+
+\smallskip
+\noindent \textbullet~В пространствах одной и той же размерности топологии все одинаковы, какую бы норму не писали. Именно поэтому конечномерные пространства одной 
+размерности, они будут изоморфны друг другу.
+
+\subsection*{Эквивалентных нормы.}
+\noindent \textasteriskcentered~Пусть $X$ - линейное многообразие, на котором задано 2 нормы $\norm{\cdot}_1$, $\norm{\cdot}_2$. Они называются \textit{ эквивалентными} $\norm{\cdot}_1 \sim \norm{\cdot}_2$, 
+тогда и только тогда когда существует пара положительных констант ($a$, $b$ $> 0$), таких что для любого $x \in X$ будет выполняться неравенство $a \cdot \norm{\cdot}_1 \le 
+\norm{\cdot}_2 \le b \cdot \norm{\cdot}_1$.
+\[
+    \norm{\cdot}_1 \sim \norm{\cdot}_2 \Longleftrightarrow a \cdot \norm{\cdot}_1 \le \norm{\cdot}_2 \le b \cdot \norm{\cdot}_1
+\]
+
+\medskip
+\noindent Бинарное отношение эквивалентности:
+1) $a \sim a$;
+2) $a \sim b \Longleftrightarrow b \sim a$;
+3) $a \sim b, b \sim c \Rightarrow a \sim c$.
+
+\bigskip 
+\noindent \textbf{Проверим утверждение}. $\norm{\cdot}_1 \sim \norm{\cdot}_2 \Longleftrightarrow [x = \lim x_n (\norm{\cdot}_1) \Longleftrightarrow x = \lim x_n (\norm{\cdot}_2)]$.
+
+\begin{proof}
+
+\noindent \textbullet~$\norm{\cdot}_1 \sim \norm{\cdot}_2$, $a \cdot \norm{x}_1 \le \norm{x}_2 \le b \cdot \norm{x}_1$ $\Longleftrightarrow 
+a \cdot \norm{x_n - x}_1 \le \norm{x_n - x}_2 \le b \cdot \norm{x_n - x}_1 \Longleftrightarrow
+\lim \norm{x_n - x}_1 \to 0$, $\lim \norm{x_n - x}_2 \to 0$. Обратное доказывается точно так же.
+
+\smallskip 
+\noindent \textbullet~Докажем, что $\exists \; const \; a$. Для этого пойдем от противного: пусть $\nexists a $. Тогда $\forall n \in \mathbb{N} \; \exists x_n \in X : \dfrac{1}
+{n} \norm{x_n}_1 > \norm{x_n}_2$. Возьмем точку $y_n = \dfrac{x_n}{\norm{x_n}_1}$. Из полувшегося равенства $\norm{y_n}_2 < \dfrac{1}{n} \to 0 \Rightarrow y_n \to 0$ 
+по $\norm{\cdot}_2$. А тогда $y_n \to 0$ и по первой норме, однако $\norm{y_n}_1 = \dfrac{\norm{x_n}_1}{\norm{x_n}_1} = 1 \not\to 0$. Получили противоречие с тем, что 
+$y_n \to 0$ по первой $\norm{\cdot}_1$. Аналогично доказывается и для  $b$.
+\end{proof}

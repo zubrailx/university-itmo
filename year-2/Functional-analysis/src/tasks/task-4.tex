@@ -1,0 +1,113 @@
+\subsection*{Понятие предела на основе окрестности точки.}
+
+\noindent \textasteriskcentered~$O(a)$ - окрестность точки $a$. Под этим понимается: $\exists G \in \tau : a \in G \subset O(a)$.
+
+\smallskip
+\noindent \textbullet~Тогда $x = \lim x_n$ в ТП $\Longleftrightarrow \forall O(x) \; \exists M \in \mathbb{N} : \forall n \ge M \Rightarrow x_n \in O(x)$. Это и есть определение предела в абстрактном ТП.
+
+\medskip 
+\noindent \textbullet~В НП все базируется на шарах, тогда то определение, которое давалось в НП ($x = \lim x_n \Longleftrightarrow \norm{x_n - x} \to 0$) $\Longleftrightarrow (x = \lim x_n$ на языке окрестностей).
+
+\subsubsection*{Соотношение двойственности.}
+
+\noindent \textbullet~$\overline{\bigcup\limits_\alpha A_\alpha} = \bigcap\limits_\alpha \overline{A_\alpha}, \;\;\; \overline{\bigcap\limits_\alpha A_\alpha} = \bigcup\limits_\alpha \overline{A_\alpha}$ - соотношение двойственности.
+
+
+\subsection*{Важнейшие операции.}
+
+$\forall A \subset X$ - ТП
+
+\noindent \textasteriskcentered~Операция замыкания (closure): $Cl A = \bigcap_{A \subset F} F$ - замкн. Это наименьшее закрытое множество, в котором содержится $A$. Оно всегда не пусто.
+
+\noindent \textasteriskcentered~$Int A = \bigcup\limits_{G \subset A} G$ - откр. Это наибольшее открытое множество, которое содержится в $A$. Может быть пустым.
+
+\noindent \textasteriskcentered~$Fr A = Cl A \backslash Int A$ - граница.
+
+\begin{theorem*}
+    $X$ - НП, $A \subset X$, $Cl A = \{ x : \rho (x, A) = 0\}$, где $\rho(x, A) = \inf_{a \in A} \rho(x, a)$
+\end{theorem*}
+\begin{proof}
+Пусть $B = \{ x : \rho (x, A) = 0\}$. Докажем, что $B = Cl A$.
+
+\smallskip
+\noindent \textbullet~$b \in B, \rho (b, A) = 0$. Проверим, что если $F \supset A \Rightarrow b \in F$, а тогда как $Cl A = \bigcap F \Rightarrow b \in Cl A$.
+
+\smallskip
+\noindent \textbullet~Допустим, что это не так. Тогда $b \in \overline{F}$ - откр, т.к $F$ - замкнуто. Тогда $\exists V_r(b) \subset \overline{F}$.
+
+\smallskip
+\noindent \textbullet~Поскольку $A \subset F, A \cap \overline{F} = \emptyset$. $\rho(b, A) = 0$. Тогда $\forall n \in \mathbb{N} \; \exists a_n \in A : \rho(b, a_n) < \dfrac{1}{n}$ - по определению расстояния. При $n \to \infty$ $\dfrac{1}{n} \to 0$. Тогда $\exists n_0 : \dfrac{1}{n_0} < r$. $\rho(b, a_{n_0}) < \dfrac{1}{n_0} < r \Rightarrow a_{n_0} \in V_r(b) \Rightarrow a_{n_0} \in \overline{F}$. Противоречие. Доказали $B \subset Cl A$.
+
+\bigskip
+\noindent \textbullet~Проверим, что $Cl A \subset B$. Для этого должно быть $B$ - замкнутое множество, содержащее $A$. Тогда по определению замыкания получим $Cl A \subset B$.
+
+\smallskip
+\noindent \textbullet~$B = \{ x : \rho(x, A) = 0\}$. Если взять $x \in A \Rightarrow \rho(x, A) = 0 \Rightarrow x \in B$. Доказали $A \subset B$. Теперь проверим, что $B$ - замкнутое множество. Для этого проверим, что $\overline{B}$ - открытое множество. 
+
+\smallskip 
+\noindent \textbullet~Для доказательства последнего должно выполниться: $\forall b \in \overline{B} \; \exists V_r(b) \subset \overline{B}$.
+
+\smallskip 
+\noindent \textbullet~$b \in \overline{B} \Rightarrow \rho(b, A) > 0$. Само расстояние $= inf_{a \in A} \norm{b - a}$. Обозначим $d = \rho(b, A) > 0$. $\forall a \in A \Rightarrow \norm{b - a} \ge d > 0$. 
+
+\smallskip 
+\noindent \textbullet~Возьмем в качестве $r = \dfrac{d}{3}$ и рассмотрим шар $V_r(b)$. Для того, чтобы проверить, что он содержится во множестве $\overline{B}$ необходимо проверить следующее: $\forall c \in V_r(b) \; \rho(c, A) > 0$. Тогда эта точка содержится в $\overline{B}$.
+
+\smallskip 
+\noindent \textbullet~$d \le \rho(b, a) \le \rho(b, c) + \rho(c, a)$. Значит $\rho(c, a) \ge d - \rho(b, c)$. Точка $c$ взята внутри шара, значит: $d - \rho(b, c) > d - r = \dfrac{2}{3} d$.
+
+\smallskip 
+\noindent \textbullet~$\forall a \in A \Rightarrow \rho(c, a) \ge \dfrac{2}{3} d > 0 \Rightarrow \rho(c, A) \ge \dfrac{2}{3} d > 0$.
+\end{proof}
+
+\bigskip
+\noindent \textbullet~В нормированном пространстве $Cl A = \{ x : \rho(x, A) = 0\}$. $F$ - замкнутое $\Longleftrightarrow Cl F = F$.
+
+\smallskip 
+\noindent \textbullet~$F$ - замкнуто в НП $\Longleftrightarrow [x_n \in F$, $x = \lim x_n \Rightarrow x \in F]$.
+
+
+\subsection*{Классификация множеств по Бэру для операторов.}
+
+\noindent \textasteriskcentered~Классификация множеств в ТП по Бэру.
+
+\smallskip 
+\noindent \textasteriskcentered~$E \subset X$, $Cl E = X$, $E$ - всюдо плотное в X. Пример, $\overline{\mathbb{Q}} = \mathbb{R}$. Если $E$ - счетное, то само пространство $X$ называется \textit{сепарабельным}.
+
+\smallskip
+\noindent \textasteriskcentered~$E \subset X$, $Int Cl E = \emptyset$. Тогда $E$ называется нигде не плотным в $X$.
+
+\smallskip 
+\noindent \textasteriskcentered~$X = \bigcup\limits_{n = 1}^{\infty} E_n$ - объединение счетного числа нигде не плотных множеств $\Rightarrow X $ - \romannumeralcaps{1} категория Бэра. В противном случае - \romannumeralcaps{2} категория.
+
+\medskip 
+\noindent \textbullet~На языке шаров: $E$ - нигде не плотно в $X \Longleftrightarrow$ $\forall$ шаре $\overline{V} \; \exists \overline{V_1} \subset \overline{V} : \overline{V_1} \cap E = \emptyset$. То есть какого радиуса шар ни взять замыкание данного множества данный шар целиком не содержит - то есть всегда найдутся какие-то элементы из шара, которые не входят в замыкание данного множества. Как пример, на поле действительных чисел множество натуральных чисел нигде не плотно.
+
+\begin{theorem*}[Лемма Рисса о почти перпендикуляре]
+   $X$ - НП. $Y$ - собственное подпространство $X$ (замкнутое линейное многообразие). Тогда $\forall \epsilon \in (0, 1) \; \exists z_\epsilon :$ 1) $\norm{z_\epsilon} = 1$, 2) $\rho(z_\epsilon, Y) > 1 - \epsilon$.
+\end{theorem*}
+\begin{proof}
+
+\noindent \textbullet~$Y = Cl Y$, $\exists \hat{x} \notin Y$, $d = \rho(\hat{x} - Y) = \inf_{y \in Y} \norm{\hat{x} - y}$.
+
+\smallskip 
+\noindent \textbullet~Допустим, что $d = 0$. Тогда по определению $\inf$ $\forall n \in \mathbb{N} \; \exists y_n \in Y : \norm{\hat{x} - y_n} < \dfrac{1}{n} \rightarrow 0 \Rightarrow \hat{x} = \lim y_n, Y$ - замкнутое $\Rightarrow \hat{x} \in Y$. Противоречие. $\hat{x} \notin Y$. Таким образом установили, что $d > 0$.
+
+\smallskip 
+\noindent \textbullet~Возьмем $\epsilon \in (0, 1) \Rightarrow \dfrac{1}{1 - \epsilon} > 1 \Rightarrow \dfrac{1}{1 - \epsilon} \cdot d > d = \inf$.
+
+\smallskip 
+\noindent \textbullet~Тогда по определению $inf$ найдется $y_\epsilon \in Y : d \le \norm{\hat{x} - y_{\epsilon}} < \dfrac{1}{1 - \epsilon} d$.
+
+\smallskip 
+\noindent \textbullet~Положим $z_\epsilon = \dfrac{\hat{x} - y_\epsilon}{\norm{\hat{x} - y_\epsilon}}$. $\norm{z_\epsilon} = 1$.
+
+\smallskip 
+\noindent \textbullet~Возьмем $\forall y \in Y$ и оценим норму разности $\norm{z_\epsilon - y}$. $\norm{z_\epsilon - y} = \norm{\dfrac{\hat{x} - y_\epsilon}{\norm{\hat{x} - y_\epsilon}} - y} = \dfrac{\norm{\hat{x} - (y_\epsilon + \norm{\hat{x} - y_\epsilon}) y}}{\norm{\hat{x} - y_\epsilon}}$.
+
+\smallskip
+\noindent \textbullet~$(y_\epsilon + \norm{\hat{x} - y_\epsilon})\cdot y \in Y$ - линейное многообразие. Тогда числитель того, что выше $\ge d$: $\dfrac{\norm{\hat{x} - (y_\epsilon + \norm{\hat{x} - y_\epsilon}) y}}{\norm{\hat{x} - y_\epsilon}} \ge \dfrac{d}{\dfrac{1}{1- \epsilon} d} = 1 - \epsilon$.
+
+\smallskip
+\noindent \textbullet~$\forall y \in Y \Rightarrow \norm{z_\epsilon - y} \ge 1 - \epsilon \Rightarrow \rho(z_\epsilon, Y) \ge 1 - \epsilon$. Что и требовалось доказать.
+\end{proof}

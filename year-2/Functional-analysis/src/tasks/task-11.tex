@@ -1,0 +1,16 @@
+\begin{theorem*}[Бэр о категориях]
+Любое В-пространство является множеством \romannumeralcaps{2} категории в себе. 
+\end{theorem*}
+\begin{proof}
+\smallskip
+\par\noindent \textbullet~Для доказательства применим принцип вложенных шаров и докажем от противного. Допустим $X$ имеет \romannumeralcaps{1} категорию. Значит мы его 
+можем представить как $X = \bigcup\limits_1^\infty X_n$, где $X_n$ - нигде не плотное. 
+
+\noindent \textbullet~Возьмем $\forall \overline{V}$. Раз $X_1$ - нигде не плотное, то $\exists \overline{V_1} \subset \overline{V} : \overline{V}_1 \cap X_1 = \emptyset$.
+Теперь имея шар $\overline{V}_1$, принимая во внимание то, что $X_2$ - нигде не плотное, поэтому также $\exists \overline{V}_2 \subset \overline{V}_1 : \overline{V}_2 
+\cap X_2 = \emptyset$. И так далее по индукции $\overline{V}_{n + 1} \subset \overline{V}_n$. Тогда по принципу вложенных шаров: $\exists a \in \bigcap\limits_1^\infty 
+\overline{V}_n$.
+
+\noindent \textbullet~Так как $X = \bigcup\limits_1^\infty X_n$ $\exists n_0 : a \in X_{n_0}$, однако $a \in \overline{V}_{n_0}$. Получили противоречие с тем, что $X_{n_0} \cap 
+\overline{V}_{n_0} = \emptyset$.
+\end{proof}

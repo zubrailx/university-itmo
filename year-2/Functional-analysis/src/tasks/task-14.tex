@@ -1,0 +1,82 @@
+\subsection*{Ортонормальные системы.}
+
+\noindent \textasteriskcentered~$x \bot y$ - ортогональные, если $(x, y) = 0$.
+
+\smallskip
+\noindent \textbullet~В связи с ортогональностью, вводится понятиe ОНС (ортонормальная систем точек) - $\{ e_1, \dots, e_n, \dots \}$ в $X$ : $\norm{e_n} = 1$, $i \neq 
+j \Rightarrow e_i \bot e_j$. $(e_i, e_j) = \delta_{i, j}$, где $\delta_{i, j}$ - символ Кронекера, равный 1 тогда и только тогда когда $i \neq j$. Если взять пространство $l_2$, $e_n = (0, \dots, 0, 1, 0, \dots)$, где $1$ на $n$-ом месте, то тогда ${e_n}$ - ОНС в $l_2$.
+
+\smallskip 
+\noindent \textasteriskcentered~Пусть $\{e_n\}$ - ОНС, $\forall x \in X$ можно задать скалярное произведение $(x, e_n)$, обозначаемое как \textit{коэффициент Фурье} 
+$x$ по ОНС $\{e_n\}$.
+
+\smallskip 
+\noindent \textbullet~Пусть $X$ - НП, в котором заданы абстрактные ряды $\sum_{k = 1}^\infty x_k$, $S_n = \sum_{k = 1}^n x_k$ - частичная сумма.
+Тогда если $\exists S = \lim S_n$ в $X$, то $S$ - сумма ряда, а сам ряд сходится.
+
+\medskip
+\noindent \textbullet~Если $X$ - B-пространство, $\sum_{k = 1}^\infty \norm{x_k} < +\infty \Rightarrow \sum_{k = 1}^\infty x_k$ сходится в $X$.
+
+\medskip 
+\noindent \textasteriskcentered~Абстрактный ряд $\sigma(x) = \sum_{k = 1}^\infty (x, e_k) e_k$ называется \textit{рядом Фурье} точки $x$.
+
+\medskip 
+\noindent \textasteriskcentered~Пусть $X_n = V(e_1, \dots, e_n) = \{\sum_{k = 1}^\infty \alpha_k e_k, \alpha_k \in \mathbb{C} \}$ - линейная оболочка. $\forall x \in X$, 
+$E_{X_n}(x) = \inf_{y \in X_n}\norm{x - y}$ - \textit{наилучшее приближение}.
+
+\begin{theorem*}[Экстремальное свойство частичных сумм ряда Фурье\footnote{Доказательство этой теоремы можно также найти в книге Люстерника-Соболева на стр.82
+    (параграф 3, пункт 3.)}]
+Пусть $\{ e_n \}$ - ОНС, $S_n(x) = \sum_{k = 1}^n (x, e_k) e_k$ - частичная сумма. Тогда $E_{X_n}(x) = \norm{x - S_n(x)}$ - наилучшее приближение. Другими словами,
+частичная сумма ряда $S_n(x)$ будет наилучшим приближением $x$ ряда $S_n(x)$.
+\end{theorem*}
+
+\begin{proof}
+\smallskip
+\par\noindent \textbullet~$\forall y \in X_n$, $y = \sum_{k = 1}^n \alpha_k e_k$. Проверим, что $\norm{x - y} \to \min$ по $y \in X_n$, то этот минимум будет 
+достигаться на соответствующей сумме ряда Фурье $S_n(x)$.
+
+\smallskip
+\noindent \textbullet~Распишем $\norm{x - y}^2 = (x - y, x - y) = \norm{x}^2 - (x, y) - (y, x) + \norm{y}^2$ - делали для неравенства Шварца. Так как норма неотрицательна,
+то, взяв квадрат, соотношение никак не нарушится.
+
+\smallskip
+\noindent \textbullet~$\norm{y}^2 = (\sum_{k = 1}^n \alpha_k e_k, \sum_{k = 1}^n \alpha_k e_k) = \sum_{i, j = 1}^n \alpha_i \overline{\alpha_j}(e_i, e_j)$ (
+$(e_i, e_j) = 0 \Longleftrightarrow (i \neq j)$, иначе 1) $= \sum_{i = 1}^{n} \alpha_i \overline{\alpha_i}$.
+
+\smallskip
+\noindent \textbullet~$(x, y) = (x, \sum_1^n \alpha_j e_j) = \sum_1^n \overline{\alpha_j} (x, e_j)$. Обозначим коэф. Фурье $(x, e_j) = \beta_j$. 
+То есть $(x, y) = \sum_1^n \beta_j \overline{\alpha_j}$
+
+\smallskip
+\noindent \textbullet~$(y, x) = \sum_1^n \alpha_j (e_j, x) = \sum_1^n \overline{\beta_j} \cdot \alpha_j$.
+
+\smallskip 
+\noindent \textbullet~$\norm{x - y}^2 = \norm{x}^2 - \sum_1^n \beta_j \cdot \overline{\alpha_j} - \sum_1^n \overline{\beta_j} \cdot \alpha_j + \sum_1^n \alpha_j \cdot 
+\overline{\alpha_j}$.
+
+\smallskip 
+\noindent \textbullet~Заметим, что $\abs{\alpha_j - \beta_j}^2 = (\alpha_j - \beta_j) \cdot \overline{(\alpha_j - \beta_j)} = 
+(\alpha_j - \beta_j) \cdot (\overline{\alpha_j} - \overline{\beta_j}) = \alpha_j \overline{\alpha_j} - \beta_j \overline{\alpha_j} - 
+\overline{\beta_j} \alpha_j + \beta_j \overline{\beta_j} = \abs{\alpha_j}^2 - \beta_j \overline{\alpha_j} - \overline{\beta_j} \alpha_j + \abs{\beta_j}^2$
+
+\smallskip 
+\noindent \textbullet~$\norm{x - y}^2 = \norm{x}^2 - \sum_1^n \abs{\beta_j}^2 + \sum_1^n \abs{\alpha_j - \beta_j}^2 \to \min$ по $\alpha_j$. Минимум достигается при 
+$\alpha_j = \beta_j \Rightarrow \sum_1^n \abs{\alpha_j - \beta_j}^2 = 0$.
+
+\smallskip
+\noindent Можете убедиться, что $S_n(x) = \sum_{j = 1}^n (x, e_j) e_j$.
+\end{proof}
+
+\bigskip 
+\noindent\textbf{Следствие.} \textit{$E_{X_n}(x) = \norm{x}^2 - \sum_1^n \abs{(x, e_j)}^2$.}
+
+\begin{proof}
+Очевидно из последнего выведенного соотношения в теореме выше.
+\end{proof}
+
+\bigskip
+\noindent \textasteriskcentered~Так как само наилучшее приближение неотрицательно, то по правилу треугольника $\sum_1^n \abs{(x, e_j)}^2 \le \norm{x}^2$, $n \to \infty$.
+Данное неравенство называется \textbf{\textit{неравенством Бесселя}}.
+
+\smallskip
+\noindent \textbullet~Для того, чтобы данное неравенство обращалось в равенство, требуется полнота унитарного пространства $X$, как НП.

@@ -1,0 +1,61 @@
+\subsection*{Размерность.}
+
+\noindent \textasteriskcentered~Пусть $X$ - линейное многообразие, $e_1, \dots, e_n$ - линейно-независимые векторы в $X : V(e_1, \dots, e_n) = \{ \sum_1^n 
+\alpha_k e_k\}$\footnote{Чисто алгебраическое определение.}, где $V$ - линейная оболочка. Размерность $dim X = n$. Размерность отрезка = $1$, размерность квадрата - $2$.
+
+\medskip
+\noindent \checkmark~Есть еще понятие топологической размерности, но эта тема крайне трудная. Работы принадлежат Урысону (1930-е годы).
+
+\bigskip
+\begin{theorem*}[Фердинанд Рисс]
+Пусть $dim X < +\infty \Rightarrow$ все нормы в $X$ эквивалентны.
+\end{theorem*}
+
+\begin{proof}
+
+\noindent \textbullet~По условию в $X \; \exists e_1, \dots, e_n$ - линейно-нез. $: X = V(e_1, \dots, e_n)$, $\forall x \in X \Rightarrow$ Единственно($!$) $x = \sum_1^n 
+\alpha_k e_k$.
+
+\smallskip
+\noindent \textbullet~Иксу соответствуют числа $x \leftrightarrow (\alpha_1, \dots, \alpha_n)$. Пусть $\norm{x}$ - норма в $X$. Помимо нее определим $\norm{x}_0$ -
+как евклидовскую ($\sqrt{\sum_{k = 1} ^n \alpha_k^2}$).
+Если исходная норма будет эквивалентна той, которую мы построили, то по транзитивности этого отношения эквивалентности любые две нормы на $x$ 
+окажутся эквивалентными.
+
+\smallskip 
+\noindent \textbullet~По неравенству треугольника $\norm{x} \le \sum_1^n \abs{\alpha_k} \norm{e_k}$. По неравенству Гельдера, где $p = 2$: 
+$\sum_1^n \abs{\alpha_k} \norm{e_k} \le \sqrt{\sum_{k = 1}^{n} \norm{e_k}^2} \cdot \sqrt{\sum_{k = 1}^n \abs{\alpha_k}^2}$. 
+
+\smallskip
+\noindent \textbullet~$\sqrt{\sum_{k = 1}^n \abs{\alpha_k}^2} = \norm{x}_0$, $ \sqrt{\sum_{k = 1}^{n} \norm{e_k}^2}$ - некоторая константа, обозначим $b$. Таким образом,
+$\norm{x} \le b \norm{x}_0$.
+
+\medskip 
+\noindent \textbullet~Проверим $a \norm{x}_0 \le \norm{x}$. Для этого рассмотрим в $\mathbb{R}^n$ $f(\alpha_1, \dots, \alpha_n) = \norm{\sum_{k = 1}^n \alpha_k e_k}$.
+Проверим, что $f$ - непрерывна в $\mathbb{R}^n$.
+
+\smallskip
+\noindent \textbullet~$\abs{f(\overline{\alpha} + \Delta \overline{\alpha}) - f(\overline{\alpha})} = \abs{\norm{\sum \alpha_k e_k + \sum \Delta\alpha_k e_k} - 
+\norm{\sum \alpha_k e_k}} \le \norm{\sum \Delta \alpha_k e_k} \le \sum \abs{\Delta \alpha_k} \norm{e_k} \le b \cdot \norm{\Delta \overline{\alpha}}_0$.
+Получили $\abs{\Delta f(\overline{\alpha})} \le b \cdot \norm{\Delta \overline{\alpha}}_0 \Rightarrow f$ - непрерывна в $\mathbb{R}^n$.
+
+\smallskip 
+\noindent \textbullet~Рассмотрим единичную сферу в $\mathbb{R}^n$ : $S_1 = \{ \overline{\alpha} : \sum_{k = 1}^n \alpha_k^2 = 1\}$. В силу непрерывности $f$ по 
+т. Вейерштрасса в матанализе об экстремальных значениях непрерывной функции $\exists \overline{\alpha}^* \in S_1 : f(\overline{\alpha}^*) = 
+\min_{\overline{\alpha } \in S} f(\overline{\alpha}) = a$.
+
+\smallskip 
+\noindent \textbullet~Если допустить, что $a = 0$, то $f(\overline{\alpha}^*) = 0$, а тогда по формуле для $f$ $\norm{\sum \alpha^*_k e_k} = 0 \Rightarrow
+\sum \alpha^*_{k} e_k = 0$, а по линейной независимости $e_k \Rightarrow$ все $\alpha_k^* = 0$, а тогда эта точка не будет принадлежать сфере $\overline{\alpha}^* \notin
+S_1$, что противоречит тому, что мы брали точку на сфере. То есть $a > 0$.
+
+\smallskip
+\noindent \textbullet~$\forall x \in X$, $ x = \sum \alpha_k e_k$. Рассмотрим соответствующее значение функции $f$ на этих коэффициентах: $f(\overline{\alpha}) = 
+\norm{\sum \alpha_k e_k}$. Пусть $\beta_k = \dfrac{\alpha_k}{\norm{\overline{\alpha}}_e}$, $\sum \beta^2_k = \sum \dfrac{\alpha^2_k}{\norm{\overline{\alpha}}^2_e} = 1$
+ т.е $\overline{\beta} = (\beta_1, \dots, \beta_n) \in S_1$. Тогда $f(\overline{\beta}) \ge a$.
+
+\smallskip 
+\noindent \textbullet~Если записать тождество $f(\overline{\alpha}) = \norm{\overline{\alpha}}_e \cdot \norm{\sum \dfrac{\alpha_k}{\norm{\overline{\alpha}}_e} e_k} 
+= \norm{\overline{\alpha}}_e \cdot \norm{\sum \beta_k e_k}
+\ge \norm{\overline{\alpha}}_e \cdot a = \norm{x}_0 \cdot a$. $f(\overline{\alpha}) = \norm{x}$. Таким образом, получаем $\norm{x} \ge a \cdot \norm{x}_0$.
+\end{proof}

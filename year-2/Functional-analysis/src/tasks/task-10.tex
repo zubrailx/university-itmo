@@ -1,0 +1,23 @@
+\noindent \textasteriskcentered~Пусть $\overline{V}_n = \overline{V}_{r_n}(a_n) = \{ \norm{x - a_n} \le r_n\}$. Если последующий шар содержится в предыдущем
+$\overline{V}_{n + 1} \subset \overline{V}_{n}$, то тогда данная система называется \textit{вложенной}.  
+
+\medskip
+\noindent \textbf{Утверждение. }\textit{Пусть $\overline{V}_1 = \overline{V}_{r_1}(a_1)$, $\overline{V}_2 = \overline{V}_{r_2}(a_2)$ - замкнутые шары в $X$. Тогда $
+\overline{V}_1 \subset \overline{V}_2 \Longleftrightarrow \norm{a_2 - a_1} \le r_2 - r_1$}. 
+
+\begin{theorem*}[Принцип вложенных шаров]
+Пусть $X$ - В-пространство и пусть система шаров $\{ \overline{V}_n = \overline{V}_{r_n}(a_n)\}$ - вложенная. Тогда их пересечение не пустое $\bigcap\limits_1^\infty 
+\overline{V}_n \neq \emptyset$. 
+\end{theorem*}
+
+\begin{proof}
+\par\noindent \textbullet~По вложенности и предыдущему утверждению $\norm{a_n - a_{n + 1}} \le r_n - r_{n + 1} \Rightarrow 0 \le r_{n + 1} \le r_n$, то есть 
+последовательность $\{ r_n\}$ убывает и ограничена снизу, а тогда по т. Вейерштрасса о пределе монотонной последовательности $\exists r = \lim r_n$.
+
+\noindent \textbullet~В силу вложенности можем написать неравенства с произвольными индексами: $\norm{a_m - a_{m + p}} \le r_m - r_{m+p} \to 0 \; m, p \to \infty$, 
+а тогда последовательность центров $\{ a_n\}$ сходится в себе, а тогда по полноте $X$ $\exists a = \lim a_n$.
+
+\noindent \textbullet~Опять таки в силу вложенности $\overline{V}_{m + p} \subset \overline{V}_m \Rightarrow a_{m + p} \in \overline{V}_m$, который является замкнутым 
+множеством, поэтому если $p \to \infty$, то $a_{m + p} \to a \Rightarrow a \in \overline{V}_m$, а тогда в силу произвольности $m$: $a \in \bigcap\limits_1^\infty 
+\overline{V}_m$.
+\end{proof}

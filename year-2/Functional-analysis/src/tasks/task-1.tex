@@ -1,0 +1,93 @@
+\subsection*{Определение линейного пространства.}
+
+\noindent \textasteriskcentered~Пусть $E$ - абстрактное \textit{линейное пространство} на поле вещественных или комплексных чисел. Это означает, что в $E$ определены 2 операции:
+
+\romannumeralcaps{1}. Каждым двум элементам $x, y \in E$ поставлен в соответствие определенный элемент $x + y \in E$, называемый их \textit{суммой}.
+
+\romannumeralcaps{2}. Каждому элементу $x \in E$ и каждому числу (скаляру) $\lambda$ поставлен в соответствие определенный элемент $\lambda x \in E$ - \textit{произведение} элемента на скаляр $\lambda$ - так что выполнены следующие свойства (аксиомы) для любых элементов $x, y, z \in E$ и любых скаляров $\lambda \mu$:
+
+1) $x + y = y + x$;
+
+2) $x + (y + z) = (x + y) + z$;
+
+3) существует элемент $0 \in E$ такой, что $x + 0 = x$;
+
+4) существование обратного элемента: $x + y = 0,~y$ - обратный элемент.
+
+5) $\lambda(\mu x) = (\lambda \mu) x$;
+
+6) $1 \cdot x = x, \; 0 \cdot x = 0$ (слева 0 - скаляр, а справа элемент множества $E$);
+
+7) $\lambda (x + y) = \lambda x + \lambda y$;
+
+8) $(\lambda + \mu) x = \lambda x + \mu x$;
+
+\noindent В качестве числовых множителей (скаляров) $\lambda$, $\mu$, \dots в линейном пространстве берутся вещественные или комплексные числа. В первом случае $E$ называется \textit{вещественным} линейным многообразием, во втором - \textit{комплексным} линейным многообразием.
+
+
+\subsection*{Линейные многообразия.}
+
+\noindent \textasteriskcentered~Множество $\widetilde{E}$ в линейном пространстве $E$ называется \textit{линейным многообразием} (линейным множеством), если для любых $x, y \in \widetilde{E}$ и любых скаляров $\lambda, \mu$ линейная комбинация $\lambda x + \mu y \in \widetilde{E}$.
+
+\noindent \textbullet~Поскольку $\widetilde{E}$ является частью линейного пространства $E$, то из определения линейного многообразия $\widetilde{E}$ также само является пространством.
+
+
+\subsection*{Определение нормированного пространства и нормы.}
+
+\noindent \textasteriskcentered~Линейное пространство $E$ называется \textit{нормированным пространством} (НП), если каждому $x \in E$ поставлено в соответствие неотрицательное число $\norm{x} \in \mathbb{R}$ (норма $x$) так, что выполнены следующие аксиомы:
+
+\smallskip
+1) $\norm{x} \ge 0; \; \norm{x} = 0$ в том и только в том случае, когда $x = 0$ (строгая положительная определенность или условие невырожденности);
+
+2) $\norm{\lambda x} = \abs{\lambda} \cdot \norm{x}$ (однозначность или однородность);
+
+3) $\norm{x + y} \le \norm{x} + \norm{y}$ (неравенство треугольника);
+
+
+\subsection*{Метрическое пространство.}
+
+\noindent \textasteriskcentered~Множество $X$ называется \textit{метрическим пространством}, если каждой паре его элементов $x$ и $y$ поставлено в соответствие вещественное число $\rho(x, y) = \norm{x - y}$, называемое \textit{расстоянием} между элементами $x$ и $y$, удовлетворяющее аксиомам:
+
+\smallskip
+1) $\rho(x, y) \ge 0;\; \rho(x, y) = 0$ тогда и только тогда, когда $x = y$;
+
+2) $\rho(x, y) = \rho(y, x)$;
+
+3) $\rho(x, y) \le \rho(x, z) + \rho(z, y)$;
+
+
+\subsection*{Определение предела по норме.}
+\noindent \textasteriskcentered~Элемент $x_0 \in E$ называется \textit{пределом} последовательности $\{x_n\}$, если $\norm{x_n - x_0} \rightarrow 0$ при $n \rightarrow \infty$. Если $x_0$ есть предел $\{x_n\}$, то будем писать $x_0 = \lim_{n \to \infty} x_n$ или $x_n \to x_0$ при $n \to \infty$ и говорить, что последовательность \textit{сходится} к $x_0$.\footnote{Очевидно, все это можно переписать через расстояния.}
+
+
+\subsection*{Арифметика предела.}
+
+\hspace{\parindent}1) $\lim (x_n + y_n) = \lim x_n + \lim y_n$;
+
+2) $\lim (\alpha_n \cdot x_n) = \lim \alpha_n \cdot \lim x_n$;
+
+
+3) $\lim \norm{x_n} = \norm{\lim x_n}$;
+
+\medskip
+\begin{proofexpr*}
+$\lim (\alpha_n \cdot x_n) = \lim \alpha_n \cdot \lim x_n$
+\end{proofexpr*}
+
+\begin{proof}
+
+\noindent \textbullet~$\alpha = \lim \alpha_n, \; x = \lim x_n$.
+
+\smallskip
+\noindent \textbullet~$\norm{\alpha_n x_n - \alpha x} = \norm{(\alpha_n - \alpha) x_n +\alpha (x_n - x)} \le
+\norm{(\alpha_n - \alpha) x_n} + \norm{\alpha(x_n - x)} =
+\abs{\alpha_n - \alpha}\norm{x_n} + \abs{\alpha} \norm{x_n - x}$ 
+
+\smallskip
+\noindent \textbullet~$\abs{\alpha_n - \alpha} \to 0$, $\norm{x_n - x} \to 0$, $\norm{x_n}$ - ограничена. Тогда и все последнее выражение стремится к 0. Тогда и $\norm{\alpha_n x_n - \alpha x}$ стремится к 0.
+
+\smallskip 
+\noindent \textbullet~Отсюда получаем, что $\lim \alpha_n x_n = \alpha x$
+
+\end{proof}
+

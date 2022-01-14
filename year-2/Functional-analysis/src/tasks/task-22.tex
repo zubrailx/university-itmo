@@ -1,0 +1,71 @@
+\subsection*{Линейные оператор. Непрерывность. Ограниченность.}
+
+\noindent\textasteriskcentered~Пусть $X, Y$ - НП, $A : X \rightarrow Y$ - отображение $X$ в $Y$, удовлетворяющее условию $A(\alpha x_1 + \beta x_2) = \alpha A x_1 + 
+\beta A x_2$.  В этом случае говорят, что $A$ - \textit{линейный оператор}. Так как пространства нормированные, то можно говорить о непрерывности линейного оператора, 
+что означает $x_n \to x \Rightarrow A_{x_n} \to A x$. Тогда говорят, что линейный оператор непрерывен в точке $x$. 
+
+\smallskip
+\noindent\textbullet~За счет линейности, если оператор непрерывен хотя бы в
+одной точке, тогда он будет непрерывен и в любой точке. Пусть $A$ - \textit{непрерывен} в $x^*$, это означает, что если $x_n \to x^* \Rightarrow A x_n \to A x^*$. По арифметике
+предела это означает, что $A x_n - A x^* \to 0$. По линейности оператора $A x_n - A x^* = A(x_n - x^*)$. Так как $x_n \to x^* \Rightarrow 
+x_n - x^* \to 0$, тогда получается $A(x_n - x^*) \to 0$, что равно $A 0$ - значение оператора в нуле. Таким образом, из непрерывности в одной точке будет вытекать
+непрерывность в нуле, а значит и в любой точке. 
+
+\smallskip
+\noindent\textbullet~Пояснение про нуль. Пусть $z_n \to 0 \Rightarrow A z_n \to A 0 = 0$. 
+Поскольку $0 = \alpha 0$, тогда $A 0 = A(\alpha 0) = \alpha A(0)$. Тогда получится, что равенство $A(0) = \alpha A(0)$ верно при $\forall \alpha \Rightarrow A(0) = 0$.
+Если знаем, что из $z_n \to 0 \Rightarrow A z_n \to 0$, тогда возьмем $\forall x \in X$, $x_n \to x \Rightarrow x_n - x \to 0$, тогда по непрерывности в нуле $A(x_n - x) \to 0$. По
+линейности оператора $A(x_n - x) = A x_n - A x \to 0 \Longleftrightarrow A x_n \to Ax$ - значит линейный оператор непрерывен в точке $x$. Итого, линейный оператор
+непрерывен в точке $x$ $\Longleftrightarrow$ оператор непрерывен в $0$.
+
+\smallskip
+\noindent\textasteriskcentered~Если $\exists M$ - $const > 0 : \forall x \in X \Rightarrow \norm{Ax} \le M \cdot \norm{x} \Rightarrow$ $A$ - \textit{ограниченный} оператор. 
+
+\begin{theorem*}
+    Линейный оператор $A$ - непрерывен $\Longleftrightarrow$ $A$ - ограничен
+\end{theorem*}
+\begin{proof}
+\smallskip
+\par\noindent\textbullet~Пусть оператор $A$ ограничен $\Rightarrow \norm{A x} \le M \cdot \norm{x}$. Если $x_n \to 0$, то написав неравенство $\norm{A x_n} \le 
+M \cdot \norm{x_n}$ можно заметить, что правая часть $ \to 0$ $\Rightarrow \norm{A x_n} \to 0 \Rightarrow A x_n \to 0$. Таким образом, из ограниченности оператора 
+вытекает непрерывность в нуле, а значит и в любой точке тоже.
+
+\medskip
+\noindent\textbullet~Пусть $A$ - непрерывен, допустим, что он не ограничен. Тогда $\forall n \in \mathbb{N}$ всегда $\exists x_n \in X : \norm{A x_n} > n \cdot 
+\norm{x_n}$. Значит отсюда получится по линейности оператора и свойствам нормы $\norm{A \left( \dfrac{x_n}{n \cdot \norm{x_n}}\right)} > 1$. Если рассмотреть точки 
+$y_n = \dfrac{x_n}{n \cdot \norm{x_n}}$, то очевидно окажется, что $\norm{y_n} = \dfrac{1}{n} \to 0$. Таким образом, $y_n \to 0 \Rightarrow$ по непрерывности 
+$A y_n \to 0$, однако у нас выполняется неравенство $\norm{A y_n} > 1$, что противоречит тому, что $A y_n \to 0$. Значит оператор ограничен.
+\end{proof}
+
+\subsection*{Норма оператора. Аксиомы нормы.}
+
+\noindent\textasteriskcentered~Для ограниченных операторов, если $\norm{x} \le 1$, то так как $\norm{A x} \le M \cdot \norm{x} \le M$, то тогда получаем, что $\sup \norm{A x}$ на 
+единичном шаре конечен: $\sup_{\norm{x} \le 1} \norm{A x} < + \infty$. Эта величина называется \textit{нормой оператора} и обозначается $\norm{A}$. То есть $\norm{A} = 
+\sup_{\norm{x} \le 1} \norm{A x}$. Если взять $\forall x \in X$, то точка $\dfrac{x}{\norm{x}}$ будет иметь единичную норму, то тогда по определению нормы оператора 
+$\norm{A (\dfrac{x}{\norm{x}})} \le \norm{A}$, так как $\norm{x} \le 1$. С другой стороны $\norm{A (\dfrac{x}{\norm{x}})} = \dfrac{1}{\norm{x}} \cdot \norm{A x}$. А тогда получится, $\norm{A x} 
+\le \norm{A} \cdot {\norm{x}} \; \forall x \in X$.
+
+\medskip
+\noindent\textbullet~Проверим, что $\norm{A}$ удовлетворяет всем аксиомам нормы на линейном многообразии. Рассмотрим линейное многообразие ограниченных операторов $V(X, Y)
+= \{ A $ - линейный ограниченный оператор $: X \to Y\}$ ($V$ - знак линейной оболочки). Арифметические действия с операторами определяем поточечно: $(\alpha A)(x) = \alpha \cdot A(x)$, $(A + B)(x) = 
+A x + B x$, при этом каждый раз будут получаться ограниченные операторы. Действительно если начать смотреть $\norm{(A + B) \cdot x} = \norm{A x + B x} \le \norm{A x} + 
+\norm{B x}$, а так как операторы $A, B$ ограничены, то $\norm{A x} + \norm{B x} \le \norm{A} \norm{x} + \norm{B} \norm{x} = (\norm{A} + \norm{B}) \cdot \norm{x}$ = $const
+\cdot \norm{x}$, значит оператор ограничен. В частности, если $\norm{x} \le 1 \Rightarrow \norm{(A + B) \cdot x} \le \norm{A} + \norm{B}$. Переходя к $\sup$ по $\norm{x}
+\le 1 \Rightarrow \norm{A + B} \le \norm{A} + \norm{B}$ - доказали неравенство треугольника.
+
+\medskip
+\noindent\textbullet~Докажем аксиому $\norm{\alpha A} = \abs{\alpha}\norm{A}$. Считаем, что $\norm{x} \le 1$, вычисляем $\norm{(\alpha A)x} = \norm{\alpha A x} = 
+\abs{\alpha} \cdot \norm{A x} \le \abs{\alpha} \cdot \norm{A}$. Таким образом, получили $\norm{\alpha A} \le \abs{\alpha} \cdot \norm{A}$.
+
+\smallskip
+\noindent\textbullet~Проверим противоположное неравенство. Запишем тождество $\norm{A} = \norm{\alpha (\dfrac{1}{\alpha} A)}$. В силу только что доказанного неравенства
+подставляем $\dfrac{1}{\alpha}: \norm{\alpha (\dfrac{1}{\alpha} A)} \le \dfrac{1}{\abs{\alpha}} \cdot \norm{\alpha A} \Rightarrow \abs{\alpha} \cdot \norm{A} \le  
+\norm{\alpha A}$. Получили противоположное неравенство, значит $\abs{\alpha} \cdot \norm{A} = \norm{\alpha A}$. Проверили вторую аксиому. Первая аксиома очевидна. 
+
+\medskip 
+\noindent\textbullet~Теперь можно вести разговор о линейном многообразии ограниченных оператор. В этом многообразии величина $\norm{A} = \sup_{\norm{x} \le 1} \norm{A x}$
+задает норму. И значит наше линейное многообразие превращается в линейное нормированное пространство. Значит мы можем говорить об операторе $A = \lim A_n$, понимая под 
+этим тот факт, что $\norm{A_n - A} \to 0$, то есть $\forall \epsilon > 0 \; \exists N : \forall n \ge N \Rightarrow \norm{A_n - A} \le \epsilon$. Норма разности - 
+$\sup_{\norm{x} \le 1} \norm{A_n x - A x}$, а тогда получается, что $\norm{A_n - A} \to 0$ можно перезаписать в форме $\forall \epsilon > 0 \; \exists N : \forall n \ge 
+N$ и $\forall x : \norm{x} \le 1 \Rightarrow \norm{A_n x - A x} \le \epsilon$. Последнее поточеное неравенство должно выполняться сразу для всех иксов для единичного 
+шара, начиная с какого-то номера.

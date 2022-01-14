@@ -1,0 +1,39 @@
+\subsection*{Основные определения.}
+\noindent \textasteriskcentered~Пусть $A \subset X$, $a \in X$. Тогда имеет место $\rho(a , A) = \inf_{b \in A} \norm{a - b}$. Существенный интерес представляет случай, 
+когда $A$ - линейное подпространство $X$: пусть $Y$ - подпространство $X$, $\forall x \in X$ $E_Y(x) = \rho(x, Y)$ - \textit{наилучшее приближение $x$ подпространством
+$Y$}. Если при этом $\exists y^* \in Y : E_Y(x) = \norm{x - y^*}$, то тогда $y^*$ - элемент наилучшего приближения $x$ подпространтсовм $Y$. Сам элемент может и не существовать.
+
+\smallskip
+\noindent \textasteriskcentered~Легко проверить, что $E_Y$ - \textit{полунорма} на $X$, т.е:
+
+1) $E_Y(x) \ge 0$;
+
+2) $E_Y(\alpha x) = \abs{\alpha} E_Y(x)$;
+
+3) $E_Y(x_1 + x_2) \le E_Y(x_1) + E_Y(x_2)$.
+
+\begin{theorem*}[Борель]
+   Пусть $X$ - НП, $dim Y < + \infty \Rightarrow  \forall x \in X$ в $Y$ существует элемент наилучшего приближения $y^*$. 
+\end{theorem*}
+
+\begin{proof}
+
+\noindent \textbullet~Рассмотрим $E_Y(x) = \inf_{y \in Y} \norm{x - y}$. Необходимо доказать, что $\exists y^* \in Y : E_Y(x) = \norm{x - y^*}$.
+
+\smallskip
+\noindent \textbullet~$Y = V(e_1, \dots, e_n)$ - линейная оболочка. Тогда рассмотрим $y = \sum_{k = 1}^{n} \alpha_k e_k$, а также функцию $f(\overline{\alpha}) = 
+\norm{x - \sum_{k = 1}^{n} \alpha_k e_k}$. Также как при доказательстве теоремы Рисса проверяем непрерывность $f$ в $\mathbb{R}^n$. Обозначим для удобства $d = E_Y(x)$
+и проверим, что вне некоторого замкнутого шара $\overline{V}_r(\overline{O})$ значение $f(\overline{\alpha}) \ge d + 1$. Если это сделать, то тогда достаточно искать инфиум функции в пределах этого
+шара: $d = inf_{\overline{V} (\overline{O})} f(\overline{\alpha})$, где сам шар по теореме Рисса ограниченное замкнутое множество в $\mathbb{R}^n$, функция $f$
+непрерывна на нем, а тогда по т. Вейерштрасса $\exists \overline{\alpha}^* \in \overline{V}_r(\overline{O}) : d = f(\overline{\alpha}^*)$, а тогда в качестве элемента 
+наилучшего приближения мы и возьмем эту точку $y^* = \sum_{k = 1}^{n} \alpha_k^* e_k$ и теорема будет доказана. 
+
+\smallskip 
+\noindent \textbullet~$\norm{x - \sum_{k = 1}^{n} \alpha_k e_k} \ge d + 1$, где слева формула для $f$. $\norm{x - \sum_{k = 1}^{n} \alpha_k e_k} \ge
+\norm{\sum \alpha_k e_k} - \norm{x}$, а тогда достаточно проверять неравенство $\norm{\sum \alpha_k e_k} \ge \norm{x} + d + 1$.
+
+\smallskip 
+\noindent \textbullet~В силу эквивалентности норм в конечномерном пространстве для некоторой константы $a > 0$ можно написать неравенство $\norm{\sum \alpha_k e_k} \ge 
+a \sqrt{\sum \alpha_k^2} = a \cdot \norm{\overline{\alpha}}_0$ по т. Рисса, а тогда достаточно проверить $\norm{\overline{\alpha}}_0 \ge \dfrac{\norm{x} + d + 1}{a}$.
+Тогда если обозначить $\dfrac{\norm{x} + d + 1}{a} = r$, то шар такого радиуса есть требуемый. Таким образом теорема доказана.  
+\end{proof}

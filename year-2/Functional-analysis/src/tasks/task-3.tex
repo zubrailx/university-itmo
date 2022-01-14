@@ -1,0 +1,116 @@
+\subsection*{Метрическое пространство.}
+
+\noindent \textasteriskcentered~Множество $X$ называется \textit{метрическим пространством}, если каждой паре его элементов $x$ и $y$ поставлено в соответствие вещественное число $\rho(x, y) = \norm{x - y}$, называемое \textit{расстоянием} между элементами $x$ и $y$, удовлетворяющее аксиомам:
+
+\smallskip
+1) $\rho(x, y) \ge 0;\; \rho(x, y) = 0$ тогда и только тогда, когда $x = y$;
+
+2) $\rho(x, y) = \rho(y, x)$;
+
+3) $\rho(x, y) \le \rho(x, z) + \rho(z, y)$;
+
+\smallskip
+\noindent таким образом, метрические пространства можно считать обобщениями нормированных пространств.
+
+
+\subsection*{Шары в нормированном пространстве.}
+
+\noindent \textasteriskcentered~Рассмотрим в нормированном пространстве $E$ множество $V_r(x_0) = 
+\{x \in E : \norm{x - x_0} < r\}$, где $x_0 \in E$ - фиксированная точка, а $r > 0$.
+Множество $V_r (x_0)$ называется \textit{открытым шаром} с центром в $x_0$.
+
+\smallskip
+\noindent \textasteriskcentered~Аналогично, множество $\overline{V_r}(x_0) = \{x \in E : \norm{x - x_0} \le r\}$ называется \textit{замкнутым шаром}.
+
+\smallskip
+\noindent \textasteriskcentered~Множество $\sigma_r(x_0) = \{x \in E : \norm{x - x_0} = r\}$ называется \textit{сферой}.
+
+\smallskip
+\noindent \textbullet~$\overline{V_r}(x_0) = \sigma_r(x_0) + V_r(x_0)$
+
+\bigskip
+\noindent\textbf{Теорема. (Основное свойство шаров)} 
+Пусть $b \in V_1 \cap V_2 \Rightarrow \exists V_r(b) \subset V_1 \cap V_2$.
+
+\noindent Простыми словами: Если два открытых шара пересекаются, то для любой точки из их пересечения существует открытый шар, лежащий в пересечении и содержащий эту точку.
+
+\begin{proof}
+
+\noindent Замечание. Для $X = \mathbb{R}$ утверждение очевидно (пересечение двух интервалов есть интервал).
+
+\smallskip
+\noindent \textbullet~Так как $b \in V_1 \cap V_2 \Rightarrow \norm{b - a_j} < r_j$, 
+$j \in \{1, 2\}$.
+
+\smallskip
+\noindent \textbullet~Положим $r = \min\{r_j - \norm{b - a_j}\} > 0$.
+
+\smallskip
+\noindent \textbullet~$x \in V_r(b)$.
+
+\smallskip
+\noindent \textbullet~$\norm{x - a_j} = \norm{(x - b) + (b - a_j)} \le 
+\norm{x - b} + \norm{b - a_j} < r + \norm{b - a_j} \le (r_j - \norm{b - a_j}) + \norm{b - a_j} \le 
+r_j$.
+
+\end{proof}
+
+
+\subsection*{Открытые множества.}
+
+\noindent \textasteriskcentered~Множество $G \subset X$ называется \textit{открытым} в нормированном\footnote{В общем случае метрическом тоже можно считать. Все идентично.} пространстве, если его можно записать как некоторое объединение открытых шаров (в общем случае объединение может состоять из несчетного числа шаров).
+
+\smallskip
+$\tau$ - класс открытых множеств.
+
+\smallskip
+$\tau = \{ G = \bigcup\limits_\alpha V_\alpha\}$, G - открытые в НП $(X, \norm{\cdot})$.
+
+
+\subsubsection*{Свойства открытых множеств.}
+
+\noindent 1)~$X, \emptyset \in \tau$ - все пространство и пустое множество открыты;
+
+\noindent 2)~$G_\alpha \in \tau, \; \alpha \in A \Rightarrow \bigcup\limits_{\alpha \in A} G_\alpha \in \tau$;
+
+\noindent 3)~$G_1, \dots, G_n \in \tau \Rightarrow \bigcap\limits_{j = 1} G_j \in \tau$
+
+\begin{proofexpr*}
+    Доказательство 3 свойства.
+\end{proofexpr*}
+\begin{proof}
+Докажем для двух множеств, тогда по индукции можно будет доказать и для $n$.
+
+\smallskip
+\noindent \textbullet~$G_1 = \bigcup\limits_{\alpha} V_\alpha$; $G_2 = \bigcup\limits_{\beta} V_\beta$
+
+\smallskip
+\noindent \textbullet~$G_1 \cap G_2 = \bigcup\limits_{\alpha, \beta} (V_\alpha \cap V_\beta)$
+
+\smallskip
+\noindent \textbullet~По основному свойству шаров: $b \in V_\alpha \cap V_\beta \Rightarrow \exists V(b) \subset 
+V_\alpha \cap V_\beta$.
+
+\smallskip
+\noindent \textbullet~Следовательно $V_\alpha \cap V_\beta$ - объединение открытых шаров $\Rightarrow$ $G_1 \cap G_2$ - тоже объединение открытых шаров $\Rightarrow$ $G_1 \cap G_2 \in \tau$ по свойству 2.
+\end{proof}
+
+\noindent \textasteriskcentered~Класс $\tau$ называется (нормированной) \textit{топологией} на множестве $X$. Тогда пара $(X, \tau)$ называется \textit{топологическим
+пространством}. Нормированное пространство - частный случай топологического пространства.
+
+
+\subsection*{Замкнутые множества.}
+
+\noindent \textasteriskcentered~Множество $F$ называется замкнутым в НП $(X,\norm{\cdot})$, если $\overline{F} = X \backslash F$ — открыто.
+
+\smallskip
+\noindent \textbullet~Применяя закон де Моргана, видим что класс открытых множеств $\tau$ двойственен классу замкнутых множеств.
+
+
+\subsubsection*{Свойства замкнутых множеств.}
+
+\noindent 1)~$X, \emptyset$ - замкнуты;
+
+\noindent 2)~Если $F_\alpha$ - замкнуто,$ \; \forall a \in A$, то $\bigcap\limits_{\alpha \in A} F_\alpha$ - замкнуто;
+
+\noindent 3)~Если $F_1, \dots, F_n$ - замкнуты, то $\Rightarrow \bigcup\limits_{j = 1}^n F_j$ - замкнуто.

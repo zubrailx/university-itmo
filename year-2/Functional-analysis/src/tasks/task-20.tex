@@ -1,0 +1,54 @@
+\subsection*{Пространство $l_p$.}
+
+\noindent\checkmark~Если рассматривать конкретные В-пространства, то базируясь на теореме Хаусдорфа, то есть записываю ее в терминах этого конкретного пространства, 
+можно получать конструктивные критерии компактности в этих пространсвах. Рассмотрим пространство $l_p$.
+
+\smallskip 
+\noindent\textbullet~$l_p = \{ \overline{x} = (x_1, x_2, \dots) : \sum_1^\infty \abs{x_k}^p < +\infty\}, \; p \ge 1$. Норма $\norm{\overline{x}}_p = \left( \sum_1^\infty 
+\abs{x_k}^p\right)^\frac{1}{p}$. Это пространство Банахово. 
+
+\begin{theorem*}
+Пусть $K \subset l_p$. Тогда $K$ - относительный компакт $\Longleftrightarrow$ :
+
+\smallskip
+1)~$K$ - ограничена в  $l_p$;
+
+\smallskip 
+2)~$\forall \epsilon > 0 \; \exists n_\epsilon \in \mathbb{N} : \forall \overline{x} = (x_1, x_2, \dots) \in K \Rightarrow \sum_{k = n_\epsilon + 1}^\infty \abs{x_k}^p \le 
+\epsilon^p$.
+
+\end{theorem*}
+
+\begin{proof}
+\smallskip\par\noindent\textbullet~Пусть $K$ - относительный компакт в $l_p$. $K$ - ограничен, поскольку это общий факт нормированных пространств. Проверим свойство 2. 
+По т.~Хаусдорфа $\forall \epsilon > 0$ у $K \; \exists$ конечная $\epsilon$-сеть, состоящая из точек $\overline{b}_1, \dots, \overline{b}_p$, $\overline{b_j} = (b_1^{(j)},
+b_2^{(j)}, \dots)$. Возьмем $\forall \overline{x} \in K$, подбираем соответствующую $\overline{b_j} : \norm{\overline{x} - \overline{b_j}}_p \le \epsilon$. 
+
+\smallskip 
+\noindent\textbullet~Рассмотрим сумму: (3) - неравенство Минковского
+\begin{align*}
+    \left( \sum_{k = n}^\infty \abs{x_k}^p\right)^\frac{1}{p} = \left( \sum_{k = n}^\infty \abs{(x_k - b_k^{(j)}) + b_k^{(j)}}^p \right)^\frac{1}{p} \le 
+    \left( \sum_{k = n}^\infty \left(\abs{(x_k - b_k^{(j)})} + \abs{b_k^{(j)}}\right)^p \right)^\frac{1}{p} \le^{(3)} 
+    \left( \sum_{k = n}^\infty \abs{(x_k - b_k^{(j)})}^p\right)^\frac{1}{p} + \\ \left(\sum_{k = n}^\infty \abs{b_k^{(j)}}^p \right)^\frac{1}{p} \le 
+    \norm{\overline{x} - \overline{b}_j}_p + \left(\sum_{k = n}^\infty \abs{b_k^{(j)}}^p \right)^\frac{1}{p} 
+\end{align*}
+
+\noindent\textbullet~$\norm{\overline{x} - \overline{b}_j}_p \le \epsilon$, поскольку $\overline{b}_j \in l_p$, то $\sum_{k = 1}^\infty \abs{b_k^{(j)}} < + \infty$ - 
+сходится, то и хвост ряда $\left(\sum_{k = n}^\infty \abs{b_k^{(j)}}^p \right)^\frac{1}{p} \to 0$, $n \to \infty$. А значит $\forall n \ge N_j$ сумма ряда $ \sum_{k = n}^\infty \abs{b_k^{(j)}}^p \le \epsilon^p$, а тогда если взять номер $n_\epsilon = N_1 + \dots + N_p + 10$, где 10 - произвольное число $\Rightarrow n_\epsilon \ge N_j$,
+а тогда для этого номера $\forall j = \overline{1, p}$ суммы $\sum_{k = n_\epsilon}^\infty \abs{b_k^{(j)}}^p \le \epsilon^p$, а тогда если в
+$\left(\sum_{k = n}^\infty \abs{b_k^{(j)}}^p \right)^\frac{1}{p}$ подставить вместо $n$ $n_\epsilon$, то тогда получится, что мы взяли $\forall x \in K$ и нашли номер $n_\epsilon : \sum_{k = n_\epsilon}^\infty \abs{x_k}^p \le 2 \epsilon$. Доказали необходимое условие.
+
+\medskip 
+\noindent\textbullet~Докажем достаточность. Не умаляя общности считаем, что $p = 1$. Установим, что из свойств 1, 2 вытекает вполне ограниченное множество $K$. Тогда по т.~Хаусдорфа $K$ будет относительно 
+компактно. По свойству 1 $\exists const \; a > 0 : \norm{\overline{x}}_1 \le a$ для $\forall x \in K$. Однако $\abs{x_j} \le \norm{\overline{x}}_1 \Rightarrow K$ - 
+покоординатно ограничено. Пусть $M$ - натуральное число из условия 2. Обозначим $S$ - конечное множество точек $\overline{y}_j$ из $l_1$ вида $y_{M + 1}^{(j)} = 
+y_{M+2}^{(j)} = \dots = 0$, а при $i = \overline{1, M}$ $y_i^{(j)}$ одна из точек $a_s$ разбиения $[-a, a]$ на конечное число частей длиной не больше $\frac{\epsilon}{M}$.
+
+\smallskip
+\noindent\textbullet~Теперь для $\forall \overline{x} = (x_1, x_2, \dots) \in K$ будет $:$ если $i = \overline{1, M}$, то покоординатной ограниченности $x_i \in [-a, a]$ 
+а значит $\exists a_s : \abs{x_i - a_s} \le \frac{\epsilon}{M}$. При $i > M$ все $y_i^{(j)} = 0 \Rightarrow \abs{x_i - y_i^{(j)}} = \abs{x_i}$. Имеем $\norm{\overline{x} -
+\overline{y}_j}_1 = \sum_{i = 1}^M \abs{x_i - y_i^{(j)}} + \sum_{i = M + 1}^\infty \abs{x_i} \le \sum_{i = 1}^M \frac{\epsilon}{M} + \epsilon = 2 \epsilon$.
+
+\smallskip
+\noindent\textbullet~Поэтому $S$ - конечная $2\epsilon$-сеть для $K$.
+\end{proof}

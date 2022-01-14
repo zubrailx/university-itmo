@@ -1,0 +1,28 @@
+\noindent\textbf{Утверждение.}\textit{ Пусть $X$ - НП, $Y$ - B-пространство. Тогда пространство линейных ограниченных операторов из $X$ в $Y$ $V(X, Y)$ будет 
+B-пространством.}
+
+\begin{proof}
+\smallskip
+\par\noindent\textbullet~Необходимо убедиться в том, что $A_n - A_m \to 0$ в $V(X, Y) \Rightarrow \exists A \in V(X, Y) : A_n \to A$, тогда пространство будет Банаховым.
+
+\smallskip
+\noindent\textbullet~Так как $A_n - A_m \to 0$, то тогда $\forall \epsilon \; \exists N : \forall n, m \ge N, \forall x : \norm{x} \le 1 \Rightarrow \norm{A_n x - A_m x} 
+\le \epsilon$. 
+
+\smallskip
+\noindent\textbullet~Также можем написать, что $\forall x \in X \norm{A_n x - A_m x} \le \norm{A_n - A_m} \cdot \norm{x} \le \epsilon \cdot \norm{x}$ по свойствам нормы.
+
+\smallskip
+\noindent\textbullet~Из последнего неравенства видно, что $\forall x$ последовательность $\{ A_n x\}$ сходится в себе в $Y$, а так как $Y$ - полное пространство, то 
+тогда у такой последовательности 
+должен $\exists \lim A_n x$ в $Y$. Обозначим этот предел $A x$ и проверим, что оператор $A$ ограничен и является пределом оператора $A_n$. Если мы это проверим, тогда 
+у сходящейся последовательности операторов будет существовать предел. 
+
+\smallskip
+\noindent\textbullet~Имеется неравенство $\norm{A_n x - A_m x} \le \epsilon$ $\forall \epsilon > 0$ c $N$ и $\forall x : \norm{x} \le 1$ - на единичном шаре. Устремим 
+$n \to \infty \Rightarrow A_n x \to A x$ по определению оператора $A$, а тогда по свойствам предела $\norm{A x - A_m x} \le \epsilon \; \forall \epsilon > 0, \forall m 
+\ge N, \forall x : \norm{x} \le 1$. Отсюда получается $\norm{A x} = \norm{(A x - A_m x) + A_m x} \le \norm{A x - A_m x} + \norm{A_m x}$. Если взять, например, $\epsilon 
+> 1$, то нашлось бы $N$, такое что $m > N, \norm{x} \le 1$, а тогда из получившегося неравенства $\norm{A x} \le 1 + \norm{A_{m_0}} \Rightarrow \norm{A} \le 1 + \norm{A_{m_0}}$, 
+а значит она конечна и оператор окажется ограниченным. Тогда если вернуться к факту $\norm{A - A_m} \le \epsilon$ $\forall m \ge N$, это будет однозначно обозначать, что
+$A = \lim A_m$ в пространстве $V(X, Y)$, а значит оно окажется полным.
+\end{proof}

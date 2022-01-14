@@ -1,0 +1,69 @@
+\subsection*{Определение B-пространства.}
+
+\noindent \textasteriskcentered~Последовательность $\{x_n\}$ элементов метрического пространства $X$ называется \textit{сходящейся к себе}, если для любого числа
+ $\epsilon > 0$ найдется номер $n_0(\epsilon) : \rho(x_n, x_m) < \epsilon$ при $n, m \ge n_0(\epsilon)$.
+
+\smallskip
+\noindent \checkmark~Пусть $\mathbb{R}$. Есть критерий Коши существования предела числовой последовательности, в котором говорится: 
+$\exists \lim a_n \Longleftrightarrow \lim (a_n - a_m) = 0$. Важным классом нормированных пространств являются те из них, в которых абстрактный вариант критерий 
+Коши реализуется.
+
+\smallskip
+\noindent \checkmark~Из того факта, что $\exists a = \lim a_n$ сразу вытекает $\lim(a_n - a_m) = 0$. Достаточно написать: $\norm{a_n - a_m} = 
+\norm{(a_n - a) + (a - a_m)} \le \norm{a_n - a} + \norm{a - a_m} \to 0$. Таким образом, если $\{ a_n \}$ в $X$ сходится $\Longleftrightarrow$ она будет сходиться в себе 
+($a_n - a_m \to 0)$.
+
+\smallskip
+\noindent \textbullet~Пусть $X$ - НП, в котором если $lim(a_n - a_m) = 0$, то $\exists \, lim a_n$, то $X$ называется \textit{полным нормированным пространством} 
+или \textit{пространством Банаха} или \textit{\textbf{B-пространством}}. Полнота означает, что из сходимости в себе следует сходимость.
+
+
+\subsection*{Пространство $l_p$.}
+
+\noindent \textbullet~Норма на $l_p$ определяется как $\norm{\overline{a}} = \left(\sum_{k = 1}^{\infty}(a_j)^p\right)^\frac{1}{p}$.
+
+\bigskip
+\noindent \textbf{Утверждение. }\textit{Пространство $l_p$ полное.\footnote{Проверьте доказательство, могу ошибаться.}}
+
+\begin{proof}
+\par\noindent \textbullet~$\overline{a} = \{ a_1^{(n)}, a_2^{(n)}, \dots\} \in l_p$; $\norm{\overline{a}_n - \overline{a}_m} \to 0$. То есть $\left(\sum_{j = 1}^\infty 
+\abs{a_j^{(n)} - a_j^{(m)}}^p\right)^\frac{1}{p} \to 0$, $n, m \to \infty$. 
+
+\smallskip
+\noindent \textbullet~$\forall k = 1, 2, \dots \abs{a_k^{(n)} - a_k^{(m)}} \le \left(\sum_{j = 1}^\infty \abs{a_j^{(n)} - a_j^{(m)}}^p\right)^{\frac{1}{p}} \to 0$. 
+
+\smallskip 
+\noindent \textbullet~Таким образом, $\abs{a_k^{(n)} - a_k^{(m)}} \to  0$ при $n, m \to \infty$, $\; \forall k = 1, 2, \dots \{ a_k^{(n)}\}$ - сходится в себе,
+где $k$ - фиксирована, $n$ - переменная.
+
+\smallskip 
+\noindent \textbullet~$\exists a_k = \lim a_k^{(n)} , n \to \infty$, $\overline{a} = (a_1, a_2, \dots)$. Теперь докажем переход.
+
+\medskip
+\noindent \textbullet~$\forall \epsilon > 0$ $\{ \overline{a}_n\}$ - сходится в себе.
+
+\smallskip
+\noindent \textbullet~$\exists \mathbb{N} : \forall n, m \ge \mathbb{N} \Rightarrow \norm{a_n - a_m} \le \sum$
+
+\smallskip
+\noindent \textbullet~$\sum_{j = 1}^\infty \abs{a_j^{(n)} - a_j^{(m)}}^p \le \sum^p$ $\Rightarrow$
+$\sum_{j = 1}^k \abs{a_j^{(n)} - a_j^{(m)}}^p \le \sum^p \; \forall k = 1, 2, \dots \Rightarrow$
+$\sum_{j = 1}^\infty \abs{a_j^{(n)} - a_j}^p \le \sum^p$;
+
+\smallskip 
+\noindent \textbullet~Так как $l_p$ - линейное многообразие, то $\overline{a} = \overline{a}_n - (\overline{a}_n - \overline{a}) \in l_p$, так как 
+$\overline{a}_n \in l_p$, $\overline{a}_n - \overline{a} \in l_p$.
+
+\end{proof}
+
+
+\subsection*{Пространство $C[a, b]$.}
+
+\noindent \textbf{Утверждение. }\textit{Пространство $C[a, b]$ полное.}
+
+\begin{proof}
+\par\noindent \textbullet~Пусть дана последовательность $\{ x_n(t)\}$, где $x_n(t) \in C[a, b]$, $n = 1, 2, \dots$, и пусть $\rho(x_n, x_m) \to 0$ при $n, m \to \infty$.
+Это означает, что для последовательности $\{ x_n (t)\}$ выполняется условие Коши равномерной сходимости на $[a, b]$ и, следовательно, существует непрерывная на $[a, b]$
+функция $x_0(t)$, к которой на $[a, b]$ равномерно сходится последовательность $\{x_n(t)\}$. Таким образом, $x_0(t) \in C[a, b]$ и $\rho(x_n, x_0) = \max_t \abs{x_n(t) 
+- x_0(t)} \to 0$, т.е. $C[a, b]$ - полное пространство.
+\end{proof}

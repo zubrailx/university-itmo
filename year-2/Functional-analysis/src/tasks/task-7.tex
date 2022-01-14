@@ -1,0 +1,31 @@
+\noindent \textbf{Следствие}. \textit{Пусть $X$ - нормированное пространство, $Y$ - конечномерное линейное многообразие в $X \Rightarrow
+Y$ - замкнутое в $X$ множество (или подпространство $X$).}
+
+\begin{proof}
+
+\noindent \textbullet~По условию $Y = V(e_1, \dots, e_n)$, $e_k \in X$. По свойствам замкнутых множеств необходимо доказать,что если $y_m \in Y$ и при этом 
+$y_m \to y$ в $X \Rightarrow y \in Y$. 
+
+\smallskip 
+\noindent \textbullet~Так как $y_m \to y \Rightarrow y_m - y_p \to 0$. Раз $Y$ - линейное многообразие, то $y_m - y_p \in Y$. $\forall y \in Y \Rightarrow y = \sum_{k = 1}
+^n \alpha_k e_k$. Также как и в теореме Рисса вместо исходной нормы $\norm{y}$ можно рассмотреть норму $\norm{y}_0 = \sqrt{\sum \alpha_k^2}$ и $\norm{y} \sim \norm{y}_0$.
+А тогда по характеристическому свойству эквивалентностей раз $y_m - y_p \to 0$ по исходной норме пространства, то тогда $y_m - y_p \to 0$ по $\norm{\cdot}_0$.
+
+\smallskip 
+\noindent \textbullet~Тогда $\norm{y_m - y_p}_0 = \sqrt{\sum_{k = 1}^{n} \abs{\alpha_k^{(m)} - \alpha_k^{(p)}}^2} \to 0$. Тогда очевидно, что $\forall k = \overline{ 1,n}$
+$\; \abs{\alpha_k^{(m)} - \alpha_k^{(p)}} \le \sqrt{\sum_j \abs{\alpha_j^{(m)} - \alpha_j^{(p)}}^2}$. Таким образом $\forall k = \overline{1, n} \Rightarrow
+\alpha_k^{(m)} - \alpha_k^{(p)} \to 0$. То есть числовая последовательность $\{ \alpha_k^{(m)}\}$ сходится в себе (фундаментальная последовательность) по $m$. 
+А тогда по критерию Коши существования предела
+числовой последовательности\footnote{Для того чтобы последовательность имела конечный предел, необходимо и достаточно, чтобы она удовлетворяла условию Коши, т.е была 
+фундаментальной $\norm{a_n - a_m} < \epsilon$.} $\exists \alpha_k = \lim_{m \to \infty} \alpha_k^{(m)}$, а так как таких чисел конечное число ($k = \overline{1, n}$),
+$\Rightarrow \norm{\overline{\alpha}_m - \overline{\alpha}}_e \to 0$, а значит $\hat{y} = \sum \alpha_k e_k$ и если рассмотреть $\norm{y_m - \hat{y}}_0 = \norm{\overline
+{\alpha}_m - \overline{\alpha}}_0 \to 0$. 
+
+\smallskip
+\noindent \textbullet~Таким образом окажется, что $\hat{y} = \lim y_m$ по норме $\norm{\cdot}_0$, а тогда в силу эквивалентности норм $\norm{\cdot} \sim
+\norm{\cdot}_0$ $y_m \to \hat{y}$ по $\norm{\cdot}$. По условию $y_m \to y$ по основной норме, а тогда в силу единственности предела $\Rightarrow y = \hat{y}$. Тогда 
+получается, что $y = \sum \alpha_k e_k$, а значит $y \in Y$.
+\end{proof}
+
+% Фундаментальность, ограниченность последовательности, критерий Коши
+% http://nuclphys.sinp.msu.ru/mathan/p1/m0509.html

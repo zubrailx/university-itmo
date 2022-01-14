@@ -1,0 +1,159 @@
+\documentclass{article}
+
+%----geometry--------------------------------------------------------------------------------------
+\usepackage{geometry}
+
+% total - determines printable width, height
+\geometry{ 
+	a4paper, total={180mm,267mm}
+}
+
+%----text,fonts------------------------------------------------------------------------------------
+\usepackage{mmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{setspace}
+
+% \setstretch{0,9}
+
+%----ToC-------------------------------------------------------------------------------------------
+\usepackage{blindtext}
+\usepackage{hyperref}
+
+% table of contents
+\addto\captionsenglish{
+	\renewcommand{\contentsname}
+	{Оглавление}
+}
+
+\hypersetup{
+	allcolors=black
+}
+
+%----math,graphics---------------------------------------------------------------------------------
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsthm}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\pgfplotsset{
+	compat=1.18
+}
+
+\usepackage{graphicx}
+\graphicspath{{images/}}
+
+\usepackage{wrapfig}
+\usepackage{tabularx}
+
+% environments
+\renewenvironment{proof}{\medskip\noindent\textbf{Доказательство}.}{\hfill$\blacksquare$}
+
+\newtheorem*{proofexpr*}{Вывод}
+\newtheorem{proofexpr}{Вывод}
+
+\newtheorem*{theorem*}{Теорема}
+\newtheorem{theorem}{Теорема}
+
+% roman caps symbol
+\newcommand{\romannumeralcaps}[1]
+    {\MakeUppercase{\romannumeral #1}}
+% norm symbol%
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+% module
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+
+
+%----title-----------------------------------------------------------------------------------------
+\title{Функциональный анализ\\ Билеты к зачету 3 семестр}
+\date{2021-2022}
+\author{}
+
+%----document--------------------------------------------------------------------------------------
+\begin{document}
+
+\maketitle
+
+\begin{sloppypar}
+\tableofcontents
+
+\newpage
+\section{Норма в линейном многообразии, определение предела по норме, арифметика предела.}
+\input{tasks/task-1}
+\section{Пространства последовательностей Lp и непрерывно-дифференцируемых функций С[а,в].}
+\input{tasks/task-2}
+\section{Шары в нормированном пространстве (НП) - основное свойство, открытые и замкнутые множества.}
+\input{tasks/task-3}
+\section{Формула для замыкания множества.}
+\input{tasks/task-4}
+\section{Условие эквивалентности норм.}
+\input{tasks/task-5}
+\section{Теорема Рисса об эквивалентности норм.}
+\input{tasks/task-6}
+\section{Замкнутость конечномерного линейного пространства.}
+\input{tasks/task-7}
+\section{Теорема Бореля о существовании элемента наилучшего приближения.}
+\input{tasks/task-8}
+\section{B-пространства, примеры Lp и C[0,1].}
+\input{tasks/task-9}
+\section{Принцип вложенных шаров.}
+\input{tasks/task-10}
+\section{Теорема Бэра о категориях.}
+\input{tasks/task-11}
+\section{Несчетность B-пространств.}
+\input{tasks/task-12}
+\section{Определение скалярного произведения, равенство параллелограмма, неравенство Шварца.}
+\input{tasks/task-13}
+\section{Наилучшее приближение в унитарном пространстве, неравенство Бесселя.}
+\input{tasks/task-14}
+\section{Определение гильбертова пространства (Н), критерий сходимости ортогональных рядов.}
+\input{tasks/task-15}
+\section{Теорема Рисса-Фишера, равенство Персеваля.}
+\input{tasks/task-16}
+\section{Наилучшее приближение в Н для случая выпуклого, замкнутого множества.}
+\input{tasks/task-17}
+\section{Разложение гильбертова пространства в прямую сумму подпространств.}
+\input{tasks/task-18}
+\section{Критерий компактности Хаусдорфа.}
+\input{tasks/task-19}
+\section{Критерий компактности в пространствах Lp.}
+\input{tasks/task-20}
+\section{Теорема Арцела-Асколи.}
+\input{tasks/task-21}
+\section{Непрерывный линейный оператор и его норма.}
+\input{tasks/task-22}
+\section{Полнота пространства линейных ограниченных операторов.}
+\input{tasks/task-23}
+\section{Продолжение по непрерывности линейного оператора со всюду плотного линейного подмножества НП.}
+\input{tasks/task-24}
+\section{Теорема Банаха-Штейнгауза.}
+\input{tasks/task-25}
+\section{Теорема Банаха об обратимости оператора I-C.}
+\input{tasks/task-26}
+\section{Теорема Банаха о гомеоморфизме.}
+\input{tasks/task-27}
+\section{Теорема о замкнутом графике.}
+\input{tasks/task-28}
+\section{Линейные функционалы и гиперплоскости.}
+\input{tasks/task-29}
+\section{Теорема Хана-Банаха о продолжении линейных функционалов.}
+\input{tasks/task-30}
+\section{Теорема Рисса об общем виде линейного непрерывного функционала в Н.}
+\input{tasks/task-31}
+\section{Замкнутость спектра линейного оператора.}
+\input{tasks/task-32}
+\section{Спектральный радиус.}
+\input{tasks/task-33}
+\section{Аналитичность резольвентного оператора.}
+\input{tasks/task-34}
+\section{Норма сопряженного оператора.}
+\input{tasks/task-35}
+\section{Связь между множеством значений оператора и ядром сопряженного оператора.}
+\input{tasks/task-36}
+\section{Связь между множеством значений сопряженного оператора и ядром оператора.}
+\input{tasks/task-37}
+\end{sloppypar}
+% Sample text\footnote{This is shit}
+\end{document}

@@ -1,0 +1,84 @@
+\noindent\textbullet~Далее, не оговаривая, мы считаем, что все пространства являются B-пространствами, то есть $x_n - x_m \to 0 \Rightarrow \exists \lim x_n$.
+Обратное верно всегда.
+
+\smallskip 
+\noindent\textbullet~Для доказательства потребуется принцип вложенных шаров: $X$ - B-пространство, $\overline{V}_n$ - замкнутые шары в $X$, $\overline{V}_{n+1} \subset 
+\overline{V}_n \Rightarrow \bigcap_{n = 1}^\infty \overline{V}_n \neq \emptyset$, общих точек не обязательно должна быть единственной. 
+Если $r \to 0$, то общих точек только 1. Например, $\overline{V}_n = [-1 - \frac{1}{n}, 1 + \frac{1}{n}]$.
+
+\begin{theorem*}[Банах, Штейнгауз]
+Пусть дана последовательность линейных ограниченных операторов $A_n \in V(X, Y)$, про которую известно, что $\forall x \in X$ $\sup_{n \in \mathbb{N}}\norm{A_n x} < 
++ \infty$ (то есть последовательность операторов поточечно равномерно ограничена). Тогда $\sup_{n \in \mathbb{N}} \norm{A_n} < + \infty$ (то есть последовательность 
+операторов просто равномерно ограничена). Равномерность означает конечность соответствующих супремумов.
+\end{theorem*}
+
+\begin{proof}
+\smallskip 
+\par\noindent\textbullet~Доказательство разобьем на 2 этапа.
+
+\smallskip
+\noindent\textbullet~Допустим $\exists \overline{V} = \overline{V}_r(a) : \sup_{x \in \overline{V}, n \in \mathbb{N}} \norm{A_n x} < +\infty$. Покажем тогда, что можно 
+утверждать, что из этого факта будет вытекать, что $sup_{n \in \mathbb{N}} \norm{A_n} < +\infty$. Обозначим для удобства $M = \sup_{x \in \overline{V}, n \in \mathbb{N}}
+\norm{A_n x}$. 
+
+\smallskip
+\noindent\textbullet~Рассмотрим единичный шар $\overline{V}_1 = \overline{V}_1(0)$. По нему считаются нормы операторов. Возьмем $\forall x \in \overline{V}_1$ и определяем 
+$y = a + r x$. Если составить норму разности $\norm{y - a} = \norm{r x} = r \norm{x} \le r$. Таким образом, точка $y \in \overline{V}$. Значит $\forall n \in \mathbb{N}
+\Rightarrow \norm{A_n y} \le M$. Из формулы $y = a + rx \Rightarrow x = \dfrac{y - a}{r}$, начинаем смотреть, что представляет норма значения $n$-ого оператора над точкой 
+$x$, которая является любой.
+
+\smallskip
+\noindent\textbullet~$\norm{A_n x} = \norm{a_n (\dfrac{y - a}{r})} = \dfrac{1}{r} \norm{A_n y - A_n a} \le \dfrac{1}{r}(\norm{A_n y} + \norm{A_n a}) \le \dfrac{1}{r} 
+(M + \norm{A_n a})$. Ясно, что норма $\norm{A_n a} \le \sup_{m \in \mathbb{N}} \norm{A_m a} = N < + \infty$ по условию теоремы (поточечно равномерно ограничена). 
+Подставляя это в последнее неравенство $\norm{A_n x} \le \dfrac{1}{r} (M + N)$ - не зависит от $n$ и $x \in \overline{V}_1$. Тогда сначала переходим к $\sup$ по $x \in 
+\overline{V}_1$, а тогда получаем, что $\norm{A_n} \le \dfrac{1}{r}(M + N)$. Теперь переходим к супремому по номерам $n \Rightarrow \sup_{n \in N} \norm{A_n} < + \infty$,
+то есть будет выполняться утверждение теоремы Банаха-Штейнгауза. Первый этап проделали.
+
+\medskip
+\noindent\textbullet~Допустим, что $\nexists$ шара $\overline{V}$ из первого этапа и убедимся в том, что тогда появится противоречие 
+(такой шар хотя бы один должен существовать). Возьмем $\forall \overline{V}$, тогда по предположению должна $\exists x_1 \in V, \exists n_1 \in \mathbb{N} : 
+\norm{A_{n_1}(x_1)} > 1$. 
+
+\smallskip
+\noindent\textbullet~Оператор $A_{n_1}$ непрерывен (поскольку ограничен), тогда по стандартному свойству непрерывности $\exists \overline{V}_{r_1}(x_1) = \overline{V}_1 : 
+\overline{V}_1 \subset \overline{V}, \forall y \in \overline{V}_1 \Rightarrow \norm{A_{n_1}(y)} > 1$. Построенный шар $\overline{V}_1$ не может быть шаром из первого 
+этапа по нашему предположению, тогда $\exists x_2 \in V_1, \exists n_2 \in \mathbb{N} : \norm{A_{n_2}(x_2)} > 2$, при этом можно считать, что $n_2 > n_1$. Тогда опять по 
+непрерывности $\exists \overline{V}_{r_2} (x_1) = \overline{V}_2 : \overline{V}_2 \subset V_1$, $r_2 < \frac{r_1}{2}$, $\forall y \in \overline{V}_2 \Rightarrow 
+\norm{A_{n_2}(y)} > 2$ и так далее продолжаем это построение.
+
+\smallskip
+\noindent\textbullet~В результате выстраивается последовательность замкнутые вложенных шаров: $\overline{V}_{k+1} \in \overline{V}_k$, $r_k \to 0$, радиус каждый раз 
+уменьшается в 2 раза, и при этом $\forall x \in \overline{V}_k \Rightarrow \norm{A_{n_k}(x)} > k$. По принципу вложенных шаров существует точка $x^* \in \bigcap_{k = 1}^\infty \overline{V}_k$. В частности эта точка принадлежит шару $\overline{V}_k$, а тогда $\norm{A_{n_k}(x^*)} > k$. Если в этом неравенстве $k \to \infty \Rightarrow
+\norm{A_{n_k}(x^*)} \to +\infty$. А это противоречит тому, что $\sup_{m \in \mathbb{N}}\norm{A_n(x^*)} < +\infty$. Полученное противоречие доказывает, что шар из первого 
+этапа существует, значит теорема доказана.
+\end{proof}
+
+
+\subsection*{Следствие из теоремы. Интерпретации $A  = \lim A_n$.}
+
+\noindent\textbullet~Пусть $A_n \in V(X, Y), A = \lim A_n$. В функциональном анализе есть 3 разных понимания этого равенства.
+
+\smallskip 
+1) $\norm{A_n - A} \to 0$ - оператор $A$ является пределом по операторной норме. Это тоже самое, что $\forall \epsilon > 0 \exists n_0 : \forall n \ge n_0 \Rightarrow
+\norm{A_n x - A_x} \le \epsilon$ сразу для всех $x$ из замкнутого единичного шара. - равномерная сходимость.
+
+\smallskip 
+2) $\forall x \in X \Rightarrow A x = \lim A_n x$ - сильная (поточечная) сходимость последовательности операторов.
+
+\smallskip 
+3) $\forall f$ - линейного ограниченого функционала, $\forall x \Rightarrow f(A x) = \lim f(A_n x)$ - слабая сходимость последовательности операторов.
+
+\bigskip\noindent\textbf{Следствие.}\textit{ Пусть $A_n \in V(X, Y)$, про которую известно, что $\forall x \in X \Rightarrow \exists \lim A_n x = A x$. Тогда предельный 
+оператор $A \in V(X, Y)$, то есть тоже ограничен (по сильному пределу). }
+
+\begin{proof}
+\smallskip
+\par\noindent\textbullet~Возьмем $x \in \overline{V}_1 \Rightarrow \norm{A x} \le M$ - $const$. $\norm{A x} = \norm{(A x - A_n x) + A_n x} \le \norm{A x - A_n x} + 
+\norm{A_n x}$. Для имеющегося $x$, так как можно написать $A x = \lim A_n x$, возьмем $\epsilon = 1, \; \exists n_0 : \forall n \ge n_0 \Rightarrow \norm{A x - A_n x} \le 
+1$. В частности, получится $\norm{A x} \le 1 + \norm{A_{n_0} x}$. Норма $\norm{A_{n_0}x} \le \norm{A_{n_0}} \cdot \norm{x} \le \norm{A_{n_0}}$.
+
+\smallskip
+\noindent\textbullet~Так как $\forall x \; \exists \lim A_n x$ по условию следствия, тогда по стандартным свойствам предела $\{ \norm{A_n x}\}$ - ограничена. То есть для 
+любого $x$ выполняется условия Банаха-Штейнгауза, а тогда $S = \sup \norm{A_n} < +\infty$. Тогда возвращаясь к неравенству $\norm{A x} \le 1 + \norm{A_{n_0} x}$ получаем, 
+что $\norm{A x} \le 1 + \norm{A_{n_0}} \le 1 + S$ - $const$. А следовательно неравенство верно $\forall x \in \overline{V}_1 \Rightarrow \norm{A} < +\infty$.
+\end{proof}
