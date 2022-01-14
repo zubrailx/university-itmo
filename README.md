@@ -66,5 +66,5 @@
 
 ### Функциональный анализ 
 
-* [link](year-2/Functional-analysis)
+* [Зачет](year-2/Functional-analysis)
 
