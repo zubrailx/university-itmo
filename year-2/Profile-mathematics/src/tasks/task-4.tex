@@ -1,0 +1,54 @@
+\subsection*{Основные определения.}
+
+\noindent \textasteriskcentered~Системой линейных алгебраических уравнений, содержащей m уравнений и n неизвестных, называется система вида
+
+\begin{equation*}
+    \begin{cases}
+        a_{11} x_1 + a_{12} x_2 + \dots + a_{1n} x_n = b_1 \\
+        a_{12} x_1 + a_{22} x_2 + \dots + a_{1n} x_n = b_2 \\
+        \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \\
+        a_{1n} x_1 + a_{2n} x_2 + \dots + a_{nn} x_n = b_n   
+    \end{cases},
+\end{equation*}
+
+\noindent где числа $a_{ij}$ - \textit{коэффициенты} системы, числа $b_{ij}$ - \textit{свободные члены}.
+
+\smallskip
+\noindent Матричная форма записи: $A \cdot X = B$, где $A$ - \textit{основная матрица}, $X$ - вектор-столбец неизвестных $x_j$, $B$ - вектор-столбец свободных членов.
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Расширенная} матрица - матрица $\overline{A}$, дополненная справа столбцом свободных членов.
+
+\noindent \textbullet~Всякое решение можно записать в виде матрицы-столбца:
+$
+    C = 
+    \begin{pmatrix}
+        c_1 \\
+        c_2 \\
+        \vdots \\
+        c_n
+    \end{pmatrix}
+$
+
+\medskip\noindent \textasteriskcentered~Система уравнений называется \textbf{\textit{совместной}}, если она имеет хотя бы одно решение, и \textbf{\textit{несовместной}}, если она не имеет ни одного решения. 
+
+\medskip\noindent \textasteriskcentered~Совместная система называется \textbf{\textit{определенной}}, если она имеет единственное решение, и \textbf{\textit{неопределенной}}, если она имеет более одного решения. 
+
+\medskip\noindent \textasteriskcentered~Система линейных уравнений называется \textbf{\textit{однородной}}, если все ее свободные члены равны 0. 
+
+\medskip\noindent \textasteriskcentered~\textit{Тривиальное }или \textit{нулевое} решение - $x_1 = x_2 = \dots = x_n = 0$ 
+
+
+\subsection*{Решение системы линейных уравнений методом Гаусса.}
+
+\noindent \textbullet~Для решения системы линейных уравнений по методу Гаусса необходимо систему привести к \textit{ступенчатому}, в частности \textit{треугольному} виду.
+
+\begin{equation*}
+    \begin{cases}
+        a_{11} x_1 + a_{12} x_2 + \cdots + a_{1k} x_k + \cdots + a_{1n} x_n = b_1 \\
+        \phantom{a_11 x_1 +~} a_{b2} x_2 + \cdots + a_{2k} x_k + \cdots + a_{2n} x_n = b_2 \\
+         \phantom{a_11 x_1 +~} \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \cdots \\
+         \phantom{a_{11} x_1 + a_{12} x_2 + \cdots + } a_{kk} x_k + \cdots + a_{kn} x_n = b_n \end{cases}
+\end{equation*}
+
+\noindent \textbullet~Затем свободные члены ($a_{i, k+1} x_{k_1}, \dots, a_{i, n} x_{n}$), если система не треугольная, перемещаем в правую часть и решаем обратным ходом, просто принимая в качестве иксов какие-то параметры ($\alpha, \beta, \gamma \dots$). Если система является треугольной, то свободных членов не будет, а только главные.

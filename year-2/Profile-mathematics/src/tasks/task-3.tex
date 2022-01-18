@@ -1,0 +1,47 @@
+\subsection*{Невырожденная матрица.}
+
+\noindent \textasteriskcentered~Квадратная матрица называется \textit{невырожденной}, если определитель $\Delta = det A$ не равен нулю: $\Delta = det A \neq 0$. В противном случае матрица называется \textit{вырожденной}.
+
+\subsection*{Союзная матрица.}
+
+\noindent \textasteriskcentered~Матрицей, \textbf{\textit{союзной}} к матрице $A$, называется матрица 
+\[
+    A^* = 
+    \begin{pmatrix}
+        A_{11} & A_{21} & \dots & A_{n1} \\
+        A_{12} & A_{22} & \dots & A_{n2} \\
+        \vdots & \vdots &\ddots & \vdots \\
+        A_{1n} & A_{2n} & \dots & A_{nn}
+    \end{pmatrix}
+\]
+, где $A_{ij}$ - алгебраическое дополнение элемента $a_{ij}$ данной матрицы.
+
+\subsection*{Обратная матрица.}
+
+\noindent \textasteriskcentered~Матрица $A^{-1}$ называется \textbf{\textit{обратной}} матрице $A$, если выполнено условие $A \cdot A^{-1} = A^{-1} \cdot A = E$
+
+\bigskip
+\noindent \textbf{Теорема}. Всякая невырожденная матрица имеет обратную. ($\exists A^{-1} \Longleftrightarrow detA \neq 0$)
+
+\begin{proof}
+\par \noindent \textit{Необходимость}. Пусть $\exists A^{-1} \Rightarrow A \cdot A^{-1} = E$. Так как $det(A \cdot A^{-1}) = det A * det A^{-1} \neq 0 \; (det E = 1 => det A \neq 0)$.
+
+\smallskip
+\noindent\textit{Достаточность}. Пусть $det A \neq 0$. Рассмотрим $A \cdot (A^{*})^T$.
+
+\[
+   A \cdot A^{*} = 
+   \begin{pmatrix}
+        A_{11} \cdot a_{11} + A_{12} \cdot a_{12} + \dots + A_{1n} \cdot a_{1n} & 
+        0 & \dots & 0 \\ 
+        0 & A_{21} \cdot a_{21} + \dots + A_{2n} \cdot a_{2n} &
+        \dots & 0 \\ 
+        \vdots & \vdots & \ddots & \vdots \\
+        0 & 0 & \dots & 
+        A_{n1} \cdot a_{n1} + \dots + A_{nn} \cdot a_{nn}  
+   \end{pmatrix} = 
+\]
+
+$= det A \cdot E \Rightarrow \dfrac{A \cdot (A^*)^T}{det A} = E$.
+
+\end{proof}

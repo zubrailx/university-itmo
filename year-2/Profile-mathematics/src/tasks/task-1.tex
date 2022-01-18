@@ -1,0 +1,183 @@
+\subsection*{Основные определения}
+
+\noindent \textasteriskcentered~\textit{Матрица} - прямоугольная таблица чисел, содержащая $m$ строк одинаковой длины (или $n$ столбцов одинаковой длины).
+\[
+A = 
+\begin{pmatrix}
+    a_{11} & a_{12} & \dots & a_{1n} \\
+    a_{21} & a_{22} & \dots & a_{1n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    a_{m1} & a_{m2} & \dots & a_{mn}
+\end{pmatrix}
+\]
+
+\noindent \textasteriskcentered~Матрицу $A$ называют матрицей \textit{размера $m \times n$} и пишут $A_{m \times n}$. 
+Числа $a_{ij}$ называются ее \textit{элементами}. 
+Элементы, стоящие на диагонали, идущей из верхнего левого угла, образуют \textit{главную диагональ}. Из нижнего левого -- \textit{побочная диагональ}.
+
+\smallskip
+\noindent \textasteriskcentered~Матрицы \textbf{\textit{равны между собой}}, если равны все соответствующие элементы этих матриц ($a_{ij} = b_{ij}$).
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Квадратная матрица}: ($m = n$)
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Матрица строка}:
+$\begin{pmatrix}
+    a_{11} & a_{12} & \dots & a_{1n}
+\end{pmatrix}$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Матрица столбец(вектор)}: 
+$\begin{pmatrix}
+    a_{11} \\ 
+    a_{21} \\
+    \vdots \\
+    a_{m1}
+\end{pmatrix}$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Диагональная матрица}: 
+$\forall a_{ij} : a_{ij} = 0 \; \forall i \neq j$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Единичная матрица}:
+$E_{n \times n} = 
+\begin{pmatrix}
+    1 & 0 & \dots & 0 \\
+    0 & 1 & \dots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \dots & 1
+\end{pmatrix}
+$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Нулевая матрица}:
+$O_{m \times n} = 
+\begin{pmatrix}
+    0 & 0 & \dots & 0 \\
+    0 & 0 & \dots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \dots & 0
+\end{pmatrix}
+$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Треугольная матрица}:
+$A_{n \times n} = 
+\begin{pmatrix}
+    a_{11} & a_{12} & \dots & a_{1n} \\
+    0 & a_{22} & \dots & a_{2n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \dots & a_{mn}
+\end{pmatrix}$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Транспонированная матрица}:
+$A = 
+\begin{pmatrix}
+    a_{11} & a_{12} & \dots & a_{1n} \\
+    a_{21} & a_{22} & \dots & a_{2n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    a_{m1} & a_{m2} & \dots & a_{mn}
+\end{pmatrix},\;
+A^T = 
+\begin{pmatrix}
+    a_{11} & a_{21} & \dots & a_{m1} \\
+    a_{12} & a_{22} & \dots & a_{m2} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    a_{1n} & a_{2n} & \dots & a_{mn}
+\end{pmatrix}$
+
+\medskip
+\noindent \textasteriskcentered~При помощи элементарных преобразований любую матрицу можно привести к такой, у которой в начале главной диагонали будет стоять некоторое количество единиц, а затем будут идти нули, не на главной диагонали также нули. Такую матрицу называют \textbf{\textit{канонической}}.
+
+\subsection*{Действия над матрицами}
+
+\noindent \textasteriskcentered~\textit{Матрицы равны}: $A_{m \times n} = B_{m \times n}, \; if \; a_{ij} = b_{ij} 
+\;\forall i = \overline{1,\dots m}, j = \overline{1, \dots n}$
+
+\smallskip
+\noindent \textasteriskcentered~\textit{Суммой} $A_{m \times n} = (a_{ij})$ и $B_{m \times n} = (b_{ij})$, называется $C_{m \times n} = (c_{ij})$ $: \forall c_{ij} = (a_{ij} + b_{ij})$.
+
+\smallskip 
+\noindent \textasteriskcentered~\textit{Произведение на число}: $A_{m \times n} = (a_{ij})$ на $\lambda \in \mathbb{R}$ называется матрица $B_{m \times n} = (\lambda \cdot a_{ij})$.
+
+
+\subsection*{Основные свойства}
+
+\noindent 1) Коммутативность: 
+$A_{m \times n} + B_{m \times n} = B_{m \times n} + A_{m \times n}$
+
+\smallskip 
+\noindent 2) Ассоциативность:
+$(A_{m \times n} + B_{m \times n}) + C_{m \times n} = A_{m \times n} + (B_{m \times n} 
++ C_{m \times n})$
+
+\smallskip 
+\noindent 3) Существование нулевой матрицы:
+$(A_{m \times n} + O_{m \times n} = A_{m \times n})$
+
+\smallskip 
+\noindent 4) Умножение на число:
+$\lambda (A + B) = \lambda A + \lambda B$
+
+\smallskip 
+\noindent 5) Дистрибутивность: 
+$(\alpha + \beta) A = \alpha A + \beta A$
+
+\smallskip 
+\noindent 6) Единичный элемент:
+$E * A = A$
+
+\smallskip 
+\noindent 7) $A - O = A$
+
+\smallskip 
+\noindent 8) $\alpha (\beta A) = (\alpha \beta) A$
+
+
+\subsection*{Элементарные преобразования}
+
+\noindent \textbullet~Перестановка местами двух параллельных рядов матрицы.
+
+\noindent \textbullet~Умножение всех элементов ряда матрицы на число, отличное от нуля.
+
+\noindent \textbullet~Прибавление ко всем элементам ряда матрицы соответствующих элементов параллельного ряда, умноженных на одно и то же число.
+
+\smallskip
+\noindent \textasteriskcentered~Две матрицы называются \textbf{\textit{эквивалентными}}, если одна из другой
+получается с помощью элементарных преобразований: $A \sim B$
+
+
+\subsection*{Прочее}
+
+\noindent \textasteriskcentered~Матрицы $A$ и $B$ называются \textbf{\textit{перестановочными}}, если $A B = B A$.
+
+
+\subsubsection*{Свойства, связанные с умножением матриц}
+
+\noindent 1) $A \cdot (B \cdot C) = (A \cdot B) \cdot C$
+
+\smallskip
+\noindent 2) $A \cdot (B + C) = A B + A C$
+
+\smallskip
+\noindent 3) $(A + B) \cdot C = A C + B C$
+
+\smallskip
+\noindent 4) $\lambda (A B) = (\lambda A) B = A \cdot (\lambda B)$
+
+\smallskip
+\noindent 5) $A \cdot B \neq B \cdot A$
+
+\smallskip
+\noindent 6) $det (A \cdot B) = det(A) \cdot det(B)$
+
+
+\subsubsection*{Свойства транспонирования}
+
+\noindent 1) $(A + B)^T = A^T + B^T$
+
+\smallskip
+\noindent 2) $(AB)^T = B^T \cdot A^T$
