@@ -68,3 +68,8 @@
 
 * [Зачет](year-2/Functional-analysis)
 
+
+### Профильная математика
+
+* [Экзамен](year-2/Profile-mathematics)
+
