@@ -95,9 +95,10 @@
 ### Профильная математика
 
 * [Экзамен](Year-2/Profile-mathematics)
-* [Билеты (не закончено)](Year-2/Profile-mathematics/src/main.pdf)
+* [Билеты (брошено)](Year-2/Profile-mathematics/src/main.pdf)
 
----
-### В процессе
 
-* [Вычислительная математика](https://github.com/zubrailx/Computational-math)
+### Вычислительная математика
+
+* [ЛР 1](Year-2/Computational-math/lab-1)
+

@@ -1,0 +1,6 @@
+*.pyc
+__pycache__
+.idea/
+input.txt
+output.txt
+
