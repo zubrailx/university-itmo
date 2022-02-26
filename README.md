@@ -97,3 +97,7 @@
 * [Экзамен](Year-2/Profile-mathematics)
 * [Билеты (не закончено)](Year-2/Profile-mathematics/src/main.pdf)
 
+---
+### В процессе
+
+* [Вычислительная математика](https://github.com/zubrailx/Computational-math)
