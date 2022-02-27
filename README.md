@@ -102,3 +102,8 @@
 
 * [ЛР 1](Year-2/Computational-math/lab-1)
 
+
+### Машинное обучение и анализ данных
+
+* [Упражнения](Year-2/Machine-learning-and-data-analysis)
+
