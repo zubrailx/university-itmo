@@ -5,33 +5,34 @@
 > В случае, если не нашлось некоторых лаботаторных работ, то проверьте ветки репозитория. 
 Может быть данный курс не закончен до конца, или пока до того, чтобы его выложить, руки не дошли.
 
+---
 
-## Курс 1
+### Курс 1
 
-### [Информатика](Year-1/Informatics)
+#### [Информатика](Year-1/Informatics)
 
-### [ОПД](Year-1/Basics-of-professional-life)
+#### [ОПД](Year-1/Basics-of-professional-life)
 
-### [Программирование](Year-1/Programming)
+#### [Программирование](Year-1/Programming)
 
-### [Физика](Year-1/Physics)
+#### [Физика](Year-1/Physics)
 
-### [КИК](Year-1/Communication-and-team-building)
+#### [КИК](Year-1/Communication-and-team-building)
 
 
-## Курс 2
+### Курс 2
 
-### [Веб-программирование](Year-2/Web-programming)
+#### [Веб-программирование](Year-2/Web-programming)
 
-### [Языки-программирования](Year-2/Programming-languages)
+#### [Языки-программирования](Year-2/Programming-languages)
 
-### [Матлогика](Year-2/Math-logic)
+#### [Матлогика](Year-2/Math-logic)
 
-### [Функциональный анализ](Year-2/Functional-analysis)
+#### [Функциональный анализ](Year-2/Functional-analysis)
 
-### [Профильная математика](Year-2/Profile-mathematics)
+#### [Профильная математика](Year-2/Profile-mathematics)
 
-### [Вычислительная математика](Year-2/Computational-math)
+#### [Вычислительная математика](Year-2/Computational-math)
 
-### [Машинное обучение и анализ данных](Year-2/Machine-learning-and-data-analysis)
+#### [Машинное обучение и анализ данных](Year-2/Machine-learning-and-data-analysis)
 
