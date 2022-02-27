@@ -5,28 +5,9 @@
 ## Курс 1
 
 
-### Информатика
+### [Информатика](Year-1/Informatics)
 
-* [ЛР 1](Year-1/Informatics/lab-1)
-* [ЛР 2](Year-1/Informatics/lab-2)
-* [ЛР 3](Year-1/Informatics/lab-3)
-* [ЛР 4](Year-1/Informatics/lab-4)
-* [ЛР 5](Year-1/Informatics/lab-5)
-* [ЛР 6](Year-1/Informatics/lab-6)
-* [ЛР 7](Year-1/Informatics/lab-7)
-* [Аннотации](Year-1/Informatics/Annotations)
-
-
-### ОПД
-
-* [ЛР 1](Year-1/Basics-of-professional-life/lab-1)
-* [ЛР 2](Year-1/Basics-of-professional-life/lab-2)
-* [ЛР 3](Year-1/Basics-of-professional-life/lab-3)
-* [ЛР 4](Year-1/Basics-of-professional-life/lab-4)
-* [ЛР 5](Year-1/Basics-of-professional-life/lab-5)
-* [ЛР 6](Year-1/Basics-of-professional-life/lab-6)
-* [ЛР 7](Year-1/Basics-of-professional-life/lab-7)
-
+### [ОПД](Year-1/Basics-of-professional-life)
 
 ### Программирование
 
