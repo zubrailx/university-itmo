@@ -1,5 +1,5 @@
-# functional-analysis
+## Функциональный анализ (ОГНП)
 
-* LaTeX only (tasks 1-25): [link](src/main.pdf) 
+* [Расписанные билеты LaTeX+рукописи](src/main.pdf)
+* [Расписанные билеты (брошено)](main-merged.pdf)
 
-* LaTex + handwritten (tasks 1-37) : [link](main-merged.pdf)

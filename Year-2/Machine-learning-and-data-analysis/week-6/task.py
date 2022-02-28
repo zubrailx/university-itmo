@@ -26,16 +26,18 @@ def task_1():
     print(log_reg.predict_proba([data_test_wer, data_test_sup]))
     print("OTHER RESULTS")
     y_true = data_test["Y"].values
+    y_pred_proba = log_reg.predict_proba(data_test_x)
     y_pred = log_reg.predict(data_test_x)
     fp = np.sum((y_pred == 1) & (y_true == 0))
     tp = np.sum((y_pred == 1) & (y_true == 1))
     fn = np.sum((y_pred == 0) & (y_true == 1))
     tn = np.sum((y_pred == 0) & (y_true == 0))
-    print(y_pred)
-    print(y_true)
+    print("Y_pred_proba: ", y_pred_proba[:, 1])
+    print("Y_pred: ", y_pred)
+    print("Y_true: ", y_true)
     print("TPR: ", tp / (tp + fn))
     print("Presicion: ", tp / (tp + fp)) 
-    print("AUC: ", metrics.roc_auc_score(y_true, y_pred))
+    print("AUC: ", metrics.roc_auc_score(y_true, y_pred_proba[:, 1]))
     return
 
 
