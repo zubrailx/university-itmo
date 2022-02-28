@@ -36,3 +36,5 @@
 
 * [Машинное обучение и анализ данных](Year-2/Machine-learning-and-data-analysis)
 
+* [Теория вероятностей](Year-2/Theory-of-probabilities)
+
