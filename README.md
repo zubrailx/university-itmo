@@ -38,3 +38,4 @@
 
 * [Теория вероятностей](Year-2/Theory-of-probabilities)
 
+* [Встроенные системы](Year-2/Embedded-systems)
