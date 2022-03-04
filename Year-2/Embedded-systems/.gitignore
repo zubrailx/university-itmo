@@ -3,3 +3,5 @@
 *.exe
 *.txt
 *.o
+build/
+output/
