@@ -6,6 +6,8 @@
 
 #define offsetof(type, element) ((size_t)&(((type *)0)->element))
 
+#define SECTION_CONTAINS_CODE 0x00000020
+
 enum return_status {
 	OK = 0,
 	FILE_NOT_OPEN,
@@ -34,25 +36,30 @@ int main() {
 	}
 	
 	// write section binary to files
-  char* name = "output/sections/";
-  char *filename = malloc(strlen(name) + 8 + 4); // +4 = .bin
+  /*char *name = "output/sections/";*/
+  char *name = "output/sections/code.bin";
+  /*char *filename = malloc(strlen(name) + 8 + 4); // +4 = .bin*/
+  FILE *fi = fopen(name, "wb");
 	for (uint16_t i = 0; i < section_table_size; ++i) {
+    if (!(section_table_arr[i].Characteristics & SECTION_CONTAINS_CODE)) continue; 
+
 		uint32_t section_size = section_table_arr[i].SizeOfRawData;
 		uint32_t section_physical_offset = section_table_arr[i].PointerToRawData; 
 		void *data = malloc(section_size);
-    strcpy(filename, name);
-    strcat(filename, (char*) section_table_arr[i].Name);
-    strcat(filename, ".bin");
-		FILE *fi = fopen(filename, "wb");
+    /*strcpy(filename, name);*/
+    /*strcat(filename, (char*) section_table_arr[i].Name);*/
+    /*strcat(filename, ".bin");*/
+		/*FILE *fi = fopen(filename, "wb");*/
 
 		fseek(file, section_physical_offset, SEEK_SET);
 		fread(data, section_size, 1, file);
 		fwrite(data, section_size, 1, fi);
 
-		fclose(fi);
+		/*fclose(fi);*/
 		free(data);
 	}
-  free(filename);
+  /*free(filename);*/
+  fclose(fi);
 
 	// print section info and entry address
 	FILE* file_oi = fopen("output/output.txt", "w");
