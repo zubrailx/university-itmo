@@ -1,0 +1,5 @@
+.ccls-cache/
+*.bin
+*.exe
+*.txt
+*.o
