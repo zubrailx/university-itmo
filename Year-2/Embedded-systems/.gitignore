@@ -5,3 +5,4 @@
 *.o
 build/
 output/
+*.zip/
