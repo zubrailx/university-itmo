@@ -1,6 +1,9 @@
 import timeit
-import sys
-from lib import *
+
+import modules.matrix as matrix
+from modules.matrix import Matrix
+
+from .calculate import iteration
 
 
 MATRIX_DIM_MIN = 1 
@@ -8,7 +11,7 @@ MATRIX_DIM_MAX = 20
 MATRIX_GENERATE_MULTIPLICATION = 1000
 
 
-def main():
+def solve(file_input, file_output):
     # read matrix dimensions
     try:
         matrix_dim = int(input("Enter matrix dimensions: "))
@@ -73,8 +76,3 @@ def main():
     print("Result matrix_x: ", matrix_x, "Result matrix_err: ", matrix_x - matrix_x_prev, sep='\n')
     print("Number of iterations: ", it_count)
     print("Elapsed time (ms): ", elapsed_time * 1000)
-
-
-if __name__ == "__main__":
-    main()
-

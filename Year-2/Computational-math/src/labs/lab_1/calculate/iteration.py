@@ -1,5 +1,5 @@
 from copy import copy
-from .matrix import Matrix
+from modules.matrix import Matrix
 
 
 def iterate(matrix_a, matrix_b, matrix_x):

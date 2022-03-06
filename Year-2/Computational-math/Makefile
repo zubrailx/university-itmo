@@ -1,3 +1,6 @@
+.PHONY: run all clean
+
+
 run:
 	python3 src/main.py
 

@@ -1,7 +1,7 @@
 import random
 from copy import deepcopy, copy
 
-from . import util
+from modules import util
 
 
 class Matrix:
@@ -199,6 +199,7 @@ def matrix_generate(rows, columns, mul):
             matrix[i][j] = random.random() * mul
     return matrix
 
+
 def matrix_generate_pseudo_square(rows, columns, mul):
     coef = 2
     matrix = matrix_generate(rows, columns, mul)
@@ -230,4 +231,3 @@ def _matrix_mul(arg1, arg2):
     else:
         raise Exception("ERROR: matrix type check")
     return matrix
-

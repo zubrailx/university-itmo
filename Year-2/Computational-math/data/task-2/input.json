@@ -1,0 +1,21 @@
+{
+  "tasks" : [
+    {
+      "method" : "split_in_half",
+      "equation" : "x^2 + e^4",
+      "data" : [
+        "range_min": -3,
+        "range_max":  2
+      ]
+    },
+    {
+      "method" : "tangential",
+      "equation" : "x^2 + e^4",
+      "data" : [
+        "range_min": -3,
+        "range_max":  2, 
+        "x_0": 4
+      ]
+    }
+  ]
+}
