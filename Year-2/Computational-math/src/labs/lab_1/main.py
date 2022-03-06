@@ -3,8 +3,7 @@ import timeit
 import modules.matrix as matrix
 from modules.matrix import Matrix
 
-from .calculate import iteration
-
+from . import iteration
 
 MATRIX_DIM_MIN = 1 
 MATRIX_DIM_MAX = 20

@@ -18,7 +18,7 @@ def calculate_difference(matrix_prev, matrix_next):
     if (matrix_prev.rows == matrix_next.rows and matrix_prev.columns == matrix_next.columns):
         return _calculate_diff_evkl(matrix_prev, matrix_next)
     else:
-        raise Exception("ERROR: compared matrixes have different dimensions")
+        raise Exception("ERROR: compared matrices have different dimensions")
 
 
 def _calculate_diff_evkl(m1, m2):
