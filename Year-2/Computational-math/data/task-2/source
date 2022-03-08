@@ -1,0 +1,67 @@
+# (a) + b) + c
+# def parse_addition(string_pointer):
+# left = parse_variable(string_pointer)    # higher priority
+# while (string_pointer.get() == Sign.ADD.value):
+# string_pointer.inc()
+# right = parse_variable(string_pointer)   # higher priority
+# assert(right is not None)
+# left = Node(Sign.ADD.value, left, right)
+# return left
+
+
+# def parse_variable(string_pointer):
+# if not (is_alpha(string_pointer.get())):
+# return None
+# index_prev = string_pointer.index
+# string_pointer.inc()
+# while(is_alnum(string_pointer.get())):
+# string_pointer.inc()
+# return Node(string_pointer.string[index_prev:string_pointer.index])
+
+
+# def parse_blank(string, pointer):
+# assert(is_blank(string[pointer.index]))
+# while (is_blank(string[pointer.index])):
+# pointer.index += 1
+# return
+
+
+# syntax:
+# log   -> \log{base}{x}
+# sin   -> \sin{x}
+# cos   -> \cos{x}
+# tan   -> \tan{x}
+# ctan  -> \ctan{x}
+
+# class Associativity(Enum):
+# NONE = 0
+# LEFT_TO_RIGHT = 1
+# RIGHT_TO_LEFT = 2
+
+
+# _dict_variable = {
+# "e"  : math.e,
+# "pi" : math.pi
+# }
+
+# _dict_unary_operators = {
+# "-"   : (lambda x: -x, Associativity.RIGHT_TO_LEFT),
+# "sin" : (math.sin,     Associativity.NONE),
+# "cos" : (math.cos,     Associativity.NONE),
+# "tan" : (math.tan,     Associativity.NONE)
+# }
+
+# # (expr, priority)
+# _dict_binary_operators = {
+# "+"   : (lambda x, y: x + y,  Associativity.LEFT_TO_RIGHT, 1),
+# "-"   : (lambda x, y: x - y,  Associativity.LEFT_TO_RIGHT, 1),
+# "*"   : (lambda x, y: x * y,  Associativity.LEFT_TO_RIGHT, 10),
+# "frac": (lambda x, y: x / y,  Associativity.LEFT_TO_RIGHT, 10),
+# "^"   : (lambda x, y: x ** y, Associativity.RIGHT_TO_LEFT, 100),
+# "log" : (math.log,            Associativity.LEFT_TO_RIGHT, 1000)
+# }
+
+# you can create an array with variables + associations + priorities and thus
+# automate the creation of nodes for the parser based on these conditions
+
+

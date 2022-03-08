@@ -18,11 +18,11 @@ def solve():
     except ValueError:
         sys.exit("ValueError: invalid arguments.")
 
-    file_input = open(path_input, "r") if path_input else sys.stdin
-    file_output = open(path_output, "w") if path_output else sys.stdout
+    stream_input = open(path_input, "r") if path_input else sys.stdin
+    stream_output = open(path_output, "w") if path_output else sys.stdout
 
     if (lab_number in labs.keys()):
-        labs[lab_number](file_input, file_output)
+        labs[lab_number](stream_input, stream_output)
     else:
         sys.exit(f"Lab with number \"{lab_number}\" is not present.")
     

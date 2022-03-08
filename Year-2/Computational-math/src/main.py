@@ -12,8 +12,9 @@ def main():
     # file_output = open(sys.argv[2], "r") if len(sys.argv) == 3 else sys.stdout
 
     # solve the lab
-    lab.solve()
 
+    lab.solve()
+    
 
 if __name__ == "__main__":
     main()

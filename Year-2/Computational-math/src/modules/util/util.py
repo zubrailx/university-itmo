@@ -6,3 +6,4 @@ def is_number(s):
     if s[0] == '-':
         s = s[1:]
     return s.replace('.', '', 1).isdigit()
+

@@ -1,21 +1,31 @@
-{
-  "tasks" : [
-    {
-      "method" : "split_in_half",
-      "equation" : "x^2 + e^4",
-      "data" : [
-        "range_min": -3,
-        "range_max":  2
-      ]
-    },
-    {
-      "method" : "tangential",
-      "equation" : "x^2 + e^4",
-      "data" : [
-        "range_min": -3,
-        "range_max":  2, 
-        "x_0": 4
-      ]
+[
+  {
+    "method" : "split_half",
+    "equation" : "x^2 + \\e^4",
+    "data" : {
+      "range_min": -3,
+      "range_max":  2,
+      "iterations" : 10
     }
-  ]
-}
+  },
+  {
+    "method" : "tangent",
+    "equation" : "x^2 + \\e^4",
+    "data" : {
+      "range_min": -3,
+      "range_max":  2, 
+      "x_0": 4
+    }
+  },
+  {
+    "method" : "simple_iteration",
+    "equation": [
+      "x^2 + e^4",
+      "x^4 + e^5"
+    ],
+    "data": {
+      "range_min" : 4,
+      "range_max" : 6
+    }
+  }
+]
