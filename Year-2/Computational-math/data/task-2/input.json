@@ -10,22 +10,28 @@
   },
   {
     "method" : "tangent",
-    "equation" : "x^2 + \\e^4",
+    "equation" : "x^4 - 3 * x^2 + 75 * x - 10000",
     "data" : {
       "range_min": -3,
       "range_max":  2, 
-      "x_0": 4
+      "x_0": -11,
+      "iterations" : 10
     }
   },
   {
     "method" : "simple_iteration",
     "equation": [
-      "x^2 + e^4",
-      "x^4 + e^5"
+      "x_1^2 + x_2^4 + \\e^4",
+      "x_1^4 + x_2^4 + \\e^5"
     ],
     "data": {
       "range_min" : 4,
-      "range_max" : 6
+      "range_max" : 6,
+      "iterations": 10,
+      "x_0": {
+        "x_1" : 4,
+        "x_2" : 3
+      }
     }
   }
 ]

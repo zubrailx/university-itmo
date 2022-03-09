@@ -13,6 +13,7 @@ labs = {
 def solve():
     try:
         path_input = input("Input file: ").strip()
+        path_input = "data/task-2/input.json"
         path_output = input("Output file: ").strip()
         lab_number = int(input("Lab number: ").strip())
     except ValueError:

@@ -1,4 +1,3 @@
-import sys
 import json
 
 from . import methods
@@ -17,4 +16,5 @@ def solve(stream_input, stream_output):
         # can be parsed
         result = method_dict[m["method"]](m)
         stream_output.write(json.dumps(result))
+        stream_output.write("\n")
     return

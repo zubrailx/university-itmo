@@ -1,54 +1,7 @@
 import math
-from enum import Enum
 
-
-def is_alpha(char):
-    return (char >= 'a' and char <= 'z') or (char >= 'A' and char <= 'Z')
-
-def is_number(char):
-    return (char >= '0' and char <= '9')
-
-def is_alslash(char):
-    return (is_alpha(char) or (char == '\\'))
-
-def is_alnum(char):
-    return (is_alpha(char) or is_number(char))
-
-def is_blank(char):
-    return (char == ' ' or char == '\t' or char == '\n')
-
-
-
-class Type(Enum):
-    OPERATOR = 0
-    VARIABLE = 1
-    EOF = 2
-    BRACKET = 3
-    NUMBER = 4
-
-
-class Node:
-    def __init__(self, center, node_type, left=None, right=None):
-        self.left = left
-        self.center = center
-        self.right = right
-        self.node_type = node_type
-
-    def __str__(self):
-        string = f"({self.left}, {self.center}, {self.right})"
-        return string
-    
-    def calculate(self, var_dict):
-        if (self.node_type == Type.NUMBER):
-            return self.center
-        if (self.node_type == Type.VARIABLE):
-            if (type(self.center) == str):
-                assert (self.center in var_dict.keys())
-                return var_dict[self.center]
-        elif (self.node_type == Type.OPERATOR):
-            return self.center(self.left.calculate(var_dict), self.right.calculate(var_dict))
-        else:
-            raise Exception("Cannot calculate this expression")
+from .node import *
+from modules.util import is_number, is_alnum, is_alslash
 
 
 class StringPointer:
@@ -93,6 +46,7 @@ def parse_expression(string_pointer) -> tuple:
     tokens = tokenize(string_pointer)
     nodes = parse_tokens(tokens, 0)
     variables = get_list_of_variables(nodes)
+
     return (nodes, list(variables))
 
 
@@ -125,7 +79,7 @@ def tokenize(string):
         elif (is_alslash(string_pointer.get())):
             var_start = string_pointer.index
             string_pointer.inc()
-            while (is_alnum(string_pointer.get())):
+            while (is_alnum(string_pointer.get()) or string_pointer.get() == '_'):
                 string_pointer.inc()
             token = (Type.VARIABLE, string_pointer.string[var_start:string_pointer.index])
             tokens.append(token)
