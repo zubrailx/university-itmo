@@ -7,3 +7,5 @@ run:
 clean:
 	find . -type d -name "*__pycache__" -exec rm -rf {} +
 
+pack:
+	zip computational-math.zip -r *
