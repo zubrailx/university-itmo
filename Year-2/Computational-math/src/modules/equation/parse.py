@@ -1,7 +1,7 @@
 import math
 
 from .node import *
-from modules.util import is_number, is_alnum, is_alslash
+from modules.util.is_check import is_number, is_alnum, is_alslash
 
 
 class StringPointer:
@@ -65,8 +65,20 @@ def tokenize(string):
     string_pointer = StringPointer(string)
     tokens = []
     while (string_pointer.get() != chr(0)):
+        # check number
+        if (is_number(string_pointer.get()) or string_pointer.get() == '-' and string_pointer.index < len(string_pointer.string) - 1 and is_number(string_pointer.string[string_pointer.index + 1])):
+            var_start = string_pointer.index
+            dot_cnt = 0
+            string_pointer.inc()
+            while (is_number(string_pointer.get()) or string_pointer.get() == '.'):
+                if (string_pointer.get() == '.'):
+                    dot_cnt += 1
+                string_pointer.inc()
+            assert(dot_cnt <= 1 and "Can't parse number")
+            token = (Type.NUMBER, float(string_pointer.string[var_start:string_pointer.index]))
+            tokens.append(token)
         # check operator
-        if (string_pointer.get() in Operators.keys()):
+        elif (string_pointer.get() in Operators.keys()):
             token = (Type.OPERATOR, string_pointer.get())
             string_pointer.inc()
             tokens.append(token)
@@ -82,18 +94,6 @@ def tokenize(string):
             while (is_alnum(string_pointer.get()) or string_pointer.get() == '_'):
                 string_pointer.inc()
             token = (Type.VARIABLE, string_pointer.string[var_start:string_pointer.index])
-            tokens.append(token)
-        # check number
-        elif (is_number(string_pointer.get())):
-            var_start = string_pointer.index
-            dot_cnt = 0
-            string_pointer.inc()
-            while (is_number(string_pointer.get() or string_pointer.get() == '.')):
-                if (string_pointer.get() == '.'):
-                    dot_cnt += 1
-                string_pointer.inc()
-            assert(dot_cnt <= 1 and "Can't parse number")
-            token = (Type.NUMBER, float(string_pointer.string[var_start:string_pointer.index]))
             tokens.append(token)
         else:
             string_pointer.inc()

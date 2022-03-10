@@ -1,36 +1,32 @@
 [
   {
     "method" : "split_half",
-    "equation" : "x^2 + \\e^4",
+    "equation" : "x^2 - 10",
     "data" : {
-      "range_min": -3,
-      "range_max":  2,
+      "range_min": 0,
+      "range_max":  10,
       "iterations" : 10
     }
   },
   {
     "method" : "tangent",
-    "equation" : "x^4 - 3 * x^2 + 75 * x - 10000",
+    "equation" : "x^2 - 10",
     "data" : {
-      "range_min": -3,
-      "range_max":  2, 
-      "x_0": -11,
+      "x_0": 0.1,
       "iterations" : 10
     }
   },
   {
     "method" : "simple_iteration",
     "equation": [
-      "x_1^2 + x_2^4 + \\e^4",
-      "x_1^4 + x_2^4 + \\e^5"
+      "0.1 * x_1^2 + x_1 + 0.2 * x_2 ^ 2 - 0.3",
+      "0.2 * x_1^2 + x_2 - 0.1 * x_1 * x_2 - 0.7"
     ],
     "data": {
-      "range_min" : 4,
-      "range_max" : 6,
       "iterations": 10,
       "x_0": {
-        "x_1" : 4,
-        "x_2" : 3
+        "x_1" : 0.9,
+        "x_2" : 0.9
       }
     }
   }
