@@ -4,6 +4,10 @@ from .node import *
 from modules.util.is_check import is_number, is_alnum, is_alslash
 
 
+class ParseException(Exception):
+    pass
+
+
 class StringPointer:
     def __init__(self, string):
         self.string = string
@@ -19,15 +23,6 @@ class StringPointer:
         self.index += value
 
 
-# TODO add operations: sin, cos, tan, ctan, log
-Operators = {
-    "+": (lambda x, y: x + y),
-    "-": (lambda x, y: x - y),
-    "*": (lambda x, y: x * y),
-    "/": (lambda x, y: x / y),
-    "^": (lambda x, y: x ** y)
-}
-
 Precedences = {
     "+": (1, 2),
     "-": (1, 2),
@@ -42,8 +37,8 @@ Variables = {
 }
 
 
-def parse_expression(string_pointer) -> tuple:
-    tokens = tokenize(string_pointer)
+def parse_expression(string: str) -> tuple:
+    tokens = tokenize(string)
     nodes = parse_tokens(tokens, 0)
     variables = get_list_of_variables(nodes)
 

@@ -8,6 +8,17 @@ class Type(Enum):
     BRACKET = 3
     NUMBER = 4
 
+
+# TODO add operations: sin, cos, tan, ctan, log
+Operators = {
+    "+": (lambda x, y: x + y),
+    "-": (lambda x, y: x - y),
+    "*": (lambda x, y: x * y),
+    "/": (lambda x, y: x / y),
+    "^": (lambda x, y: x ** y)
+}
+
+
 class Node:
     def __init__(self, center, node_type, left=None, right=None):
         self.left = left
@@ -16,9 +27,14 @@ class Node:
         self.node_type = node_type
 
     def __str__(self):
-        string = f"({self.left}, {self.center}, {self.right})"
-        return string
-    
+        if (self.node_type == Type.VARIABLE or self.node_type == Type.NUMBER):
+            return self.center
+        if (self.node_type == Type.OPERATOR):
+            for k, v in Operators.items():
+                if self.center == v:
+                    return f"{self.left} {k} {self.right}"
+        return ""
+
     def calculate(self, var_dict):
         if (self.node_type == Type.NUMBER):
             return self.center
@@ -31,4 +47,3 @@ class Node:
         else:
             raise Exception("Cannot calculate this expression")
         return 0
-            

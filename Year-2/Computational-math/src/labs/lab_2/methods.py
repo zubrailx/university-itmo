@@ -8,7 +8,8 @@ from modules.util.color import Color, color_string
 
 
 def split_half(data: dict) -> dict:
-    node_root, var_list = parse.parse_expression(data["equation"][0])
+    node_root = data["equation"][0]
+    var_list = data["var_list"]
     if (len(var_list) != 1):
         raise ProjectException(color_string(Color.RED, "ERROR >> Amount of variables should be equal to 1"))
     try:
@@ -33,7 +34,8 @@ def split_half(data: dict) -> dict:
 
 
 def tangent(data: dict) -> dict:
-    node, var_list = parse.parse_expression(data["equation"][0])
+    node = data["equation"][0]
+    var_list = data["var_list"]
     if (len(var_list) != 1):
         raise ProjectException(color_string(Color.RED, "ERROR >> Amount of variables should be equal to 1"))
     try:
@@ -56,7 +58,10 @@ def tangent(data: dict) -> dict:
 
 
 def simple_iteration(data: dict) -> dict:
-    equation_list = data["equation"]
+    node_list = data["equation"]
+    equation_list = []
+    for i in range(node_list):
+        equation_list.append(str(node_list[i]))
     node_list = []
     try:
         iterations = data["data"]["iterations"]

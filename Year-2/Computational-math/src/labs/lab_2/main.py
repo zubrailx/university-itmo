@@ -4,12 +4,14 @@ import sys
 from . import methods
 from modules.util.color import color_string, Color
 from modules.util.project_exception import ProjectException
+from modules.equation import parse
+from modules.equation.parse import ParseException
 
 
 method_dict = {
-    "split_half":       methods.split_half,
-    "tangent":          methods.tangent,
-    "simple_iteration": methods.simple_iteration
+    "split_half":       (methods.split_half,        "Splitting in half"),
+    "tangent":          (methods.tangent,           "Tangent method"),
+    "simple_iteration": (methods.simple_iteration,  "Simple iteration method (for systems)")
 }
 
 
@@ -18,90 +20,149 @@ def solve(stream_input, stream_output):
     for m in method_list:
         if not (m["method"] in method_dict.keys()):
             print(color_string(Color.RED, f"ERROR >> Method '{m['method']}' not found."))
-        # can be parsed
         try:
-            result = method_dict[m["method"]](m)
-            stream_output.write(json.dumps(result))
-            stream_output.write("\n")
+            # TODO parse output to user stdout (global function, not only for lab 2)
+            result = method_dict[m["method"]][0](m)
+            stream_output.write(json.dumps(result) + "\n")
         except ProjectException as e:
             print(e)
     return
 
+
 def _get_data_from_file(stream_input):
-    return json.loads(" ".join(line.strip() for line in stream_input.readlines()))
+    data = json.loads(" ".join(line.strip() for line in stream_input.readlines()))
+    for i in range(len(data)):
+        try:
+            equation_list = data[i]["equation"]
+            for j in range(len(equation_list)):
+                data[i]["equation"][j] = parse.parse_expression(equation_list[j])
+        except ParseException as e:
+            print(color_string(Color.RED, e))
+            print(color_string(Color.RED, f"ERROR >> Invalid user input in index {i} method in list. Skipping."))
+            data.pop(i)
+    return data
 
-
-methods_stdio_name = {
-    1: ("Splitting in half", "split_half"),
-    2: ("Tangent method", "tangent"),
-    3: ("Simple iteration method (for systems)", "simple_iteration")
-}
 
 def _get_data_from_stdin():
     data = []
-    print("Beginning the user input...")
-    for k, v in methods_stdio_name.items():
-        print(f"{k}) {v[0]}")
-    current = 0
     while True:
         data.append(dict())
-        while True:
-            try:
-                number = int(input("Choose the method number: "))
-                if number not in methods_stdio_name.keys():
-                    raise ValueError()
-                break
-            except ValueError:
-                print(color_string(Color.RED, "ERROR >> Invalid user input"))
-        data[current]["method"] = methods_stdio_name[number][1]
-
-        while True:
-            try:
-                count = int(input("Enter the number of equations: "))
-                if number not in methods_stdio_name.keys():
-                    raise ValueError()
-                break
-            except ValueError:
-                print(color_string(Color.RED, "ERROR >> Invalid user input"))
-        data[current]["equation"] = []
-        for _ in range(count):
-            equation = input("Equation: ")
-            data[current]["equation"].append(equation)
-
-        _print_additional_description()
-        while True:
-            try:
-                additional = []
-                line = sys.stdin.readline().strip()
-                while line:
-                    additional.append(line)
-                    if line:
-                        line = sys.stdin.readline().strip()
-                    else:
-                        break
-                additional_json = json.loads(" ".join(additional))
-                data[current]["data"] = additional_json
-                break
-            except Exception:
-                print(color_string(Color.RED, "Invalid user input. Try again."))
-
-        if (input("Do you want to end? y/n: ").strip().lower() == "y"):
+        data[len(data) - 1]["method"] = _get_data_from_stdin_method()
+        method = method_dict[data[len(data) - 1]["method"]][0]
+        data[len(data) - 1]["equation"], var_list = _get_data_from_stdin_equation(method)
+        data[len(data) - 1]["data"] = _get_data_from_stdin_data(var_list, method)
+        data[len(data) - 1]["var_list"] = var_list
+        if (input("Finish input? Y/N: ").strip().lower() == "y"):
             break
     return data
 
-def _print_additional_description():
-    print("Enter additional information in JSON format, cuz there are a lot of arguments :")
-    print("Example format: ")
-    print("-------------------------")
-    print('{')
-    print('"iterations": 10,')
-    print('"x_0": {')
-    print('"x_1": 0.9,')
-    print('"x_2": 0.9')
-    print('},')
-    print('"range_min": -3,')
-    print('"range_max": 2')
-    print('}')
-    print("-------------------------")
-    print("Press Ctrl + D to end input")
 
+def _get_data_from_stdin_method():
+    method_dict_keys = list(method_dict.keys())
+    for i in range(len(method_dict_keys)):
+        print(f"{i + 1}) {method_dict[method_dict_keys[i]][1]}")
+    while True:
+        try:
+            number = int(input("Choose the method number: ")) - 1
+            if not (0 <= number < len(method_dict_keys)):
+                raise ValueError()
+            break
+        except ValueError:
+            print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
+    return method_dict_keys[number]
+
+
+def _get_data_from_stdin_equation(function):
+    var_set = set()
+    equation_list = list()
+
+    if (function == methods.simple_iteration):
+        while True:
+            try:
+                count = int(input("Enter the number of equations: "))
+                if (count <= 0):
+                    raise ValueError()
+                break
+            except ValueError:
+                print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
+    else:
+        count = 1
+
+    for _ in range(count):
+        while True:
+            try:
+                node, var_list = parse.parse_expression(input("Equation: ").strip())
+                equation_list.append(node)
+                current_set = var_set | set(var_list)
+                if (len(current_set) > count):
+                    raise ValueError("Too much variables, try again.")
+                var_set = current_set
+                break
+            except ParseException as e:
+                print(color_string(Color.RED, e))
+                print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
+            except ValueError as e:
+                print(e)
+    return (equation_list, list(var_set))
+
+
+def _get_data_from_stdin_data(var_list: list, function):
+    _get_data_from_stdin_data_description()
+    data = {}
+    # iterations
+    while True:
+        try:
+            iterations = input("Enter 'iterations' or blank: ")
+            if (iterations.strip() == ''):
+                break
+            iterations = int(iterations)
+            if (iterations < 0):
+                raise ValueError()
+            data["iterations"] = iterations
+            break
+        except ValueError:
+            print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
+    # range_min
+    while True:
+        try:
+            range_min = input("Enter 'range_min' or blank: ")
+            if (range_min.strip() == ''):
+                break
+            range_min = float(range_min)
+            data["range_min"] = range_min
+            break
+        except ValueError:
+            print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
+    # range_max
+    while True:
+        try:
+            range_max = input("Enter 'range_max' or blank: ")
+            if (range_max.strip() == ''):
+                break
+            range_max = float(range_max)
+            data["range_max"] = range_max
+            break
+        except ValueError:
+            print(color_string(Color.RED, "ERROR >> Invalid user input"))
+    # x_0
+    if (function == methods.tangent or function == methods.simple_iteration):
+        for i in range(len(var_list)):
+            while True:
+                try:
+                    var_value = float(input(f"Enter the value for '{var_list[i]}: '"))
+                    data[var_list[i]] = var_value
+                    break
+                except ValueError:
+                    print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
+    return data
+
+
+def _get_data_from_stdin_data_description():
+    print("Additional arguments: ")
+    print("-" * 100)
+    print("iterations   (int)   - count of iterations for the method")
+    print("range_min    (float) - minimum value of border")
+    print("range_max    (float) - maximum value of border")
+    print("x_0          (dict<variable(str), float>) - values of arguments for first computation")
+    print("-" * 100)
+    print()
