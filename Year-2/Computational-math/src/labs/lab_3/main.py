@@ -4,6 +4,7 @@ import sys
 from modules.util.color import color_string, Color
 from modules.parse import parse
 from modules.parse.parse import ParseException
+from modules.parse.tokenize import TokenizeException
 from modules.util.project_exception import ProjectException
 from .simpson import simpson
 
@@ -42,7 +43,7 @@ def _read_data_stdin_equation():
     data = []
     while True:
         try:
-            count = int(input("Enter parse count: "))
+            count = int(input("Enter equation count: "))
             break
         except ValueError:
             print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
@@ -53,8 +54,8 @@ def _read_data_stdin_equation():
                 equation = parse.parse_expression(input("Enter the parse: "))
                 data.append(equation)
                 break
-            except ParseException as e:
-                print(e)
+            except (ParseException, TokenizeException) as e:
+                print(color_string(Color.RED, e))
     return data
 
 

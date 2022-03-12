@@ -1,7 +1,6 @@
-import math
-
 from .node import *
 from .tokenize import tokenize, Token, Operator
+from .variables import _OperatorsBinary, _OperatorsUnary, _Variables
 
 
 class ParseException(Exception):
@@ -26,35 +25,11 @@ class TokenPointer:
         return self.tokens[start:end]
 
 
-# TODO add operations: sin, cos, tan, ctan, log
-_OperatorsBinary = {
-    Operator.SUM: ((1, 2), lambda x, y: x + y),
-    Operator.SUB: ((1, 2), lambda x, y: x - y),
-    Operator.MUL: ((3, 4), lambda x, y: x * y),
-    Operator.DIV: ((3, 4), lambda x, y: x / y),
-    Operator.POW: ((6, 5), lambda x, y: x ** y)
-}
-
-# if I want to add operator that works from right to left I need to create in structure node pointer to parent and
-# create variable that contains the pointer to the latest bracket and variable, so I can make a decorator and replace
-# old object with new that contains the old. So I don't need unary operators that work right to left :)
-_OperatorsUnary = {
-    Operator.SUB: ((1, 0), lambda x: -x)
-}
-
-
-_Variables = {
-    "\\pi": math.pi,
-    "\\e": math.e
-}
-
-
 def parse_expression(string: str) -> tuple:
     tokens = tokenize(string.strip())
     token_pointer = TokenPointer(tokens)
     nodes = parse_tokens(token_pointer, 0)
     variables = get_list_of_variables(nodes)
-
     return (nodes, list(variables))
 
 
@@ -62,7 +37,7 @@ def get_list_of_variables(node) -> set:
     variables = set()
     if (node is None):
         return variables
-    if (node.node_type == NodeType.BINARY_OPERATOR or NodeType.UNARY_OPERATOR):
+    if (node.node_type in [NodeType.BINARY_OPERATOR, NodeType.UNARY_OPERATOR]):
         variables |= get_list_of_variables(node.left)
         variables |= get_list_of_variables(node.right)
     elif (node.node_type == NodeType.VARIABLE):
@@ -75,7 +50,7 @@ _last_expression = None
 
 def parse_tokens(pointer: TokenPointer, precedence: int = 0):
     k, v = pointer.get()
-    if (k == Token.BRACKET and v == '=='):
+    if (k == Token.BRACKET and v == '()'):
         left_node = _parse_brackets(pointer)
     elif (k == Token.VARIABLE):
         left_node = _parse_variable(pointer)
@@ -91,6 +66,7 @@ def parse_tokens(pointer: TokenPointer, precedence: int = 0):
         if (k == Token.EOF or k == Token.BRACKET):
             break
         if (k == Token.OPERATOR):
+            # check unary operator
             bin_node = _parse_binary_operator(pointer, left_node, precedence)
             if (bin_node is None):
                 break
@@ -128,10 +104,10 @@ def _parse_unary_operator(pointer: TokenPointer):
     k, v = pointer.get()
     pointer.inc()
     l, r = _OperatorsUnary[v][0]
-    if (l > r):
-        node = parse_tokens(pointer, 0)
-        return Node(_OperatorsUnary[v.value][1], NodeType.UNARY_OPERATOR, None, node)
-    elif (l < r):
+    if (l < r):
+        node = parse_tokens(pointer, r)
+        return Node(_OperatorsUnary[v][1], NodeType.UNARY_OPERATOR, None, node)
+    elif (l > r):
         raise ParseException(f"Right-left operators ane not realized yet.")
     else:
         raise ParseException(f"Operator {(k, v)} has invalid priority: {(l, r)}")

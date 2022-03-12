@@ -54,17 +54,7 @@ def tokenize(string):   # -> (Type, value)
     pointer = StringPointer(string)
     tokens = []
     while (not pointer.is_end()):
-        # check number
-        length = _is_number(pointer)
-        if (length):
-            _add_token(tokens, pointer, Token.NUMBER, length)
-            continue
-        # check variable
-        length = _is_variable(pointer)
-        if (length):
-            _add_token(tokens, pointer, Token.VARIABLE, length)
-            continue
-        # check operator
+        # check operator (should have higher priority than number, cuz x - 5 will be x <none> (-5))
         length = _is_operator(pointer)
         if (length):
             _add_token(tokens, pointer, Token.OPERATOR, length)
@@ -73,6 +63,16 @@ def tokenize(string):   # -> (Type, value)
         length = _is_bracket(pointer)
         if (length):
             _add_token(tokens, pointer, Token.BRACKET, length)
+            continue
+        # check variable
+        length = _is_variable(pointer)
+        if (length):
+            _add_token(tokens, pointer, Token.VARIABLE, length)
+            continue
+        # check number
+        length = _is_number(pointer)
+        if (length):
+            _add_token(tokens, pointer, Token.NUMBER, length)
             continue
         # skip blank character
         length = _is_blank(pointer)
@@ -133,4 +133,3 @@ def _is_blank(pointer: StringPointer) -> int:
     while (is_char_blank(pointer.get(length))):
         length += 1
     return length
-
