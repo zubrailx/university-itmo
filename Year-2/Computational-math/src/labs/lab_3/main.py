@@ -48,10 +48,10 @@ def _read_data_stdin_equation():
         except ValueError:
             print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
 
-    for _ in range(count):
+    for i in range(count):
         while True:
             try:
-                equation = parse.parse_expression(input("Enter the parse: "))
+                equation = parse.parse_expression(input(f"Enter the equation [{i + 1}]: "))
                 data.append(equation)
                 break
             except (ParseException, TokenizeException) as e:

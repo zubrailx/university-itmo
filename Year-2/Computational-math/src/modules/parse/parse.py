@@ -50,7 +50,7 @@ _last_expression = None
 
 def parse_tokens(pointer: TokenPointer, precedence: int = 0):
     k, v = pointer.get()
-    if (k == Token.BRACKET and v == '()'):
+    if (k == Token.BRACKET and str(v) in '()'):
         left_node = _parse_brackets(pointer)
     elif (k == Token.VARIABLE):
         left_node = _parse_variable(pointer)
