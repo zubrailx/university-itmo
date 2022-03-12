@@ -4,7 +4,7 @@ from enum import Enum
 
 import labs as lab
 
-from modules.util.is_check import is_uint_word
+from modules.util.is_check import is_word_uint
 from modules.util.color import Color, color_string
 from modules.util.project_exception import ProjectException
 
@@ -76,7 +76,7 @@ def main():
         exit()
 
     try:
-        if (lab_number is not None and is_uint_word(lab_number)):
+        if (lab_number is not None and is_word_uint(lab_number)):
             lab_number = int(lab_number)
             lab.solve(lab_number, input_file, output_file)
         else:

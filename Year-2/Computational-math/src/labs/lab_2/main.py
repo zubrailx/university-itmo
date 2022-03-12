@@ -4,8 +4,8 @@ import sys
 from . import methods
 from modules.util.color import color_string, Color
 from modules.util.project_exception import ProjectException
-from modules.equation import parse
-from modules.equation.parse import ParseException
+from modules.parse import parse
+from modules.parse.parse import ParseException
 
 
 method_dict = {
@@ -33,9 +33,9 @@ def _get_data_from_file(stream_input):
     data = json.loads(" ".join(line.strip() for line in stream_input.readlines()))
     for i in range(len(data)):
         try:
-            equation_list = data[i]["equation"]
+            equation_list = data[i]["parse"]
             for j in range(len(equation_list)):
-                data[i]["equation"][j] = parse.parse_expression(equation_list[j])
+                data[i]["parse"][j] = parse.parse_expression(equation_list[j])
         except ParseException as e:
             print(color_string(Color.RED, e))
             print(color_string(Color.RED, f"ERROR >> Invalid user input in index {i} method in list. Skipping."))
@@ -49,7 +49,7 @@ def _get_data_from_stdin():
         data.append(dict())
         data[len(data) - 1]["method"] = _get_data_from_stdin_method()
         method = method_dict[data[len(data) - 1]["method"]][0]
-        data[len(data) - 1]["equation"], var_list = _get_data_from_stdin_equation(method)
+        data[len(data) - 1]["parse"], var_list = _get_data_from_stdin_equation(method)
         data[len(data) - 1]["data"] = _get_data_from_stdin_data(var_list, method)
         data[len(data) - 1]["var_list"] = var_list
         if (input("Finish input? Y/N: ").strip().lower() == "y"):

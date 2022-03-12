@@ -1,6 +1,6 @@
 from copy import copy
 
-from modules.equation import parse
+from modules.parse import parse
 from modules.equation.derivative import grad, node_flatten
 from modules.matrix import Matrix
 from modules.util.project_exception import ProjectException
@@ -8,7 +8,7 @@ from modules.util.color import Color, color_string
 
 
 def split_half(data: dict) -> dict:
-    node_root = data["equation"][0]
+    node_root = data["parse"][0]
     var_list = data["var_list"]
     if (len(var_list) != 1):
         raise ProjectException(color_string(Color.RED, "ERROR >> Amount of variables should be equal to 1"))
@@ -34,7 +34,7 @@ def split_half(data: dict) -> dict:
 
 
 def tangent(data: dict) -> dict:
-    node = data["equation"][0]
+    node = data["parse"][0]
     var_list = data["var_list"]
     if (len(var_list) != 1):
         raise ProjectException(color_string(Color.RED, "ERROR >> Amount of variables should be equal to 1"))
@@ -58,7 +58,7 @@ def tangent(data: dict) -> dict:
 
 
 def simple_iteration(data: dict) -> dict:
-    node_list = data["equation"]
+    node_list = data["parse"]
     equation_list = []
     for i in range(node_list):
         equation_list.append(str(node_list[i]))

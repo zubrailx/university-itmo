@@ -1,6 +1,6 @@
 from copy import copy
 
-from .node import Node
+from modules.parse.node import Node
 
 
 _PRECISION = 0.0001
