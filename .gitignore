@@ -1,6 +1,7 @@
 *.aux
 *.log
 *.gz
+*.zip
 .idea/
 *.iml
 target/
