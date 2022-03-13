@@ -6,7 +6,6 @@ import labs.lab_2 as lab_2
 import labs.lab_3 as lab_3
 
 
-
 labs = {
     1: lab_1.solve,
     2: lab_2.solve,
