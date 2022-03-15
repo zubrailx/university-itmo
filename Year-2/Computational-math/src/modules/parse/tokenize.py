@@ -1,5 +1,5 @@
 from enum import Enum
-from modules.util.is_check import is_char_number, is_char_alnum, is_char_alpha, is_char_blank
+from modules.util import is_char_number, is_char_alnum, is_char_alpha, is_char_blank
 
 
 class TokenizeException(Exception):

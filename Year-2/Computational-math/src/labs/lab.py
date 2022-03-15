@@ -1,5 +1,5 @@
-from modules.util.color import Color, color_string
-from modules.util.project_exception import ProjectException
+from modules.util import Color, color_string
+from modules.util import ProjectException
 
 import labs.lab_1 as lab_1
 import labs.lab_2 as lab_2

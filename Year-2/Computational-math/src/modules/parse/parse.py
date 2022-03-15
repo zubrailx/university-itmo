@@ -1,4 +1,4 @@
-from .node import *
+from .node import Node, NodeType
 from .tokenize import tokenize, Token, Operator
 from .variables import _OperatorsBinary, _OperatorsUnary, _Variables
 

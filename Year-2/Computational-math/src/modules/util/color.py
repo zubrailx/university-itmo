@@ -1,6 +1,6 @@
 from enum import Enum 
 
-class Color(Enum): # You may need to change color settings
+class Color(Enum):  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
     GREEN = '\033[32m'

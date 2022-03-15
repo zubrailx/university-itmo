@@ -4,9 +4,9 @@ from enum import Enum
 
 import labs as lab
 
-from modules.util.is_check import is_word_uint
-from modules.util.color import Color, color_string
-from modules.util.project_exception import ProjectException
+from modules.util import is_word_uint
+from modules.util import Color, color_string
+from modules.util import ProjectException
 
 
 class Key(Enum):

@@ -1,7 +1,11 @@
 from enum import Enum
 
 from .variables import _OperatorsUnaryString, _OperatorsBinaryString
-from modules.util.project_exception import ProjectException
+from modules.util import ProjectException
+
+
+class CalculationException(Exception):
+    pass
 
 
 class NodeType(Enum):
@@ -22,7 +26,7 @@ class Node:
     def calculate(self, var_dict):
         # number
         if (self.node_type == NodeType.NUMBER):
-            return self.center
+            return float(self.center)
         # variable
         elif (self.node_type == NodeType.VARIABLE):
             if (type(self.center) == str):
@@ -31,7 +35,7 @@ class Node:
                 return var_dict[self.center]
         # binary operator
         elif (self.node_type == NodeType.BINARY_OPERATOR):
-            return self.center(self.left.calculate(var_dict), self.right.calculate(var_dict))
+            return self.center(self.left.calculate(var_dict),self.right.calculate(var_dict))
         # unary operator
         elif (self.node_type == NodeType.UNARY_OPERATOR):
             if (self.left is not None):

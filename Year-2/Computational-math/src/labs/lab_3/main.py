@@ -1,11 +1,9 @@
 import json
 import sys
 
-from modules.util.color import color_string, Color
-from modules.parse import parse
-from modules.parse.parse import ParseException
-from modules.parse.tokenize import TokenizeException
-from modules.util.project_exception import ProjectException
+from modules.util import color_string, Color
+from modules.parse import parse, ParseException, TokenizeException
+from modules.util import ProjectException
 from .simpson import simpson
 
 
@@ -14,13 +12,39 @@ def solve(input_stream, output_stream):
     for e in data:
         try:
             result = simpson(e)
-            output_stream.write(json.dumps(result) + "\n")
+            if output_stream == sys.stdout:
+                _print_result(result)
+            else:
+                output_stream.write(json.dumps(result, indent=4) + "\n")
         except ProjectException as e:
-            print(e)
+            print(color_string(Color.RED, f"ERROR[simpson] >> {e}"))
 
 
-def _read_data_file(input_stream):
-    data = json.loads("".join(input_stream.readlines()))
+def _print_result(result):
+    for i in range(len(result)):
+        print(f"Equation #{i + 1}:")
+        print("\tIntegral:\t%.8f:" % result[i]['result'])
+        print("\tError R1:\t%.8e:" % result[i]['r1'])
+        print("\tError R2:\t%.8e:" % result[i]['r2'])
+        print("\tError R:\t%.8e:" % result[i]['r'])
+
+
+def _read_data_file(stream_input):
+    data = json.loads(" ".join(line.strip() for line in stream_input.readlines()))
+    for i in range(len(data)):
+        try:
+            equation_list = data[i]["equation"]
+            var_lst = set()
+            data[i]["equation"] = list()
+            for j in range(len(equation_list)):
+                equation, var_cur_lst = parse.parse_expression(equation_list[j])
+                data[i]["equation"].append((equation, var_cur_lst))
+                var_lst |= set(var_cur_lst)
+            data[i]["var_lst"] = list(var_lst)
+        except ParseException as e:
+            print(color_string(Color.RED, e))
+            print(color_string(Color.RED, f"ERROR >> Invalid user input in index {i} method in list. Skipping."))
+            data.pop(i)
     return data
 
 
@@ -29,10 +53,12 @@ def _read_data_stdin():
     while True:
         data.append(dict())
 
-        data[len(data) - 1]["parse"] = _read_data_stdin_equation()
+        data[len(data) - 1]["equation"], data[len(data) - 1]["var_list"] = _read_data_stdin_equation()
         range_dict = _read_data_stdin_range()
-        data[len(data) - 1]["range_min"] = range_dict["range_min"]
-        data[len(data) - 1]["range_max"] = range_dict["range_max"]
+        data[len(data) - 1]["data"] = dict()
+        data[len(data) - 1]["data"]["range_min"] = range_dict["range_min"]
+        data[len(data) - 1]["data"]["range_max"] = range_dict["range_max"]
+        data[len(data) - 1]["data"]["step"] = _read_data_stdin_step()
 
         if (input("Finish input? Y/N: ").strip().lower() == "y"):
             break
@@ -41,22 +67,18 @@ def _read_data_stdin():
 
 def _read_data_stdin_equation():
     data = []
-    while True:
-        try:
-            count = int(input("Enter equation count: "))
-            break
-        except ValueError:
-            print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
-
+    count = 1
+    var_list = set()
     for i in range(count):
         while True:
             try:
-                equation = parse.parse_expression(input(f"Enter the equation [{i + 1}]: "))
-                data.append(equation)
+                equation, var_list_cur = parse.parse_expression(input(f"Enter the equation [{i + 1}]: "))
+                var_list |= set(var_list_cur)
+                data.append((equation, var_list_cur))
                 break
             except (ParseException, TokenizeException) as e:
                 print(color_string(Color.RED, e))
-    return data
+    return (data, var_list)
 
 
 def _read_data_stdin_range():
@@ -76,3 +98,12 @@ def _read_data_stdin_range():
         except ValueError:
             print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
     return data
+
+
+def _read_data_stdin_step():
+    while True:
+        try:
+            step = float(input("Enter step: "))
+            return step
+        except ValueError:
+            print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
