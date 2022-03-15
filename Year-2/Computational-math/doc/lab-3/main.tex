@@ -6,14 +6,6 @@
 \geometry{ 
 	a4paper, total={160mm,267mm}
 }
-\columnsep 10mm
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-
-% colontituls 
-\renewcommand{\headrulewidth}{0 pt}
-\cfoot{}
-\footskip=5mm
 
 %----text,fonts------------------------------------------------------------------------------------
 \usepackage{mmap}
@@ -43,6 +35,9 @@
 
 % relative importing
 \usepackage{import}
+
+% module
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
 
 \begin{document}
 
@@ -96,11 +91,10 @@ y = \int_a^b f(x)
 \end{equation*}
 
 Введя обозначения 
-\begin{equation*}
-  \sigma_1 = y_1 + y_3 + \ldots + y_{n-1}
-
-  \sigma_2 = y_2 + y_4 + \ldots + y_n
-\end{equation*}
+\begin{align*}
+  \sigma_1 &= y_1 + y_3 + \ldots + y_{n-1} \\
+  \sigma_2 &= y_2 + y_4 + \ldots + y_n
+\end{align*}
 
 запишем формулу в укороченном виде:
 
@@ -113,23 +107,118 @@ y = \int_a^b f(x)
 
 \includegraphics[width=\linewidth]{draw.png}
 
+\bigskip
 \section{Листинг реализованного численного метода.}
 
 \begin{verbatim}
-  y0 = calculate(equation, {var_lst[0]: range_min})
-  yn = calculate(equation, {var_lst[0]: range_max})
-  n = int((range_max - range_min) / step)
+def _calculate_integral(equation: Node, range_min, range_max, step, var_lst):
+    y0 = calculate(equation, {var_lst[0]: range_min})
+    yn = calculate(equation, {var_lst[0]: range_max})
+    n = int((range_max - range_min) / step)
 
-  sigma1 = sum([calculate(
-    equation, {var_lst[0]: range_min + step * i}) for i in range(1, n, 2)])
-  sigma2 = sum([calculate(
-    equation, {var_lst[0]: range_min + step * i}) for i in range(2, n, 2)])
+    sigma1 = sum( [calculate(
+      equation, {var_lst[0]: range_min + step * i}) for i in range(1, n, 2)])
+    sigma2 = sum([calculate(
+      equation, {var_lst[0]: range_min + step * i}) for i in range(2, n, 2)])
 
-  return (step / 3) * (y0 + yn + 4 * sigma1 + 2 * sigma2)
+    return (step / 3) * (y0 + yn + 4 * sigma1 + 2 * sigma2)
 \end{verbatim}
 
+\newpage
 \section{Примеры и результаты работы программы на разных данных.}
 
+\noindentВвод данный через ifile-ofile:
+\begin{verbatim}
+data/task-3/input.json
+[
+  {
+  "equation": [
+    "x^2 + 5",
+    "x^3"
+  ],
+  "data": {
+    "range_min": -5,
+    "range_max": 10,
+    "step": 0.001
+    }
+  }
+]
+
+data/task-3/output.json
+[
+    {
+        "result": 449.99999999999915,
+        "r1": 1.6653345369377348e-15,
+        "r2": 0.0,
+        "r": 1.6653345369377348e-15
+    },
+    {
+        "result": 2343.749999999999,
+        "r1": 1.6653345369377348e-15,
+        "r2": 0.0,
+        "r": 1.6653345369377348e-15
+    }
+]
+\end{verbatim}
+
+\bigskip
+\noindentВвод данных через stdin-stdout:
+\begin{verbatim}
+/usr/bin/python3.9 
+
+Enter the equation [1]: x^2 + 10 * x + 5
+Enter the left border: -12
+Enter the right border: 12
+Enter step: 0.001
+Finish input? Y/N: y
+Equation #1:
+        Integral:       1272.00000000:
+        Error R1:       2.66453526e-15:
+        Error R2:       0.00000000e+00:
+        Error R:        2.66453526e-15:
+
+\end{verbatim}
 
 \section{Вывод.}
+
+В ходе выполнения данной лабораторной работы я познакомился с тем, каким образом можно 
+считать значения интеграла от функции с помощью метода Симпсона. Кроме того, для того, чтобы
+должным образом понимать, откуда была взята данная формула, разобрался с квадратурными формулами
+Ньютона-Котеса (метод Симпсона есть частный случай при $n=3$, метод трапеций при $n = 2$), а также
+с соответствующим интерполяционным полиномом Лагранжа.
+
+\medskip
+Для вычисления значения функции в точках устанимого разрыва следовал следующему алгоритму: 
+вычислял значение функции в некоторой окрестности радиуса $\epsilon$ и находил среднее значение, определял $(f(x + \epsilon) 
++ f(x - \epsilon)) / 2$. 
+
+\medskip
+Кроме того, для более корректного определения значений измерений, расчитывал пределельную погрешность.
+Для метода Симпсона с сравнении с методом трапеций и методом прямоугольников она имеет меньший порядок,
+поскольку при нахождении площади некоторого сектора ширины $h$ функция, ограничивающая сверху данную
+область, имеет вид параболы, в то время как для других предствленных методом она имеет форму прямой 
+линии, соответственно, точность измерений будет больше.
+
+\smallskip
+Приводя конкретные значения предельных абсолютных погрешностей:
+
+\smallskip
+\textbullet~Метод средних прямоугольников: $\abs{R_1} \le \max_{x \in [a, b]}\abs{f''(x)} \dfrac{(b-a)^3}{24 n^2}$
+
+\smallskip
+\textbullet~Метод трапеций: $\abs{R_1} \le \max_{x \in [a, b]}\abs{f''(x)} \dfrac{(b-a)^3}{12 n^2}$
+
+\smallskip
+\textbullet~Метод Симпсона: $\abs{R_1} \le \max_{x \in [a, b]}\abs{f''''(x)} \dfrac{(b-a)^5}{180 n^4}$
+
+\medskip
+Также не следует забывать про набегающую погрешность, возникающую из-за ограниченности разрядной
+сетки компьютера. Так для метода Симпсона данная величина равняется
+\begin{equation*}
+  \abs{R_2} \le (b - a) * \epsilon
+\end{equation*}, где $\epsilon$ - величина, обозначающая погрешность вычислений для каждой итерации нахождения значения функции. Так для 64-разрядной
+машины $\epsilon \le 1/2^{52}$.
+
+\medskip
+Таким образом, предельная абсолютная погрешность измерений: $\abs{R} \le \abs{R_1} + \abs{R_2}$.
 \end{document}
