@@ -3,4 +3,5 @@ __pycache__
 .idea/
 input.txt
 output.txt
+build/
 
