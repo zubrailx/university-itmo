@@ -20,6 +20,13 @@ class Operator(Enum):
     DIV = "/"
     POW = "^"
     MUL = "*"
+    SIN = "\\sin"
+    COS = "\\cos"
+    TAN = "\\tan"
+    COT = "\\cot"
+    LOG2 = "\\log2"
+    LOGE = "\\loge"
+    LOG10 = "\\log10"
     EOF = "\x00"
 
     def __str__(self):
@@ -53,9 +60,13 @@ class StringPointer:
 def tokenize(string):   # -> (Type, value)
     pointer = StringPointer(string)
     tokens = []
+    operator_dict = dict()
+    for e in Operator:
+        operator_dict[e.value] = e
+    # tokenizing
     while (not pointer.is_end()):
         # check operator (should have higher priority than number, cuz x - 5 will be x <none> (-5))
-        length = _is_operator(pointer)
+        length = _is_operator(pointer, operator_dict)
         if (length):
             _add_token(tokens, pointer, Token.OPERATOR, length)
             continue
@@ -97,8 +108,12 @@ def _add_token(tokens: list, pointer: StringPointer, typo: Token, length: int):
     pointer.inc(length)
 
 
-def _is_operator(pointer: StringPointer) -> int:
-    return int(pointer.get() in [operator.value for operator in Operator])
+def _is_operator(pointer: StringPointer, operator_dict: dict) -> int:
+    operator_max_length = max([len(k) for k in operator_dict.keys()])
+    for i in range(1, operator_max_length + 1):
+        if (pointer.substr(pointer.index, pointer.index + i) in operator_dict.keys()):
+            return i
+    return 0
 
 def _is_variable(pointer: StringPointer) -> int:
     length = 0
