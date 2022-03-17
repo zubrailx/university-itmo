@@ -25,8 +25,8 @@ def simpson(data):
         equation = equation_lst[i][0]
 
         var_lst = equation_lst[i][1]
-        if (len(var_lst) != 1):
-            raise ProjectException(f"In equation {str(equation)} var_list != 1")
+        if (len(var_lst) > 1):
+            raise ProjectException(f"In equation {str(equation)} var_list > 1")
 
         result_lst.append(dict())
         result_lst[i]["result"] = _calculate_integral(equation, range_min, range_max, step, var_lst)
@@ -37,11 +37,18 @@ def simpson(data):
 
 
 def _calculate_integral(equation: Node, range_min, range_max, step, var_lst):
-    y0 = calculate(equation, {var_lst[0]: range_min})
-    yn = calculate(equation, {var_lst[0]: range_max})
-    n = int((range_max - range_min) / step)
-    sigma1 = sum([calculate(equation, {var_lst[0]: range_min + step * i}) for i in range(1, n, 2)])
-    sigma2 = sum([calculate(equation, {var_lst[0]: range_min + step * i}) for i in range(2, n, 2)])
+    if(len(var_lst) == 1):
+        y0 = calculate(equation, {var_lst[0]: range_min})
+        yn = calculate(equation, {var_lst[0]: range_max})
+        n = int((range_max - range_min) / step)
+        sigma1 = sum([calculate(equation, {var_lst[0]: range_min + step * i}) for i in range(1, n, 2)])
+        sigma2 = sum([calculate(equation, {var_lst[0]: range_min + step * i}) for i in range(2, n, 2)])
+    else:
+        y0 = calculate(equation, {})
+        yn = calculate(equation, {})
+        n = int((range_max - range_min) / step)
+        sigma1 = sum([calculate(equation, {}) for _ in range(1, n, 2)])
+        sigma2 = sum([calculate(equation, {}) for _ in range(2, n, 2)])
     return (step / 3) * (y0 + yn + 4 * sigma1 + 2 * sigma2)
 
     
@@ -51,31 +58,37 @@ def _calculate_r1(range_min, range_max):
 # invalid calculation cuz many errors
 def _calculate_r2(equation: Node, range_min, range_max, step, var_lst):
     # finding M4
-    f_l4 = grad(grad(grad(grad(node_flatten(equation, {var_lst[0]: None}, var_lst[0])))))
-    n = int((range_max - range_min) / step)
-    y_l4 = float("-inf")
-    for i in range(n):
-        try:
-            y_cur_l4 = f_l4(range_min + step * i)
-            if (y_cur_l4 > y_l4):
-                y_l4 = y_cur_l4
-        except CalculationException:
-            continue
-    if (y_l4 == float("-inf")):
-        return float("NaN")
-    return (range_max - range_min) * (step ** 4) / 180 * y_l4
+    if (len(var_lst) == 1):
+        f_l4 = grad(grad(grad(grad(node_flatten(equation, {var_lst[0]: None}, var_lst[0])))))
+        n = int((range_max - range_min) / step)
+        y_l4 = float("-inf")
+        for i in range(n):
+            try:
+                y_cur_l4 = f_l4(range_min + step * i)
+                if (y_cur_l4 > y_l4):
+                    y_l4 = y_cur_l4
+            except CalculationException:
+                continue
+        if (y_l4 == float("-inf")):
+            return float("NaN")
+        return (range_max - range_min) * (step ** 4) / 180 * y_l4
+    else:
+        return 0
 
 def _calculate_r2_sympy(equation: Node, range_min, range_max, step, var_lst):
-    sympy_expr, sympy_var = sympy_flatten(equation, var_lst)
-    for _ in range(4):
-        sympy_expr = sgrad(sympy_expr, sympy_var[0])
-    f_l4 = sympy_expr
-    n = int((range_max - range_min) / step)
-    y_l4 = float("-inf")
-    for i in range(n):
-        y_cur_l4 = float(seval(f_l4, {sympy_var[0]: range_min + step * i}))
-        if (y_cur_l4 > y_l4):
-            y_l4 = y_cur_l4
-    if (y_l4 == float("-inf")):
-        return float("NaN")
-    return (range_max - range_min) * (step ** 4) / 180 * y_l4
+    if (len(var_lst)):
+        sympy_expr, sympy_var = sympy_flatten(equation, var_lst)
+        for _ in range(4):
+            sympy_expr = sgrad(sympy_expr, sympy_var[0])
+        f_l4 = sympy_expr
+        n = int((range_max - range_min) / step)
+        y_l4 = float("-inf")
+        for i in range(n):
+            y_cur_l4 = float(seval(f_l4, {sympy_var[0]: range_min + step * i}))
+            if (y_cur_l4 > y_l4):
+                y_l4 = y_cur_l4
+        if (y_l4 == float("-inf")):
+            return float("NaN")
+        return (range_max - range_min) * (step ** 4) / 180 * y_l4
+    else:
+        return 0
