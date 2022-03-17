@@ -2,7 +2,7 @@ import json
 import sys
 
 from modules.util import color_string, Color
-from modules.parse import parse, ParseException, TokenizeException
+from modules.parse import parse, ParseException, TokenizeException, CalculationException
 from modules.util import ProjectException
 from .simpson import simpson
 
@@ -16,7 +16,7 @@ def solve(input_stream, output_stream):
                 _print_result(result)
             else:
                 output_stream.write(json.dumps(result, indent=4) + "\n")
-        except ProjectException as e:
+        except (CalculationException, ProjectException) as e:
             print(color_string(Color.RED, f"ERROR[simpson] >> {e}"))
 
 

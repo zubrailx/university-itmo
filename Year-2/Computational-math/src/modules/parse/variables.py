@@ -1,4 +1,4 @@
-import math
+import sympy
 from .tokenize import Operator
 
 
@@ -16,20 +16,19 @@ _OperatorsBinary = {
 # TODO add operator: log(x, base)
 _OperatorsUnary = {
     Operator.SUB: ((1, 2), lambda x: -x),
-    Operator.SIN: ((1, 2), lambda x: math.sin(x)),
-    Operator.COS: ((1, 2), lambda x: math.cos(x)),
-    Operator.TAN: ((1, 2), lambda x: math.tan(x)),
-    Operator.COT: ((1, 2), lambda x: 1 / math.tan(x)),
-    Operator.LOGE: ((1, 2), lambda x: math.log(x, math.e)),
-    Operator.LOG2: ((1, 2), lambda x: math.log2(x)),
-    Operator.LOG10: ((1, 2), lambda x: math.log10(x))
+    Operator.SIN: ((1, 2), lambda x: sympy.sin(x)),
+    Operator.COS: ((1, 2), lambda x: sympy.cos(x)),
+    Operator.TAN: ((1, 2), lambda x: sympy.tan(x)),
+    Operator.COT: ((1, 2), lambda x: sympy.cot(x)),
+    Operator.LOGE: ((1, 2), lambda x: sympy.log(x, sympy.exp(1))),
+    Operator.LOG2: ((1, 2), lambda x: sympy.log(x, 2)),
+    Operator.LOG10: ((1, 2), lambda x: sympy.log(x, 10))
 }
 
 _Variables = {
-    "\\pi": math.pi,
-    "\\e": math.e
+    "\\pi": sympy.pi,
+    "\\e": sympy.exp(1)
 }
-
 
 _OperatorsBinaryString = dict()
 _OperatorsUnaryString = dict()
