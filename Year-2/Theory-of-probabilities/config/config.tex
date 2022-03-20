@@ -33,6 +33,11 @@
 	allcolors=black
 }
 
+\newcommand{\asubsection}[2]{
+\setcounter{subsection}{#1}
+\addtocounter{subsection}{-1}
+\subsection{#2}
+}
 %----math,graphics---------------------------------------------------------------------------------
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{amsthm}
@@ -49,3 +54,5 @@
 
 \usepackage{wrapfig}
 \usepackage{tabularx}
+
+
