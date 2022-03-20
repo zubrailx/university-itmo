@@ -1,3 +1,169 @@
+%! TEX root = main.tex
+
 \section{Вероятностное пространство.}
-\subimport{tasks}{task-1.tex}
+% \subimport{tasks}{task-1.tex}
+
+\subsection{Проверить следующие соотношения между событиями}
+
+\noindent~1) $A \setminus B = A \overline{B}$
+
+\noindentПусть $\omega \in A \setminus B$. Тогда $\omega \in A$, $\omega \not\in B$, $
+\omega \in \overline{B}$. Это означает, что $\omega \in A\overline{B}$. 
+В обратную сторону, $\omega \in A\overline{B} \Rightarrow \omega \in A$, $\omega \in 
+\overline{B}$, $\omega \not\in B \Rightarrow \omega \in A \setminus B$.
+
+\medskip
+\noindent~2) $A \setminus B = A \setminus AB = \left( A + B \right)  \setminus B$.
+
+\noindent a) Пусть $\omega \in A \setminus B \Rightarrow \omega \in A$, $\omega \not\in AB$, так 
+как $\omega \not\in B \Rightarrow \omega \in A \setminus AB$. 
+b) Пусть $\omega \in A, \omega \not\in
+AB$. Из второго $\omega \not\in$ или $A$ или $B$, но поскольку $\omega \in A$, то $\omega \not\in
+B$. А тогда получаем $\omega \in A \setminus B$, а это тоже самое, что и $\omega \in (A + B) \setminus
+B$, так как $(A + B) \setminus B = (A \setminus B) + (B \setminus B) = A \setminus B + \emptyset = 
+A \setminus B$. 
+c) Пусть $\omega \in (A + B) \setminus B$, по уже проделанному выше получаем $\omega
+\in A \setminus B$.
+
+\medskip
+\noindent~3) $\overline{\left( A + B \right) } = \overline{A}~\overline{B}$, $\overline{AB} = \overline{A} + 
+\overline{B}$
+
+\noindent a) Пусть $\omega \in \overline{A + B} \Rightarrow \omega \not\in A$, $\omega \not\in B 
+\Leftrightarrow \omega \in \overline{A}, \omega \in \overline{B} \Rightarrow \omega \in \overline{A}~
+\overline{B}$. Обратное доказывается аналогично. b) Пусть $\omega \in \overline{AB} \Leftrightarrow 
+\omega \not\in AB$. Тогда $\omega \not\in A$ или $\omega \not\in B$ или в обоих сразу. НУО считаем, что
+$\omega \not\in A \Rightarrow \omega \in \overline{A}$, а значит что $\omega \in \overline{A} + 
+\overline{B}$. Для остальных случаев доказывается аналогично. В обратную сторону, пусть $\omega \in
+\overline{A} + \overline{B}$. НУО считаем, что $\omega \in \overline{A} \Rightarrow \omega \not\in A$, 
+а тогда $\omega \not\in A B \Leftrightarrow \omega \in \overline{AB}$.
+
+\medskip
+\noindent~4) $A \left( B \setminus C \right) = AB \setminus AC$
+
+\noindent a) Пусть $\omega \in A$, $\omega \in \left( B \setminus C \right) \Leftrightarrow \omega
+\in A $, $\omega \in \left( B \setminus C \right) $. Из второго $\omega \in B, \omega \in \overline{C}$.
+Тогда $\omega \in AB$ и $\omega \in A\overline{C} \Rightarrow \omega \not\in AC$, поскольку
+$\omega$ должен лежать в $A$ и $C$. Получаем $\omega \in AB \overline{\left( AC \right)} $, а это по первому пункту 
+есть $\omega \in AB \setminus AC$. b) Обратно по первому пункту получаем $\omega \in AB \overline{\left( AC \right)}
+ \Rightarrow \omega \in AB$, $\omega \not\in AC$. Поскольку $\omega \in AB \Rightarrow \omega \in A, 
+ \omega \in B$ и $\omega \not\in AC \Rightarrow \omega \not\in C \Rightarrow \omega \in A, \omega
+\in B\overline{C} \Rightarrow \omega \in A \left( B \setminus C \right)$. 
+
+\subsection{Установить, какие из следующих соотношений правильные}
+\noindent~1) $A \setminus \left( B \setminus C \right) = \left( A \setminus B \right) + C$
+
+\noindent С левой стороны $A \setminus \left( B \setminus C \right) = A \overline{\left( 
+B  \overline{C}\right) } = A \left( \overline{B} + C \right) = A \setminus B + A C$. Неверно.
+
+\medskip
+\noindent~2) $A \setminus \left( B \setminus C \right) = \left( A \setminus B \right) + AC$
+
+\noindentВерно и доказано в пункте 1.
+
+\medskip
+\noindent~3) $\left( A + B \right) \setminus C = \left( A \setminus C \right) + \left( B \setminus C \right) $
+
+\noindent $\left( A + B \right) \setminus C \Leftrightarrow \omega \in \left(A + B\right),
+\omega \in \overline{C} \Leftrightarrow \omega \in A\overline{C} $ или $ \omega \in B\overline{C}$, 
+а это тоже самое что и $\omega \in \left(A \setminus C\right) + \left(B \setminus C\right)$. Верно
+
+\medskip
+\noindent~4) $\left( A + B \right)  \setminus C = A + \left( B \setminus C \right) $
+
+\noindent Неверно, доказано обратное в пункте выше.
+
+\medskip
+\noindent~5) $A\overline{B}C \subset A + B$
+
+\noindent Множество, получающееся справа как минимум не меньше, чем $A$, а значит оно является 
+подмножеством $A + B$.
+
+\medskip
+\noindent~6) $\left(A \setminus B\right)\left(C \setminus D\right) = AC \setminus BD$
+
+\noindent $\left(A \setminus B\right) \left(C \setminus D\right) = A\overline{B}C\overline{D} =
+\left(AC\right)\left(\overline{B}~\overline{D}\right) = \left(AC\right)\overline{\left(
+B + D\right)} = \left(AC\right) \setminus \left(B + D\right)$. Неверно.
+\subsection{Упростить следующие выражения}
+
+\noindent~1) $A + AB = A$ 
+
+\medskip
+\noindent~2) $\left(A + B\right)\left(A + \overline{B}\right) = A \left(B + \overline{B}\right) = A$
+
+\medskip
+\noindent~3) $\left(A \setminus C\right)\left(B \setminus \overline{C}\right) = \left(A\overline{C}\right)
+\left(BC\right) = A\overline{C}BC = \emptyset$
+
+\medskip
+\noindent~4) $\left(A + B\right)\left(\overline{A} + B\right)\left(A + \overline{B}\right) = 
+\left(A + \overline{A}\right)B\left(A + \overline{B}\right) = B\left(A + \overline{B}\right) = 
+BA + B\overline{B} = BA$
+
+\subsection{Пусть}
+\[
+  A_n = \left\{x: a \le x < a + \frac{1}{n}\right\} 
+.\] 
+\[
+  B_n = \left\{x: a \le x \le b - \frac{1}{n}\right\} 
+.\] 
+Для событий найти более простые выражения.
+\[
+  A = \bigcap_{n = 1}^{\infty} A_n;~~~ B = \bigcup_{n = 1}^\infty B_n
+.\] 
+
+\noindent a) При $n \to \infty$ $x$ для $A_n$ стремится к $a$, поскольку он ограничен сверху
+выражением, которое стремится к $a$ ($\lim_{n \to \infty} a + \frac{1}{n} = a$). Поэтому $A = a$, если мы рассматриваем всюду плотное множество.
+
+\medskip
+\noindent b) При $n \to \infty$ для $B_n$ $x : a \le x \le b$, поскольку $\lim_{n \to \infty} b - \frac{1}{n} = b $.
+Поэтому $B$ = $\left\{x: a \le x \le b\right\}$.
+
+
+\subsection{Какие подмножества множества $\Omega$ в примере 3 из пар.1 при $n = 3$ соответствуют
+событиям}
+
+\noindent~1) При первом подбрасывании выпал герб: $A = \{$ГРР, ГРГ, ГГР, ГГГ$\}$
+
+\medskip
+\noindent~2) Всего выпало ровно 2 герба: $A = \{$РГГ, ГРГ, ГГР$\}$
+
+\medskip
+\noindent~3) Выпало не более одного герба: $A = \{$РРР, РРГ, РГР, ГРР$\}$
+
+
+\subsection{Пусть $A, B, C$ -- три произвольных события. Найти выражения для событий, состоящих
+в том, что из $A, B, C$}
+
+\noindent~1) $A\overline{B}\overline{C}$
+
+\smallskip
+\noindent~2) $AB\overline{C}$
+
+\smallskip
+\noindent~3) $ABC$ 
+
+\smallskip
+\noindent~4) $\Omega - \overline{A}\overline{B}\overline{C} = A + B + C$
+
+\smallskip
+\noindent~5) $A\overline{B}\overline{C} + \overline{A}B\overline{C} + \overline{A}\overline{B}C$
+
+\smallskip
+\noindent~6) $\overline{A}\overline{B}\overline{C}$
+
+\smallskip
+\noindent~7) $\Omega - ABC = \overline{A} + \overline{B} + \overline{C}$
+
+
+\subsection{Пусть в примере 3 из пар.1 $n = 3$. Является ли алгеброй следующая система подмножеств}
+
+\noindent~$\emptyset, \Omega, \{$ГГГ, ГРГ, ГГР, ГРР$\}, \{$РГГ, РРГ, РГР, РРР$\}$
+
+\smallskip
+\noindent $\emptyset, \Omega$ входят точно, так как если $\Omega \in U$, то $\emptyset = \Omega \setminus
+\Omega \in U$, также если $\{$ГГГ, ГРГ, ГГР, ГРР$\} \in U$, то и $\Omega \setminus \{$ГГГ, ГРГ, ГГР, ГРР$\} = 
+\{$РГГ, РРГ, РГР, РРР$\} \in U$. Верно.
+
 
