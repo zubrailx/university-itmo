@@ -9,3 +9,6 @@ credentials.txt
 dist/
 node_modules/
 .ccls-cache/
+*.odt#
+*.zip
+

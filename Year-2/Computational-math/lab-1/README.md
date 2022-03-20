@@ -1,1 +1,0 @@
-# computational-math-lab-1

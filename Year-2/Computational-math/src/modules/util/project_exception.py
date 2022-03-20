@@ -1,0 +1,2 @@
+class ProjectException(Exception):
+    pass

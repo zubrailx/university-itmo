@@ -1,0 +1,13 @@
+[
+  {
+  "equation": [
+    "x^2 + 5",
+    "x^3"
+  ],
+  "data": {
+    "range_min": -5,
+    "range_max": 10,
+    "step": 0.001
+    }
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "method" : "split_half",
+    "equation" : "x^2 - 10",
+    "data" : {
+      "range_min": 0,
+      "range_max":  10,
+      "iterations" : 10
+    }
+  },
+  {
+    "method" : "tangent",
+    "equation" : "x^2 - 10",
+    "data" : {
+      "x_0": 0.1,
+      "iterations" : 10
+    }
+  },
+  {
+    "method" : "simple_iteration",
+    "equation": [
+      "0.1 * x_1^2 + x_1 + 0.2 * x_2 ^ 2 - 0.3",
+      "0.2 * x_1^2 + x_2 - 0.1 * x_1 * x_2 - 0.7"
+    ],
+    "data": {
+      "iterations": 10,
+      "x_0": {
+        "x_1" : 0.9,
+        "x_2" : 0.9
+      }
+    }
+  }
+]
