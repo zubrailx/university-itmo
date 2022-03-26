@@ -15,7 +15,7 @@ enum return_status {
 };
 
 int main() {
-	FILE* file = fopen("data/test.exe", "rb");
+	FILE* file = fopen("data/input.exe", "rb");
 	if (file == NULL) { return FILE_NOT_OPEN; }
   // read doc and set file pointer to optional header
 	IMAGE_DOS_HEADER image_doc_header;
