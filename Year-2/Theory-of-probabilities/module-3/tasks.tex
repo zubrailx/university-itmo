@@ -2,12 +2,331 @@
 
 \section{Условные вероятности. Независимость событий.}
 
+%---------------------------------------------------------------------------------------------------
+\begin{task}{1}
+Брошено две игральные кости. Какова вероятность того, что выпало две <<3>>, если известно, что сумма
+выпавших очков делится на три?
+\end{task}
+
+\begin{solution}
+Пусть $P(A)$ - вероятность того, что сумма выпавших очков делится на три, $P(B)$ - вероятность 
+выпадения двух <<3>>. Тогда $P(A) = \frac{12}{36}$, так как $\Omega$ состоит из 36 элементарных 
+событий, а кол-во событий выпадения суммы, делящейся на 3: $A =  \{\left(1, 2\right) , \left(
+1, 5\right) , \left(2, 1\right) , \left(2, 4\right) , \left(3, 3\right) \left(3, 6\right) ,
+\left(4, 2\right) , \left(4, 5\right) , \left(5, 1\right) , \left(5, 4\right) , \left(6, 3\right) ,
+\left(6, 6\right) \}$, а мощность данного множества равна 12. $P(B) = P(AB) = \frac{1}{36}$, а значит
+$P(B | A) = \frac{P(AB)}{P(A)} = \frac{1}{12}$.
+\end{solution}
+
+\begin{result}
+  $\frac{1}{12}$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{2}
+  Известно, что при бросании 10 игральных костей появилась по крайне мере одна <<1>>. Какова 
+  вероятность того, что появилось две <<1>> или более?
+\end{task}
+
+\begin{solution}
+По формуле условной вероятности $P(B | A) = \frac{P(AB)}{P(A)}$, где $P(A)$ - вероятность 
+выпадения по крайней мере одной <<1>>, $P(AB)$ - вероятность выпадения двух <<1>> или более. 
+
+\begin{flalign*}
+  P(A) = \sum_{i = 1}^{10} C_{10}^i (\frac{5}{6})^{10 - i} (\frac{1}{6})^i, \;\;\;
+  P(AB) = \sum_{i = 2}^{10} C_{10}^i (\frac{5}{6})^{10 - i} (\frac{1}{6})^i, \;\;\; 
+  \frac{P(AB)}{P(A)} \approx 0.6147724 &&
+\end{flalign*}
+
+\begin{verbatim}
+#!/usr/bin/python
+
+p_a  = sum([c_n_k(10, i) * (5/6)**(10 - i) * (1/6) ** i for i in range(1, 11)])
+p_ab = sum([c_n_k(10, i) * (5/6)**(10 - i) * (1/6) ** i for i in range(2, 11)])
+print(p_ab/p_a)
+\end{verbatim}
+\end{solution}
+
+\begin{result}
+  $\approx 0.6147724$
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{3}
+  Из множества $\left\{1, 2, \ldots, N\right\} $ по схеме случайного выбора без возвращения
+  выбираются три числа. Найти условную вероятность того, что третье число попадет в интервал,
+  образованный первыми двумя, если известно, что первое число меньше второго.
+\end{task}
+
+\begin{solution}
+Есть несколько вариантов решения: напрямую посчитать вероятность по формуле условной вероятности 
+или воспользоваться здравым смыслом и сразу же назвать ответ.
+
+\medskip
+\noindentЕсли воспользоваться вторым вариантом, то так как по условию первое 
+число должно быть меньше второго, то возможны следующие конфигурации: $\left\{\left(
+i_1, i_2, i_3\right) , \left(i_1, i_3, i_2\right) , \left(i_3, i_1, i_2\right) \right\} $, где
+$i_k, \; k \in {1, 2, 3}$ - число, которое мы выбрали первым, вторым, третьим (между числами 
+могут лежать или не лежать другие числа). Нам подходит только
+вторая конфигурация из 3, а значит вероятность $\frac{1}{3}$.
+  
+\medskip
+\noindentЕсли считать напрямую,то тогда вероятность выбрать 2 числа так, чтобы первое было 
+меньше второго: $P(A) = \frac{C_{n}^2}{n\cdot (n - 1)}$, а вероятность, что в таком случае 
+третье число окажется между вторым: 
+
+\[
+  P(AB) = \frac{\sum_{i = 1}^n \sum_{j = i + 1}^n (j - i - 1)}{n\cdot (n - 1) \cdot (n - 2)}
+.\] 
+
+\noindentЕсли посчитать, то скорее всего окажется то, что нам требуется.
+\end{solution}
+
+\begin{result}
+  $\frac{1}{3}$
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{4}
+ Из урны, содержащей 3 белых и 5 черных шаров, последовательно без возвращения извлекают 8 шаров. 
+ Пусть $A_0^{(i)} (A_1^{(i)}$ - событие, состоящее в том, что i-й шар был черный (белый). Найти 
+ условные вероятности:
+\end{task}
+
+\begin{subtask}{1}
+  $P(A_1^{(5)} | A_1^{(1)} A_0^{(2)} A_0^{(3)} A_1^{(4)})$ 
+\end{subtask}
+
+\begin{solution}
+\begin{equation*}
+  P(A_1^{(5)} | A_1^{(1)} A_0^{(2)} A_0^{(3)} A_1^{(4)}) = \frac{P\left(A_1^{(5)} A_1^{(1)} A_0^{(2)} A_0^{(3)} A_1^{(4)}\right)}
+  {P\left(A_1^{(1)} A_0^{(2)} A_0^{(3)} A_1^{(4)}\right)} = \frac{\frac{3}{8} \cdot \frac{5}{7} \cdot \frac{4}{6}\cdot \frac{2}{5}\cdot \frac{1}{4}}
+  {\frac{3}{8} \cdot \frac{5}{7} \cdot \frac{4}{6}\cdot \frac{2}{5}\cdot} = \frac{1}{4}
+\end{equation*}
+\end{solution}
 
 
-\begin{proof}
-  Текст
-\end{proof}
+\begin{subtask}{2}
+  $P(A_0^{(4)} | A_{\alpha_1}^{(1)} A_{\alpha_2}^{(2)} A_{\alpha_3}^{(3)}), \left(\alpha_1, \alpha_2, \alpha_3\right) =
+  \left(0, 0, 1\right), \left(0, 1, 0\right), \left(1, 0, 0\right) $
+\end{subtask}
+
+\begin{solution}
+  Поскольку на момент появления события $A_0^{(4)}$ в урне остается лежать всегда  3 черных и 2 белых
+  шара, то вероятность выпадения черного шара равна $\frac{3}{5}$.
+
+\medskip
+\noindentЕсли считать напрямую: $P_1(\alpha_1, \alpha_2, \alpha_3) = \frac{5}{8} \cdot  \frac{4}{7} \cdot 
+\frac{3}{6}$, $P_2(\alpha_1, \alpha_2, \alpha_3) = \frac{5}{8} \cdot \frac{3}{7} \cdot \frac{4}{6}$, 
+$P_3(\alpha_1, \alpha_2, \alpha_3) = \frac{3}{8} \cdot  \frac{5}{7} \cdot \frac{4}{6}$. 
+$P(A) = \sum_{i = 1}^3 = \frac{60 + 60 + 60}{336}$.  $P(AB) = \sum_{i = 1}^3 P_i(A) * P(A_0^{(4)}) = 
+\frac{3}{5} \cdot \frac{60 + 60 + 60}{336}$. $P(B | A) = \frac{3}{5}$
+\end{solution}
+
+\begin{result}
+1) $\frac{1}{4}$, 2) $\frac{3}{5}$.
+\end{result}
 
 
-\begin{example}[4]
-\end{example}
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{5}
+  Доказать, что события $A$, $\overline{B}$ независимы, если независимы события $A$ и $B$.
+\end{task}
+
+\begin{solution}
+
+\noindent\textbullet~Пусть $A$, $B$ независимы, тогда $P(AB) = P(A) \cdot  P(B)$.
+
+\smallskip
+\noindent\textbullet~$P(\overline{B}) = 1 - P(B)$.
+
+\smallskip
+\noindent\textbullet~ $P(AB) = P(A) \cdot P(B) = P(A) \cdot (1 - P(\overline{B})) = P(A) - P(A) \cdot 
+P(\overline{B}) = P(A) - P(A) \setminus P(B) = P(A) - P(A\overline{B})$. Последнее равенство получено
+из упражнения 1.1.1.
+
+\smallskip
+\noindent\textbullet~Тогда $P(A) - P(A) \cdot P(\overline{B}) = P(A) - P(A\overline{B}) \Leftrightarrow
+P(A) \cdot P(\overline{B}) = P(A\overline{B})$.
+\end{solution}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{6}
+  Случайная точка $\left(\xi_1, \xi_2\right)$ имеет равномерное распределение в квадрате $\left\{
+  \left(x_1, x_2\right) : 0 \le x_1 \le 1, \; 0 \le x_2 \le 1\right\}$. При каких значениях 
+  $r$ независимы события 
+  \[
+    A_r = \left\{\abs{\xi_1 - \xi_2} \ge r\right\}, \;\;\; B_r = \left\{\xi_1 + \xi_2 \le  3r\right\} 
+  .\] 
+\end{task}
+
+\begin{solution} 
+  Найдем <<объем>> вероятности, для этого построим функции вероятности на основании имеющихся данных:
+\[
+P_r(A) = F_A(x) =
+\begin{cases}
+  1, & r \le 0 \\
+  (1 - r)^2, & 0 < r \le 1 \\
+  0, & r > 1
+\end{cases}, 
+\;\;\;P_r(B) = F_B(x) = 
+\begin{cases}
+  0, & r \le 0 \\
+  \frac{1}{2}(3r)^2, & 0 < r \le  \frac{1}{3} \\
+  1 - \frac{1}{2}(2 - 3r)^2, & \frac{1}{3} < r \le \frac{2}{3} \\
+  1, & r > \frac{2}{3}
+\end{cases}
+.\] 
+
+\noindentТак как события называются независимыми тогда, когда выполняются какие-либо из равенств 
+$P(A | B) = P(A)$, $P(B | A) = P(B)$, $P(AB) = P(A) \cdot P(B)$, то воспользовавшись ими увидим, 
+что события независимы, когда $r \ge  \frac{2}{3}$, так как тогда $P(AB) = 1 \cdot P(A) = P(A | B)$,
+когда $r \le 0$, так как $P(AB) = P(B) \cdot 1 = P(B | A)$.
+
+\medskip
+\noindentТеперь найдем при каких $r$ графически $P(A) * P(B) = P(AB)$:
+
+\smallskip
+\noindentПри $0 < r \le \frac{1}{3}$: $P_r(A) \cdot  P_r(B) = (1 - r)^2 \cdot \frac{1}{2} \cdot (3r)^2$.
+
+\begin{center}
+\scalebox{1.5}{
+\begin{tikzpicture}
+\begin{axis}[
+    xmin=-1,xmax=1,
+    ymin=-1,ymax=1,
+    grid=both,
+    grid style={line width=.1pt, draw=gray!10},
+    major grid style={line width=.2pt,draw=gray!50},
+    axis lines=middle,
+    minor tick num=4,
+    ticklabel style={font=\tiny,fill=white},
+    xlabel style={at={(ticklabel* cs:1)},anchor=north west},
+    ylabel style={at={(ticklabel* cs:1)},anchor=south west},
+    axis equal,
+    xlabel={$x$},
+    ylabel={$y$}
+]
+
+\coordinate (O) at (0,0);
+\node[fill=white,circle,inner sep=0pt] (O-label) at ($(O)+(-135:10pt)$) {$O$};
+
+
+\draw (axis cs: -2, -5/3) -- (axis cs: 2/3, 1);
+\draw (axis cs: -2/3, -1) -- (axis cs: 2, 5/3);
+\draw (axis cs: 0, 1) -- (axis cs: 3/2, -1/2);
+
+\node[fill=white,circle,inner sep=0pt] (r-label) at (3/4, -3/4) {$r = \frac{1}{3}$};
+
+\end{axis}
+\end{tikzpicture}
+}
+\end{center}
+
+Графически объем равен: $2\cdot r^2$. Приравняем то, с тем, что написано выше: $(1 - r)^2 \cdot \frac{1}{2} \cdot (3r)^2 = 2\cdot r^2$.
+Решая уравнение, найдем, что $r = \frac{1}{3}$.
+
+\smallskip
+\noindentДля остальных интервалов равенства не возникает. 
+\end{solution}
+
+\begin{result}
+  $r \le 0, r \ge \frac{2}{3}, r = \frac{1}{3}$
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{8}
+  События $A_1, A_2,A_3,A_4$ взаимно независимы. Доказать взаимную независимость событий $\overline{A_1}A_2$ 
+  и $A_3 A_4$.
+\end{task}
+
+\begin{solution}
+Так как все события взаимно независимы, то независимы и события $A_3, A_4$, также $A_1,A_2$ тоже независимы,
+а тогда и $\overline{A_1}A_2$, поскольку это было доказано ранее в задании 5.
+
+\medskip
+\noindent\textbullet~$P(\overline{A_1}A_2) = P(\overline{A_1}) \cdot P(A_2)$, $P(A_3A_4) = P(A_3) \cdot P(A_4)$
+
+\medskip
+\noindent\textbullet~$P(\overline{A_1}A_2)\cdot P(A_3A_4) = P(\overline{A_1}) \cdot P(A_2) \cdot  P(A_3) \cdot P(A_4)$
+
+\medskip
+\noindent\textbullet~ Так как независимы $A_1, A_2, A_3, A_4$, то также будут независимы и $\overline{A_1},
+A_2, A_3, A_4$ (можно доказать по индукции), а значит $P(\overline{A_1}) \cdot P(A_2) \cdot  P(A_3) \cdot P(A_4) = P(\overline{A_1}A_2A_3A_4)$, 
+то есть $P(\overline{A_1}A_2)\cdot P(A_3A_4) = P(\overline{A_1}A_2A_3A_4)$, ч.т.д.
+\end{solution}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{9}
+  События $A_1,A_2,A_3,A_4$ взаимно независимы: $P(A_k) = p_k$, $k = 1, 2, 3, 4$. Найти вероятность
+  событий:
+\end{task}
+
+\begin{subtask}{1}
+  $A_1\overline{A_3}A_4$. $P(A_1\overline{A_3}A_4) = P(A_1)\cdot P(A_3)P(A_4) = p_1 (1 - p_3)p_4$.
+\end{subtask}
+
+\begin{subtask}{2}
+  $A_1 + A_2$.  $P(A_1 + A_2) =  P(A_1) + P(A_2) - P(A_1)\cdot P(A_2) = p_1 + p_2 - p_1 \cdot p_2$.
+\end{subtask}
+
+\begin{subtask}{3}
+  $(A_1 + A_2) (A_3 + A_4)$. $P((A_1 + A_2) (A_3 + A_4)) = 
+  P(A_1 + A_2) \cdot P(A_3 + A_4) = (P(A_1) + P(A_2) - P(A_1)\cdot P(A_2)) (P(A_3) + P(A_4) - P(A_3) \cdot P(A_4)) =
+  (p_1 + p_2 - p_1 \cdot p_2) (p_3 + p_4 - p_3 \cdot p_4) $, так как события независимы.
+\end{subtask}
+
+\begin{result}  
+  1) $p_1 (1 - p_3)p_4$, 2) $p_1 + p_2 - p_1 \cdot p_2$, 3) $(p_1 + p_2 - p_1 \cdot p_2) (p_3 + p_4 - p_3 \cdot p_4)$
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{11}
+  Из урны, содержащей 3 белых и 5 черных шаров, два игрока по очереди вытащили по одному шару. Положим
+  $A_k = \{$ $k$-ый игрок вытащил белый шар $\}$. Найти вероятность событий:
+\end{task}
+
+\begin{subtask}{1}
+  Вероятность $A_1$. $P(A_1) = a_1 = \frac{3}{8}$.
+\end{subtask}
+
+\begin{subtask}{2}
+Вероятность $A_2$. $P(A_2) = P(A_2 | A_1) + P(A_2 | \overline{A_1}) = a_{11} \cdot  a_1  + a_{12} \cdot (1 - a_1) =
+\frac{2}{7} \cdot \frac{3}{8} + \frac{3}{7} \cdot (1 - \frac{3}{8}) = \frac{6}{56} + \frac{15}{56} = \frac{21}{56} = \frac{3}{8}$.
+\end{subtask}
+
+\begin{subtask}{3}
+Вероятность $ A_1 A_2$. $P(A_1A_2) = a_1 + a_{11} = \frac{3}{8} \cdot \frac{2}{7} = \frac{3}{28}$.
+\end{subtask}
+
+\begin{result}
+  1) $\frac{3}{8}$, 2) $\frac{3}{8}$, 3) $\frac{3}{28}$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{15}
+  Предположим, что 5\% всех мужчин и 0.25\% всех женщин -- дальтоники. Наугад выбранное лицо оказалось
+  дальтоником. Какова вероятность того, что это мужчина? (Считать, что количество мужчин и женщин одинаково.)
+\end{task}
+
+\begin{solution}
+  Расчитаем по формуле Байеса: $P(B_m | A) = \frac{P(AB_m)}{P(A)} = \frac{P(AB_m)}{P(B_w) \cdot P(A | B_w) + P(B_m) \cdot P(A | B_m)} =
+  \frac{0.05 \cdot \frac{1}{2}}{0.05 \cdot \frac{1}{2} + 0.0025 \cdot \frac{1}{2}} = \frac{0.025}{0.02625} = \frac{20}{21}$.
+\end{solution}
+
+\begin{result}
+  $\frac{20}{21}$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+
+
