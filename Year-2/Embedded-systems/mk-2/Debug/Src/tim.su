@@ -1,4 +1,0 @@
-../Src/tim.c:63:6:HAL_TIM_PWM_MspInit	8	static
-../Src/tim.c:78:6:HAL_TIM_MspPostInit	32	static
-../Src/tim.c:30:6:MX_TIM2_Init	48	static
-../Src/tim.c:106:6:HAL_TIM_PWM_MspDeInit	0	static
