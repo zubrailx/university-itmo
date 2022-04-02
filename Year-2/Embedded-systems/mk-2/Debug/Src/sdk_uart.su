@@ -1,0 +1,2 @@
+../Src/sdk_uart.c:9:6:UART_Transmit	8	static
+../Src/sdk_uart.c:13:19:UART_Receive	8	static
