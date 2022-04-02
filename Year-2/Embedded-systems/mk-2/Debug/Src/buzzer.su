@@ -1,0 +1,4 @@
+../Src/buzzer.c:6:6:Buzzer_Init	8	static
+../Src/buzzer.c:11:6:Buzzer_Set_Freq	8	static
+../Src/buzzer.c:15:6:Buzzer_Set_Volume	0	static
+../Src/buzzer.c:21:6:Buzzer_Play	24	static

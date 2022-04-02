@@ -1,0 +1,8 @@
+../Src/main.c:133:6:SystemClock_Config	96	static
+../Src/main.c:299:6:OLED_TIMER	16	static
+../Src/main.c:345:6:OLED_KB	16	static
+../Src/main.c:354:6:oled_Reset	8	static
+../Src/main.c:173:6:TIMER_NOW	48	static
+../Src/main.c:84:5:main	8	static
+../Src/main.c:311:6:KB_Test	48	static
+../Src/main.c:365:6:Error_Handler	0	static
