@@ -1,0 +1,419 @@
+%! TEX root = main.tex
+
+\section{Случайные величины.}
+
+\begin{task}{1}
+Плотность распределения $\xi$ задана формулами 
+\[
+  p_\xi(x) = \frac{C}{x^4} (x \ge 1), \; p_\xi (x) = 0 (x < 1)
+.\] 
+Найти постоянную $C$, плотность распределения величины $\eta = \ln \xi$, $P(0.5 < \eta < 0.75)$.
+\end{task}
+
+\begin{solution}
+\[
+\int_{1}^\infty \frac{c}{x^4} dx = -\frac{x^{-3} c}{3} \bigg|_1^\infty = \frac{c}{3} = 1 \implies
+c = 3
+.\] 
+\[
+p_\eta(x) = \frac{\partial P(\eta < x)}{\partial x} = \frac{\partial P(\xi < e^x)}{\partial x} =
+p_\xi(e^x) e^x
+.\] Тогда \[
+p_\eta(x) = 3e^{-3x}
+.\] 
+\[
+  P\left(0.5 < \eta < 0.75\right) = \int_{0.5}^{0.75} 3e^{(-3x} dx = -e^{-3x}\bigg|_{0.5}^{0.75} =
+  -e^{-2.25} + e^{-1.5} \approx 0.11773
+.\] 
+\end{solution}
+
+\begin{result}
+  $C = 3$, $p_\eta = 3e^{-3x}$, $0.11773$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{2}
+  Случайная величина $\xi$ равномерно распределена на отрезке $\left[0, 1\right]$. Найти плотности
+  распределенения величин: а) $\eta_1 = 2\xi + 1$; б) $\eta_2 = -\ln(1 - \xi)$.
+\end{task}
+
+\begin{subtask}{а)}
+\[
+  p_{\eta_1}(x) = \frac{\partial P(\eta_1 < x)}{\partial x} = \frac{\partial P(2\xi + 1 <
+  x)}{\partial x} = p_\xi(\frac{x - 1}{2}) \cdot \frac{1}{2} = \frac{1}{2}
+.\] 
+\[
+  \frac{x - 1}{2} \in [0,1] \implies x \in [1, 3]
+.\] 
+\end{subtask}
+
+\begin{subtask}{б)}
+\[
+p_{\eta_2} = \frac{\partial P(\eta_2 < x)}{\partial x}  = \frac{\partial P(-\ln(1 - \xi) <
+x)}{\partial x} =  \frac{\partial P(\xi < 1 - e^{-x})}{\partial x} = p_\xi(1 - e^{-x}) e^{-x} =
+e^{-x}
+.\] 
+\[
+  1 - e^{-x} \in [0,1] \Longleftrightarrow  -e^{-x} \in [-1, 0] \Longleftrightarrow e^{-x} \in [0,
+  1] \Longleftrightarrow x \in [0, +\infty] 
+.\] 
+\end{subtask}
+
+\begin{solution}
+  а) $\frac{1}{2}$, $x \in [1, 3]$, б) $e^{-x}$, $x \in [0, +\infty]$.
+\end{solution}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{3}
+  Случайная величина $\xi$ имеет показательное распределение с плотностью распределения $p_\xi(x) = 
+  \alpha e^{-\alpha x} (x > 0)$. Найти плотности распределения случайных величин: а) $\eta_1 = \sqrt{\xi}$;
+  б)$\eta_2 = \xi^2$; в)$\eta_3 = \frac{1}{\alpha}\ln\xi$; г) $\eta_4 = 1 - e^{-\alpha\xi}$. 
+\end{task}
+
+\begin{subtask}{а)}
+\[
+p_{\eta_1}(x) = \frac{\partial P(\sqrt{\xi} < x)}{\partial x} = p_\xi(x^2) \cdot 2x = 
+2x \alpha \cdot  e^{-\alpha x^2}, x > 0
+.\] С учетом вышенаписанного 
+\[
+  x^2 \in (0, +\infty) \Longleftrightarrow x \in (0, +\infty)
+.\] 
+\end{subtask}
+
+\begin{subtask}{б)}
+\[
+p_{\eta_2}(x) = \frac{\partial P(\xi^2 < x)}{\partial x} = p_\xi(\sqrt{x}) \cdot \frac{1}{2 \sqrt{x}
+} = \alpha e^{-\alpha\sqrt{x} } \cdot  \frac{1}{2\sqrt{x} } = \frac{\alpha e^{-\alpha\sqrt{x}
+}}{2\sqrt{x} }, x > 0
+.\] 
+\end{subtask}
+
+\begin{subtask}{в)}
+\[
+  p_{\eta_3}(x) = \frac{\partial P(\frac{1}{\alpha}\ln\xi< x)}{\partial x} = \frac{\partial P(\ln\xi
+  < \alpha x)}{\partial x} = \frac{\partial P(\xi < e^{\alpha x})}{\partial x} = p_\xi(e^{\alpha x})
+  e^{\alpha x} \alpha = \alpha^2 e^{-\alpha(e^{\alpha x} - x)}
+.\] 
+\[
+  e^{\alpha x} \in (0, +\infty) \Longleftrightarrow x \in (-\infty, +\infty)
+.\] 
+\end{subtask}
+
+\begin{subtask}{г)}
+\begin{align*}
+p_{\eta_4} = \frac{\partial P(1 - e^{-\alpha \xi} < x)}{\partial x} = \frac{\partial P(e^{-\alpha\xi
+}> 1 - x)}{\partial x} = \frac{\partial P(e^{-\alpha \xi} > e^{\ln(1 - x)})}{\partial x} = 
+\frac{\partial P(-\alpha \xi > \ln(1 - x))}{\partial x} = \\ = \frac{\partial P(\xi < \ln(1 -
+x)^{-\frac{1}{\alpha}})}{\partial x} = p_\xi(\ln(1 - x)^{- \frac{1}{\alpha}}) \cdot
+(\frac{1}{\alpha} \cdot \frac{1}{1 - x}) = e^{\ln(1 - x)} \cdot  \frac{1}{1 - x} = 1
+\end{align*}
+\[
+  \ln(1 - x)^{- \frac{1}{\alpha}} \in (0, + \infty) = \ln(1 - x) \in (-\infty, 0) = x \in (0, 1)
+.\] 
+\end{subtask}
+
+\begin{result}
+а) $2x \alpha e^{-\alpha x^2}$, $x \in (0, +\infty)$, б) $\frac{\alpha e^{-\alpha\sqrt{x}
+}}{2\sqrt{x} }$, $x \in (0, +\infty)$, в) $\alpha^2 e^{-\alpha(e^{\alpha x} - x)}$, $x \in (-\infty,
++\infty)$, г) $1$, $x \in (0, 1)$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{4}
+  Случайная величина $\xi$ распределена нормально с параметрами $a = 0$, $\sigma^2 = 1$. Найти 
+  плотности распределения величин: а) $\eta_1 = \xi^2$; б) $\eta_2 = e^\xi$ (логарифмически нормальное
+  распределение).
+\end{task}
+
+\[
+  p_{\xi}(x) = \frac{1}{\sqrt{2\pi\sigma}} e^{\frac{-(x - a)^2}{2\sigma^2}} = \frac{1}{\sqrt{2\pi}}
+  e^{-\frac{x^2}{2}}
+.\] 
+
+\begin{subtask}{а)}
+\[
+p_{\eta_1}(x) = \frac{\partial P(\xi^2 < x)}{\partial x} = \frac{\partial P(\xi < \sqrt{x})
+}{\partial x} = p(\sqrt{x}) \frac{1}{2\sqrt{x} } = \frac{1}{2\sqrt{2\pi x} }e^{-\frac{x}{2}}
+.\] 
+\end{subtask}
+
+\begin{subtask}{б)}
+\[
+p_{\eta_2}(x) = \frac{\partial P(e^\xi < x)}{\partial x} = \frac{\partial P(\xi < \ln x)}{\partial x}
+= p_\xi(\ln x) \cdot \frac{1}{x} = \frac{1}{\sqrt{2\pi} x} e^{\frac{-\ln(x)^2}{2}}
+.\] 
+\end{subtask}
+
+\begin{result}
+а)$ \frac{1}{2\sqrt{2\pi x} }e^{-\frac{x}{2}} $, б) $\frac{1}{\sqrt{2\pi} x}
+e^{\frac{-\ln(x)^2}{2}}$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{5}
+  Точка $P$ равномерно распределена на единичном квадрате $ABCD$. Найти плотность распределения 
+  площади  $\xi$ прямоугольника $AB'PD'$, где $B'$ и $D'$ -- основания перпендикуляров, опущенных
+  из точки $P$ на стороны $AB$ и $AD$ соответственно.
+\end{task}
+
+\begin{solution}
+\[
+F(x) = x + \int_x^1 \frac{x}{t} dt = x + x \cdot \ln|x|\bigg|_x^1 = x - x \cdot  \ln x
+.\] Тогда \[
+p_\xi(x) = F'(x) = 1 - \ln|x| - \frac{x}{x} = - x \cdot  \ln|x|
+.\] 
+\begin{center}
+\scalebox{1.5}{
+\begin{tikzpicture}
+\begin{axis}[
+  xmin=-0.1,xmax=1,
+  ymin=-0.1,ymax=1,
+  grid=both,
+  grid style={line width=.1pt, draw=gray!10},
+  major grid style={line width=.2pt,draw=gray!50},
+  axis lines=middle,
+  minor tick num=4,
+  ticklabel style={font=\tiny,fill=white},
+  xlabel style={at={(ticklabel* cs:1)},anchor=north west},
+  ylabel style={at={(ticklabel* cs:1)},anchor=south west},
+  axis equal,
+  xlabel={$x$},
+  ylabel={$y$}
+]
+
+\coordinate (O) at (0,0);
+\node[fill=white,circle,inner sep=0pt] (O-label) at ($(O)+(-135:10pt)$) {$O$};
+\draw (axis cs: 0.2, 1) -- (axis cs: 0.2, 0);
+\addplot[
+    domain = 0:1,
+    samples = 200,
+    smooth,
+    thick
+] {0.2 / x};
+\draw (axis cs: 1, 0.2) -- (axis cs: 1, 0);
+\end{axis}
+\end{tikzpicture}
+}
+\end{center}
+\end{solution}
+
+\begin{result}
+$-\ln(x)$.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{7}
+  Случайные величины $\xi_1$ и $\xi_2$ независимы и имеют равномерное распределение на отрезке $\left[
+  0, 1\right]$. Найти плотности распределения величин: а) $\xi_1 + \xi_2$; б) $\xi_1 - \xi_2$; в) $\frac{\xi_1}{\xi_2}$.
+\end{task}
+
+\begin{subtask}{а)}
+Как уже было доказано в к параграфе, $p_{\xi_1 + \xi_2}(x) = \int_{-\infty}^{+\infty} p_{\xi_1}(x - u)
+p_{\xi_2}(u) du$ 
+\[
+p_{\xi_1 + \xi_2}(x) = \int_{-\infty}^{+\infty} p_{\xi_1}(x - u) p_{\xi_2}(u) du = \int_0^1
+p_{\xi_1}(x - u) du
+.\] 
+\noindentРассмотрим промежутки $x \in [0, 1], \; x \in [1, 2]$. На первом промежутке: 
+\[
+  p_{\xi_1 + \xi_2}(x) = \int_0^x p_{\xi_1}(x - u) du = x
+.\] 
+\noindentНа втором промежутке:
+\[
+p_{\xi_1 + \xi_2}(x) = \int_{x - 1}^1 p_{\xi_1}(x - u) du = 1 - x + 1 = 2 - x
+.\] 
+\noindentА это ни что иное как: \[
+  p_{\xi_1 + \xi_2}(x) = 1 - |x - 1|, \; x \in [0, 2]
+.\] 
+\end{subtask}
+
+\begin{subtask}{б)}
+\[
+F_{\xi_1 - \xi_2}(x) = \int_{-\infty}^{+\infty} du \int^{+\infty}_{u - x} p_{\xi_1}(u) p_{\xi_2}(v)
+dv  
+.\] Произведем замену переменных $v = z + u, \; z = v - u$  
+\begin{align*}
+F_{\xi_1 - \xi_2}(x) = \int_{-\infty}^{+\infty} du \int_{-x}^{+\infty} p_{\xi_1}(u) p_{\xi_2}(z + u)
+dz = \int_{-x}^{+\infty}dz\int_{-\infty}^{+\infty}p_{\xi_1}(u)p_{\xi_2}(z + u) du =\\=
+\int_{-\infty}^{x}dt -\int_{-\infty}^{+\infty}p_{\xi_1}(u)p_{\xi_2}(u - t)du
+\end{align*}
+\[
+  p_{\xi_1 -\xi_2}(x) = -\int_{-\infty}^{+\infty}p_{\xi_1}(u)p_{\xi_2}(u - x)du = -\int_0^1
+  p_{\xi_2}(u - x) du
+.\] Рассмотрим отрезки, на которых $p_{\xi_2} \neq 0$:
+\[
+p_{\xi_2}(u - x) \neq 0 \Longleftrightarrow  0 \le u - x \le 1 \implies x \le u, \; x \ge u - 1,
+\; x \le  1
+.\] Тогда на первом промежутке: \[
+p_{\xi_1 - \xi_2}(x) = \int_x^1 p_{\xi_1}(u - x) du = 1 - x
+.\] На втором промежутке: \[
+p_{\xi_1 - \xi_2}(x) = \int_{0}^{x + 1} p_{\xi_1}(u - x) du = x + 1
+.\] Тогде через модуль: $p_{\xi_1 - \xi_2}(x) = 1 - |x|$ 
+
+\end{subtask}
+
+\begin{subtask}{в)}
+\begin{align*}
+F_{\xi_1 / \xi_2}(x) = \begin{cases}
+x < 0, & \int_{-\infty}^{0}du \int_{0}^{\frac{u}{x}} p_{\xi_1}(u) p_{\xi_2}(v) dv + 
+\int_{0}^{+\infty} du \int_{\frac{u}{x}}^{0}p_{\xi_1}(u)p_{\xi_2}(v) dv \\
+x \ge  0, & \int_{-\infty}^{0}du \int_{-\infty}^{\frac{u}{x}} p_{\xi_1}(u) p_{\xi_2}(v) dv + 
+\int_{-\infty}^0 du \int_{0}^{+\infty} p_{\xi_1}(u) p_{\xi_2}(v) dv + \\
+& \;\;\;\;\;\;\; 
+\int_{0}^{+\infty} du \int_{\frac{u}{x}}^{+\infty} p_{\xi_1}(u) p_{\xi_2}(v) dv + 
+\int_{0}^{+\infty} du \int_{-\infty}^{0} p_{\xi_1} p_{\xi_2} dv 
+\end{cases}
+\end{align*}
+Считать все это как-то не хочется.
+\end{subtask}
+
+\bigskip
+\begin{result}
+  а) $1 - |x - 1|$, $x \in [0, 2]$, б) $1 - |x|$, $x \le 1$, в) -
+\end{result}
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{11}
+  Совместное распределение случайных величин $\xi_1$, $\xi_2$ задано таблицей 
+  
+  \medskip
+  \begin{tabular}{|c|c|c|c|}
+  \hline
+  $\xi_1  \setminus \xi_2$ & -1 & 0 & 1 \\
+  \hline
+  -1 & 1/8 & 1/12 & 7/24 \\
+  \hline
+  1 & 5/24 & 1/6 & 1/8 \\
+  \hline
+  \end{tabular}
+
+  \noindentв которой на пересечении $i$-й строки и $j$-го столбца $\left(i = -1, 1, j = -1, 0, 1\right)$ 
+  приведена вероятность $p_{ij} = P\left\{\xi_1 = i, \xi_2 = j\right\}$. Найти:  а) одномерные законы
+  распределения $\xi_1$ и $\xi_2$; б) закон распределения $\eta_1 = \xi_1 + \xi_2$; в) закон 
+  распределения $\eta_2 = \xi_2^2$; г) $P\left(\eta_1 = 0, \eta_2 = 1\right)$.
+\end{task}
+
+\begin{subtask}{а)}
+
+\noindent\textbullet~$P(\xi_1 = -1) = \frac{1}{8} + \frac{1}{12} + \frac{7}{24} = \frac{1}{2}$,
+
+\smallskip
+\noindent\textbullet~$P(\xi_1 = 1) = \frac{5}{24} + \frac{1}{6} + \frac{1}{8} = \frac{1}{2}$,
+
+\medskip
+\noindent\textbullet~$P(\xi_2 = -1) = \frac{1}{8} + \frac{5}{24} = \frac{1}{3}$,
+
+\smallskip
+\noindent\textbullet~$P(\xi_2 = 0) = \frac{1}{12} + \frac{1}{6} = \frac{1}{4}$,
+
+\smallskip
+\noindent\textbullet~$P(\xi_2 = 1) = \frac{7}{24} + \frac{1}{8} = \frac{5}{12}$
+\end{subtask}
+
+\begin{subtask}{б)}
+
+\noindent\textbullet~$P(\eta_1 = -2) = \frac{1}{8}$,
+
+\smallskip
+\noindent\textbullet~$P(\eta_1 = -1) = \frac{1}{12}$,
+
+\smallskip
+\noindent\textbullet~$P(\eta_1 = 0) = \frac{7}{24} + \frac{5}{24} = \frac{1}{2}$,
+
+\smallskip
+\noindent\textbullet~$P(\eta_1 = 1) = \frac{1}{6}$,
+
+\smallskip
+\noindent\textbullet~$P(\eta_1 = 2) = \frac{1}{8}$
+\end{subtask}
+
+\begin{subtask}{в)}
+
+\smallskip
+\noindent\textbullet~$P(\eta_2 = 0) = \frac{1}{12} + \frac{1}{6} = \frac{1}{4}$,
+
+\smallskip
+\noindent\textbullet~$P(\eta_2 = 1) = \frac{1}{8} + \frac{5}{24} + \frac{7}{24} + \frac{1}{8} =
+\frac{18}{24} = \frac{3}{4}$
+\end{subtask}
+
+
+\begin{subtask}{г)}
+\noindent\textbullet~$P(\eta_1 = 0, \eta_2 = 1) = \frac{1}{2}$
+\end{subtask}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{14}
+  Обозначим $\tau$ число испытаний в схеме Бернулли до появления первого успеха включительно. Найти
+  закон распределения $\tau$.
+\end{task}
+
+\begin{solution}
+Пусть на $k$-ом испытании произошел успех. Тогда вероятность данного события расчитывается по
+формуле: \[
+  P(n = k) = (1 - p)^{k - 1} p
+.\], где $p$ -- вероятность успеха.
+
+\smallskip
+\noindentДанное выражение - то, что нам и надо, поскольку в таком случае проводится $k$ испытаний, 
+и на последнем происходит успех.  Значит закон распределения $\tau$ :
+\[
+P(\tau = k) = (1 - p)^{k - 1} p
+.\] 
+\end{solution}
+
+\begin{result}
+$P(\tau = k) = (1 - p)^{k - 1} p$
+\end{result}
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{15}
+  Величина $\tau^{\left(1\right)}$ равна числу испытаний в схеме Бернулли до первого успеха
+  включительно, $\tau^{\left(2\right)}$ -- число испытаний, прошедших после первого успеха до 
+  второго успеха. Найти совместное распределение $\tau^{(1)}, \tau^{(2)}$. Являются ли $\tau^{(1)}$ 
+  и $\tau^{(2)}$ независимыми?
+\end{task}
+
+\begin{solution}
+По уже рассмотренному выше:
+\[
+P(\tau_1 = k) = (1 - p)^{k - 1} p, \;\;\; P(\tau_2 = l) = (1 - p)^{l - 1} p
+.\] 
+\[
+P(\tau_1 = k, \tau_2 = l) = (1 - p)^{k - 1} p \cdot  (1 - p)^{l - 1} p = P(\tau_1 = k) \cdot
+P(\tau_2 = l)
+.\]Поскольку для выполнения второго события не важно, когда произошло первое, а только необходимо
+знать, какой промежуток времени произошел между первым и вторым успехом, то данные события являются независимыми.
+\end{solution}
+
+\begin{result}
+$ (1 - p)^{k - 1} p \cdot  (1 - p)^{l - 1} p $, случайные величины независимы.
+\end{result}
+
+%---------------------------------------------------------------------------------------------------
+\medskip
+\begin{task}{20}
+  Машина состоит из 10000 деталей. Каждая деталь независимо от других оказывается неисправной
+  с вероятностью $p_i$, причем для $n_1 = 1000$ деталей $p_1 = 0.0003$; для $n_2 = 2000$ деталей 
+  $p_2 = 0.0005$ и для $n_3 = 7000$ деталей $p_3 = 0.0001$. Машина не работает, если в ней
+  неисправны хотя бы две детали. Найти приближенное значение вероятности того, что машина не будет работать.
+\end{task}
+
+\begin{solution}
+В среднем какая-либо деталь сломается с вероятностью $\tau = 1000 \cdot 0.0003 + 2000 \cdot 0.0005 +
+7000 \cdot  0.0001 = 0.3 + 1 + 0.7 = 2$. Для нахождения вероятности воспользуемся формулой Пуассона:
+\[
+P(k = 2, 3, 4, \dots) = 1 - \overline{P(k = 2, 3, 4, \dots)} = 1 - P(k = 0, 1) = 1 - 
+\sum_{k=0}^{1} \frac{\tau^{k}}{k!} e^{-\tau} = 1 - e^{-2} - 2e^{-2} \approx 0.594 .\] 
+\end{solution}
+
+\begin{result}
+$0.594$
+\end{result}
+
