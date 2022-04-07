@@ -2,8 +2,3 @@
 
 * [Отчет по всем модулям](main.pdf)
 
-
-* [Модуль №1](module-1/main.pdf)
-
-* [Модуль №2](module-2/main.pdf)
-

@@ -1,7 +1,8 @@
 \documentclass[11pt]{article}
 
-% relative importing
+%-relative importing-------------------------------------------------------------------------------
 \usepackage{import}
+
 %----geometry--------------------------------------------------------------------------------------
 \usepackage{geometry}
 
@@ -23,7 +24,6 @@
 \usepackage{blindtext}
 \usepackage{hyperref}
 
-% table of contents
 \addto\captionsenglish{
 	\renewcommand{\contentsname}
 	{Оглавление}
@@ -33,6 +33,11 @@
 	allcolors=black
 }
 
+%\newcommand{\asubsection}[2]{
+%\setcounter{subsection}{#1}
+%\addtocounter{subsection}{-1}
+%\subsection{#2}
+%}
 %----math,graphics---------------------------------------------------------------------------------
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{amsthm}
@@ -49,3 +54,23 @@
 
 \usepackage{wrapfig}
 \usepackage{tabularx}
+
+%-environments-------------------------------------------------------------------------------------
+
+% task description
+\newenvironment{task}[1]
+{\par\bigskip\noindent\textbf{Задание #1.~}}{\smallskip}
+
+\newenvironment{subtask}[1]
+{\par\bigskip\noindent\textbf{Пункт #1.~}}{}
+
+% task solution
+\newenvironment{solution}{\medskip\noindent\textbf{Решение}.~}{\hfill$\blacksquare\medskip$}
+
+% task result
+\newenvironment{result}{\medskip\noindent\textbf{Ответ:}~}{\medskip}
+
+
+%-signs--------------------------------------------------------------------------------------------
+% module
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
