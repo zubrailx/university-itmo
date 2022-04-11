@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .spline import MultiSpline
+from labs.lab_4.spline import MultiSpline
+
 
 def draw(p_reals, p_errs, p_err_max_i, s_first: MultiSpline, s_second: MultiSpline, equation=None):
     xp = [p["x"] for p in p_reals]
