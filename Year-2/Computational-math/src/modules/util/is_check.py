@@ -13,4 +13,3 @@ def is_char_blank(char):
 
 def is_word_uint(string: str):
     return all([is_char_number(c) for c in string])
-
