@@ -15,8 +15,9 @@ def solve(ifs, ofs):
         p_errs = get_points_with_error(data["points"], data["error"])
         muls_first = MultiSpline(get_splines(p_errs))
         p_err_max_i = find_point_with_max_error(data["points"], muls_first.splines)
-        p_errs.pop(p_err_max_i)
-        muls_second = MultiSpline(get_splines(p_errs))
+        p_errs2 = p_errs.copy()
+        p_errs2.pop(p_err_max_i)
+        muls_second = MultiSpline(get_splines(p_errs2))
         # draw
         draw(data["points"], p_errs, p_err_max_i, muls_first, muls_second, data["equation"])
     except (CalculationException, ProjectException) as e:

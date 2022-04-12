@@ -92,3 +92,11 @@ def _create_simple_matrix_b(points, splines):
     matrix_b[row][0] = 0
     row += 1
     return matrix_b
+
+def fill_simple_transformed_splines(matrix_x, splines):
+    for i in range(matrix_x.columns // 4):
+        splines[i].a = matrix_x[i * 4 + A_OFF][0]
+        splines[i].b = matrix_x[i * 4 + B_OFF][0]
+        splines[i].c = matrix_x[i * 4 + C_OFF][0]
+        splines[i].d = matrix_x[i * 4 + D_OFF][0]
+    return splines

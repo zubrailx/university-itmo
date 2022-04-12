@@ -1,7 +1,7 @@
 import random
 from modules.util import ProjectException
-from .transformation.simple import create_with_simple_transformations
-from .transformation.simple import A_OFF, B_OFF, C_OFF, D_OFF
+from .transformation.simple import create_with_simple_transformations, fill_simple_transformed_splines
+from .transformation.triagonal import create_with_triagonal_transformations, fill_triagonal_transformed_splines
 
 from labs.lab_1.iteration import solve_iterate
 
@@ -59,7 +59,7 @@ class Spline:
 
 def get_splines(points):
     points = sorted(points, key=lambda p: p["x"])
-    splines = list()
+    splines = []
     # initializing splines with hi
     for i in range(len(points) - 1):
         hi = Spline(points[i]["x"], points[i + 1]["x"])
@@ -67,18 +67,16 @@ def get_splines(points):
             raise ProjectException("has points with same x coordinates")
         splines.append(hi)
     # creating matrices
-    matrix_a, matrix_b, matrix_x = create_with_simple_transformations(points, splines)
-    # diagonalizing matrix and checking the sufficient condition
+    # matrix_a, matrix_b, matrix_x = create_with_simple_transformations(points, splines)
+    matrix_a, matrix_b, matrix_x = create_with_triagonal_transformations(points, splines)
+    # diagonalizing matrix, checking condition and solving
     if (not matrix_a.is_convergent()):
         raise ProjectException("matrix_a is not convergent")
-    matrix_a = matrix_a.create_diagonal_max_if_can(matrix_b, matrix_x)
-    matrix_x = solve_iterate(matrix_a, matrix_b, matrix_x, diff=0.001)
+    matrix_a = matrix_a.create_diagonal_max_if_can(matrix_b, matrix_x)[0]
+    matrix_x = solve_iterate(matrix_a, matrix_b, matrix_x, diff=0.001)[0]
     # filling splines
-    for i in range(matrix_x.columns // 4):
-        splines[i].a = matrix_x[i * 4 + A_OFF][0]
-        splines[i].b = matrix_x[i * 4 + B_OFF][0]
-        splines[i].c = matrix_x[i * 4 + C_OFF][0]
-        splines[i].d = matrix_x[i * 4 + D_OFF][0]
+    # fill_simple_transformed_splines(matrix_x, splines)
+    fill_triagonal_transformed_splines(matrix_x, splines, points)
     return splines
 
 
@@ -91,13 +89,13 @@ def get_points_with_error(points, error):
     return new_points
 
 
-def find_point_with_max_error(points, splines: list):
+def find_point_with_max_error(points: list, splines: list):
     if (points[0]["x"] != splines[0].c_point_0):
         raise ProjectException("Invalid point coordinates")
     max_error = abs(splines[0].calculate(points[0]["x"]) - points[0]["y"])
     max_index = 0
     for i in range(len(splines)):
-        if (points[i]["x"] != splines[i].c_point_1):
+        if (points[i + 1]["x"] != splines[i].c_point_1):
             raise ProjectException("Invalid point coordinates")
         else:
             error = abs(splines[i].calculate(points[i + 1]["x"]) - points[i + 1]["y"])
