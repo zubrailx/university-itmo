@@ -57,6 +57,7 @@ class Spline:
 
 # END << class Spline
 
+
 def get_splines(points):
     points = sorted(points, key=lambda p: p["x"])
     splines = []
@@ -78,28 +79,3 @@ def get_splines(points):
     # fill_simple_transformed_splines(matrix_x, splines)
     fill_triagonal_transformed_splines(matrix_x, splines, points)
     return splines
-
-
-def get_points_with_error(points, error):
-    new_points = list()
-    if (error < 0):
-        raise ProjectException("invalid error value")
-    for p in points:
-        new_points.append({"x": p["x"], "y": p["y"] + random.random() * 2 * error - error})
-    return new_points
-
-
-def find_point_with_max_error(points: list, splines: list):
-    if (points[0]["x"] != splines[0].c_point_0):
-        raise ProjectException("Invalid point coordinates")
-    max_error = abs(splines[0].calculate(points[0]["x"]) - points[0]["y"])
-    max_index = 0
-    for i in range(len(splines)):
-        if (points[i + 1]["x"] != splines[i].c_point_1):
-            raise ProjectException("Invalid point coordinates")
-        else:
-            error = abs(splines[i].calculate(points[i + 1]["x"]) - points[i + 1]["y"])
-            if (error > max_error):
-                max_error = error
-                max_index = i + 1
-    return max_index

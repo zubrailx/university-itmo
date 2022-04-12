@@ -4,7 +4,8 @@ import sys
 from modules.util import color_string, Color, ProjectException
 from modules.parse import parse_expression, CalculationException, ParseException, TokenizeException
 
-from .spline import get_splines, find_point_with_max_error, get_points_with_error, MultiSpline
+from .spline import get_splines, MultiSpline
+from .point import find_point_with_max_error
 from .graph import draw
 
 
@@ -12,7 +13,7 @@ def solve(ifs, ofs):
     data = _read_data_from_stdin() if ifs == sys.stdin else _read_data_from_ifile(ifs)
     try:
         # get data to draw splines
-        p_errs = get_points_with_error(data["points"], data["error"])
+        p_errs = data["points"]  # already in pointgen.py
         muls_first = MultiSpline(get_splines(p_errs))
         p_err_max_i = find_point_with_max_error(data["points"], muls_first.splines)
         p_errs2 = p_errs.copy()
