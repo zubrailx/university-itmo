@@ -30,7 +30,7 @@ class MultiSpline:
                 i -= 1
                 return self.splines[i].calculate(x)
 
-# END << class Multispline
+# END << class MultiSpline
 
 
 class Spline:
@@ -56,7 +56,6 @@ class Spline:
                f"c_point_0: {self.c_point_0}, c_point_1: {self.c_point_1})"
 
 # END << class Spline
-
 
 def get_splines(points):
     points = sorted(points, key=lambda p: p["x"])

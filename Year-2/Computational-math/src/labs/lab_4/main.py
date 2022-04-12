@@ -33,7 +33,7 @@ def _read_data_from_ifile(ifs):
     return data
 
 def _read_data_from_stdin():
-    data = dict()
+    data = {}
     # reading points
     while True:
         try:
@@ -43,9 +43,9 @@ def _read_data_from_stdin():
             break
         except ValueError:
             print(color_string(Color.RED, "ERROR >> Invalid user input. Try again."))
-    point_list = list()
+    point_list = []
     for i in range(count):
-        p = dict()
+        p = {}
         while True:
             try:
                 print(f"Enter p[{i + 1}] \"x y\": ", end="")
