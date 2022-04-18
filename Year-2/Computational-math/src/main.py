@@ -35,7 +35,7 @@ def get_and_check_key_value(key: Key, argv: list):
             return get_argument_after_key(key, sys.argv)
         else:
             raise ProjectException(color_string(Color.RED,
-                                                f"FATAL >> For key {key.value} not argument found. Terminating..."))
+                                            f"FATAL >> For key {key.value} not argument found. Terminating..."))
     return None
 
 
@@ -56,6 +56,7 @@ def main():
 
     input_file = None
     output_file = None
+
     try:
         if (input_path is not None):
             try:

@@ -2,8 +2,18 @@ from copy import copy
 from modules.matrix import Matrix
 
 
+def solve_iterate(ma, mb, mx, diff):
+    it_count = 0
+    matrix_x = Matrix().init(mx)
+    matrix_x_prev = matrix_x
+    while (calculate_difference(matrix_x_prev, matrix_x) >= diff or it_count == 0):
+        matrix_x_prev = matrix_x
+        matrix_x = iterate(ma, mb, matrix_x)
+        it_count += 1
+    return (matrix_x, it_count, matrix_x - matrix_x_prev)
+
 def iterate(matrix_a, matrix_b, matrix_x):
-    new_matrix_x = Matrix(matrix_x.rows, matrix_x.columns).init(0)
+    new_matrix_x = Matrix(matrix_x.rows, matrix_x.columns)
     for i in range(matrix_a.rows):
         row = copy(matrix_a[i])
         x_main = - row[i]

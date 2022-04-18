@@ -1,31 +1,37 @@
 import random
 from copy import deepcopy, copy
 
-from modules import util
+from modules.util import color_string, Color, ProjectException
 
 
 class Matrix:
-    def __init__(self, rows=0, columns=0):
+    def __init__(self, rows=1, columns=1):
         if (isinstance(rows, int) and (isinstance(columns, int))):
+            if (rows <= 0 or columns <= 0):
+                raise Exception("ERROR: Matrix invalid arguments")
             self.matrix = []
             self.rows = rows
             self.columns = columns
             for _ in range(rows):
-                self.matrix.append([None for _ in range(columns)])
+                self.matrix.append([0 for _ in range(columns)])
         else:
             raise Exception("ERROR: Matrix type check")
 
     def init(self, m):
-        if (isinstance(m, float) or isinstance(m, int)):
+        if (isinstance(m, float) or isinstance(m, int)) or (m is None):
             self.matrix = [[m] * self.columns for _ in range(self.rows)]
-        elif (isinstance(m, list) and (isinstance(m[0], list))):
-            # copy deep the matrix
-            self.matrix = deepcopy(m)
-            self.rows = len(m)
-            self.columns = len(m[0])
+            return self
         else:
-            raise Exception("ERROR: Matrix type check")
-        return self
+            if (isinstance(m, Matrix)):
+                m = m.matrix
+            if (isinstance(m, list) and (isinstance(m[0], list))):
+                # copy deep the matrix
+                self.matrix = deepcopy(m)
+                self.rows = len(m)
+                self.columns = len(m[0])
+                return self
+            else:
+                raise Exception("ERROR: Matrix type check")
 
     def __str__(self):
         s = "[" 
@@ -34,14 +40,14 @@ class Matrix:
         s += str(self.matrix[self.rows - 1]) + ']'
         return s
 
-    def __getitem__(self, row):
+    def __getitem__(self, row: int) -> list:
         return self.matrix[row]
 
-    def __setitem__(self, row):
+    def __setitem__(self, row: int) -> list:
         return self.matrix[row]
 
     def __add__(self, arg):
-        matrix = Matrix(self.rows, self.columns).init(0)
+        matrix = Matrix(self.rows, self.columns)
         if (isinstance(arg, Matrix)):
             if (self.rows == arg.rows and self.columns == arg.columns):
                 for i in range(self.rows):
@@ -54,7 +60,7 @@ class Matrix:
         return matrix
 
     def __sub__(self, arg):
-        matrix = Matrix(self.rows, self.columns).init(0)
+        matrix = Matrix(self.rows, self.columns)
         if (isinstance(arg, Matrix)):
             if (self.rows == arg.rows and self.columns == arg.columns):
                 for i in range(self.rows):
@@ -113,7 +119,7 @@ class Matrix:
     def is_convergent(self):
         return _matrix_convergent_cons_2(self)
 
-    def create_diagonal_max_if_can(self):
+    def create_diagonal_max_if_can(self, *args):
         if (self.rows != self.columns or self.rows == 0):
             raise Exception("ERROR: bad matrix")
         # check that maximum elements
@@ -135,7 +141,13 @@ class Matrix:
         matrix_new = Matrix(self.rows, self.columns)
         for i in range(len(perm)):  # len(perm) always eq to self.rows
             matrix_new.insert_row(self.matrix[perm[i][0]], perm[i][1])
+
+        if (len(args) > 0):
+            new_matrices = _permute_args_matrices_rows(perm, args)
+            for i in range(len(args)):
+                args[i].matrix = new_matrices[i].matrix
         return (matrix_new, perm)
+
 
 # << END class Matrix
 
@@ -174,20 +186,22 @@ def _matrix_convergent_cons_2_b(matrix):
 
 
 def matrix_read(rows, columns):
-    # init matrix with 0
-    matrix = Matrix(rows, columns).init(0)
+    matrix = Matrix(rows, columns)
     print("Enter the matrix by rows:")
     i = 0
     while i < rows:
-        s = input(f"[{i + 1}]: ").split()
+        while True:
+            try:
+                num_list = list(map(float, input(f"[{i + 1}]: ").split()))
+                if (len(num_list) != columns):
+                    raise ProjectException()
+                break
+            except ValueError:
+                print(color_string(Color.RED, f"ERROR >> Numbers are not of class Number"))
+            except ProjectException:
+                print(color_string(Color.RED, f"ERROR >> Invalid count of numbers in a row, should be {columns}"))
         for j in range(columns):
-            e = s[j]
-            if not util.is_number(e):
-                accepted = False
-                while not accepted:
-                    e = input(f"Element [{i + 1}][{j + 1}] = {e} is invalid, retry: ")
-                    accepted = util.is_number(e)
-            matrix[i][j] = float(e)
+            matrix[i][j] = num_list[j]
         i += 1
     return matrix
 
@@ -220,7 +234,7 @@ def _matrix_mul(arg1, arg2):
     elif (isinstance(arg2, Matrix)):
         if (arg1.columns == arg2.rows):
             # init matrix with zeroes
-            matrix = Matrix(arg1.rows, arg2.columns).init(0)
+            matrix = Matrix(arg1.rows, arg2.columns)
             for i in range(matrix.rows):
                 for j in range(matrix.columns):
                     # multiplication
@@ -231,3 +245,25 @@ def _matrix_mul(arg1, arg2):
     else:
         raise Exception("ERROR: matrix type check")
     return matrix
+
+
+def _permute_args_matrices_rows(perm, args):
+    # check dimensions
+    is_good = True
+    for i in range(len(args)):
+        if (args[i].rows != len(perm)):
+            is_good = False
+            break
+    if (not is_good):
+        raise Exception("ERROR: invalid arguments")
+    # permutations
+    result = list()
+    if len(args) > 0:
+        for i in range(len(args)):
+            temp = Matrix(args[i].rows, args[i].columns)
+            for fr, to in perm:
+                temp[to][0] = args[i][fr][0]
+            result.append(temp)
+        return result
+    else:
+        return None
