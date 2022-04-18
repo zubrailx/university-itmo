@@ -79,3 +79,6 @@ def get_splines(points):
     # fill_simple_transformed_splines(matrix_x, splines)
     fill_triagonal_transformed_splines(matrix_x, splines, points)
     return splines
+
+def get_equation(points):
+    return MultiSpline(get_splines(points))

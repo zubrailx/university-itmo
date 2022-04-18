@@ -1,0 +1,11 @@
+{
+  "equation": "\\sin(x) + y",
+  "real_eq": "1 / 2 * (5 * \\e^x - \\sinx - \\cosx)",
+  "dependant": "y",
+  "step": 0.1,
+  "count": 20,
+  "initial": {
+    "x": 0,
+    "y" : 2
+  }
+}

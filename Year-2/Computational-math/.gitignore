@@ -4,4 +4,5 @@ __pycache__
 input.txt
 output.txt
 build/
-
+output.json
+input.json
