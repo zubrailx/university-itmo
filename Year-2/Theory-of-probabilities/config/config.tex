@@ -8,7 +8,8 @@
 
 % total - determines printable width, height
 \geometry{ 
-	a4paper, total={180mm,267mm}
+	a4paper, 
+  total={170mm,257mm}
 }
 
 %----text,fonts------------------------------------------------------------------------------------
@@ -30,7 +31,10 @@
 }
 
 \hypersetup{
-	allcolors=black
+  colorlinks=true, %Colours links instead of ugly boxes
+  urlcolor=blue, %Colour for external hyperlinks
+  linkcolor=black, %Colour of internal links
+  citecolor=red %Colour of citations
 }
 
 %\newcommand{\asubsection}[2]{
@@ -40,6 +44,7 @@
 %}
 %----math,graphics---------------------------------------------------------------------------------
 \usepackage{amsmath,amsfonts,amssymb}
+%\usepackage{txfonts}
 \usepackage{amsthm}
 
 \usepackage{tikz}
