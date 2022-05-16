@@ -6,24 +6,22 @@ import se.s312563.lab3.entity.Point;
 import se.s312563.lab3.service.PointService;
 import se.s312563.lab3.view.FormView;
 
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Named("inputController")
+@ManagedBean(name = "inputController")
 @SessionScoped
 public class InputController implements Serializable {
 
-    @Inject
-    @Named("service.pointService")
+    @ManagedProperty(value = "service.pointService")
     PointService pointService;
 
-    @Inject
-    @Named("formView")
+    @ManagedProperty(value = "formView")
     private FormView formView;
 
     public void executeForm() {

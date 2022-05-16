@@ -1,11 +1,13 @@
 package se.s312563.lab3.repository.manager;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
 import java.io.File;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+@ManagedBean(name = "credentials")
 @ApplicationScoped
 public class Credentials {
     private String username = "";

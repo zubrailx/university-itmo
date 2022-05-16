@@ -1,22 +1,22 @@
 package se.s312563.lab3.repository.manager;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-@Named("repository.persistenceFactory")
+@ManagedBean(name = "repository.persistenceFactory")
 @SessionScoped
 public class PersistenceFactory implements Serializable {
 
     private EntityManagerFactory emf;
 
-    @Inject
+    @ManagedProperty(value = "credentials")
     private Credentials credentials;
 
     @PostConstruct

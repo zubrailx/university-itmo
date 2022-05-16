@@ -3,21 +3,20 @@ package se.s312563.lab3.repository;
 import se.s312563.lab3.entity.Point;
 import se.s312563.lab3.repository.manager.PersistenceFactory;
 
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Named("repository.pointRepository")
+@ManagedBean(name = "repository.pointRepository")
 @SessionScoped
 public class PointRepositoryDAO implements Serializable, PointRepository {
 
-    @Inject
-    @Named("repository.persistenceFactory")
+    @ManagedProperty(value = "repository.persistenceFactory")
     private PersistenceFactory persistenceFactory;
 
     @Override

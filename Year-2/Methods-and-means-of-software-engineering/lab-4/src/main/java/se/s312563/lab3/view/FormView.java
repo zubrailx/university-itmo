@@ -3,13 +3,13 @@ package se.s312563.lab3.view;
 import se.s312563.lab3.dto.PointDTO;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Named;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Named("formView")
+@ManagedBean(name = "formView")
 @SessionScoped
 public class FormView implements Serializable {
 
