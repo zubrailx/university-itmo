@@ -1,14 +1,49 @@
 import cv2 as cv
 import numpy as np
 import json
+import colorsys
 from datetime import datetime
 
+
+def gstreamer_pipeline(
+    capture_width=1280,
+    capture_height=720,
+    display_width=1280,
+    display_height=720,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc ! "
+        "video/x-raw(memory:NVMM), "
+        "width=(int)%d, height=(int)%d, "
+        "format=(string)NV12, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink max-buffers=1 drop=true"
+        % (
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
 
 def read_colors_from_file(path):
     file = open(path, "r")
     data = json.loads(" ".join(file.readlines()))
     data_min, data_max = [d["min"] for d in data], [d["max"] for d in data]
     return (data_min, data_max)
+
+
+def hsv_to_rgb(b, g, r):
+    pass
+
+def rgb_to_hsv():
+    pass
 
 
 def draw_rectangles(frame, n, colors=None, thickness=2):
@@ -27,13 +62,19 @@ def draw_rectangles(frame, n, colors=None, thickness=2):
     else:
         colors = [col for _ in range(n)]
 
-    rw, rh = (width - thickness * (n)) / n, height / n
+    rw, rh = (width - thickness * n) / (2*n), height / n
+    rwo, rho = rw, rh
+    rw, rh = max(rwo, rho), max(rwo, rho)
     ws = rw
     rectangle_dims = []
+    offset = 40
     for i in range(n):
-        top_left = (int(ws * i) + thickness * i, int((height - rh) / 2))
-        bottom_right = (int(ws * (i + 1)) + thickness * i, int((height + rh) / 2))
+        top_left = (int(ws * i) + (thickness + offset)* i, int((height - rh) / 2))
+        bottom_right = (int(ws * (i + 1)) + (thickness + offset) * i, int((height + rh) / 2))
         cv.rectangle(frame, top_left, bottom_right, colors[i], thickness)
+        # remove borders
+        top_left = (top_left[0] + thickness, top_left[1] + thickness)
+        bottom_right = (bottom_right[0] - thickness, bottom_right[1] - thickness)
         rectangle_dims.append((top_left, bottom_right))
     return rectangle_dims
 
@@ -41,7 +82,7 @@ def draw_rectangles(frame, n, colors=None, thickness=2):
 def get_masked_frame_from_rectangles(frame, rectangles):
     frames = []
     for i in range(len(rectangles)):
-        hsv_frame = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+        hsv_frame = frame
         top_left, bottom_right = rectangles[i][0], rectangles[i][1]
         mask_frame = hsv_frame[top_left[1]:bottom_right[1] + 1, top_left[0]:bottom_right[0] + 1]
         frames.append(mask_frame)
@@ -88,9 +129,16 @@ def display_results(frame, results, coordinates):
     text = "Last time unlocked: " + history
     put_text_with_stroke(frame, text, org, font, font_scale, text_color, thickness, stroke_color)
 
+def get_mean_color(masked_frames):
+    sr_pixel_arr = []
+    for frame in masked_frames:
+        avg_color_per_row = np.average(frame, axis=0)
+        avg_color = np.average(avg_color_per_row, axis=0)
+        sr_pixel_arr.append(avg_color)
+    return sr_pixel_arr
 
 def main():
-    cap = cv.VideoCapture(0)
+    cap = cv.VideoCapture(gstreamer_pipeline(flip_method=4), cv.CAP_GSTREAMER)#gstreamer_pipeline(flip_method=4), cv.CAP_GSTREAMER)
     if (not cap.isOpened()):
         print("Cannot open camera.")
         exit()
@@ -106,11 +154,12 @@ def main():
             print("Can't receive frame (stream end?). Exiting ...")
             break
         # inverting
-        frame = cv.flip(frame, 180)
+        # frame = cv.flip(frame, 180)
         # process
         rectangle_dims = draw_rectangles(frame, n, thickness=2, colors=colors_med)
         masked_frames = get_masked_frame_from_rectangles(frame, rectangle_dims)
-        rect_rez = check_masked_frames(masked_frames, colors_min=colors_min, colors_max=colors_max, coef=0.9)
+        rect_rez = check_masked_frames(masked_frames, colors_min=colors_min, colors_max=colors_max, coef=0.8)
+        print(get_mean_color(masked_frames))
         display_results(frame, rect_rez, rectangle_dims)
         # display + process heystroke
         cv.imshow('frame', frame)

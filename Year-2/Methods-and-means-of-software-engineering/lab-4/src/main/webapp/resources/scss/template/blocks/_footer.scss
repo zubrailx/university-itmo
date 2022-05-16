@@ -1,0 +1,13 @@
+.footer {
+  &__wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #c6c6c6;
+  }
+
+  &__item {
+    margin: 12px 8px;
+    font-size: 1.1em;
+  }
+}

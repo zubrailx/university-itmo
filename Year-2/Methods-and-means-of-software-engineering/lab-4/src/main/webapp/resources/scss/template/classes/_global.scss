@@ -1,0 +1,22 @@
+.body {
+  font-size: 1.2em;
+  background-color: aliceblue;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.simple-button {
+  font: inherit;
+  margin: 4px;
+  border: 1px solid #acafc6bf;
+  padding: 6px;
+}
+
+.simple-shadow {
+  -webkit-box-shadow: 0px 0px 8px 0px rgba(34, 60, 80, 0.25);
+  -moz-box-shadow: 0px 0px 8px 0px rgba(34, 60, 80, 0.25);
+  box-shadow: 0px 0px 8px 0px rgba(34, 60, 80, 0.25);
+}

@@ -1,0 +1,57 @@
+.footer__wrapper { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; background-color: #c6c6c6; }
+
+.footer__item { margin: 12px 8px; font-size: 1.1em; }
+
+.header__top { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-pack: start; -ms-flex-pack: start; justify-content: flex-start; background-color: #c6c6c6; }
+
+.header__bottom { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
+
+.header__navigation { color: black; }
+
+.header-top__item { font-size: 1.2em; padding: 12px 10px; }
+
+.header-top_link { margin-left: auto; color: black; text-decoration: underline; }
+
+.header-bottom__lab { padding: 6px; margin: 4px; font-size: 1.1em; }
+
+/* || RESETS */
+* { padding: 0; margin: 0; border: 0; }
+
+*, *:before, *:after { -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+:focus, :active { outline: none; }
+
+a:focus, a:active { outline: none; }
+
+nav, footer, header, aside { display: block; }
+
+html, body { height: 100%; width: 100%; font-size: 100%; line-height: 1; font-size: 14px; -ms-text-size-adjust: 100%; -moz-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+
+input, button, textarea { font-family: inherit; }
+
+input::-ms-clear { display: none; }
+
+button { cursor: pointer; }
+
+button::-moz-focus-inner { padding: 0; border: 0; }
+
+a, a:visited { text-decoration: none; }
+
+a:hover { text-decoration: none; }
+
+ul li { list-style: none; }
+
+img { vertical-align: top; }
+
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+
+/* || --------------*/
+html, body { font-family: 'Open Sans', sans-serif; font-size: 14px; font-style: normal; font-weight: 500; }
+
+.body { font-size: 1.2em; background-color: aliceblue; }
+
+.flex-column { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+
+.simple-button { font: inherit; margin: 4px; border: 1px solid #acafc6bf; padding: 6px; }
+
+.simple-shadow { -webkit-box-shadow: 0px 0px 8px 0px rgba(34, 60, 80, 0.25); box-shadow: 0px 0px 8px 0px rgba(34, 60, 80, 0.25); }
