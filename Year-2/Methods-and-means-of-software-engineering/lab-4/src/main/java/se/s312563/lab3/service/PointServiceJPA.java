@@ -9,12 +9,20 @@ import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.List;
 
-@ManagedBean(name = "service.pointService")
+@ManagedBean(name = "pointService")
 @SessionScoped
 public class PointServiceJPA implements PointService, Serializable {
 
-    @ManagedProperty(value = "repository.pointRepository")
+    @ManagedProperty(value = "#{pointRepository}")
     PointRepository pointRepository;
+
+    public PointRepository getPointRepository() {
+        return pointRepository;
+    }
+
+    public void setPointRepository(PointRepository pointRepository) {
+        this.pointRepository = pointRepository;
+    }
 
     @Override
     public Point addEntity(Point p) {

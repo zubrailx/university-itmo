@@ -12,12 +12,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@ManagedBean(name = "repository.pointRepository")
+@ManagedBean(name = "pointRepository")
 @SessionScoped
 public class PointRepositoryDAO implements Serializable, PointRepository {
 
-    @ManagedProperty(value = "repository.persistenceFactory")
+    @ManagedProperty(value = "#{persistenceFactory}")
     private PersistenceFactory persistenceFactory;
+
+    public PersistenceFactory getPersistenceFactory() {
+        return persistenceFactory;
+    }
+
+    public void setPersistenceFactory(PersistenceFactory persistenceFactory) {
+        this.persistenceFactory = persistenceFactory;
+    }
 
     @Override
     public Point addEntity(Point p) {

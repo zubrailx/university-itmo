@@ -18,11 +18,27 @@ import java.util.stream.Stream;
 @SessionScoped
 public class InputController implements Serializable {
 
-    @ManagedProperty(value = "service.pointService")
+    @ManagedProperty(value = "#{pointService}")
     PointService pointService;
 
-    @ManagedProperty(value = "formView")
+    @ManagedProperty(value = "#{formView}")
     private FormView formView;
+
+    public PointService getPointService() {
+        return pointService;
+    }
+
+    public void setPointService(PointService pointService) {
+        this.pointService = pointService;
+    }
+
+    public FormView getFormView() {
+        return formView;
+    }
+
+    public void setFormView(FormView formView) {
+        this.formView = formView;
+    }
 
     public void executeForm() {
         List<PointDTO> dtoList = formView.getUserDTOList();
