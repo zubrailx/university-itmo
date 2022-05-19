@@ -1,5 +1,9 @@
 package se.s312563.lab3.entity;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -8,6 +12,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "points")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Point {
     @Id
     @GeneratedValue
@@ -28,63 +35,8 @@ public class Point {
     @Transient
     private Integer offset;
 
-    public Point() {
-    }
-
     public static Builder newBuilder() {
         return new Point().new Builder();
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getR() {
-        return r;
-    }
-
-    public void setR(double r) {
-        this.r = r;
-    }
-
-    public boolean isHit() {
-        return hit;
-    }
-
-    public LocalDateTime getLocalDateTime() {
-        return localDateTime;
-    }
-
-    public void setLocalDateTime(LocalDateTime localDateTime) {
-        this.localDateTime = localDateTime;
-    }
-
-    public double getScriptTimeSeconds() {
-        return scriptTimeSeconds;
-    }
-
-    public Integer getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Integer offset) {
-        this.offset = offset;
     }
 
     private boolean calculate(double x, double y, double r) {

@@ -11,7 +11,7 @@ public class DTOConverter {
                 .setY(pointDTO.getY())
                 .setR(pointDTO.getR())
                 .setHit(pointDTO.getHit())
-                .setLocalDateTime(pointDTO.getLocalDateTime())
+                .setLocalDateTime(pointDTO.getLdt())
                 .setScriptTime(pointDTO.getScriptTime())
                 .setOffset(pointDTO.getOffset())
                 .build();
@@ -22,7 +22,7 @@ public class DTOConverter {
                 .setX(point.getX())
                 .setY(point.getY())
                 .setR(point.getR())
-                .setHit(point.isHit())
+                .setHit(point.getHit())
                 .setLocalDateTime(point.getLocalDateTime())
                 .setScriptTime(point.getScriptTimeSeconds())
                 .setOffset(point.getOffset())

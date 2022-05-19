@@ -1,0 +1,26 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:panelGroup class="data-container" id="data-container">
+        <div class="data-container__count">
+            <h:outputLabel styleClass="data-container__label">Количество точек:</h:outputLabel>
+            <h:outputText styleClass="data-container__value" value="#{pointController.allPointCount}"/>
+        </div>
+        <div class="data-container__hit-count">
+            <h:outputLabel styleClass="data-container__label">Количество попаданий:</h:outputLabel>
+            <h:outputText styleClass="data-container__value" value="#{pointController.allPointHitCount}"/>
+        </div>
+        <div class="data-container__area">
+            <h:outputLabel styleClass="data-container__label">Площадь:</h:outputLabel>
+            <h:outputText styleClass="data-container__value" value="#{areaController.calculateArea()}">
+                <f:convertNumber pattern="#0.0000" />
+            </h:outputText>
+        </div>
+        <div class="data-container__announcement">
+            <h:outputText styleClass="data-container__announcement-value" value="#{pointController.announcement}"/>
+        </div>
+    </h:panelGroup>
+</ui:composition>

@@ -1,16 +1,19 @@
 package se.s312563.lab3.view;
 
+import lombok.Getter;
+import lombok.Setter;
 import se.s312563.lab3.dto.PointDTO;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@ManagedBean(name = "formView")
-@SessionScoped
+@ManagedBean(name = "formView", eager = true)
+@SessionScoped()
+@Getter
+@Setter
 public class FormView implements Serializable {
 
     private final int[] valueX = {-3, -2, -1, 0, 1, 2, 3};
@@ -24,52 +27,7 @@ public class FormView implements Serializable {
     private double svgY;
 
     // table dto list
-    private List<PointDTO> dtoList;
-
-    @PostConstruct
-    private void init() {
-        dtoList = new ArrayList<>();
-    }
-
-    public boolean[] getBooleanX() {
-        return booleanX;
-    }
-
-    public int[] getValueX() {
-        return valueX;
-    }
-
-    public double getInputY() {
-        return inputY;
-    }
-
-    public void setInputY(double y) {
-        this.inputY = y;
-    }
-
-    public double getInputR() {
-        return inputR;
-    }
-
-    public void setInputR(double r) {
-        this.inputR = r;
-    }
-
-    public double getSvgX() {
-        return svgX;
-    }
-
-    public void setSvgX(double svgX) {
-        this.svgX = svgX;
-    }
-
-    public double getSvgY() {
-        return svgY;
-    }
-
-    public void setSvgY(double svgY) {
-        this.svgY = svgY;
-    }
+    private List<PointDTO> dtoList = new ArrayList<>();
 
     public List<PointDTO> getUserDTOList() {
         List<PointDTO> lst = new ArrayList<>();
@@ -89,14 +47,6 @@ public class FormView implements Serializable {
                 .setX(svgX)
                 .setY(svgY)
                 .setR(inputR).build();
-    }
-
-    public List<PointDTO> getDtoList() {
-        return dtoList;
-    }
-
-    public void setDtoList(List<PointDTO> dtoList) {
-        this.dtoList = dtoList;
     }
 
     public void clearForm() {

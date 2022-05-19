@@ -1,5 +1,7 @@
 package se.s312563.lab3.repository;
 
+import lombok.Getter;
+import lombok.Setter;
 import se.s312563.lab3.entity.Point;
 import se.s312563.lab3.repository.manager.PersistenceFactory;
 
@@ -14,18 +16,12 @@ import java.util.List;
 
 @ManagedBean(name = "pointRepository")
 @SessionScoped
+@Getter
+@Setter
 public class PointRepositoryDAO implements Serializable, PointRepository {
 
     @ManagedProperty(value = "#{persistenceFactory}")
     private PersistenceFactory persistenceFactory;
-
-    public PersistenceFactory getPersistenceFactory() {
-        return persistenceFactory;
-    }
-
-    public void setPersistenceFactory(PersistenceFactory persistenceFactory) {
-        this.persistenceFactory = persistenceFactory;
-    }
 
     @Override
     public Point addEntity(Point p) {

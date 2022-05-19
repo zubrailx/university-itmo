@@ -1,5 +1,8 @@
 package se.s312563.lab3.controller;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import se.s312563.lab3.DTOConverter;
 import se.s312563.lab3.dto.PointDTO;
 import se.s312563.lab3.entity.Point;
@@ -9,14 +12,15 @@ import se.s312563.lab3.view.FormView;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
-import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ManagedBean(name = "inputController")
 @SessionScoped
-public class InputController implements Serializable {
+@Getter
+@Setter
+public class InputController {
 
     @ManagedProperty(value = "#{pointService}")
     PointService pointService;
@@ -24,21 +28,9 @@ public class InputController implements Serializable {
     @ManagedProperty(value = "#{formView}")
     private FormView formView;
 
-    public PointService getPointService() {
-        return pointService;
-    }
+    @ManagedProperty(value = "#{pointController}")
+    private PointController pointController;
 
-    public void setPointService(PointService pointService) {
-        this.pointService = pointService;
-    }
-
-    public FormView getFormView() {
-        return formView;
-    }
-
-    public void setFormView(FormView formView) {
-        this.formView = formView;
-    }
 
     public void executeForm() {
         List<PointDTO> dtoList = formView.getUserDTOList();
@@ -50,6 +42,8 @@ public class InputController implements Serializable {
         if (pointList != null) {
             dtoList = pointList.stream().map(DTOConverter::entityToDto).collect(Collectors.toList());
             formView.setDtoList(Stream.concat(formView.getDtoList().stream(), dtoList.stream()).collect(Collectors.toList()));
+            // counter
+            pointController.updateCounter(dtoList);
         }
     }
 
@@ -60,7 +54,10 @@ public class InputController implements Serializable {
             p = pointService.addEntity(p);
             // append list
             if (p != null) {
-                formView.getDtoList().add(DTOConverter.entityToDto(p));
+                pointDTO = DTOConverter.entityToDto(p);
+                formView.getDtoList().add(pointDTO);
+                // counter
+                pointController.updateCounter(pointDTO);
             }
         }
     }
@@ -72,6 +69,8 @@ public class InputController implements Serializable {
             List<PointDTO> dtoList = pList.stream().map(DTOConverter::entityToDto).collect(Collectors.toList());
             List<PointDTO> formList = formView.getDtoList();
             formList.removeAll(dtoList);
+            // counter
+            pointController.restoreCounter();
         }
     }
 }

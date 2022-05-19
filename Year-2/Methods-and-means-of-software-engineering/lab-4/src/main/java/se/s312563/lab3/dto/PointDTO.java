@@ -1,10 +1,16 @@
 package se.s312563.lab3.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+
+@Getter
+@Setter
 public class PointDTO implements Serializable {
 
     private double x;
@@ -19,64 +25,8 @@ public class PointDTO implements Serializable {
         return new PointDTO().new Builder();
     }
 
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getR() {
-        return r;
-    }
-
-    public void setR(double r) {
-        this.r = r;
-    }
-
-    public LocalDateTime getLocalDateTime() {
-        return ldt;
-    }
-
-    public void setLocalDateTime(LocalDateTime ldt) {
-        this.ldt = ldt;
-    }
-
     public String getLocalDateTimeFormatted() {
         return ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-    }
-
-    public Boolean getHit() {
-        return hit;
-    }
-
-    public void setHit(Boolean hit) {
-        this.hit = hit;
-    }
-
-    public Double getScriptTime() {
-        return scriptTime;
-    }
-
-    public void setScriptTime(Double executeTime) {
-        this.scriptTime = executeTime;
-    }
-
-    public Integer getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Integer offset) {
-        this.offset = offset;
     }
 
     @Override

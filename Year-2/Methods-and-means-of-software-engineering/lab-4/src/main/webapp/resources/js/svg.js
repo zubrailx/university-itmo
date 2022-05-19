@@ -6,6 +6,7 @@ const svg_r = 80;
 let $svg_x_input = document.querySelector(".svg-container__input-x");
 let $svg_y_input = document.querySelector(".svg-container__input-y");
 let $svg_button = document.querySelector(".svg-container__button");
+let $data_button = document.querySelector(".data-update__button");
 
 
 function toFormCoordinates(point) {
@@ -55,7 +56,6 @@ function loadPointsFromTable(){
         point.hit = $table_rows[i].cells[3].innerText.trim() === 'true';
         point = toSvgCoordinates(point);
         points.push(point);
-        console.log(i);
     }
     points.forEach(point => { drawPoint(point.x, point.y, point.hit); });
 }
@@ -91,6 +91,7 @@ let $form_radius_input = document.querySelector(".form-radius__input > input");
 $form_radius_input.onchange = () => {
     deletePoints();
     loadPointsFromTable();
+    $data_button.click();
 }
 
 
