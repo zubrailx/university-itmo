@@ -1,0 +1,9 @@
+.ccls
+.ccls-cache/
+build/
+release/
+debug/
+.idea/
+input.txt
+
+
