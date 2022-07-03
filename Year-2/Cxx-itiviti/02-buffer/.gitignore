@@ -1,0 +1,5 @@
+cmake-build-debug/
+build/
+.idea/
+.ccls
+.ccls-cache/
