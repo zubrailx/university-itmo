@@ -2,4 +2,4 @@
 
 ## Table of Contents
 
-- [Шаблоны](./templates.md)
+- [Шаблоны + концепты и ограничения + замыкания](./templates.md)

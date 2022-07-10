@@ -1,4 +1,4 @@
-## Шаблоны
+## Шаблоны + концепты и ограничения + замыкания
 
 ```c++
 template <typename Container, typename Value = Container::value_type>
@@ -584,3 +584,230 @@ void invoke_fn(Args && ... args)
 }
 ```
 
+### Разрешение имен функций
+
+* Составление набора кандидатов
+  * Простой поиск
+  * Поиск, зависящий от аргументов
+  * Подстановка аргументов шаблонов
+* Вычеркивание нежизнеспособных кандидатов
+* Выбор лучшего кандидата из жизнеспособных
+
+### SFINAE
+
+* Substitution Failure Is Not An Error*
+* *-terms and conditions apply, acts only in overload resolution
+
+Ошибка подстановки шаблонного параметра в объявлении функции при создании набора кандидатов для разрешения имени функции не является ошибкой компиляции, если в наборе кандидатов есть другая подходящая функция.
+
+```c++
+template<>
+bool contains(const Combination & container,
+              const Combination::value_type & val);
+
+bool contains(const Combination & combo,
+              const Instrument & leg);
+
+
+Combination butterfly;
+Instrument AAPL_call_option;
+if (contains(butterfly, AAPL_call_opt)) {
+    ...
+}
+```
+
+```c++
+template <typename T,
+          std::enable_if_t<std::is_integral_v<T>,
+                           bool> = true>
+T add(T arg1, T arg2); //если bool - то работает эта функция
+
+template <typename T,
+          std::enable_if_t<!std::is_integral_v<T>,
+                           bool> = true>
+T add(T arg1, T arg2); // в противном случае работает эта
+```
+https://en.cppreference.com/w/cpp/types/enable_if
+
+
+### SFINAE не нужно:
+```c++
+template <typename T>
+concept Integral = std::is_integral_v<T>;
+
+template <typename T>
+concept NotIntegral = !Integral<T>;
+
+auto add(Integral auto arg1, Integral auto arg2)
+{
+   return arg1 + arg2;
+}
+
+template <NotIntegral T>
+T add(T arg1, T arg2)
+{
+   return arg1.append(arg2);
+}
+```
+```c++
+template <typename T>
+concept Substractable = requires (T a, T b) { T(a - b); };
+
+template <typename T>
+T sub(T arg1, T arg2) requires Substractable<T>
+{
+   return arg1 - arg2;
+}
+
+template <typename T>
+T add(T arg1, T arg2) requires requires { T(arg1 + arg2); }
+{
+   return arg1 + arg2;
+}
+
+std::cout << sub(std::string("abcd"), std::string("abc")) << std::endl; // ошибка при компиляции
+std::cout << add(std::string("abcd"), std::string("abc")) << std::endl; // все хорошо
+```
+
+### Концепты и constraints/ограничения
+
+* Constraint — набор атомарных ограничений на шаблонный параметр, связанный логическими операциями && и ||.
+* Концепт — именованный constraint.
+
+```c++
+template <template_parameter_list>
+concept concept_name = constraint_expression;
+
+template <typename T>
+concept Integral = std::is_integral_v<T>;
+```
+
+### Атомарные ограничения
+
+Константное выражение типа bool
+```c++
+std::is_integral_v<T>;
+(I > 0) // I is a non-type template parameter
+```
+requires-выражение
+```c++
+requires ( parameter-list(optional) ) { requirement-seq }
+```
+
+### requires-выражения
+Простое требование, проверяется только корректность с точки зрения языка.
+```c++
+requires (T a, T b)
+{
+    a + b;
+    a - b;
+}
+```
+
+Требование к типу, проверяется существование типа.
+```c++
+requires (T a, U b)
+{
+    typename CommonType<T, U>;
+}
+```
+
+Составное требование, проверяется языковая корректность и свойства выражения.
+```c++
+requires (T a, U b)
+{
+    {a + b} -> std::same_as<int>;
+    {a * b} noexcept -> std::same_as<int>;
+}
+```
+
+Вложенное требование.
+```c++
+requires (T a, U b)
+{
+    requires Addable<T, U>;
+}
+```
+
+Комбинация всего перечисленного.
+```c++
+requires (T a, U b)
+{
+    a + b;
+    {a + b} -> std::same_as<int>;
+    typename CommonType<T, U>;
+    requires Addable<T, U>;
+}
+```
+
+### Где можно использовать концепты
+```c++
+// template type parameters
+  template <Addable T>
+  int add(T a, T b);
+// template non-type parameters
+  template <Addable auto Value>
+// с auto
+  int add(Addable auto a, Addable auto b);
+// в requires-clause
+```
+
+### requires-clause
+После списка параметров шаблонов.
+```c++
+template <typename T>
+    requires Addable<T>
+int add(T a, T b);
+```
+После объявления функции.
+```c++
+template <typename T>
+int add(T a, T b) requires Addable<T>;
+```
+В requires-clause можно использовать не только концепты, но и constraints.
+
+```c++
+template <typename T>
+concept Substractable = requires (T a, T b) { T(a - b); };
+
+template <typename T>
+T sub(T arg1, T arg2) requires Substractable<T>
+{
+   return arg1 - arg2;
+}
+
+template <typename T>
+T add(T arg1, T arg2) requires requires { T(arg1 + arg2); }
+{
+   return arg1 + arg2;
+}
+
+template <int I>
+void get() requires (I > 0)
+{
+    std::cout << "I is not zero" << std::endl;
+}
+```
+
+### Замыкания
+```c++
+auto lambda = [capture] (args) specifiers -> return type {
+    ... // code
+};
+
+
+auto age_less = [] (const auto & lhs, const auto & rhs) {
+    return lhs.age < rhs.age;
+};
+std::sort(humans.begin(), humans.end(), age_less);
+
+
+std::vector<std::vector<double>> huge_matrix = generate();
+auto heavy_calculations = [&huge_matrix] {
+    // do things
+};
+
+auto result_future = std::async(heavy_calculations);
+// do other things
+auto result = result_future.get();
+```
