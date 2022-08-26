@@ -1,0 +1,8 @@
+.ccls
+.ccls-cache/
+.cache/
+.tmp/
+
+build/
+*.out
+*.o
