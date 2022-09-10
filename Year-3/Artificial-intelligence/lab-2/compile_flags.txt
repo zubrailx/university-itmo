@@ -1,0 +1,10 @@
+c++
+-std=c++2b
+-O2
+-Wall
+-pedantic
+-Wshadow
+-Wfloat-equal
+-fsanitize=address
+-fsanitize=undefined
+-fstack-protector
