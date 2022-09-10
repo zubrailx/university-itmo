@@ -1,0 +1,10 @@
+---
+AlwaysBreakTemplateDeclarations: 'Yes'
+PointerAlignment: Middle
+SortIncludes: 'true'
+SpacesBeforeTrailingComments: '0'
+TabWidth: '2'
+UseTab: Always
+SpaceAfterTemplateKeyword: 'false'
+
+...

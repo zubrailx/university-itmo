@@ -3,7 +3,8 @@ NAME := exec
 CXX = g++
 LD = $(CXX)
 
-CXXFLAGS = $(strip $(file < compile_flags.txt)) -g
+CXXFLAGS.debug = $(strip $(file < compile_flags.txt)) -g
+CXXFLAGS = $(CXXFLAGS.debug)
 LDFLAGS = $(CXXFLAGS)
 
 RM = rm -rf

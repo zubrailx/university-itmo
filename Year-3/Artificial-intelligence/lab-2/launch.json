@@ -1,0 +1,13 @@
+{
+  "configurations": [
+    {
+      "name": "[json]: launch `exec`",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "build/exec",
+      "cwd":"${workspaceFolder}",
+      "stopOnEntry": false
+    }
+  ]
+}
+
