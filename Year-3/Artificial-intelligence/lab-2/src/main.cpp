@@ -59,7 +59,6 @@ std::istream &operator>>(std::istream &str, CSVRow &data) {
   return str;
 }
 
-
 // Variant: 2 (С.Петербург -> Житомир)
 int main() {
   std::ifstream file("test/in.1");
