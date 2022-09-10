@@ -59,8 +59,10 @@ std::istream &operator>>(std::istream &str, CSVRow &data) {
   return str;
 }
 
+
+// Variant: 2 (С.Петербург -> Житомир)
 int main() {
-  std::ifstream file("plop.csv");
+  std::ifstream file("test/in.1");
 
   CSVRow row;
   while (file >> row) {
