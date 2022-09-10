@@ -1,0 +1,73 @@
+%форматирование размера документа
+\documentclass[11pt, a4paper]{article}
+
+\usepackage{geometry}
+% total - determines printable width, height
+\geometry{ 
+	a4paper, total={160mm,267mm}
+}
+
+%----text,fonts------------------------------------------------------------------------------------
+\usepackage{mmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{setspace}
+\setstretch{0,9}
+\usepackage{fancyvrb}
+
+%----math,graphics---------------------------------------------------------------------------------
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{filecontents}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\pgfplotsset{
+	compat=1.17
+}
+
+\usepackage{graphicx}
+\graphicspath{{image/}}
+  
+\usepackage{wrapfig}
+\usepackage{tabularx}
+
+% relative importing
+\usepackage{import}
+
+\input{./language.tex}
+
+\begin{document}
+
+\import{.}{titular.tex}
+\newpage
+
+\section{Описание задания}
+
+\noindentСоставить базу знаний на языке Пролог, которая будет содержать генеалогическое дерево семьи с указанием родственных отношений (например, папа, бабушка и т.д.), опираясь на два первичных факта: родитель и супруг. 
+
+\section{Родословное дерево}
+\includegraphics[width=\linewidth]{tree.png}
+
+\section{Проверка правил на примерах}
+
+\lstinputlisting[
+  style      = Prolog-pygsty,
+  caption    = {База знаний},
+]{../task.pl}
+
+\lstinputlisting[
+  style      = Prolog-pygsty,
+  caption    = {Тестирование на примерах (runfile)},
+]{../run.pl}
+
+\lstinputlisting[
+  style      = Prolog-pygsty,
+  caption    = {Тестирование на примерах (runtime)},
+]{../result}
+
+\end{document}
