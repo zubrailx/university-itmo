@@ -16,6 +16,8 @@ OBJDIR = $(BUILDDIR)
 TARGET = $(BUILDDIR)/$(NAME)
 
 SOURCES := $(shell find $(SRCDIR) -type f -name '*.cpp')
+HEADERS := $(shell find $(SRCDIR) -type f -name '*.hpp')
+HEADERS += $(shell find $(SRCDIR) -type f -name '*.h')
 OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 DIRS := $(sort $(dir $(OBJECTS)))
 
@@ -26,7 +28,7 @@ all: build
 run:
 	exec $(TARGET)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 build: $(DIRS) $(OBJECTS)
