@@ -1,10 +1,9 @@
 #include <fstream>
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
+
+#pragma once
 
 #define CSV_DELIMETER ';'
 

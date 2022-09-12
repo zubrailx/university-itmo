@@ -1,5 +1,7 @@
 #include <string>
 
+#pragma once
+
 template <typename T> constexpr auto type_name() {
   std::string_view name, prefix, suffix;
 #ifdef __clang__
