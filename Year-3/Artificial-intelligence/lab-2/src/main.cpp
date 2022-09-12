@@ -24,7 +24,7 @@ void test_tree() {
   tp.append("level-2(2)");
   tp.step_out();
   tp.append("level-1");
-  tp.step_in(2);
+  tp.step_in(4);
   tp.append("level-3");
   tp.step_out();
   tp.append("level-2");

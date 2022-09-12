@@ -1,4 +1,5 @@
 #include <fstream>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -10,12 +11,14 @@ private:
 	const std::string M_TREE_SIGNS[6] = {"├", "─", "│", " ", "└", "┐"};
 
 	struct Tree {
-		std::vector<std::pair<std::string, Tree *>> arr;
+		std::vector<std::pair<std::string, std::unique_ptr<Tree>>> arr;
 	};
-	Tree root;
+	std::unique_ptr<Tree> root;
 
 public:
-	TreePrinter(std::ostream & stream) : m_stream(stream) {}
+	TreePrinter(std::ostream & stream) : m_stream(stream) {
+		root = std::make_unique<Tree>();
+	}
 
 	void step_in(int step = 1) { m_level += step; }
 
@@ -26,7 +29,7 @@ public:
 
 	std::vector<int> append(const std::string & str) {
 		std::vector<int> stack;
-		auto * arr = &root.arr;
+		auto * arr = &root.get()->arr;
 		for (int i = 0; i < m_level && i < m_last; ++i) {
 			// invariant - size > 0
 			int offset = arr->size() - 1;
@@ -40,14 +43,16 @@ public:
 		} else {
 			int idx = m_last;
 
-			if (arr->empty()) {// in case root is empty
+			if (arr->empty()) {// in case parent is NILL
 				stack.push_back(0);
-				arr = &arr->emplace_back(M_TREE_SIGNS[5], new Tree).second->arr;
+				arr = &arr->emplace_back(M_TREE_SIGNS[5], std::make_unique<Tree>())
+									 .second->arr;
 				idx += 1;
 			}
 			for (; idx < m_level; ++idx) {
 				stack.push_back(arr->size());
-				arr = &arr->emplace_back(M_TREE_SIGNS[5], new Tree).second->arr;
+				arr = &arr->emplace_back(M_TREE_SIGNS[5], std::make_unique<Tree>())
+									 .second->arr;
 			}
 			stack.push_back(arr->size());
 			arr->emplace_back(str, new Tree);
@@ -57,17 +62,17 @@ public:
 	}
 
 	int insert_under(const std::string & str, std::vector<int> & pos) {
-		auto * arr = &root.arr;
+		auto * arr = &root.get()->arr;
 		for (size_t i = 0; i < pos.size(); ++i) {
 			arr = &(*arr)[pos[i]].second->arr;
 		}
-		arr->emplace_back(str, new Tree);
+		arr->emplace_back(str, std::make_unique<Tree>());
 		return arr->size() - 1;
 	}
 
 	void print() {
 		std::vector<int> helper;
-		print_helper(&root, 0, helper);
+		print_helper(root.get(), 0, helper);
 	}
 
 private:
@@ -92,9 +97,9 @@ private:
 	void print_full_line(const Tree * subtree, int idx, std::vector<int> & stack,
 											 int level) {
 		stack[level] = idx;
-		print_line(&root, stack, level);
+		print_line(root.get(), stack, level);
 		m_stream << subtree->arr[idx].first << std::endl;
-		print_helper(subtree->arr[idx].second, level + 1, stack);
+		print_helper(subtree->arr[idx].second.get(), level + 1, stack);
 	}
 
 	void print_line(const Tree * root, const std::vector<int> & stack,
