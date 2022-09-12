@@ -7,32 +7,34 @@
 
 class TreePrinter {
 private:
-  int m_last = 0;
-  int m_level = 0;
-  std::ostream &m_stream;
-  const std::string M_TREE_SIGNS[6] = {"├", "─", "│", " ", "└", "┐"};
+	int m_last = 0;
+	int m_level = 0;
+	std::ostream & m_stream;
+	const std::string M_TREE_SIGNS[6] = {"├", "─", "│", " ", "└", "┐"};
 
-  struct Tree {
-    std::vector<std::pair<std::string, std::unique_ptr<Tree>>> arr;
-  };
-  std::unique_ptr<Tree> root;
+	struct Tree {
+		std::vector<std::pair<std::string, std::unique_ptr<Tree>>> arr;
+	};
+	std::unique_ptr<Tree> root;
 
 public:
-  TreePrinter(std::ostream &stream);
+	TreePrinter(std::ostream & stream);
 
-  void step_in(int step = 1);
-  void step_out(int step = 1);
+	void step_in(int step = 1);
+	void step_out(int step = 1);
 
-  std::vector<int> append(const std::string &str);
-  int insert_under(const std::string &str, std::vector<int> &pos);
+	std::vector<int> append(const std::string & str);
+	std::vector<int> insert_under(const std::string & str, std::vector<int> pos);
 
-  void print();
+	void print();
+
+	void clear();
 
 private:
-  void print_helper(const Tree *subtree, int level, std::vector<int> &stack);
+	void print_helper(const Tree * subtree, int level, std::vector<int> & stack);
 
-  void print_full_line(const Tree *subtree, int idx, std::vector<int> &stack,
-                       int level);
+	void print_full_line(const Tree * subtree, int idx, std::vector<int> & stack,
+											 int level);
 
-  void print_line(const Tree *root, const std::vector<int> &stack, int level);
+	void print_line(const Tree * root, const std::vector<int> & stack, int level);
 };
