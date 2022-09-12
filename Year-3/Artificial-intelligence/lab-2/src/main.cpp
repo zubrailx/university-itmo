@@ -1,19 +1,19 @@
 #include <iostream>
 
 #include "csv_parser.hpp"
-#include "utility.hpp"
 #include "tree_printer.hpp"
+#include "utility.hpp"
 
 void test_tree();
 
 // Variant: 2 (С.Петербург -> Житомир)
 int main() {
-	// CSVParser parser("test/in.1");
-	// auto data = parser.parse_file<std::string, std::string, int>();
-	// for (const auto & line : data) {
-	// 	const auto & [from, to, dist] = line;
-	// 	std::cout << from << to << dist << std::endl;
-	// }
+  // CSVParser parser("test/in.1");
+  // auto data = parser.parse_file<std::string, std::string, int>();
+  // for (const auto & line : data) {
+  // 	const auto & [from, to, dist] = line;
+  // 	std::cout << from << to << dist << std::endl;
+  // }
   test_tree();
 }
 
