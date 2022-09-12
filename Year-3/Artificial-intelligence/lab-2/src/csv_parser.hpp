@@ -14,13 +14,7 @@ private:
 	char m_delimeter;
 
 public:
-	CSVParser(const std::string & file_name)
-			: m_filename(file_name), m_file(std::ifstream(file_name)) {}
-
 	CSVParser(std::string file_name)
-			: m_filename(file_name), m_file(std::ifstream(file_name)) {}
-
-	CSVParser(const char * file_name)
 			: m_filename(file_name), m_file(std::ifstream(file_name)) {}
 
 	~CSVParser() { m_file.close(); }
