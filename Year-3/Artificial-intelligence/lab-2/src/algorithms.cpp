@@ -61,9 +61,11 @@ void print_nodes(const std::vector<Node> & nodes) {
 	}
 }
 
-void clear_distances(std::vector<Node> & nodes) {
-	for (auto & node : nodes)
+void clear_nodes(std::vector<Node> & nodes) {
+	for (auto & node : nodes) {
 		node.dist = 0;
+		node.color = 0;
+	}
 }
 
 std::pair<Node *, Node *> get_entries(std::vector<Node> & nodes) {
@@ -72,12 +74,16 @@ std::pair<Node *, Node *> get_entries(std::vector<Node> & nodes) {
 	return std::make_pair(start, end);
 }
 
+std::string get_node_info(const Node * node) {
+	return node->name + ", " + std::to_string(node->dist);
+}
+
 // поиск в ширину
 long bfs(std::vector<Node> & nodes, TreePrinter & tp) {
 	auto [start, end] = get_entries(nodes);
 	std::queue<std::pair<Node *, std::vector<int>>> queue;
 	start->color = 1;
-	auto vct = tp.append(start->name);
+	auto vct = tp.append(get_node_info(start));
 	queue.push(std::make_pair(start, vct));
 	while (!queue.empty()) {
 		auto [v, vct] = queue.front();
@@ -87,8 +93,7 @@ long bfs(std::vector<Node> & nodes, TreePrinter & tp) {
 			if (v2->color == 0) {
 				v2->dist = v->dist + e.dist;
 				v2->color = 1;
-				auto vct2 =
-						tp.insert_under(v2->name + ", " + std::to_string(v2->dist), vct);
+				auto vct2 = tp.insert_under(get_node_info(v2), vct);
 				queue.push(std::make_pair(v2, vct2));
 			}
 			if (v2 == end) {
@@ -100,30 +105,88 @@ long bfs(std::vector<Node> & nodes, TreePrinter & tp) {
 }
 
 // поиск в глубину
-long dfs(std::vector<Node> & nodes, TreePrinter & tp) { return -1; }
+static long dfs_helper(std::vector<Node> & nodes, Node * cur,
+											 const Node * target, TreePrinter & tp) {
+	cur->color = 1;
+	tp.append(get_node_info(cur));
+	if (cur == target) {
+		return cur->dist;
+	} else {
+		tp.step_in();
+		for (auto it = cur->ribs.begin(); it != cur->ribs.end(); ++it) {
+			if (!it->target->color) {
+				it->target->dist = cur->dist + it->dist;
+				long ret = dfs_helper(nodes, it->target, target, tp);
+				if (ret != -1) {
+					return ret;
+				}
+			}
+		}
+		tp.step_out();
+	}
+	return -1;
+}
+
+long dfs(std::vector<Node> & nodes, TreePrinter & tp) {
+	auto [start, end] = get_entries(nodes);
+	return dfs_helper(nodes, start, end, tp);
+}
 
 // поиск с ограничением глубины
-long depth_limited_search(std::vector<Node> & nodes, TreePrinter & tp) {
+static long dfs_limited_helper(std::vector<Node> & nodes, Node * cur,
+															 const Node * target, TreePrinter & tp, int limit,
+															 int level) {
+	if (level > limit) {
+		return -1;
+	}
+	cur->color = 1;
+	tp.append(get_node_info(cur));
+	if (cur == target) {
+		return cur->dist;
+	} else {
+		tp.step_in();
+		for (auto it = cur->ribs.begin(); it != cur->ribs.end(); ++it) {
+			if (!it->target->color) {
+				it->target->dist = cur->dist + it->dist;
+				long ret =
+						dfs_limited_helper(nodes, it->target, target, tp, limit, level + 1);
+				if (ret != -1) {
+					return ret;
+				}
+			}
+		}
+		tp.step_out();
+	}
+	return -1;
+}
+
+long dfs_limited(std::vector<Node> & nodes, TreePrinter & tp, int limit) {
+	auto [start, end] = get_entries(nodes);
+	dfs_limited_helper(nodes, start, end, tp, limit, 0);
 	return -1;
 }
 
 // поиск с итеративным углублением
 long iterative_deepening_search(std::vector<Node> & nodes, TreePrinter & tp) {
+	// auto [start, end] = get_entries(nodes);
 	return -1;
 }
 
 // двунаправленный поиск
 long bidirectional_search(std::vector<Node> & nodes, TreePrinter & tp) {
+	// auto [start, end] = get_entries(nodes);
 	return -1;
 }
 
 // жадный поиск по первому наилучшему соответствию
 long greedy_first_best_match_search(std::vector<Node> & nodes,
 																		TreePrinter & tp) {
+	// auto [start, end] = get_entries(nodes);
 	return -1;
 }
 
 // поиск методом минимизации суммарной оценки A*
 long minimization_a_star_search(std::vector<Node> & nodes, TreePrinter & tp) {
+	// auto [start, end] = get_entries(nodes);
 	return -1;
 }

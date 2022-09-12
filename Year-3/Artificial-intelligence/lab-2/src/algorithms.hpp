@@ -35,12 +35,12 @@ std::vector<std::string> get_sorted_unique_members(
 Node * find_node(std::vector<Node> & vect, const std::string & target);
 void print_node(const Node & node);
 void print_nodes(const std::vector<Node> & nodes);
-void clear_distances(std::vector<Node> & nodes);
+void clear_nodes(std::vector<Node> & nodes);
 std::pair<Node *, Node *> get_entries(std::vector<Node> & nodes);
 
 long bfs(std::vector<Node> & nodes, TreePrinter & tp);
 long dfs(std::vector<Node> & nodes, TreePrinter & tp);
-long depth_limited_search(std::vector<Node> & nodes, TreePrinter & tp);
+long dfs_limited(std::vector<Node> & nodes, TreePrinter & tp, int limit);
 long iterative_deepening_search(std::vector<Node> & nodes, TreePrinter & tp);
 long bidirectional_search(std::vector<Node> & nodes, TreePrinter & tp);
 long greedy_first_best_match_search(std::vector<Node> & nodes,

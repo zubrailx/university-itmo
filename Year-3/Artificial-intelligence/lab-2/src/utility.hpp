@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 
 #pragma once
@@ -21,4 +22,11 @@ constexpr auto type_name() {
 	name.remove_prefix(prefix.size());
 	name.remove_suffix(suffix.size());
 	return name;
+}
+
+inline void print_line(int width = 60) {
+	while (width--) {
+		std::cout << "─";
+	}
+	std::cout << std::endl;
 }

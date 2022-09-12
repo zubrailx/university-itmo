@@ -11,7 +11,7 @@ inline void test_printer() {
 	tp.append("level-2(2)");
 	tp.step_out();
 	tp.append("level-1");
-	tp.step_in(4);
+	tp.step_in(2);
 	tp.append("level-3");
 	tp.step_out();
 	tp.append("level-2");
@@ -24,6 +24,7 @@ inline void test_printer() {
 	tp.insert_under("level-under-0", v);
 	tp.insert_under("level-under-0", v);
 	tp.print();
+	std::cout << "-----------------------------\n";
 	tp.clear();
 	tp.step_in(2);
 	tp.append("level-2(1)");

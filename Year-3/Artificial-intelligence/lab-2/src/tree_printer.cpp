@@ -14,34 +14,19 @@ void TreePrinter::step_out(int step) {
 std::vector<int> TreePrinter::append(const std::string & str) {
 	std::vector<int> stack;
 	auto * arr = &root.get()->arr;
-	for (int i = 0; i < m_level && i < m_last; ++i) {
-		// invariant - size > 0
-		int offset = arr->size() - 1;
-		stack.push_back(offset);
-		arr = &(*arr)[offset].second->arr;
-	}
-
-	if (m_level <= m_last) {
-		stack.push_back(arr->size());
-		arr->emplace_back(str, new Tree);
-	} else {
-		int idx = m_last;
-
-		if (arr->empty()) {// in case parent is NILL
+	for (int i = 0; i < m_level; ++i) {
+		if (arr->size() > 0) {
+			int idx = arr->size() - 1;
+			stack.push_back(idx);
+			arr = &(*arr)[idx].second->arr;
+		} else {
 			stack.push_back(0);
 			arr = &arr->emplace_back(M_TREE_SIGNS[5], std::make_unique<Tree>())
 								 .second->arr;
-			idx += 1;
 		}
-		for (; idx < m_level; ++idx) {
-			stack.push_back(arr->size());
-			arr = &arr->emplace_back(M_TREE_SIGNS[5], std::make_unique<Tree>())
-								 .second->arr;
-		}
-		stack.push_back(arr->size());
-		arr->emplace_back(str, new Tree);
-		m_last = idx;
 	}
+	stack.push_back(arr->size());
+	arr->emplace_back(str, std::make_unique<Tree>());
 	return stack;
 }
 
