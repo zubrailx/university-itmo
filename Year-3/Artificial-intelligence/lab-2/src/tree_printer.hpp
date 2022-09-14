@@ -22,6 +22,7 @@ public:
 
 	void step_in(int step = 1);
 	void step_out(int step = 1);
+	void set_level(int level);
 
 	std::vector<int> append(const std::string & str);
 	std::vector<int> insert_under(const std::string & str, std::vector<int> pos);

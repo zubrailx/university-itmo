@@ -11,6 +11,8 @@ void TreePrinter::step_out(int step) {
 	m_level = std::max(0, m_level);
 }
 
+void TreePrinter::set_level(int level) { m_level = level; }
+
 std::vector<int> TreePrinter::append(const std::string & str) {
 	std::vector<int> stack;
 	auto * arr = &root.get()->arr;
@@ -21,8 +23,7 @@ std::vector<int> TreePrinter::append(const std::string & str) {
 			arr = &(*arr)[idx].second->arr;
 		} else {
 			stack.push_back(0);
-			arr = &arr->emplace_back(M_TREE_SIGNS[5], std::make_unique<Tree>())
-								 .second->arr;
+			arr = &arr->emplace_back(M_TREE_SIGNS[5], std::make_unique<Tree>()).second->arr;
 		}
 	}
 	stack.push_back(arr->size());

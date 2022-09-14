@@ -9,13 +9,12 @@
 
 class CSVParser {
 private:
-	std::string m_filename;
 	std::ifstream m_file;
-	char m_delimeter;
+	char m_delimeter{};
 
 public:
-	CSVParser(std::string file_name)
-			: m_filename(file_name), m_file(std::ifstream(file_name)) {}
+	explicit CSVParser(const std::string & file_name)
+			: m_file(std::ifstream(file_name)) {}
 
 	~CSVParser() { m_file.close(); }
 
@@ -38,8 +37,8 @@ private:
 		return std::tuple<Args...>{read_argument<Args>(line_stream)...};
 	}
 
-	template<typename T, std::enable_if_t<!std::is_convertible_v<T, std::string>,
-																				bool> = true>
+	template<typename T,
+					 std::enable_if_t<!std::is_convertible_v<T, std::string>, bool> = true>
 	T read_argument(std::stringstream & line_stream) {
 		T arg;
 		line_stream >> arg;
