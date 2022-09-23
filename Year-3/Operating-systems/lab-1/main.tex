@@ -1,0 +1,90 @@
+%форматирование размера документа
+\documentclass[11pt, a4paper]{article}
+
+\usepackage{geometry}
+% total - determines printable width, height
+\geometry{ 
+	a4paper, total={160mm,267mm}
+}
+
+%----text,fonts------------------------------------------------------------------------------------
+\usepackage{mmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{setspace}
+\setstretch{0,9}
+\usepackage{fancyvrb}
+
+%----math,graphics---------------------------------------------------------------------------------
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{filecontents}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\pgfplotsset{
+	compat=1.17
+}
+
+\usepackage{graphicx}
+\graphicspath{{image/}}
+  
+\usepackage{wrapfig}
+\usepackage{tabularx}
+
+% relative importing
+\usepackage{import}
+
+% \input{./language.tex}
+
+\begin{document}
+
+\import{.}{titular.tex}
+
+\newpage
+
+\section{Текст задания}
+\noindentОсновная цель лабораторной работы - знакомство с системными инструментами анализа производительности и поведения программ. Для этого предлагается для выданной по варианту программы выяснить следующую информацию:
+
+\begin{enumerate}
+  \item Количество потоков создаваемое программой;
+  \item Список файлов и сетевых соединений с которыми работает программа
+  \item Карту памяти процесса;
+  \item Содержимое передаваемых по сети данных;
+  \item Построить графики:
+  \begin{itemize}
+    \item Потребления программой cpu;
+    \item Нагрузки генерируемой программой на подсистему ввода-вывода;
+    \item Нагрузки генерируемой программой на сетевую подсистему.
+    \item Смены состояния исполнения потоков;
+  \end{itemize}
+\end{enumerate}
+
+\smallskip
+
+\noindentСодержание отчета:
+\begin{enumerate}
+  \item Описание шагов выполненных для сбора информации (включая исходные тексты всех использованных скриптов и вспомогательных программ);
+  \item  Полученные графики;
+  \item  Выводы по работе.
+\end{enumerate}
+
+\noindentТемы для подготовки к защите лабораторной работы:
+\begin{enumerate}
+  \item Структура процесса;
+  \item Виртуальная память;
+  \item Системные утилиты сбора статистики ядра;
+  \item Основы ввода-вывода (блочный и последовательный ввод-вывод);
+  \item Файловая система procfs;
+  \item Использование утилиты strace, ltrace, bpftrace;
+  \item Профилирование и построение flamegraph'а и stap;
+\end{enumerate}
+
+\section{Выполнение}
+
+\section{Вывод}
+\end{document}
