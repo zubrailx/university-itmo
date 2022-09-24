@@ -1,28 +1,34 @@
-%форматирование размера документа
+%----document---------------------------------------------------------------------------------
 \documentclass[11pt, a4paper]{article}
-
 \usepackage{geometry}
 % total - determines printable width, height
 \geometry{ 
 	a4paper, total={160mm,267mm}
 }
-
+%----utility---------------------------------------------------------------------------------
+\usepackage{filecontents}
+\usepackage{xcolor}
+\usepackage{import} % relative importing
 %----text,fonts------------------------------------------------------------------------------------
 \usepackage{mmap}
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[english, russian]{babel}
+\usepackage[russian,english]{babel}
 \usepackage{setspace}
 \setstretch{0,9}
 \usepackage{fancyvrb}
-
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
 %----math,graphics---------------------------------------------------------------------------------
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{amsthm}
-\usepackage{listings}
-\usepackage{xcolor}
-\usepackage{filecontents}
-
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -35,9 +41,9 @@
   
 \usepackage{wrapfig}
 \usepackage{tabularx}
-
-% relative importing
-\usepackage{import}
+%----programming---------------------------------------------------------------------------------
+\usepackage{listings}
+%------------------------------------------------------------------------------------------------
 
 \input{./language.tex}
 
@@ -85,16 +91,16 @@
 
 \section{Листинг и результаты.}
 
-\lstinputlisting[
-  style =myc++,
-  caption={Листинг кода},
-]{../main.cpp}
+\noindent Код алгоритмов: \href{https://github.com/zubrailx/University-ITMO/blob/main/Year-3/Artificial-intelligence/lab-2/src/algorithms.cpp}{src/algorithms.cpp}.
 
-\lstinputlisting[
-  caption={Результат программы},
-]{../test/out.1}
+\noindent Весь код с утилитами: \href{https://github.com/zubrailx/University-ITMO/tree/main/Year-3/Artificial-intelligence/lab-2/src}{src}.
 
-\section{Вывод программы.}
+\noindent Вывод программы: \href{https://github.com/zubrailx/University-ITMO/blob/main/Year-3/Artificial-intelligence/lab-2/test/out.1}{test/out.1}.
+
+\section{Вывод.}
+
+\noindent В ходе выполнения данной лабораторной работы познакомился с алгоритмами поиска, которые реализовал на языке c++. Кроме того, 
+немного разобрался с латехом.
 
 
 \end{document}
