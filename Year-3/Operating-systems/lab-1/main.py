@@ -111,7 +111,7 @@ def parse_and_display_cpu(path):
     axs[2].set_xlabel("seconds")
 
     fig.tight_layout()
-    plt.savefig("images/fig-cpu.png")
+    plt.savefig("fig-cpu.png")
     plt.clf()
 
     # One graph cpu
@@ -123,7 +123,7 @@ def parse_and_display_cpu(path):
     ax.set_xlabel("seconds")
     ax.set_ylabel("%CPU usage")
     ax.legend()
-    plt.savefig("images/fig-cpu-1.png")
+    plt.savefig("fig-cpu-1.png")
     plt.clf()
 
     # One graph cpu
@@ -153,7 +153,7 @@ def parse_and_display_cpu(path):
     axs[2].set_xlabel("seconds")
 
     fig.tight_layout()
-    plt.savefig("images/fig-mem.png")
+    plt.savefig("fig-mem.png")
     plt.clf()
     return data_cpu
 
@@ -224,7 +224,7 @@ def parse_and_display_io(path):
     axs[2].set_xlabel("seconds")
 
     fig.tight_layout()
-    plt.savefig("images/fig-io.png")
+    plt.savefig("fig-io.png")
     plt.clf()
     return data_io
 
@@ -314,7 +314,7 @@ def parse_and_display_net(path):
     axs[devlen].set_xlabel("seconds")
 
     fig.tight_layout()
-    plt.savefig("images/fig-net.png")
+    plt.savefig("fig-net.png")
     plt.clf()
     return data_net
 
@@ -322,7 +322,7 @@ def parse_and_display_state(path):
     data_state = {
         "header":["PID", "USER", "PR", "NI", "VIRT", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"], 
         "pattern_header": r"^[^\S\n\r]+(PID)\s+(USER)\s+(PR)\s+(NI)\s+(VIRT)\s+(RES)\s+(SHR)\s+(S)\s+(%CPU)\s+(%MEM)\s+(TIME\+)\s+(COMMAND)$",
-        "pattern_data": r"^\s+(\d+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+:\d+\.\d+)\s+(\S+)$",
+        "pattern_data": r"^\s+(\d+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\S)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+:\d+\.\d+)\s+(\S+)$",
         "data" : []
     }
     regex_title_state = re.compile(data_state["pattern_header"], flags=re.M)
@@ -335,7 +335,7 @@ def parse_and_display_state(path):
             int(match[3]),
             int(match[4]),
             int(match[5]),
-            int(match[6]),
+            match[6],
             int(match[7]),
             match[8],
             float(match[9]),
@@ -405,7 +405,7 @@ def parse_and_display_state(path):
     ax.legend()
 
     plt.tight_layout()
-    plt.savefig("images/fig-state.png", dpi=300)
+    plt.savefig("fig-state.png", dpi=300)
     plt.clf()
 
     # Vertical figure
@@ -456,7 +456,7 @@ def parse_and_display_state(path):
     ax.legend(handles=[patch_s, patch_d, patch_r, patch_t, patch_z])
 
     plt.tight_layout()
-    plt.savefig("images/fig-state-vert.png", dpi=300)
+    plt.savefig("fig-state-vert.png", dpi=300)
     plt.clf()
     return data_state
 
@@ -468,6 +468,7 @@ if __name__ == "__main__":
     path_net = None
     path_state = None
 
+    path_state = "/home/nikit/git/University-ITMO/Year-3/Operating-systems/os-1-state.log"
     args = sys.argv
     for arg in args[1:]:
         key, val = arg[0:2], arg[3:]
