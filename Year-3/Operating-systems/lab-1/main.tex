@@ -4,7 +4,7 @@
 \usepackage{geometry}
 % total - determines printable width, height
 \geometry{ 
-	a4paper, total={190mm,267mm}
+	a4paper, total={180mm,267mm}
 }
 
 %----text,fonts------------------------------------------------------------------------------------
@@ -22,6 +22,17 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{filecontents}
+\usepackage{fancyvrb}
+\usepackage{fvextra}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+}
 
 \usepackage{tikz}
 \usetikzlibrary{calc}
@@ -86,24 +97,24 @@
 
 \section{Выполнение}
 
-\begin{Verbatim}[fontsize=\small]
-Список утилит:
+% \begin{Verbatim}[fontsize=\small]
+% Список утилит:
 
-Процессор: ps, top, tiptop, turbostat, rdmsr, numastat, uptime, mpstat,
+% Процессор: ps, top, tiptop, turbostat, rdmsr, numastat, uptime, mpstat,
 
-Виртуальная память: vmstat, slabtop, pidstat, free, pcstat, lsof
+% Виртуальная память: vmstat, slabtop, pidstat, free, pcstat, lsof
 
-Дисковая подсистема: iostat, iotop, blktrace, swapon
+% Дисковая подсистема: iostat, iotop, blktrace, swapon
 
-Сеть: netstat, tcpdump, iptraf, ethtool, nicstat, ip, lldptool, snmpget, ss
+% Сеть: netstat, tcpdump, iptraf, ethtool, nicstat, ip, lldptool, snmpget, ss
 
-System calls: sysdig, strace
+% System calls: sysdig, strace
 
-Library calls: ltrace
+% Library calls: ltrace
 
-Другое: sar, perf, dstat, dmesg, bcc, lttng, stap, ftrace
+% Другое: sar, perf, dstat, dmesg, bcc, lttng, stap, ftrace
 
-\end{Verbatim}
+% \end{Verbatim}
 
 \subsection{Количество потоков создаваемое программой}
 Посчитаем уникальных \$SPID (идентификатор потока) у запущенного процесса:
@@ -172,17 +183,18 @@ MiB Swap:    975.0 total,    975.0 free,      0.0 used.   2799.7 avail Mem
    4119 nikit     20   0 1652680 774244   3092 S   0.0  19.2   0:31.66 256771
 \end{Verbatim}
 
+\newpage
 С помощью htop:
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\textwidth]{htop-1.png}
+  \includegraphics[width=0.7\textwidth]{htop-1.png}
   % \label{fig:result-png}
 \end{figure}
 
 
 \subsection{Список файлов и сетевых соединений с которыми работает программа}
-\begin{Verbatim}[fontsize=\small]
+\begin{Verbatim}[fontsize=\small,breaklines=true]
 nikit@vm:~$ ls -la /proc/4098/fd/
 total 0
 dr-x------ 2 nikit nikit  0 Sep 25 11:19 .
@@ -193,6 +205,7 @@ lrwx------ 1 nikit nikit 64 Sep 25 11:19 2 -> /dev/pts/0
 lrwx------ 1 nikit nikit 64 Sep 25 11:19 3 -> 'socket:[34028]'
 lrwx------ 1 nikit nikit 64 Sep 25 11:19 6 -> 'socket:[34913]'
 lrwx------ 1 nikit nikit 64 Sep 25 11:19 8 -> 'socket:[34029]'
+
 
 nikit@vm:~$ lsof -p 4098
 COMMAND  PID  USER   FD   TYPE DEVICE SIZE/OFF   NODE NAME
@@ -212,41 +225,107 @@ COMMAND  PID  USER   FD   TYPE DEVICE SIZE/OFF   NODE NAME
 256771  4098 nikit    5u  sock    0,8      0t0  32426 protocol: TCP
 
 
-FD         is the File Descriptor number of the file or:
-     cwd  current working directory;
-     Lnn  library references (AIX);
-     err  FD information error (see NAME column);
-     jld  jail directory (FreeBSD);
-     ltx  shared library text (code and data);
-     Mxx  hex memory-mapped type number xx.
-     m86  DOS Merge mapped file;
-     mem  memory-mapped file;
-     mmap memory-mapped device;
-     pd   parent directory;
-     rtd  root directory;
-     tr   kernel trace file (OpenBSD);
-     txt  program text (code and data);
-     v86  VP/ix mapped file;
+# Через strace (основные данные):
+nikit@vm:~/labs/os-1/task$ strace -f -e open,openat,creat -o strace-1.log ./256771
+# Вывод (* - все внутри директории)
 
-FD is followed by one of these characters, describing the mode under  which
-the file is open:
-     r for read access;
-     w for write access;
-     u for read and write access;
-     space if mode unknown and no lock
-          character follows;
-     `-' if mode unknown and lock
-          character follows.
+# Загружаем библиотеки
+1953  openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+1953  openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 3
+1953  openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+1953  openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+1953  openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
+1953  openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+1954  openat(AT_FDCWD, "/dev/urandom", O_RDONLY) = 3
+
+# Далее рекурсивный обход proc (все файлы, название которых не pid; self/task/$PID для каждого процесса и треда):
+1974  openat(AT_FDCWD, "/proc", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 13
+1974  openat(AT_FDCWD, "/proc/fs", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/fs/ext4", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/fs/ext4/sda1", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/fs/jbd2", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/fs/jbd2/sda1-8", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/fs/nfsd", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/bus", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/bus/pci", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/bus/pci/00", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/bus/input", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/irq", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+1974  openat(AT_FDCWD, "/proc/irq/0", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 18
+...
+1974  openat(AT_FDCWD, "/proc/self/task/1953/root/lib/modules/5.10.0-18-amd64/kernel/drivers/net/ethernet/mellanox/mlxfw", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3
+1974  openat(AT_FDCWD, "/proc/self/task/1954", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1954/fd", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1954/fdinfo", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1954/ns", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1954/net", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1954/attr", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1954/attr/apparmor", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1955", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1955/fd", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+1974  openat(AT_FDCWD, "/proc/self/task/1955/fdinfo", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 4
+...
+# Далее открываем файлики с цифрами в директории исполняемого бинарника:
+1956  openat(AT_FDCWD, "8166219804254678425", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
+1956  openat(AT_FDCWD, "8166219804254678425", O_RDONLY) = 3
+1956  openat(AT_FDCWD, "8166219804254678425", O_RDONLY) = 3
+1957  openat(AT_FDCWD, "12064446664900734791", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 4
+1960  openat(AT_FDCWD, "/dev/urandom", O_RDONLY) = 3
+1954  openat(AT_FDCWD, "/dev/urandom", O_RDONLY) = 4
+1958  openat(AT_FDCWD, "/dev/urandom", O_RDONLY) = 5
+1954  openat(AT_FDCWD, "13817306382609589397", O_WRONLY|O_CREAT|O_TRUNC, 0666 <unfinished ...>
+1960  openat(AT_FDCWD, "16618435859175486135", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
+1954  <... openat resumed>)             = 4
+1958  openat(AT_FDCWD, "15233208405822243171", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 5
+1960  openat(AT_FDCWD, "16618435859175486135", O_RDONLY) = 3
+1960  openat(AT_FDCWD, "16618435859175486135", O_RDONLY) = 3
+1961  openat(AT_FDCWD, "9709491411073380223", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 4
+1954  openat(AT_FDCWD, "13817306382609589397", O_RDONLY) = 3
+1954  openat(AT_FDCWD, "13817306382609589397", O_RDONLY) = 3
+1955  openat(AT_FDCWD, "14069912073054239648", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 9
+1958  openat(AT_FDCWD, "15233208405822243171", O_RDONLY) = 3
+1958  openat(AT_FDCWD, "15233208405822243171", O_RDONLY) = 3
+1959  openat(AT_FDCWD, "2858444524433567647", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
+
+# Цикл начинается с начала по кругу 
 \end{Verbatim}
+
+% \begin{Verbatim}
+% FD         is the File Descriptor number of the file or:
+%      cwd  current working directory;
+%      Lnn  library references (AIX);
+%      err  FD information error (see NAME column);
+%      jld  jail directory (FreeBSD);
+%      ltx  shared library text (code and data);
+%      Mxx  hex memory-mapped type number xx.
+%      m86  DOS Merge mapped file;
+%      mem  memory-mapped file;
+%      mmap memory-mapped device;
+%      pd   parent directory;
+%      rtd  root directory;
+%      tr   kernel trace file (OpenBSD);
+%      txt  program text (code and data);
+%      v86  VP/ix mapped file;
+
+% FD is followed by one of these characters, describing the mode under  which
+% the file is open:
+%      r for read access;
+%      w for write access;
+%      u for read and write access;
+%      space if mode unknown and no lock
+%           character follows;
+%      `-' if mode unknown and lock
+%           character follows.
+% \end{Verbatim}
 
 \subsection{Карта памяти процесса}
 Можно использовать ключик -X или -XX для большего кол-ва информации (там флаги страничек).
 
-\begin{itemize}
-  \item Resident set size (RSS) — размер страниц памяти, выделенных процессу операционной системой и в настоящее время находящихся в ОЗУ (RAM).
-  \item Pages in the page cache modified after being brought in are called dirty pages. Когда программа делает вызов write(), данные просто копируются в соответствующую страницу в страничном кэше, и она помечается флагом «dirty».
-  \item The pages are private, not shared, so they wouldn't be saved back into the original file. It would be impossible to have a dirty page backed by a read-only file. If the page needs to be removed from RAM, it will be saved in swap.
-\end{itemize}
+% \begin{itemize}
+%   \item Resident set size (RSS) — размер страниц памяти, выделенных процессу операционной системой и в настоящее время находящихся в ОЗУ (RAM).
+%   \item Pages in the page cache modified after being brought in are called dirty pages. Когда программа делает вызов write(), данные просто копируются в соответствующую страницу в страничном кэше, и она помечается флагом «dirty».
+%   \item The pages are private, not shared, so they wouldn't be saved back into the original file. It would be impossible to have a dirty page backed by a read-only file. If the page needs to be removed from RAM, it will be saved in swap.
+% \end{itemize}
 \begin{Verbatim}[fontsize=\small]
 nikit@vm:~$ pmap -x 4098
 4098:   ./256771
@@ -368,7 +447,7 @@ total kB         1652680  877364  874020
 
 \subsection{Содержимое передаваемых по сети данных}
 Создадим новое виртуальное устройство, для того, чтобы не ловить пакеты с других процессов.
-\begin{Verbatim}[fontsize=\small]
+\begin{Verbatim}[fontsize=\small,breaklines=true]
 nikit@vm:~$ sudo ip netns add testos
 nikit@vm:~$ ip netns list
 testos
@@ -420,7 +499,7 @@ nikit@vm:~/labs/os-1$ sudo ip netns exec testos ./256771
   % \label{fig:result-png}
 \end{figure}
 
-\begin{Verbatim}[fontsize=\footnotesize]
+\begin{Verbatim}[fontsize=\footnotesize,breaklines=true]
 nikit@vm:~$ sudo tcpdump -i veth-b -vv -X -c20
 tcpdump: listening on veth-b, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 13:14:45.730611 IP (tos 0x0, ttl 64, id 59347, offset 0, flags [DF], proto TCP (6), length 60)
@@ -543,19 +622,17 @@ tcpdump: listening on veth-b, link-type EN10MB (Ethernet), snapshot length 26214
 0 packets dropped by kernel
 \end{Verbatim}
 
-\newpage
-
 \subsection{Построить графики}
 
-\noindent Парсим получаемый от утилиты вывод через python и выводим через pyplot.
+\noindent Парсим получаемый от утилиты вывод через python и выводим с помощью библиотеки pyplot.
 
 \subsubsection*{Потребление программой cpu}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7\textwidth]{fig-cpu.png}
-  % \label{fig:result-png}
-\end{figure}
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.7\textwidth]{fig-cpu.png}
+%   % \label{fig:result-png}
+% \end{figure}
 
 \begin{figure}[h]
   \centering
@@ -571,7 +648,7 @@ tcpdump: listening on veth-b, link-type EN10MB (Ethernet), snapshot length 26214
 
 \newpage
 
-\subsubsection*{Нагрузки генерируемой программой на подсистему ввода-вывода}
+\subsubsection*{Графики нагрузки генерируемой программой на подсистему ввода-вывода}
 
 \begin{figure}[h]
   \centering
@@ -581,7 +658,7 @@ tcpdump: listening on veth-b, link-type EN10MB (Ethernet), snapshot length 26214
 
 \newpage
 
-\subsubsection*{Нагрузки генерируемой программой на сетевую подсистему}
+\subsubsection*{Графики нагрузки генерируемой программой на сетевую подсистему}
 
 \begin{figure}[h]
   \centering
@@ -589,13 +666,13 @@ tcpdump: listening on veth-b, link-type EN10MB (Ethernet), snapshot length 26214
   % \label{fig:result-png}
 \end{figure}
 
-\subsubsection*{Смены состояния исполнения потоков}
+\subsubsection*{Графики смены состояния исполнения потоков}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7\textwidth]{fig-state.png}
-  % \label{fig:result-png}
-\end{figure}
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.7\textwidth]{fig-state.png}
+%   % \label{fig:result-png}
+% \end{figure}
 
 \begin{figure}[h]
   \centering
@@ -603,11 +680,16 @@ tcpdump: listening on veth-b, link-type EN10MB (Ethernet), snapshot length 26214
   % \label{fig:result-png}
 \end{figure}
 
-\newpage
+% \newpage
 
 \section{Вывод}
 В ходе выполнения лабораторной работы познакомился с утилитами, представленными выше, немного
 поковырялся с сетями и неймспейсами, разобрался, как подключаться к виртуалке по ssh, скомпилировал
 ядро по VirtualBox (gentoo moment), вспомнил, как парсить данные и строить графики на python.
+
+\medskip
+\noindent Исходный код исполняемых скриптов можно найти тут: 
+\href{https://github.com/zubrailx/University-ITMO/tree/main/Year-3/Operating-systems/lab-1}{Последняя версия github репозитория}, 
+или тут: \href{https://github.com/zubrailx/University-ITMO/tree/d290a6562783b7df35565233c4b5c3bb988bc2cd/Year-3/Operating-systems/lab-1}{Версия на момент сдачи}.
 
 \end{document}
