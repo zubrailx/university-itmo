@@ -1,0 +1,76 @@
+% % Polyglossia
+\setdefaultlanguage{russian}
+\setotherlanguage{english}
+
+% Localization
+\addto\captionsrussian{
+	\renewcommand{\figurename}{Рисунок}%
+	\renewcommand{\partname}{Глава}
+	\renewcommand{\contentsname}{\centerline{Содержание}}
+	\renewcommand{\listingscaption}{Листинг}
+}
+
+% Main font
+\setmainfont{CMU Serif}
+\newfontfamily\cyrillicfont{CMU Serif}[Script=Cyrillic]
+
+% List of sources used
+% \addbibresource{refs.bib}
+
+% Margins
+\geometry{top=2cm}
+\geometry{bottom=2cm}
+\geometry{left=2cm}
+\geometry{right=2cm}
+\geometry{bindingoffset=0cm}
+
+% Links and metadata of document
+\hypersetup{unicode=true,colorlinks=true,linkcolor=red,citecolor=green,filecolor=magenta,urlcolor=cyan,
+	pdftitle={\docname},
+	pdfauthor={\studentname},
+	pdfsubject={\subject},
+	pdfcreator={\studentname},
+	pdfproducer={Overleaf},
+	pdfkeywords={\subject}
+}
+
+% Code blocks and environment for listings
+\usemintedstyle{colorful}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+
+% Font for listings with ligatures
+% \setmonofont{FiraCode-Regular.otf}[
+% 	SizeFeatures={Size=10},
+% 	Path = templates/,
+% 	Contextuals=Alternate
+% ]
+
+% Drawing caption
+\captionsetup[figure]{labelsep = period}
+
+% Table caption
+\DeclareCaptionFormat{hfillstart}{\hfill#1#2#3\par}
+\captionsetup[table]{format=hfillstart,labelsep=newline,justification=centering,skip=-10pt,textfont=bf}
+
+% Path for graphics
+\graphicspath{{fig/}}
+
+% Include titlepage in page counter
+\makeatletter
+\renewenvironment{titlepage} {
+	\thispagestyle{empty}
+}
+\makeatother
+
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+
+% Titlesec
+% \titlelabel{\thetitle.\quad}
+
+% Math
+\mathtoolsset{showonlyrefs=true}
+
+% % Markdown
+\def\markdownOptionOutputDir{build/}
+

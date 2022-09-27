@@ -1,0 +1,19 @@
+% !TEX program = xelatex
+
+\documentclass[12pt,a4paper]{article}
+
+% User settings
+\include{config}
+% Packages
+\include{settings/packages}
+\include{settings/preferences}
+
+% Language settigns
+% \include{settings/language.tex}
+
+\begin{document}
+  \include{templates/titlepage}
+  \include{templates/tocpage}
+  \markdownInput{content.md}
+  % \include{templates/bibpage}
+\end{document}

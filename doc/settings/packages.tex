@@ -1,0 +1,54 @@
+% % Unicode, fonts, language
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+% References
+\usepackage{hyperref}
+
+% Graphics
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% Page rotation
+\usepackage{pdflscape}
+
+% Code listings
+\usepackage{minted}
+\usepackage{listings}
+% \usepackage{lstfiracode}
+
+% Disable code listings number copying
+\usepackage{accsupp}
+\newcommand\emptyaccsupp[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+\let\theHFancyVerbLine\theFancyVerbLine
+\def\theFancyVerbLine{\rmfamily\tiny\emptyaccsupp{\arabic{FancyVerbLine}}}
+
+% Bibliography
+\bibliographystyle{templates/gost-numeric.bbx}
+\usepackage{csquotes}
+\usepackage[parentracker=true,backend=biber,hyperref=true,bibencoding=utf8,style=numeric-comp,language=auto,autolang=other,citestyle=gost-numeric,defernumbers=true,bibstyle=gost-numeric,sorting=ntvy]{biblatex}
+
+% Paper geometry
+\usepackage{geometry}
+
+% Image numbering by section
+\usepackage{chngcntr}
+
+% Additional commands for tables
+\usepackage{booktabs}
+
+% % For headers
+\usepackage{caption}
+% https://stackoverflow.com/questions/42916124/not-able-to-use-titlesec-with-markdown-and-pandoc
+% \usepackage{titlesec} 
+\usepackage[dotinlabels]{titletoc}
+
+% Math
+\usepackage{amsmath, amsfonts, amssymb, amsthm, mathtools}
+
+% Watermark 
+% \usepackage[printwatermark]{xwatermark}
+
+% Markdown
+\usepackage[hashEnumerators,smartEllipses]{markdown}
+
