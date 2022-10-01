@@ -1,10 +1,7 @@
 #include <stdio.h>
-
-#include "class.h"
+#include "sections.h"
 
 int main() {
-  struct A a;
-  a.a = 5;
-  printf("%d", a.a);
+  printf("Hello!");
   return 0;
 }

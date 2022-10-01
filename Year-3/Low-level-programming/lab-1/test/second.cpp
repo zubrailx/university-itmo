@@ -1,9 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "class.h"
-
-TEST(Class, Imported2) {
-  A a;
-  a.a = 10;
-  EXPECT_EQ(a.a, 10);
+TEST(Class2, Imported2) {
+  EXPECT_EQ(10, 10);
 }

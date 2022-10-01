@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.13)
 set(PROJECT_NAME dbms)
 set(PROJECT_LIB_NAME ${PROJECT_NAME})
 set(PROJECT_TEST_NAME ${PROJECT_NAME}_test)
+set(PROJECT_EXEC_NAME ${PROJECT_NAME}_exec)
 project(${PROJECT_NAME} LANGUAGES C CXX)
 
 # set latest standard
@@ -31,11 +32,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 file(GLOB_RECURSE SRCS
   CONFIGURE_DEPENDS
-  ${CMAKE_SOURCE_DIR}/src/*.c)
+  ${CMAKE_SOURCE_DIR}/src/lib/*.c)
 
 file(GLOB_RECURSE HDRS
   CONFIGURE_DEPENDS
-  ${CMAKE_SOURCE_DIR}/src/*.h
+  ${CMAKE_SOURCE_DIR}/src/lib/*.h
   ${CMAKE_SOURCE_DIR}/include/*.h)
 
 file(GLOB_RECURSE TSTS
@@ -44,22 +45,18 @@ file(GLOB_RECURSE TSTS
 # -----------------------------------------------------------------------------
 # Configurations
 # -----------------------------------------------------------------------------
-  # LIBRARIES
-  set(FETCHCONTENT_QUIET OFF)
-  include(FetchContent)
-  # gRPC
-  FetchContent_Declare(
-          googletest
-          URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
-  )
-  FetchContent_MakeAvailable(googletest)
-  # CREATE_LIBRARY
-  add_library(${PROJECT_LIB_NAME} STATIC ${SRCS})
-  target_include_directories(${PROJECT_LIB_NAME} PUBLIC include)
+set(FETCHCONTENT_QUIET OFF)
+include(FetchContent)
+# gRPC
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+)
+FetchContent_MakeAvailable(googletest)
 
-  # LINKING AND EXECUTABLES
-  add_executable(${PROJECT_TEST_NAME} ${TSTS})
-  target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
+# Create_library
+add_library(${PROJECT_LIB_NAME} STATIC ${SRCS})
+target_include_directories(${PROJECT_LIB_NAME} PUBLIC include)
 
 if (DEFINED PROGRAM_LINUX OR UNIX)
   # message(DEBUG ${UNIX})
@@ -75,8 +72,16 @@ set(ignoreMe "${PROGRAM_LINUX}${PROGRAM_WINDOWS}")
 unset(PROGRAM_LINUX CACHE)
 unset(PROGRAM_WINDOWS CACHE)
 # -----------------------------------------------------------------------------
-# Testing
+# Executable main.c
 # -----------------------------------------------------------------------------
+add_executable(${PROJECT_EXEC_NAME} src/main.c)
+target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
+# -----------------------------------------------------------------------------
+# Executable tests
+# -----------------------------------------------------------------------------
+add_executable(${PROJECT_TEST_NAME} ${TSTS})
+target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
+
 enable_testing()
 add_test(${PROJECT_TEST_NAME} bin/${PROJECT_TEST_NAME})
 # include(GoogleTest)

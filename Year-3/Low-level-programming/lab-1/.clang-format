@@ -1,0 +1,12 @@
+---
+ColumnLimit: '88'
+AlwaysBreakTemplateDeclarations: true
+PointerAlignment: Middle
+SortIncludes: true
+SpacesBeforeTrailingComments: 0
+TabWidth: 2
+UseTab: Always
+SpaceAfterTemplateKeyword: false
+Standard: Latest
+...
+Footer

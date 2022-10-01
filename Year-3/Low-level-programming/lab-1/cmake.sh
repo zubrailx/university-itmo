@@ -56,7 +56,6 @@ done
 
 # COMMANDS
 if [[ -n $TEST ]]; then
-  echo "HERE"
   cd $BUILD_DIR && ctest
 else
   # Reset
