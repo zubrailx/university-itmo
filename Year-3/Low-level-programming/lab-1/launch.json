@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "[json]: launch main.c",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "build/debug/bin/dbms_exec",
+      "cwd":"${workspaceFolder}",
+      "stopOnEntry": false
+    }
+  ]
+}

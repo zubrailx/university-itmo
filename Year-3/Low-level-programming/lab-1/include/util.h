@@ -1,5 +1,1 @@
-#pragma once
-
-#include <stdint.h>
-
-typedef uint64_t fileoff_t;
+#define my_malloc(X) ((X*) malloc(sizeof(X)))
