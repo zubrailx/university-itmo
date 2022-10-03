@@ -1,17 +1,20 @@
 #pragma once
 
-#include <inttypes.h>
+#include "database_meta.h"
 
-#define SECTION_OFFSET_NULL 0
+typedef struct BaseSection BaseSection;
+typedef struct SectionOffsetPointer SOPointer;
 
-
-typedef struct BaseSection {
+struct BaseSection {
   uint8_t type;
   uint32_t size;
-} BaseSection;
+  uint32_t number;
+};
 
-typedef uint64_t fileoff_t;
-typedef uint32_t sectoff_t;
+struct SectionOffsetPointer {
+  uint32_t number;
+  uint32_t offset;
+};
 
 enum SectionTypes {
   TYPE_UNKNOWN,
@@ -24,3 +27,5 @@ enum SectionTypes {
   TYPE_TMP,
   TYPE_DUMPED,
 };
+
+void *section_load(Database *database, const fileoff_t offset);

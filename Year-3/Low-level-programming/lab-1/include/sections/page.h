@@ -2,8 +2,6 @@
 
 #include <stdbool.h>
 
-#include "base.h"
-
 // PAGE
 typedef struct PageSection PageSection;
 

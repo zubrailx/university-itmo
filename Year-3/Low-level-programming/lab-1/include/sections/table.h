@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base.h"
 #include "sections/database.h"
 
 extern uint32_t TABLE_SIZE;
@@ -18,13 +17,6 @@ typedef struct TableSection {
   TableHeader header;
   void *body;
 } TableSection;
-
-enum TableColumnTypes {
-  COLUMN_TYPE_INT = 0,
-  COLUMN_TYPE_FLOAT = 1,
-  COLUMN_TYPE_STRING = 2,
-  COLUMN_TYPE_BOOL = 3,
-};
 
 TableSection *database_table_create(Database *database, const char *name);
 TableSection *database_table_select(Database *database, const char *name);
