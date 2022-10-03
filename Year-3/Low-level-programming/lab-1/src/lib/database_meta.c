@@ -7,7 +7,7 @@
 
 char META_INFO[] = "version-DEV:zubrailx";
 
-static void database_store(const Database *database, const char *meta) {
+static void database_save(const Database *database, const char *meta) {
   DatabaseStored stored = database->ds;
   size_t total_size = sizeof(stored) + strlen(meta);
   assert(total_size <= stored.pos_empty && total_size <= stored.ds_first);
@@ -16,7 +16,6 @@ static void database_store(const Database *database, const char *meta) {
   rewind(file);
   fwrite(&stored, sizeof(stored), 1, file);
   fwrite(meta, strlen(meta), 1, file);
-  fflush(file);
 }
 
 // needs file to read
@@ -41,7 +40,6 @@ Database database_create(const char *filename) {
                            .ds_first = offset,
                            .ds_last = offset,
                            .pos_empty = offset,
-                           .ds_counter = 0,
                        }};
   // create first database section
   DatabaseSection *ds = database_section_create(&database, NULL, 0);
@@ -62,7 +60,7 @@ Database database_open(const char *filename) {
 }
 
 void database_close(Database *database) {
-  database_store(database, META_INFO);
+  database_save(database, META_INFO);
   fclose(database->file);
   free(database->name);
   database->file = NULL;

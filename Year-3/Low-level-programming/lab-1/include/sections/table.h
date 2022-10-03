@@ -2,25 +2,35 @@
 
 #include "sections/database.h"
 
-extern uint32_t TABLE_SIZE;
+typedef struct TableHeader TableHeader;
+typedef struct TableSection TableSection;
 
-typedef struct TableHeader {
+extern sectoff_t TABLE_SECTION_SIZE;
+
+struct TableHeader {
   BaseSection base_section;
   uint32_t page_count;
   fileoff_t page_last_filled;
   fileoff_t page_first;
   /* Offset in file to the hash */
   fileoff_t hash;
-} TableHeader;
+};
 
-typedef struct TableSection {
-  TableHeader header;
+struct TableSection {
+  TableHeader *header;
   void *body;
-} TableSection;
+};
 
-TableSection *database_table_create(Database *database, const char *name);
-TableSection *database_table_select(Database *database, const char *name);
-void database_table_delete(Database *database, const char *name);
+TableSection *table_section_load(Database *database, const fileoff_t offset);
+void table_section_unload(TableSection **ts_ptr);
+
+TableSection *table_section_create(Database *database, DTTyple *dttyple);
+TableSection *table_section_select(Database *database, DTTyple *dttyple);
+TableSection *table_section_delete(Database *database, DTTyple *dttyple);
+
+TableSection *table_create(Database *database, const char *name);
+TableSection *table_select(Database *database, const char *name);
+void *table_delete(Database *database, const char *name);
 
 void table_add_column(Database *database, const char *table, const char *column,
                       enum TableColumnTypes type);

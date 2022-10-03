@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-
 // PAGE
 typedef struct PageSection PageSection;
 

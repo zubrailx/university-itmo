@@ -11,6 +11,9 @@ typedef struct Database Database;
 typedef struct DatabaseStored DatabaseStored;
 
 #define SECTION_OFFSET_NULL 0
+// Because 0 points to current page
+#define SECTION_START_INDEX 1
+#define CURRENT_SECTION_PTR 0
 
 /* Stored in file */
 struct DatabaseStored {
@@ -18,7 +21,6 @@ struct DatabaseStored {
   fileoff_t ds_first;
   fileoff_t ds_last;
   fileoff_t pos_empty;
-  uint32_t ds_counter;
 };
 /* Stored in RAM */
 struct Database {

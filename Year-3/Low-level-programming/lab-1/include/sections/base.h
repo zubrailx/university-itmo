@@ -8,12 +8,11 @@ typedef struct SectionOffsetPointer SOPointer;
 struct BaseSection {
   uint8_t type;
   uint32_t size;
-  uint32_t number;
 };
 
 struct SectionOffsetPointer {
-  uint32_t number;
-  uint32_t offset;
+  fileoff_t sect_address;
+  sectoff_t offset;
 };
 
 enum SectionTypes {
@@ -28,4 +27,6 @@ enum SectionTypes {
   TYPE_DUMPED,
 };
 
+void *section_malloc(const sectoff_t sect_size);
 void *section_load(Database *database, const fileoff_t offset);
+void section_unload(void **section);
