@@ -1,42 +1,42 @@
 #pragma once
 
-#include "sections/base.h"
-// HASH
-// HashList
-typedef struct HashList HashList;
+// #include "sections/base.h"
+// // HASH
+// // HashList
+// typedef struct HashList HashList;
 
-struct HashList {
-  /* offset in file */
-  fileoff_t next_list;
-  fileoff_t fileoff_element;
-};
+// struct HashList {
+//   /* offset in file */
+//   fileoff_t next_list;
+//   fileoff_t fileoff_element;
+// };
 
-// Backet
-typedef struct HashBacket {
-  fileoff_t hash_list_first;
-} HashBacket;
+// // Backet
+// typedef struct HashBacket {
+//   fileoff_t hash_list_first;
+// } HashBacket;
 
-// BacketSectionHeader
-typedef struct BacketHeader {
-  BaseSection base_section;
-  uint32_t backet_end_noninc;
-} BacketHeader;
+// // BacketSectionHeader
+// typedef struct BacketHeader {
+//   BaseSection base_section;
+//   uint32_t backet_end_noninc;
+// } BacketHeader;
 
-typedef struct BacketSection {
-  BacketHeader header;
-  void *body;
-} BacketSection;
+// typedef struct BacketSection {
+//   BacketHeader header;
+//   void *body;
+// } BacketSection;
 
-// HASHTABLE
-typedef struct HashTableHeader {
-  BaseSection base_section;
+// // HASHTABLE
+// typedef struct HashTableHeader {
+//   BaseSection base_section;
 
-  uint32_t bucker_count;
-  uint64_t element_count;
-  uint64_t max_elements;
-} HashTableHeader;
+//   uint32_t bucker_count;
+//   uint64_t element_count;
+//   uint64_t max_elements;
+// } HashTableHeader;
 
-typedef struct HashTableSection {
-  HashTableHeader header;
-  void *body;
-} HashTableSection;
+// typedef struct HashTableSection {
+//   HashTableHeader header;
+//   void *body;
+// } HashTableSection;

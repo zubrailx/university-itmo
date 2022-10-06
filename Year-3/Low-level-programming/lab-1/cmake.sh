@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DIR=`dirname $0`
+cd $DIR
+
 set -o errexit
 set -o nounset
 USAGE="
@@ -26,7 +29,7 @@ CLEAN=
 RESET=
 VERBOSE=
 GENERATE=
-JOBS="-j8"
+JOBS="-j1"
 CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_LINUX=''" 
 # CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_WINDOWS=''" 
 CMAKE_BUILDTREE_OPTIONS="" # --warn-uninitialized
@@ -38,7 +41,7 @@ for arg; do
   value=${arg#*=} # file arg without = then [value = key]
   case "$key" in
     --help|-h|help)    echo -e $USAGE; exit 0;;
-    -v|--verbose) VERBOSE='--log-level=VERBOSE'  ;;
+    -v|--verbose) VERBOSE='-v'  ;;
     debug)        TYPE=DEBUG;   BUILD_DIR=$BUILD/debug ;;
     release)      TYPE=RELEASE; BUILD_DIR=$BUILD/release ;;
     clean)        CLEAN=1  ;;

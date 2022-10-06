@@ -1,10 +1,27 @@
 {
   "configurations": [
     {
-      "name": "[json]: launch main.c",
+      "name": "[json]: Launch main.c",
       "type": "cppdbg",
       "request": "launch",
-      "program": "build/debug/bin/dbms_exec",
+      "program": "./build/debug/bin/dbms_exec",
+      "cwd":"${workspaceFolder}",
+      "stopOnEntry": false
+    },
+    {
+      "name": "[json]: Launch tests",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "./build/debug/bin/dbms_test",
+      "cwd":"${workspaceFolder}",
+      "stopOnEntry": false
+    },
+    {
+      "name": "[json]: Compile & Launch tests",
+      "type": "cppdbg",
+      "request": "launch",
+      "preLaunchTask": "./cmake.sh",
+      "program": "build/debug/bin/dbms_test",
       "cwd":"${workspaceFolder}",
       "stopOnEntry": false
     }

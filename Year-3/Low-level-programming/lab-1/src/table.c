@@ -1,25 +1,26 @@
-#include "sections/table.h"
-#include "util.h"
+// #include "sections/table.h"
+// #include "util.h"
 
-#include <assert.h>
-#include <malloc.h>
+// #include <assert.h>
+// #include <malloc.h>
 
-sectoff_t TABLE_SECTION_SIZE = 4096;
+// sectoff_t TABLE_SECTION_SIZE = 4096;
 
-TableSection *table_section_load(Database *database, const fileoff_t offset) {
-  void *section = section_load(database, offset);
-  TableSection *ts = my_malloc(TableSection);
-  ts->header = (TableHeader *)section;
-  ts->body = section + sizeof(TableHeader);
-  return ts;
-}
+// TableSection *table_section_load(Database *database, const fileoff_t offset)
+// {
+//   void *section = section_load(database, offset);
+//   TableSection *ts = my_malloc(TableSection);
+//   ts->header = (TableHeader *)section;
+//   ts->body = section + sizeof(TableHeader);
+//   return ts;
+// }
 
-void table_section_unload(TableSection **ts_ptr) {
-  TableSection *ts = *ts_ptr;
-  free((void *)ts->header);
-  free(ts);
-  *ts_ptr = NULL;
-}
+// void table_section_unload(TableSection **ts_ptr) {
+//   TableSection *ts = *ts_ptr;
+//   free((void *)ts->header);
+//   free(ts);
+//   *ts_ptr = NULL;
+// }
 
 // If found already exists -> return NULL or return new created table
 // TableSection *table_section_create(Database *database, DTTypleInline

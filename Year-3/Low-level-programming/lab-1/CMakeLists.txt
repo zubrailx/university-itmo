@@ -24,7 +24,7 @@ add_compile_options(
   $<$<CONFIG:RELEASE>:-O3>
 )
 
-add_link_options()
+# add_link_options()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/arc)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -32,28 +32,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 file(GLOB_RECURSE SRCS
   CONFIGURE_DEPENDS
-  ${CMAKE_SOURCE_DIR}/src/lib/*.c)
+  ${CMAKE_SOURCE_DIR}/src/*.c)
 
 file(GLOB_RECURSE HDRS
   CONFIGURE_DEPENDS
-  ${CMAKE_SOURCE_DIR}/src/lib/*.h
+  ${CMAKE_SOURCE_DIR}/src/*.h
   ${CMAKE_SOURCE_DIR}/include/*.h)
 
 file(GLOB_RECURSE TSTS
   CONFIGURE_DEPENDS
-  ${CMAKE_SOURCE_DIR}/test/*.cpp)
+  ${CMAKE_SOURCE_DIR}/test/*.cpp
+  ${CMAKE_SOURCE_DIR}/test/*.c)
+
+set(DEBUG_DIRECTORY build/debug)
 # -----------------------------------------------------------------------------
 # Configurations
 # -----------------------------------------------------------------------------
-set(FETCHCONTENT_QUIET OFF)
-include(FetchContent)
-# gRPC
-FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
-)
-FetchContent_MakeAvailable(googletest)
-
 # Create_library
 add_library(${PROJECT_LIB_NAME} STATIC ${SRCS})
 target_include_directories(${PROJECT_LIB_NAME} PUBLIC include)
@@ -71,19 +65,34 @@ set(ignoreMe "${PROGRAM_LINUX}${PROGRAM_WINDOWS}")
 # Remove configuration variables from cache
 unset(PROGRAM_LINUX CACHE)
 unset(PROGRAM_WINDOWS CACHE)
+
+# Other libraries
+set(FETCHCONTENT_QUIET OFF)
+enable_testing()
+
+include(FetchContent)
+# gRPC
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+)
+FetchContent_MakeAvailable(googletest)
+
 # -----------------------------------------------------------------------------
 # Executable main.c
 # -----------------------------------------------------------------------------
-add_executable(${PROJECT_EXEC_NAME} src/main.c)
-target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
+if (EXISTS "${PROJECT_SOURCE_DIR}/src/main.c")
+  add_executable(${PROJECT_EXEC_NAME} src/main.c)
+  target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
+endif()
 # -----------------------------------------------------------------------------
 # Executable tests
 # -----------------------------------------------------------------------------
 add_executable(${PROJECT_TEST_NAME} ${TSTS})
 target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
 
-enable_testing()
-add_test(${PROJECT_TEST_NAME} bin/${PROJECT_TEST_NAME})
+add_test(NAME ${PROJECT_TEST_NAME} COMMAND ${DEBUG_DIRECTORY}/bin/${PROJECT_TEST_NAME}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 # include(GoogleTest)
 # gtest_discover_tests(${PROJECT_TEST_NAME})
 # -----------------------------------------------------------------------------
