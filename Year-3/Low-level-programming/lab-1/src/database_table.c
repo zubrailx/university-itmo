@@ -155,11 +155,11 @@ static DTIndex ds_save_last_index(Database *database, fileoff_t fileoff,
 										.start = ds->header.typle_start,
 										.end = ds->header.typle_start + ityple_size};
 	// Save index + update header
-	ds_insert_sectoff(database, &ds->header.index_last, fileoff, off_index_last,
+	ds_alter_sectoff(database, &ds->header.index_last, fileoff, off_index_last,
 										sizeof(ds->header.index_last));
-	ds_insert_sectoff(database, &ds->header.typle_start, fileoff, off_typle_start,
+	ds_alter_sectoff(database, &ds->header.typle_start, fileoff, off_typle_start,
 										sizeof(ds->header.typle_start));
-	ds_insert_bodyoff(database, &index, fileoff, index.start, sizeof(index));
+	ds_alter_bodyoff(database, &index, fileoff, index.start, sizeof(index));
 	return index;
 }
 
@@ -168,7 +168,7 @@ static void ds_save_last_typle(Database *database, fileoff_t fileoff,
 															 size_t ityple_size) {
 	DTIndex *index = (DTIndex *)(ds->body + ds->header.index_last - sizeof(DTIndex));
 	memcpy(ds->body + index->start, ityple, ityple_size);
-	ds_insert_bodyoff(database, ityple, fileoff, index->start, ityple_size);
+	ds_alter_bodyoff(database, ityple, fileoff, index->start, ityple_size);
 }
 // Save DTTypleInline and DTIndex in file and in DatabaseSection * object
 static void ds_save_index_typle(Database *database, const fileoff_t fileoff,
@@ -212,7 +212,7 @@ DTTIWrapper dt_create(Database *database, const fileoff_t address,
 	return returned;
 }
 
-DTTIWrapper dt_delete(Database *database, const char *name) {
+DTTIWrapper dt_drop(Database *database, const char *name) {
 	assert(database->is_opened);
 	FILE *file = database->file;
 	DTTIWrapper wrapper = dt_select(database, name);

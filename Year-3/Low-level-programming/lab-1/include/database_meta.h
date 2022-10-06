@@ -32,5 +32,9 @@ struct Database {
 };
 
 Database database_create(const char *filename);
+void database_alter(const Database *database, const char *meta);
+void database_drop(Database *database);
+
 Database database_open(const char *filename);
 void database_close(Database *database);
+void database_remove(Database *database);

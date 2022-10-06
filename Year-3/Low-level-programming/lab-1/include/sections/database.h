@@ -121,7 +121,7 @@ DTTypleInline *dt_ityple_load(Database *database, DatabaseSection *section,
 DTTIWrapper dt_create(Database *database, const fileoff_t address,
 											DTTypleInline *ityple, size_t ityple_size);
 DTTIWrapper dt_select(Database *database, const char *name);
-DTTIWrapper dt_delete(Database *database, const char *name);
+DTTIWrapper dt_drop(Database *database, const char *name);
 
 size_t ds_get_body_size(const DatabaseSection *dbs);
 bodyoff_t ds_get_bodyoff(sectoff_t sectoff);
@@ -129,10 +129,10 @@ sectoff_t ds_get_sectoff(bodyoff_t bodyoff);
 
 DatabaseSectionWrapper ds_create(Database *database, DatabaseSection *previous,
 																 fileoff_t previous_pos);
-void ds_delete(Database *database, fileoff_t pos);
-void ds_insert_sectoff(Database *database, const void *data, fileoff_t fileoff,
+void ds_drop(Database *database, fileoff_t pos);
+void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
 											 sectoff_t offset, size_t size);
-void ds_insert_bodyoff(Database *database, const void *data, fileoff_t fileoff,
+void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
 											 sectoff_t offset, size_t size);
 
 DatabaseSectionWrapper ds_load_next(Database *database, const DatabaseSection *current);

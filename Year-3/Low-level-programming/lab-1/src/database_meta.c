@@ -5,21 +5,10 @@
 #include <malloc.h>
 #include <string.h>
 
-char META_INFO[] = "version-DEV:zubrailx";
-
-static void database_save(const Database *database, const char *meta) {
-	DatabaseStored stored = database->dst;
-	size_t total_size = sizeof(stored) + strlen(meta);
-	assert(total_size <= stored.pos_empty && total_size <= stored.ds_first);
-	// write meta inf
-	FILE *file = database->file;
-	rewind(file);
-	fwrite(&stored, sizeof(stored), 1, file);
-	fwrite(meta, strlen(meta), 1, file);
-}
+const char META_INFO[] = "version-DEV:zubrailx";
 
 // needs file to read
-static void database_read(Database *database) {
+static void database_load(Database *database) {
 	DatabaseStored stored;
 	rewind(database->file);
 	assert(fread(&stored, sizeof(stored), 1, database->file));
@@ -47,6 +36,26 @@ Database database_create(const char *filename) {
 	return database;
 }
 
+void database_alter(const Database *database, const char *meta) {
+	DatabaseStored stored = database->dst;
+	size_t total_size = sizeof(stored) + strlen(meta);
+	assert(total_size <= stored.pos_empty && total_size <= stored.ds_first);
+	// write meta inf
+	FILE *file = database->file;
+	rewind(file);
+	fwrite(&stored, sizeof(stored), 1, file);
+	fwrite(meta, strlen(meta), 1, file);
+}
+
+void database_drop(Database *database) {
+	fclose(database->file);
+	remove(database->name);
+	free(database->name);
+	database->file = NULL;
+	database->name = NULL;
+	database->is_opened = false;
+}
+
 Database database_open(const char *filename) {
 	FILE *file = fopen(filename, "r+b");
 	assert(file != NULL);
@@ -55,15 +64,19 @@ Database database_open(const char *filename) {
 	database.is_opened = true;
 	database.file = file;
 	database.name = strdup(filename);
-	database_read(&database);
+	database_load(&database);
 	return database;
 }
 
 void database_close(Database *database) {
-	database_save(database, META_INFO);
+	database_alter(database, META_INFO);
 	fclose(database->file);
 	free(database->name);
 	database->file = NULL;
 	database->name = NULL;
 	database->is_opened = false;
+}
+
+void database_remove(Database *database) {
+  database_drop(database);
 }

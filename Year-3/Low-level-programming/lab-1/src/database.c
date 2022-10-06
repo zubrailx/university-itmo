@@ -65,7 +65,7 @@ DatabaseSectionWrapper ds_create(Database *database, DatabaseSection *previous,
 	return (DatabaseSectionWrapper){.ds = ds, .fileoff = next_pos};
 }
 
-void ds_delete(Database *database, fileoff_t pos) {
+void ds_drop(Database *database, fileoff_t pos) {
 	FILE *file = database->file;
 	DatabaseHeader current;
 	// set current section type dumped
@@ -84,7 +84,7 @@ void ds_delete(Database *database, fileoff_t pos) {
 	}
 }
 
-void ds_insert_sectoff(Database *database, const void *data, fileoff_t fileoff,
+void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
 											 sectoff_t offset, size_t size) {
 	assert(database->is_opened);
 	FILE *file = database->file;
@@ -92,9 +92,9 @@ void ds_insert_sectoff(Database *database, const void *data, fileoff_t fileoff,
 	fwrite(data, size, 1, file);
 }
 
-void ds_insert_bodyoff(Database *database, const void *data, fileoff_t fileoff,
+void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
 											 bodyoff_t offset, size_t size) {
-	ds_insert_sectoff(database, data, fileoff, ds_get_sectoff(offset), size);
+	ds_alter_sectoff(database, data, fileoff, ds_get_sectoff(offset), size);
 }
 
 // NULLABLE

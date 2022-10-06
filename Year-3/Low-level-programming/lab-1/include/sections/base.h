@@ -27,6 +27,7 @@ enum SectionTypes {
 	TYPE_DUMPED,
 };
 
+
 void *section_malloc(const sectoff_t sect_size);
 void *section_load(const Database *database, const fileoff_t offset);
 void section_unload(void **section);

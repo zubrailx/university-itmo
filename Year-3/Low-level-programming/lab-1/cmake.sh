@@ -59,7 +59,7 @@ done
 
 # COMMANDS
 if [[ -n $TEST ]]; then
-  cd $BUILD_DIR && ctest
+  cd $BUILD_DIR && ctest --gtest-color=yes
 else
   # Reset
   [[ -n $RESET && -d $BUILD_DIR ]] && rm -rf $BUILD_DIR
