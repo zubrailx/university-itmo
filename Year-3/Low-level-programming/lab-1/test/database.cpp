@@ -1,9 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "database_meta.h"
-#include "sections/database.h"
-#include "sections/table.h"
+#include "database.h"
 }
 
 TEST(Database, Create) {
@@ -34,9 +32,9 @@ TEST(Database, Open) {
 }
 
 TEST(Database, Remove) {
-  Database database = database_create("tmp/db.bin");
-  database_remove(&database);
-  EXPECT_EQ(database.is_opened, false);
-  EXPECT_EQ(database.name, nullptr);
-  EXPECT_EQ(database.file, nullptr);
+	Database database = database_create("tmp/db.bin");
+	database_remove(&database);
+	EXPECT_EQ(database.is_opened, false);
+	EXPECT_EQ(database.name, nullptr);
+	EXPECT_EQ(database.file, nullptr);
 }

@@ -19,6 +19,7 @@ USAGE="
       \t[-v | --verbose]\n
       \t[debug | release]\n
       \ttest\n
+      \t[sep] \n                 \t\t-- tests are printed separately
 "
 
 CMAKE=cmake
@@ -29,12 +30,14 @@ CLEAN=
 RESET=
 VERBOSE=
 GENERATE=
-JOBS="-j1"
+JOBS="-j8"
 CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_LINUX=''" 
 # CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_WINDOWS=''" 
 CMAKE_BUILDTREE_OPTIONS="" # --warn-uninitialized
 CMAKE_BUILD_OPTIONS=""
 TEST=
+SEPARATE=
+TEST_EXEC=bin/dbms_test
 
 for arg; do
   key=${arg%%=*}
@@ -48,6 +51,7 @@ for arg; do
     reset)        RESET=1 ;;
     gen|generate) GENERATE=1 ;;
     test)         TEST=1 ;;
+    sep)          SEPARATE=1 ;;
     target)       CMAKE_BUILD_OPTIONS="$CMAKE_BUILD_OPTIONS --target $value";;
     *)            if [ "$key" = "$value" ]; then
                     CMAKE_BUILDTREE_VARIABLES="$CMAKE_BUILDTREE_VARIABLES $key=''"
@@ -59,7 +63,12 @@ done
 
 # COMMANDS
 if [[ -n $TEST ]]; then
-  cd $BUILD_DIR && ctest --gtest-color=yes
+  cd $DIR
+  if [[ -n $SEPARATE ]]; then
+    ./$BUILD_DIR/$TEST_EXEC --gtest_color=yes
+  else
+    cd $BUILD_DIR && ctest --gtest-color=yes
+  fi
 else
   # Reset
   [[ -n $RESET && -d $BUILD_DIR ]] && rm -rf $BUILD_DIR

@@ -1,6 +1,10 @@
 #pragma once
 
-#include "database_meta.h"
+#include "../database.h"
+
+#include <inttypes.h>
+#include <stdbool.h>
+
 
 typedef struct BaseSection BaseSection;
 typedef struct SectionOffsetPointer SOPointer;
@@ -26,7 +30,6 @@ enum SectionTypes {
 	TYPE_TMP,
 	TYPE_DUMPED,
 };
-
 
 void *section_malloc(const sectoff_t sect_size);
 void *section_load(const Database *database, const fileoff_t offset);
