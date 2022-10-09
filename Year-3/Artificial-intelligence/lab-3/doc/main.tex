@@ -1,0 +1,96 @@
+%----document---------------------------------------------------------------------------------
+\documentclass[11pt, a4paper]{article}
+\usepackage{geometry}
+% total - determines printable width, height
+\geometry{ 
+	a4paper, total={160mm,267mm}
+}
+%----utility---------------------------------------------------------------------------------
+\usepackage{filecontents}
+\usepackage{xcolor}
+\usepackage{import} % relative importing
+%----text,fonts------------------------------------------------------------------------------------
+\usepackage{mmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian,english]{babel}
+\usepackage{setspace}
+\setstretch{0,9}
+\usepackage{fancyvrb}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+}
+%----math,graphics---------------------------------------------------------------------------------
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\pgfplotsset{
+	compat=1.17
+}
+
+\usepackage{graphicx}
+\graphicspath{{image/}}
+  
+\usepackage{wrapfig}
+\usepackage{tabularx}
+%----programming---------------------------------------------------------------------------------
+\usepackage{listings}
+%------------------------------------------------------------------------------------------------
+
+\input{./language.tex}
+
+\begin{document}
+
+\import{.}{titular.tex}
+\newpage
+
+\section{Описание задания}
+
+\begin{enumerate}
+    \item Датасет с данными про оценки студентов инженерного и педагогического факультетов (для данного датасета нужно ввести метрику: студент успешный/неуспешный на основании грейда)
+    \item Отобрать случайным образом sqrt(n) признаков.
+    \item Реализовать без использования сторонних библиотек построение дерева решений (numpy и pandas использовать можно).
+    \item Провести оценку реализованного алгоритма с использованием Accuracy, precision и recall
+    \item Построить AUC-ROC и AUC-PR.
+\end{enumerate}
+
+\section{Реализация.}
+
+\subsection{Подсчет количества признаков}
+
+Общее количество признаков в датасете - 32. Тогда требуемое количество: 
+
+$$
+  k = \lceil \sqrt{32} \rceil = 6
+$$
+
+\subsection{Реализация и вывод формул}
+
+text
+
+\subsection{Оценка реализованного алгоритма с использованием Accuracy, precision и recall}
+
+text
+
+\subsection{AUC-ROC и AUC-PR}
+
+text
+
+\section{Исходный код}
+
+ \noindent Результаты, полученные в ходе выполнения лабораторной работы: \href{https://github.com/zubrailx/University-ITMO/blob/main/Year-3/Artificial-intelligence/lab-3}{sources}.
+ 
+\section{Вывод.}
+
+\noindent написать на паре.
+
+
+\end{document}
