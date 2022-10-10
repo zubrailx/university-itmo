@@ -1,0 +1,397 @@
+{
+  "entropy": 0.9894671995465736,
+  "samples": 116,
+  "attr": "COURSE ID",
+  "children": [
+    {
+      "entropy": 0.9426831892554922,
+      "samples": 50,
+      "attr": "21",
+      "children": [
+        {
+          "entropy": 0.9108783787500366,
+          "samples": 46,
+          "attr": "14",
+          "children": [
+            {
+              "entropy": 0.8926230133850986,
+              "samples": 42,
+              "attr": "23",
+              "children": [
+                {
+                  "entropy": 0.9268190639645772,
+                  "samples": 38,
+                  "attr": "8",
+                  "children": [
+                    {
+                      "entropy": 0.998363672593813,
+                      "samples": 21,
+                      "attr": "29",
+                      "result": {
+                        "1": 11,
+                        "0": 10
+                      }
+                    },
+                    {
+                      "entropy": 0.4394969869215134,
+                      "samples": 11,
+                      "attr": "6",
+                      "result": {
+                        "0": 10,
+                        "1": 1
+                      }
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 4,
+                      "attr": "1",
+                      "result": {
+                        "0": 4
+                      }
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 1,
+                      "attr": "1",
+                      "result": {
+                        "1": 1
+                      }
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 1,
+                      "attr": "1",
+                      "result": {
+                        "0": 1
+                      }
+                    }
+                  ]
+                },
+                {
+                  "entropy": 0.0,
+                  "samples": 3,
+                  "attr": "4",
+                  "result": {
+                    "0": 3
+                  }
+                },
+                {
+                  "entropy": 0.0,
+                  "samples": 1,
+                  "attr": "1",
+                  "result": {
+                    "0": 1
+                  }
+                }
+              ]
+            },
+            {
+              "entropy": 0.9182958340544896,
+              "samples": 3,
+              "attr": "5",
+              "children": [
+                {
+                  "entropy": 0.0,
+                  "samples": 2,
+                  "attr": "1",
+                  "result": {
+                    "0": 2
+                  }
+                },
+                {
+                  "entropy": 0.0,
+                  "samples": 1,
+                  "attr": "1",
+                  "result": {
+                    "1": 1
+                  }
+                }
+              ]
+            },
+            {
+              "entropy": 0.0,
+              "samples": 1,
+              "attr": "1",
+              "result": {
+                "1": 1
+              }
+            }
+          ]
+        },
+        {
+          "entropy": 0.0,
+          "samples": 1,
+          "attr": "1",
+          "result": {
+            "1": 1
+          }
+        },
+        {
+          "entropy": 0.9182958340544896,
+          "samples": 3,
+          "attr": "3",
+          "children": [
+            {
+              "entropy": 0.0,
+              "samples": 0,
+              "attr": "1",
+              "result": {}
+            },
+            {
+              "entropy": 0.0,
+              "samples": 1,
+              "attr": "1",
+              "result": {
+                "0": 1
+              }
+            },
+            {
+              "entropy": 0.0,
+              "samples": 2,
+              "attr": "1",
+              "result": {
+                "1": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entropy": 1.0,
+      "samples": 2,
+      "attr": "3",
+      "children": [
+        {
+          "entropy": 0.0,
+          "samples": 0,
+          "attr": "1",
+          "result": {}
+        },
+        {
+          "entropy": 0.0,
+          "samples": 1,
+          "attr": "1",
+          "result": {
+            "1": 1
+          }
+        },
+        {
+          "entropy": 0.0,
+          "samples": 1,
+          "attr": "1",
+          "result": {
+            "0": 1
+          }
+        }
+      ]
+    },
+    {
+      "entropy": 0.0,
+      "samples": 8,
+      "attr": "3",
+      "result": {
+        "1": 8
+      }
+    },
+    {
+      "entropy": 0.0,
+      "samples": 4,
+      "attr": "1",
+      "result": {
+        "1": 4
+      }
+    },
+    {
+      "entropy": 0.0,
+      "samples": 7,
+      "attr": "2",
+      "result": {
+        "1": 7
+      }
+    },
+    {
+      "entropy": 0.0,
+      "samples": 6,
+      "attr": "2",
+      "result": {
+        "1": 6
+      }
+    },
+    {
+      "entropy": 0.0,
+      "samples": 12,
+      "attr": "19",
+      "result": {
+        "1": 12
+      }
+    },
+    {
+      "entropy": 0.0,
+      "samples": 10,
+      "attr": "24",
+      "result": {
+        "0": 10
+      }
+    },
+    {
+      "entropy": 0.9975025463691152,
+      "samples": 17,
+      "attr": "11",
+      "children": [
+        {
+          "entropy": 0.863120568566631,
+          "samples": 7,
+          "attr": "15",
+          "children": [
+            {
+              "entropy": 0.0,
+              "samples": 0,
+              "attr": "1",
+              "result": {}
+            },
+            {
+              "entropy": 0.6500224216483541,
+              "samples": 6,
+              "attr": "24",
+              "children": [
+                {
+                  "entropy": 0.0,
+                  "samples": 4,
+                  "attr": "1",
+                  "result": {
+                    "1": 4
+                  }
+                },
+                {
+                  "entropy": 1.0,
+                  "samples": 2,
+                  "attr": "4",
+                  "children": [
+                    {
+                      "entropy": 0.0,
+                      "samples": 0,
+                      "attr": "1",
+                      "result": {}
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 0,
+                      "attr": "1",
+                      "result": {}
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 1,
+                      "attr": "1",
+                      "result": {
+                        "1": 1
+                      }
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 0,
+                      "attr": "1",
+                      "result": {}
+                    },
+                    {
+                      "entropy": 0.0,
+                      "samples": 1,
+                      "attr": "1",
+                      "result": {
+                        "0": 1
+                      }
+                    }
+                  ]
+                },
+                {
+                  "entropy": 0.0,
+                  "samples": 0,
+                  "attr": "1",
+                  "result": {}
+                }
+              ]
+            },
+            {
+              "entropy": 0.0,
+              "samples": 0,
+              "attr": "1",
+              "result": {}
+            },
+            {
+              "entropy": 0.0,
+              "samples": 1,
+              "attr": "1",
+              "result": {
+                "0": 1
+              }
+            },
+            {
+              "entropy": 0.0,
+              "samples": 0,
+              "attr": "1",
+              "result": {}
+            }
+          ]
+        },
+        {
+          "entropy": 1.0,
+          "samples": 2,
+          "attr": "3",
+          "children": [
+            {
+              "entropy": 0.0,
+              "samples": 1,
+              "attr": "1",
+              "result": {
+                "0": 1
+              }
+            },
+            {
+              "entropy": 0.0,
+              "samples": 1,
+              "attr": "1",
+              "result": {
+                "1": 1
+              }
+            },
+            {
+              "entropy": 0.0,
+              "samples": 0,
+              "attr": "1",
+              "result": {}
+            }
+          ]
+        },
+        {
+          "entropy": 0.0,
+          "samples": 5,
+          "attr": "1",
+          "result": {
+            "0": 5
+          }
+        },
+        {
+          "entropy": 0.0,
+          "samples": 3,
+          "attr": "1",
+          "result": {
+            "1": 3
+          }
+        },
+        {
+          "entropy": 0.0,
+          "samples": 0,
+          "attr": "1",
+          "result": {}
+        },
+        {
+          "entropy": 0.0,
+          "samples": 0,
+          "attr": "1",
+          "result": {}
+        }
+      ]
+    }
+  ]
+}

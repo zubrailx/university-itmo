@@ -1,6 +1,14 @@
+contourpy
+cycler
+fonttools
 joblib
+kiwisolver
+matplotlib
 numpy
+packaging
 pandas
+Pillow
+pyparsing
 python-dateutil
 pytz
 scikit-learn

@@ -23,7 +23,7 @@
     linkcolor=blue,
     filecolor=magenta,      
     urlcolor=blue,
-    pdftitle={Overleaf Example},
+    pdftitle={Title},
     pdfpagemode=FullScreen,
 }
 %----math,graphics---------------------------------------------------------------------------------
@@ -37,7 +37,7 @@
 }
 
 \usepackage{graphicx}
-\graphicspath{{image/}}
+\graphicspath{{fig/}}
   
 \usepackage{wrapfig}
 \usepackage{tabularx}
@@ -74,15 +74,31 @@ $$
 
 \subsection{Реализация и вывод формул}
 
-text
+Обратиться к пункту 3.
 
-\subsection{Оценка реализованного алгоритма с использованием Accuracy, precision и recall}
+\subsection{Оценка реализованного алгоритма с использованием accuracy, precision и recall}
 
-text
+\begin{Verbatim}
+Accuracy:  0.6551724137931034
+Precision:  0.6153846153846154
+Recall:  0.6153846153846154
+\end{Verbatim}
 
 \subsection{AUC-ROC и AUC-PR}
 
-text
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{auc-roc.png}
+  % \label{fig:result-png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{auc-pr.png}
+  % \label{fig:result-png}
+\end{figure}
 
 \section{Исходный код}
 
@@ -90,7 +106,10 @@ text
  
 \section{Вывод.}
 
-\noindent написать на паре.
+\noindent В ходе выполнения лабораторной работы я познакомился с алгоритмом C4.5 и реализовал его на питоне. Также
+вспомнил, что такое accuracy, precision, recall, а также разобрался, как строить графики AUC-ROC, AUC-PR.
 
+\medskip
+\noindent Графики AUC-PR, AUC-ROC довольно неинформативны, поскольку размер входных данных составляет 150 строк, тестовое разбиение 3:7. Именно поэтому количество данных, по которым, учится алгоритм, а также количество тестовых данных, мало, что свидетельствует о небольшом кол-ве точек на графике.
 
 \end{document}
