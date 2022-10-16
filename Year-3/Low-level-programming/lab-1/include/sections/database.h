@@ -33,11 +33,26 @@ enum TableColumnTypes {
 	COLUMN_TYPE_BOOL = 3,
 };
 
-// TO STORE INSIDE FILE AND RAM
+// DATABASE SECTION TABLE TYPLE
+// Small string optimizations
+struct NameNotIn {
+	char str_size[7];
+	struct SOPointer ptr;
+} __attribute__((packed));
+
+struct SSOName {
+	bool is_inline;
+	union {
+		struct NameNotIn noin;
+		char name[sizeof(struct NameNotIn)];
+	} u;
+} __attribute__((packed));
+
+// small string optimizations
 struct DSTHeader {
 	fileoff_t fileoff;
-	bool is_inline;
-	struct SOPointer str_or_ptr[];
+	size_t cols;
+	struct SSOName name;
 	// TableColumns
 };
 
@@ -49,36 +64,43 @@ struct DSTColumnLimits {
 struct DSTColumn {
 	/* TableColumnType */
 	int8_t type;
-	// special for
 	struct DSTColumnLimits limits;
-	// name of column
-	bool is_inline;
-	struct SOPointer str_or_ptr[];// depends on is_inline
+	struct SSOName name;
 };
 
 struct DSTyple {
 	struct DSTHeader header;
-	// TableColumns
+	struct DSTColumn columns[];
 };
 
 // TO STORE IN RAM
-struct DSTIHeader {
-	fileoff_t fileoff;
-	char name[];
+struct DSTHeaderRAM {
+	fileoff_t fileoff;// offset to table
+
+	bool so_valid;// does name in file is pointed
+	SOPointer so;
+
+	size_t size;
+	char *name;
 };
 
-struct DSTIColumn {
+struct DSTColumnRAM {
+	struct DSTColumnRAM *next;
 	/* TableColumnType */
 	int8_t type;
-	// special for
 	struct DSTColumnLimits limits;
-	// name of column
-	char name[];
+
+	bool so_valid;// does name in file is pointed
+	SOPointer so;
+
+	size_t size;
+	char *name;
 };
 
-struct DSTypleIn {
-	struct DSTIHeader header;
-	// TableColumnsInline[]
+struct DSTypleRAM {
+	struct DSTHeaderRAM header;
+	size_t cols;
+	struct DSTColumnRAM *columns;
 };
 
 // HELPER
@@ -87,11 +109,10 @@ struct DatabaseSectionWr {// wrapper
 	struct DatabaseSection *ds;
 };
 
-struct DSTypleInWr {
-	bool has_performed;// was operation performed properly
-	fileoff_t fileoff; // section where index is located
-	bodyoff_t bodyoff; // offset to index
-	struct DSTypleIn *ityple;
+struct DSTypleRAMWr {
+	fileoff_t ifileoff;// section where index is located
+	bodyoff_t ibodyoff;// offset to index
+	struct DSTypleRAM *typle;
 };
 
 // Typedefs
@@ -110,7 +131,11 @@ my_defstruct(DSTIColumn);
 my_defstruct(DSTypleIn);
 
 my_defstruct(DatabaseSectionWr);
-my_defstruct(DSTypleInWr);
+
+my_defstruct(DSTHeaderRAM);
+my_defstruct(DSTColumnRAM);
+my_defstruct(DSTypleRAM);
+my_defstruct(DSTypleRAMWr);
 
 // Function declarations
 size_t ds_get_space_left(const DatabaseSection *dbs);
@@ -118,14 +143,21 @@ size_t ds_get_body_size(const DatabaseSection *dbs);
 bodyoff_t ds_get_bodyoff(sectoff_t sectoff);
 sectoff_t ds_get_sectoff(bodyoff_t bodyoff);
 
-void typle_inline_unload(DSTypleIn **dttyple);
-DSTypleIn *typle_inline_load(Database *database, DatabaseSection *section,
-														 const DSIndex *index);
+// void ds_typle_inline_unload(DSTypleIn **dttyple);
+// DSTypleIn *typle_inline_load(Database *database, DatabaseSection *section,
+// 														 const DSIndex *index);
 
-DSTypleInWr ds_table_create(Database *database, const fileoff_t address,
-														DSTypleIn *ityple, size_t ityple_size);
-DSTypleInWr ds_table_select(Database *database, const char *name);
-DSTypleInWr ds_table_drop(Database *database, const char *name);
+DSTypleRAM ds_typle_ram_create(char *name, size_t nsize, DSTColumnRAM *column,
+															 size_t cols);
+DSTColumnRAM ds_typle_column_ram_create(int8_t type, DSTColumnLimits limits, char *name,
+																				size_t size);
+
+DSTypleRAM *ds_typle_to_typle_ram(const DSTyple *typle);
+DSTyple *ds_typle_ram_to_typle(const DSTypleRAM *typle);
+
+bool ds_table_create(Database *database, DSTypleRAMWr *wrapper);
+DSTypleRAMWr ds_table_select(Database *database, const char *name);
+DSTypleRAMWr ds_table_drop(Database *database, const char *name);
 
 DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
 														fileoff_t previous_pos);
@@ -133,7 +165,7 @@ void ds_drop(Database *database, fileoff_t pos);
 void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
 											sectoff_t offset, size_t size);
 void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
-											sectoff_t offset, size_t size);
+											bodyoff_t offset, size_t size);
 
 DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current);
 DatabaseSection *ds_load(Database *database, const fileoff_t offset);
