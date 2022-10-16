@@ -28,13 +28,13 @@ static DatabaseSection *ds_malloc(const sectoff_t sect_size) {
 	return section_convert_ds(section);
 }
 
-static void ds_init(DatabaseSection *ds) {
+static void ds_init(DatabaseSection *ds, fileoff_t previous) {
 	DSHeader *dh = &ds->header;
 	// Init database section
 	dh->base_section.type = TYPE_DATABASE;
 	dh->base_section.size = DATABASE_SECTION_SIZE;
 	dh->next = SECTION_OFFSET_NULL;
-	dh->previous = SECTION_OFFSET_NULL;
+	dh->previous = previous;
 	dh->index_last = 0;
 	// TODO: idk nice offset stupid dogshit
 	dh->typle_start = ds_get_bodyoff(DATABASE_SECTION_SIZE);
@@ -49,12 +49,11 @@ DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
 														fileoff_t previous_pos) {
 	FILE *file = database->file;
 	DatabaseSection *ds = ds_malloc(DATABASE_SECTION_SIZE);
-	ds_init(ds);
+	ds_init(ds, SECTION_OFFSET_NULL);
 	// calculate next position in file and write
 	fileoff_t next_pos = database->dst.pos_empty;
 	fseek(file, (long)next_pos, SEEK_SET);
-	fwrite(&ds->header, sizeof(ds->header), 1, database->file);
-	fwrite(ds->body, ds_body_size(ds), 1, database->file);
+	fwrite(&ds->header, ds->header.base_section.size, 1, database->file);
 
 	if (previous != SECTION_OFFSET_NULL) {
 		previous->header.next = next_pos;

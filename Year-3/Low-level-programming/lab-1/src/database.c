@@ -31,6 +31,8 @@ Database database_create(const char *filename) {
 											 }};
 	// create first database section
 	DatabaseSection *ds = ds_create(&database, NULL, 0).ds;
+  // create first data section
+  DataSection *da = da_create(&database);
 	ds_unload(&ds);
 	return database;
 }
