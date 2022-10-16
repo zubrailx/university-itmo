@@ -8,14 +8,14 @@
 sectoff_t DATABASE_SECTION_SIZE = 1024;
 
 inline size_t ds_body_size(const DatabaseSection *dbs) {
-	return dbs->header.base_section.size - sizeof(DatabaseHeader);
+	return dbs->header.base_section.size - sizeof(DSHeader);
 }
 
 inline bodyoff_t ds_get_bodyoff(sectoff_t sectoff) {
-	return sectoff - sizeof(DatabaseHeader);
+	return sectoff - sizeof(DSHeader);
 }
 inline sectoff_t ds_get_sectoff(bodyoff_t bodyoff) {
-	return bodyoff + sizeof(DatabaseHeader);
+	return bodyoff + sizeof(DSHeader);
 }
 
 static inline DatabaseSection *section_convert_ds(void *section) {
@@ -29,7 +29,7 @@ static DatabaseSection *ds_malloc(const sectoff_t sect_size) {
 }
 
 static void ds_init(DatabaseSection *ds) {
-	DatabaseHeader *dh = &ds->header;
+	DSHeader *dh = &ds->header;
 	// Init database section
 	dh->base_section.type = TYPE_DATABASE;
 	dh->base_section.size = DATABASE_SECTION_SIZE;
@@ -45,8 +45,8 @@ inline size_t ds_get_space_left(const DatabaseSection *dbs) {
 }
 
 // load + store in file
-DatabaseSectionWrapper ds_create(Database *database, DatabaseSection *previous,
-																 fileoff_t previous_pos) {
+DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
+														fileoff_t previous_pos) {
 	FILE *file = database->file;
 	DatabaseSection *ds = ds_malloc(DATABASE_SECTION_SIZE);
 	ds_init(ds);
@@ -58,16 +58,16 @@ DatabaseSectionWrapper ds_create(Database *database, DatabaseSection *previous,
 
 	if (previous != SECTION_OFFSET_NULL) {
 		previous->header.next = next_pos;
-		fseek(file, (long)(previous_pos + offsetof(DatabaseHeader, next)), SEEK_SET);
+		fseek(file, (long)(previous_pos + offsetof(DSHeader, next)), SEEK_SET);
 		fwrite(&previous->header.next, sizeof(previous->header.next), 1, file);
 	}
 	database->dst.pos_empty += ds->header.base_section.size;
-	return (DatabaseSectionWrapper){.ds = ds, .fileoff = next_pos};
+	return (DatabaseSectionWr){.ds = ds, .fileoff = next_pos};
 }
 
 void ds_drop(Database *database, fileoff_t pos) {
 	FILE *file = database->file;
-	DatabaseHeader current;
+	DSHeader current;
 	// set current section type dumped
 	fseek(file, (long)pos, SEEK_SET);
 	assert(fread(&current, sizeof(current), 1, file));
@@ -85,7 +85,7 @@ void ds_drop(Database *database, fileoff_t pos) {
 }
 
 void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
-											 sectoff_t offset, size_t size) {
+											sectoff_t offset, size_t size) {
 	assert(database->is_opened);
 	FILE *file = database->file;
 	fseek(file, (long)fileoff + (long)offset, SEEK_SET);
@@ -93,20 +93,19 @@ void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
 }
 
 void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
-											 bodyoff_t offset, size_t size) {
+											bodyoff_t offset, size_t size) {
 	ds_alter_sectoff(database, data, fileoff, ds_get_sectoff(offset), size);
 }
 
 // NULLABLE
-DatabaseSectionWrapper ds_load_next(Database *database,
-																		const DatabaseSection *current) {
+DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current) {
 	FILE *file = database->file;
 	fileoff_t pos = current->header.next;
 	if (pos == SECTION_OFFSET_NULL) {
-		return (DatabaseSectionWrapper){.fileoff = SECTION_OFFSET_NULL, NULL};
+		return (DatabaseSectionWr){.fileoff = SECTION_OFFSET_NULL, NULL};
 	}
 	fseek(file, (long)pos, SEEK_SET);
-	return (DatabaseSectionWrapper){.fileoff = pos, .ds = ds_load(database, pos)};
+	return (DatabaseSectionWr){.fileoff = pos, .ds = ds_load(database, pos)};
 }
 
 DatabaseSection *ds_load(Database *database, const fileoff_t offset) {

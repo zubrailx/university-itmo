@@ -8,7 +8,7 @@ const char META_INFO[] = "version-DEV:zubrailx";
 
 // needs file to read
 static void meta_load(Database *database) {
-	DatabaseStored stored;
+	DatabaseMeta stored;
 	rewind(database->file);
 	assert(fread(&stored, sizeof(stored), 1, database->file));
 	database->dst = stored;
@@ -18,12 +18,12 @@ Database database_create(const char *filename) {
 	FILE *file = fopen(filename, "w+b");
 	assert(file != NULL);
 
-	fileoff_t offset = sizeof(DatabaseStored) + strlen(META_INFO);
+	fileoff_t offset = sizeof(DatabaseMeta) + strlen(META_INFO);
 	// init database entry to store in RAM
 	Database database = {.file = file,
 											 .name = strdup(filename),
 											 .is_opened = true,
-											 .dst = (DatabaseStored){
+											 .dst = (DatabaseMeta){
 													 .is_corrupted = false,
 													 .ds_first = offset,
 													 .ds_last = offset,
@@ -36,7 +36,7 @@ Database database_create(const char *filename) {
 }
 
 void database_alter(const Database *database, const char *meta) {
-	DatabaseStored stored = database->dst;
+	DatabaseMeta stored = database->dst;
 	size_t total_size = sizeof(stored) + strlen(meta);
 	assert(total_size <= stored.pos_empty && total_size <= stored.ds_first);
 	// write meta inf
@@ -77,4 +77,3 @@ void database_close(Database *database) {
 }
 
 void database_remove(Database *database) { database_drop(database); }
-

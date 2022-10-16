@@ -2,29 +2,11 @@
 
 #include "sections/base.h"
 
-typedef struct DatabaseHeader DatabaseHeader;
-typedef struct DatabaseSection DatabaseSection;
-
-typedef struct DatabaseTableIndex DTIndex;
-
-typedef struct DatabaseTableTypleColumn DTTColumn;
-
-typedef struct DatabaseTableTypleHeader DTTHeader;
-typedef struct DatabaseTableTypleColumnLimits DTTColumnLimits;
-typedef struct DatabaseTableTyple DTTyple;
-
-typedef struct DatabaseTableTypleInlineHeader DTTInlineHeader;
-typedef struct DatabaseTableTypleInlineColumn DTTInlineColumn;
-typedef struct DatabaseTableTypleInline DTTypleInline;
-
-typedef struct DatabaseSectionWrapper DatabaseSectionWrapper;
-typedef struct DatabaseTableTypleIndexWrapper DTTIWrapper;
-
 extern sectoff_t DATABASE_SECTION_SIZE;
 
 // DatabaseSection
-struct DatabaseHeader {
-	BaseSection base_section;
+struct DSHeader {
+	struct BaseSection base_section;
 	fileoff_t next;
 	fileoff_t previous;
 	/* Non-inclusive body offset */
@@ -34,11 +16,11 @@ struct DatabaseHeader {
 };
 
 struct DatabaseSection {
-	DatabaseHeader header;
+	struct DSHeader header;
 	char body[];
 };
 
-struct DatabaseTableIndex {
+struct DSIndex {
 	bodyoff_t start;
 	bodyoff_t end;
 	bool is_cleared;
@@ -52,89 +34,107 @@ enum TableColumnTypes {
 };
 
 // TO STORE INSIDE FILE AND RAM
-struct DatabaseTableTypleHeader {
+struct DSTHeader {
 	fileoff_t fileoff;
 	bool is_inline;
-	SOPointer str_or_ptr[];
+	struct SOPointer str_or_ptr[];
 	// TableColumns
 };
 
-struct DatabaseTableTypleColumnLimits {
+struct DSTColumnLimits {
 	bool is_null;
 	bool is_unique;
 };
 
-struct DatabaseTableTypleColumn {
+struct DSTColumn {
 	/* TableColumnType */
 	int8_t type;
 	// special for
-	struct DatabaseTableTypleColumnLimits limits;
+	struct DSTColumnLimits limits;
 	// name of column
 	bool is_inline;
-	SOPointer str_or_ptr[];// depends on is_inline
+	struct SOPointer str_or_ptr[];// depends on is_inline
 };
 
-struct DatabaseTableTyple {
-	struct DatabaseTableTypleHeader header;
+struct DSTyple {
+	struct DSTHeader header;
 	// TableColumns
 };
 
 // TO STORE IN RAM
-struct DatabaseTableTypleInlineHeader {
+struct DSTIHeader {
 	fileoff_t fileoff;
 	char name[];
 };
 
-struct DatabaseTableTypleInlineColumn {
+struct DSTIColumn {
 	/* TableColumnType */
 	int8_t type;
 	// special for
-	struct DatabaseTableTypleColumnLimits limits;
+	struct DSTColumnLimits limits;
 	// name of column
 	char name[];
 };
 
-struct DatabaseTableTypleInline {
-	struct DatabaseTableTypleInlineHeader header;
+struct DSTypleIn {
+	struct DSTIHeader header;
 	// TableColumnsInline[]
 };
 
 // HELPER
-struct DatabaseSectionWrapper {
+struct DatabaseSectionWr {// wrapper
 	fileoff_t fileoff;
 	struct DatabaseSection *ds;
 };
 
-struct DatabaseTableTypleIndexWrapper {
+struct DSTypleInWr {
 	bool has_performed;// was operation performed properly
 	fileoff_t fileoff; // section where index is located
 	bodyoff_t bodyoff; // offset to index
-	struct DatabaseTableTypleInline *ityple;
+	struct DSTypleIn *ityple;
 };
 
+// Typedefs
+my_defstruct(DSHeader);
+my_defstruct(DatabaseSection);
+
+my_defstruct(DSIndex);
+
+my_defstruct(DSTHeader);
+my_defstruct(DSTColumnLimits);
+my_defstruct(DSTColumn);
+my_defstruct(DSTyple);
+
+my_defstruct(DSTIHeader);
+my_defstruct(DSTIColumn);
+my_defstruct(DSTypleIn);
+
+my_defstruct(DatabaseSectionWr);
+my_defstruct(DSTypleInWr);
+
+// Function declarations
 size_t ds_get_space_left(const DatabaseSection *dbs);
-
-void dt_ityple_unload(DTTypleInline **dttyple);
-DTTypleInline *dt_ityple_load(Database *database, DatabaseSection *section,
-															const DTIndex *index);
-
-DTTIWrapper dt_create(Database *database, const fileoff_t address,
-											DTTypleInline *ityple, size_t ityple_size);
-DTTIWrapper dt_select(Database *database, const char *name);
-DTTIWrapper dt_drop(Database *database, const char *name);
-
 size_t ds_get_body_size(const DatabaseSection *dbs);
 bodyoff_t ds_get_bodyoff(sectoff_t sectoff);
 sectoff_t ds_get_sectoff(bodyoff_t bodyoff);
 
-DatabaseSectionWrapper ds_create(Database *database, DatabaseSection *previous,
-																 fileoff_t previous_pos);
+void typle_inline_unload(DSTypleIn **dttyple);
+DSTypleIn *typle_inline_load(Database *database, DatabaseSection *section,
+														 const DSIndex *index);
+
+DSTypleInWr ds_table_create(Database *database, const fileoff_t address,
+														DSTypleIn *ityple, size_t ityple_size);
+DSTypleInWr ds_table_select(Database *database, const char *name);
+DSTypleInWr ds_table_drop(Database *database, const char *name);
+
+DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
+														fileoff_t previous_pos);
 void ds_drop(Database *database, fileoff_t pos);
 void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
-											 sectoff_t offset, size_t size);
+											sectoff_t offset, size_t size);
 void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
-											 sectoff_t offset, size_t size);
+											sectoff_t offset, size_t size);
 
-DatabaseSectionWrapper ds_load_next(Database *database, const DatabaseSection *current);
+DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current);
 DatabaseSection *ds_load(Database *database, const fileoff_t offset);
 void ds_unload(DatabaseSection **dbs_ptr);
