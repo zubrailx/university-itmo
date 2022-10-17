@@ -18,4 +18,6 @@ DataSectionWr da_create(Database *database) {
 	return wrapper;
 }
 
-DataSection *da_alter()
+bool da_alter(Database *database, fileoff_t fileoff, DataSection *da) {
+
+}

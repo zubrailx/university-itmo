@@ -7,7 +7,7 @@
 const char META_INFO[] = "version-DEV:zubrailx";
 
 // needs file to read
-static void meta_load(Database *database) {
+static void database_load(Database *database) {
 	DatabaseMeta stored;
 	rewind(database->file);
 	assert(fread(&stored, sizeof(stored), 1, database->file));
@@ -31,8 +31,8 @@ Database database_create(const char *filename) {
 											 }};
 	// create first database section
 	DatabaseSection *ds = ds_create(&database, NULL, 0).ds;
-  // create first data section
-  DataSection *da = da_create(&database);
+	// create first data section
+	// DataSection *da = da_create(&database);
 	ds_unload(&ds);
 	return database;
 }
@@ -65,7 +65,7 @@ Database database_open(const char *filename) {
 	database.is_opened = true;
 	database.file = file;
 	database.name = strdup(filename);
-	meta_load(&database);
+	database_load(&database);
 	return database;
 }
 

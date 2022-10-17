@@ -143,6 +143,16 @@ size_t ds_get_body_size(const DatabaseSection *dbs);
 bodyoff_t ds_get_bodyoff(sectoff_t sectoff);
 sectoff_t ds_get_sectoff(bodyoff_t bodyoff);
 
+// DatabaseSection specific
+DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
+														fileoff_t previous_pos);
+void ds_drop(Database *database, fileoff_t pos);
+void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
+											bodyoff_t offset, size_t size);
+
+DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current);
+
+// DatabaseSection Typle and Index specific
 // void ds_typle_inline_unload(DSTypleIn **dttyple);
 // DSTypleIn *typle_inline_load(Database *database, DatabaseSection *section,
 // 														 const DSIndex *index);
@@ -158,15 +168,3 @@ DSTyple *ds_typle_ram_to_typle(const DSTypleRAM *typle);
 bool ds_table_create(Database *database, DSTypleRAMWr *wrapper);
 DSTypleRAMWr ds_table_select(Database *database, const char *name);
 DSTypleRAMWr ds_table_drop(Database *database, const char *name);
-
-DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
-														fileoff_t previous_pos);
-void ds_drop(Database *database, fileoff_t pos);
-void ds_alter_sectoff(Database *database, const void *data, fileoff_t fileoff,
-											sectoff_t offset, size_t size);
-void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
-											bodyoff_t offset, size_t size);
-
-DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current);
-DatabaseSection *ds_load(Database *database, const fileoff_t offset);
-void ds_unload(DatabaseSection **dbs_ptr);

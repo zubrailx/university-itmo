@@ -26,8 +26,8 @@ my_defstruct(DataSection);
 my_defstruct(DataSectionWr);
 
 DataSectionWr da_create(Database *database);
-bool da_alter(Database *database, )
 
+bool da_alter(Database *database, fileoff_t fileoff, DataSection *da);
 void da_alter_bodyoff(Database *database, fileoff_t fileoff, bodyoff_t bodyoff,
 											const void *data, size_t size);
 

@@ -4,9 +4,11 @@
 #include <malloc.h>
 #include <string.h>
 
-void *section_malloc(const sectoff_t sect_size) { return malloc(sect_size); }
+BaseSection *section_malloc(const sectoff_t sect_size) {
+	return (BaseSection *)malloc(sect_size);
+}
 
-void *section_load(const Database *database, const fileoff_t offset) {
+BaseSection *section_load(const Database *database, const fileoff_t offset) {
 	FILE *file = database->file;
 	BaseSection base;
 	fseek(file, (long)offset, SEEK_SET);
@@ -15,6 +17,15 @@ void *section_load(const Database *database, const fileoff_t offset) {
 	fseek(file, (long)offset, SEEK_SET);
 	assert(fread(section, base.size, 1, file));
 	return section;
+}
+
+BaseSection *section_header_load(const Database *database, const fileoff_t fileoff,
+																 size_t size) {
+	FILE *file = database->file;
+	fseek(file, (long)fileoff, SEEK_SET);
+	BaseSection *base = malloc(size);
+	assert(fread(&base, size, 1, file));
+	return base;
 }
 
 void section_unload(void **base_ptr) {
@@ -64,6 +75,7 @@ bool section_alter_sync_sectoff(Database *database, const fileoff_t fileoff,
 }
 
 // Sync means that loaded structure and files are both overwritten, RAM is not deleted
+// but header section type is set to dumped
 bool section_sync_drop(Database *database, const fileoff_t fileoff, BaseSection *sect) {
 	FILE *file = database->file;
 	assert(file != NULL);

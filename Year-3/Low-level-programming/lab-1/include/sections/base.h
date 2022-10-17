@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../database.h"
-
 #include <inttypes.h>
 #include <stdbool.h>
+
+#include "dbmeta.h"
 
 struct BaseSection {
 	uint8_t type;
@@ -31,8 +31,10 @@ my_defstruct(BaseSection);
 my_defstruct(SOPointer);
 
 // RAM
-void *section_malloc(const sectoff_t sect_size);
-void *section_load(const Database *database, const fileoff_t offset);
+BaseSection *section_malloc(const sectoff_t sect_size);
+BaseSection *section_load(const Database *database, const fileoff_t offset);
+BaseSection *section_header_load(const Database *database, const fileoff_t fileoff,
+																 size_t size);
 void section_unload(void **section);
 
 // FILE or FILE + RAM(sync)

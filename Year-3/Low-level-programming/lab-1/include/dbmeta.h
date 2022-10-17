@@ -1,10 +1,10 @@
 #pragma once
 
-#include "util.h"
-
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+#include "util.h"
 
 typedef uint64_t fileoff_t;
 typedef uint32_t sectoff_t;
