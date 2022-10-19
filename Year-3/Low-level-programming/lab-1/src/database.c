@@ -4,78 +4,85 @@
 #include <malloc.h>
 #include <string.h>
 
-const char META_INFO[] = "version-DEV:zubrailx";
+#include "util.h"
 
-// needs file to read
-static void database_load(Database *database) {
-	DatabaseMeta stored;
-	rewind(database->file);
-	assert(fread(&stored, sizeof(stored), 1, database->file));
-	database->dst = stored;
+sectoff_t DATABASE_SECTION_SIZE = 1024;
+
+inline size_t ds_get_space_left(const DatabaseSection *dbs) {
+	return dbs->header.typle_start - dbs->header.index_last;
 }
 
-Database database_create(const char *filename) {
-	FILE *file = fopen(filename, "w+b");
-	assert(file != NULL);
-
-	fileoff_t offset = sizeof(DatabaseMeta) + strlen(META_INFO);
-	// init database entry to store in RAM
-	Database database = {.file = file,
-											 .name = strdup(filename),
-											 .is_opened = true,
-											 .dst = (DatabaseMeta){
-													 .is_corrupted = false,
-													 .ds_first = offset,
-													 .ds_last = offset,
-													 .pos_empty = offset,
-											 }};
-	// create first database section
-	DatabaseSection *ds = ds_create(&database, NULL, 0).ds;
-	// create first data section
-	// DataSection *da = da_create(&database);
-	ds_unload(&ds);
-	return database;
+inline size_t ds_body_size(const DatabaseSection *dbs) {
+	return dbs->header.base.size - sizeof(DSHeader);
 }
 
-void database_alter(const Database *database, const char *meta) {
-	DatabaseMeta stored = database->dst;
-	size_t total_size = sizeof(stored) + strlen(meta);
-	assert(total_size <= stored.pos_empty && total_size <= stored.ds_first);
-	// write meta inf
-	FILE *file = database->file;
-	rewind(file);
-	fwrite(&stored, sizeof(stored), 1, file);
-	fwrite(meta, strlen(meta), 1, file);
+inline bodyoff_t ds_get_bodyoff(sectoff_t sectoff) {
+	return sectoff - sizeof(DSHeader);
+}
+inline sectoff_t ds_get_sectoff(bodyoff_t bodyoff) {
+	return bodyoff + sizeof(DSHeader);
 }
 
-void database_drop(Database *database) {
-	fclose(database->file);
-	remove(database->name);
-	free(database->name);
-	database->file = NULL;
-	database->name = NULL;
-	database->is_opened = false;
+static void ds_init(DatabaseSection *ds, fileoff_t previous) {
+	DSHeader *dh = &ds->header;
+	// Init database section
+	dh->base.type = TYPE_DATABASE;
+	dh->base.size = DATABASE_SECTION_SIZE;
+	dh->next = SECTION_OFFSET_NULL;
+	dh->previous = previous;
+	dh->index_last = 0;
+	dh->typle_start = ds_get_bodyoff(DATABASE_SECTION_SIZE);
 }
 
-Database database_open(const char *filename) {
-	FILE *file = fopen(filename, "r+b");
-	assert(file != NULL);
-	Database database;
-	// init database entry to store in RAM
-	database.is_opened = true;
-	database.file = file;
-	database.name = strdup(filename);
-	database_load(&database);
-	return database;
+// load + store in file
+DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
+														fileoff_t previous_pos) {
+	DatabaseSection *ds = (DatabaseSection *)section_malloc(DATABASE_SECTION_SIZE);
+	ds_init(ds, SECTION_OFFSET_NULL);
+	fileoff_t next_pos = section_create(database, (BaseSection *)ds);
+	if (previous != SECTION_OFFSET_NULL) {
+		previous->header.next = next_pos;
+		section_alter_sectoff(database, previous_pos, offsetof(DSHeader, next),
+													&previous->header.next, sizeof(previous->header.next));
+	}
+	return (DatabaseSectionWr){.ds = ds, .fileoff = next_pos};
 }
 
-void database_close(Database *database) {
-	database_alter(database, META_INFO);
-	fclose(database->file);
-	free(database->name);
-	database->file = NULL;
-	database->name = NULL;
-	database->is_opened = false;
+void ds_alter(Database *database, const fileoff_t fileoff, const DatabaseSection *ds) {
+	section_alter(database, fileoff, (BaseSection *)ds);
 }
 
-void database_remove(Database *database) { database_drop(database); }
+void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
+											bodyoff_t offset, size_t size) {
+	section_alter_sectoff(database, fileoff, ds_get_sectoff(offset), data, size);
+}
+
+void ds_drop(Database *database, fileoff_t fileoff) {
+	DSHeader *curr = (DSHeader *)section_header_load(database, fileoff, sizeof(DSHeader));
+	section_sync_drop(database, fileoff, (BaseSection *)curr);
+	// update relatives
+	if (curr->next != SECTION_OFFSET_NULL) {
+		section_alter_sectoff(database, curr->next, offsetof(DSHeader, previous),
+													&curr->previous, sizeof(curr->previous));
+	}
+	if (curr->previous != SECTION_OFFSET_NULL) {
+		section_alter_sectoff(database, curr->previous, offsetof(DSHeader, next),
+													&curr->next, sizeof(curr->next));
+	}
+}
+
+// NULLABLE
+DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current) {
+	fileoff_t pos = current->header.next;
+	if (pos == SECTION_OFFSET_NULL) {
+		return (DatabaseSectionWr){.fileoff = SECTION_OFFSET_NULL, NULL};
+	}
+	return (DatabaseSectionWr){.fileoff = pos,
+														 .ds = (DatabaseSection *)section_load(database, pos)};
+}
+
+DatabaseSection *ds_load(Database *database, fileoff_t fileoff) {
+	return (DatabaseSection *)section_load_type(database, fileoff, TYPE_DATABASE);
+}
+
+void ds_unload(DatabaseSection **ds) { section_unload((BaseSection **)ds); }

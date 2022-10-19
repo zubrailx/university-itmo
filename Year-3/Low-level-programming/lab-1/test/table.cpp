@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "database.h"
+#include "dbmeta.h"
 #include "sections/database.h"
 }
 
@@ -15,8 +15,8 @@ TEST(DatabaseSection, Create) {
 	DSTColumnRAM column2 = ds_typle_column_ram_create(
 			COLUMN_TYPE_INT, (DSTColumnLimits){.is_null = true, .is_unique = false}, name2,
 			strlen(name2));
-  column.next = &column2;
-  char *table = strdup("table1");
-  DSTypleRAM typle = ds_typle_ram_create(table, strlen(table), &column, 2);
+	 column.next = &column2;
+	 char *table = strdup("table1");
+	 DSTypleRAM typle = ds_typle_ram_create(table, strlen(table), &column, 2);
 	database_close(&database);
 }

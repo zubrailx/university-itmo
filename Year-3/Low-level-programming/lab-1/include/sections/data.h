@@ -2,11 +2,11 @@
 
 #include "sections/base.h"
 
-extern sectoff_t DATABASE_SECTION_SIZE;
+extern sectoff_t DATA_SECTION_SIZE;
 
 // Section for storing Data (like string)
 struct DaSHeader {
-	struct BaseSection base_section;
+	struct BaseSection base;
 	bodyoff_t stored_last;
 };
 
@@ -26,9 +26,11 @@ my_defstruct(DataSection);
 my_defstruct(DataSectionWr);
 
 DataSectionWr da_create(Database *database);
-
-bool da_alter(Database *database, fileoff_t fileoff, DataSection *da);
+void da_alter(Database *database, fileoff_t fileoff, DataSection *da);
 void da_alter_bodyoff(Database *database, fileoff_t fileoff, bodyoff_t bodyoff,
 											const void *data, size_t size);
-
 void da_alter_append(Database *database, const void *data, size_t size);
+void da_drop(Database *database, fileoff_t fileoff);
+
+DataSection *da_load(Database *database, fileoff_t fileoff);
+void da_unload(DataSection **ds);

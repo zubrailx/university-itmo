@@ -18,9 +18,10 @@ typedef uint32_t bodyoff_t;
 /* Stored in file */
 struct DatabaseMeta {
 	bool is_corrupted;
-	fileoff_t ds_first;
+	fileoff_t ds_first;// first DatabaseSection
 	fileoff_t ds_last;
-	fileoff_t da_last;// last not full databaseSection
+	fileoff_t da_last;// first DataSection
+	fileoff_t da_first;
 	fileoff_t pos_empty;
 };
 /* Stored in RAM */

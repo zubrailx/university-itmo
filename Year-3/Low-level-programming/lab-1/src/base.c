@@ -4,6 +4,8 @@
 #include <malloc.h>
 #include <string.h>
 
+static BaseSection DUMPED = {.type = TYPE_DUMPED};
+
 BaseSection *section_malloc(const sectoff_t sect_size) {
 	return (BaseSection *)malloc(sect_size);
 }
@@ -19,6 +21,15 @@ BaseSection *section_load(const Database *database, const fileoff_t offset) {
 	return section;
 }
 
+BaseSection *section_load_type(const Database *database, const fileoff_t fileoff,
+															 int8_t type) {
+	BaseSection *sect = (BaseSection *)section_load(database, fileoff);
+	if (sect->type != TYPE_DATABASE) {
+		section_unload((BaseSection **)&sect);
+	}
+	return sect;
+}
+
 BaseSection *section_header_load(const Database *database, const fileoff_t fileoff,
 																 size_t size) {
 	FILE *file = database->file;
@@ -28,14 +39,12 @@ BaseSection *section_header_load(const Database *database, const fileoff_t fileo
 	return base;
 }
 
-void section_unload(void **base_ptr) {
+void section_unload(BaseSection **base_ptr) {
 	free(*base_ptr);
 	*base_ptr = NULL;
 }
 
-/*
- * Returns section pos
- */
+// Returns section pos
 fileoff_t section_create(Database *database, const BaseSection *sect) {
 	FILE *file = database->file;
 	assert(file != NULL);
@@ -74,13 +83,16 @@ bool section_alter_sync_sectoff(Database *database, const fileoff_t fileoff,
 	return section_alter_sectoff(database, fileoff, offset, data, size);
 }
 
-// Sync means that loaded structure and files are both overwritten, RAM is not deleted
-// but header section type is set to dumped
-bool section_sync_drop(Database *database, const fileoff_t fileoff, BaseSection *sect) {
+bool section_drop(Database *database, const fileoff_t fileoff) {
 	FILE *file = database->file;
 	assert(file != NULL);
 
 	fseek(file, (long)fileoff, SEEK_SET);
+	return fwrite(&DUMPED.type, sizeof(DUMPED.type), 1, file);
+}
+// Sync means that loaded structure and files are both overwritten, RAM is not deleted
+// but header section type is set to dumped
+bool section_sync_drop(Database *database, const fileoff_t fileoff, BaseSection *sect) {
 	sect->type = TYPE_DUMPED;
-	return fwrite(&sect->type, sizeof(sect->type), 1, file);
+	return section_drop(database, fileoff);
 }
