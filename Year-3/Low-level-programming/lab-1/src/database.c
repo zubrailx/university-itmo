@@ -35,15 +35,14 @@ static void ds_init(DatabaseSection *ds, fileoff_t previous) {
 }
 
 // load + store in file
-DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
-														fileoff_t previous_pos) {
+DatabaseSectionWr ds_create(Database *db, DatabaseSection *prev, fileoff_t prev_pos) {
 	DatabaseSection *ds = (DatabaseSection *)section_malloc(DATABASE_SECTION_SIZE);
 	ds_init(ds, SECTION_OFFSET_NULL);
-	fileoff_t next_pos = section_create(database, (BaseSection *)ds);
-	if (previous != SECTION_OFFSET_NULL) {
-		previous->header.next = next_pos;
-		section_alter_sectoff(database, previous_pos, offsetof(DSHeader, next),
-													&previous->header.next, sizeof(previous->header.next));
+	fileoff_t next_pos = section_create(db, (BaseSection *)ds);
+	if (prev != SECTION_OFFSET_NULL) {
+		prev->header.next = next_pos;
+		section_alter_sectoff(db, prev_pos, offsetof(DSHeader, next), &prev->header.next,
+													sizeof(prev->header.next));
 	}
 	return (DatabaseSectionWr){.ds = ds, .fileoff = next_pos};
 }
@@ -55,6 +54,12 @@ void ds_alter(Database *database, const fileoff_t fileoff, const DatabaseSection
 void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
 											bodyoff_t offset, size_t size) {
 	section_alter_sectoff(database, fileoff, ds_get_sectoff(offset), data, size);
+}
+
+void ds_alter_sync_bodyoff(Database *database, DatabaseSection *ds, const void *data,
+													 fileoff_t fileoff, bodyoff_t offset, size_t size) {
+	section_alter_sync_sectoff(database, fileoff, ds_get_sectoff(offset),
+														 (BaseSection *)ds, data, size);
 }
 
 void ds_drop(Database *database, fileoff_t fileoff) {

@@ -5,218 +5,197 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sections/data.h"
 #include "util.h"
 
-// typedef struct PairStrSize {
-// 	char *str;
-// 	size_t size;
-// } PairStrSize;
+// inits string size
+static void typle_ram_header_init(DSTHeaderRAM *ramh, const DSTHeader *header) {
+	ramh->changed = false;
+	ramh->cols = header->cols;
+	ramh->fileoff = header->fileoff;
+	ramh->is_inline = header->name.is_inline;
+	ramh->so = header->name.u.noin.ptr;
+	size_to_sso(strlen(ramh->name), ramh->ssize);
+}
 
-// void typle_inline_unload(DSTypleIn **dttyple) {
-// 	free(*dttyple);
-// 	*dttyple = NULL;
-// }
+static void typle_ram_column_init(DSTColumnRAM *ramc, DSTColumnRAM *next,
+																	const DSTColumn *column) {
+	ramc->next = next;
+	ramc->type = column->type;
+	ramc->limits = column->limits;
+	ramc->changed = false;
+	ramc->is_inline = column->name.is_inline;
+	ramc->so = column->name.u.noin.ptr;
+	size_to_sso(strlen(ramc->name), ramc->ssize);
+}
 
-// Return pair string size and string
-// load string from current section or from pointing too
-// static PairStrSize str_noinline_load(const Database *database,
-// 																		 const DatabaseSection *section,
-// 																		 const SOPointer *ptr) {
-// 	fileoff_t address = ptr->sect_address;
-// 	sectoff_t offset = ptr->offset;
-// 	char *str;
-// 	size_t size;
-// 	if (address == SECTION_CURRENT_PTR) {
-// 		size = strlen((const char *)section + offset) + 1;
-// 		str = strdup((const char *)section + offset);
-// 	} else {
-// 		void *loaded_section = section_load(database, address);
-// 		size = strlen(loaded_section + offset) + 1;
-// 		str = strdup(loaded_section + offset);
-// 		section_unload(&loaded_section);
-// 	}
-// 	return (PairStrSize){.str = str, .size = size};
-// }
+static void typle_ram_header_load(DSTHeaderRAM *ramh, Database *db,
+																	const DSTyple *typle) {
+	// Header: init fields and copy string
+	if (typle->header.name.is_inline) {
+		// also puts null terminator
+		ramh->name = strndup(typle->header.name.u.name, SSO_MXLEN);
+	} else {
+		StrNoIn noin = typle->header.name.u.noin;
+		DataSection *da = da_load(db, noin.ptr.fileoff);
+		assert(da != NULL);
+		ramh->name = strndup((void *)da + noin.ptr.offset, sso_to_size(noin.ssize));
+		da_unload(&da);
+	}
+	typle_ram_header_init(ramh, &typle->header);
+}
 
-// DSTypleIn *typle_inline_load(Database *database, DatabaseSection *section,
-// 														 const DSIndex *index) {
-// 	bodyoff_t off_start = index->start;
-// 	const bodyoff_t off_end = index->end;
-// 	const DSTyple *typle = (DSTyple *)(section->body + off_start);
-// 	// Calculate total size with inlined strings
-// 	size_t typle_size = 0;
-// 	char *table_name = NULL;
-// 	// Calculate only for header
-// 	if (typle->header.is_inline) {
-// 		// WARN: idk what in brackets is
-// 		typle_size += strlen((const char *)typle->header.str_or_ptr) + 1;
-// 		table_name = strdup((const char *)typle->header.str_or_ptr);
-// 	} else {
-// 		const SOPointer *ptr = typle->header.str_or_ptr;
-// 		PairStrSize pss = str_noinline_load(database, section, ptr);
-// 		typle_size += pss.size;
-// 		table_name = pss.str;
-// 	}
-// 	off_start += sizeof(typle->header) + typle_size;
-// 	bodyoff_t off_col_start = off_start;
-// 	typle_size += sizeof(DSTIHeader);
-// 	// Calculate for columns
-// 	while (off_start < off_end) {
-// 		DSTColumn *column = (DSTColumn *)(section->body + off_start);
-// 		size_t column_size = 0;
-// 		if (column->is_inline) {
-// 			column_size += strlen((const char *)column->str_or_ptr) + 1;
-// 		} else {
-// 			SOPointer *ptr = column->str_or_ptr;
-// 			PairStrSize pss = str_noinline_load(database, section, ptr);
-// 			free(pss.str);
-// 			column_size += pss.size;
-// 		}
-// 		off_start += column_size + sizeof(&column);
-// 		typle_size += column_size + sizeof(DSTIColumn);
-// 	}
-// 	// Insert strings inside allocated memory
-// 	// Header
-// 	DSTypleIn *ityple = malloc(typle_size);
-// 	uint32_t ityple_off = 0;
-// 	ityple->header.fileoff = typle->header.fileoff;
-// 	strcpy(ityple->header.name, table_name);
-// 	free(table_name);
-// 	ityple_off += sizeof(ityple->header) + strlen(ityple->header.name) + 1;
-// 	// Columns
-// 	off_start = off_col_start;
-// 	while (off_start < off_end) {
-// 		DSTColumn *column = (DSTColumn *)(section->body + off_start);
-// 		DSTIColumn *icolumn = (DSTIColumn *)((void *)ityple + ityple_off);
-// 		icolumn->type = column->type;
-// 		icolumn->limits = column->limits;
-// 		if (column->is_inline) {
-// 			strcpy(icolumn->name, (char *)column->str_or_ptr);
-// 			off_start += strlen((char *)column->str_or_ptr) + 1;
-// 		} else {
-// 			fileoff_t address = column->str_or_ptr->sect_address;
-// 			sectoff_t offset = column->str_or_ptr->offset;
-// 			if (address == SECTION_CURRENT_PTR) {
-// 				strcpy(icolumn->name, (const char *)section + offset);
-// 				off_start += strlen((const char *)section + offset);
-// 			} else {
-// 				void *loaded_section = section_load(database, address);
-// 				strcpy(icolumn->name, loaded_section + offset);
-// 				off_start += strlen(loaded_section + offset);
-// 				section_unload(&loaded_section);
-// 			}
-// 		}
-// 	}
-// 	return ityple;
-// }
+static void typle_ram_header_unload(DSTHeaderRAM *const ramh) { free(ramh->name); }
 
-// DSTypleInWr ds_table_select(Database *database, const char *name) {
-// 	assert(database->is_opened);
-// 	DatabaseSection *ds = ds_load(database, database->dst.ds_first);
-// 	fileoff_t fileoff = database->dst.ds_first;
-// 	while (ds != NULL) {
-// 		bodyoff_t start = 0;
-// 		const bodyoff_t end = ds->header.index_last;
-// 		while (start < end) {
-// 			DSTypleIn *ityple =
-// 					typle_inline_load(database, ds, (const DSIndex *)(ds->body + start));
-// 			if (strcmp(ityple->header.name, name) == 0) {
-// 				return (DSTypleInWr){.fileoff = fileoff,
-// 														 .bodyoff = start,
-// 														 .ityple = ityple,
-// 														 .has_performed = true};
-// 			} else {
-// 				free(ityple);
-// 			}
-// 			start += sizeof(DSIndex);
-// 		}
-// 		DatabaseSectionWr wrapper = ds_load_next(database, ds);
-// 		DatabaseSection *next = wrapper.ds;
-// 		fileoff = wrapper.fileoff;
-// 		ds_unload(&ds);
-// 		ds = next;
-// 	}
-// 	return (DSTypleInWr){.fileoff = SECTION_OFFSET_NULL,
-// 											 .bodyoff = 0,
-// 											 .ityple = NULL,
-// 											 .has_performed = false};
-// }
+static DSTColumnRAM *typle_ram_columns_load(Database *db, const DSTyple *typle) {
+	DSTColumn column;
+	DSTColumnRAM *ramc = NULL, *ram_next = NULL;
+	for (size_t i = 0; i < typle->header.cols; ++i) {
+		size_t irev = typle->header.cols - 1 - i;
+		column = typle->columns[irev];
+		ramc = my_malloc(DSTColumnRAM);
+		if (column.name.is_inline) {
+			ramc->name = strndup(column.name.u.name, SSO_MXLEN);
+		} else {
+			StrNoIn noin = column.name.u.noin;
+			DataSection *da = da_load(db, noin.ptr.fileoff);
+			assert(da != NULL);
+			ramc->name = strndup((void *)da + noin.ptr.offset, sso_to_size(noin.ssize));
+			da_unload(&da);
+		}
+		typle_ram_column_init(ramc, ram_next, &column);
+		ram_next = ramc;
+	}
+	return ram_next;// as we started from end, we need to return last occurence
+}
 
-// Update last index from database section
-// static DSIndex ds_index_last_alter(Database *database, fileoff_t fileoff,
-// 																	 DatabaseSection *ds, size_t ityple_size) {
-// 	DSIndex index;
-// 	ds->header.index_last += sizeof(DSIndex);
-// 	ds->header.typle_start -= ityple_size;
-// 	// calculate offset where to write
-// 	sectoff_t off_index_last =
-// 			offsetof(DatabaseSection, header) + offsetof(DSHeader, index_last);
-// 	sectoff_t off_typle_start =
-// 			offsetof(DatabaseSection, header) + offsetof(DSHeader, typle_start);
+static void typle_ram_columns_unload(DSTColumnRAM **const col_ptr) {
+	DSTColumnRAM *col = *col_ptr;
+	DSTColumnRAM *prev;
+	while (col != NULL) {
+		prev = col;
+		col = col->next;
+		free(prev->name);
+		free(prev);
+	}
+	*col_ptr = NULL;
+}
 
-// 	index = (DSIndex){.is_cleared = false,
-// 										.start = ds->header.typle_start,
-// 										.end = ds->header.typle_start + ityple_size};
-// 	// Save index + update header
-// 	ds_alter_sectoff(database, &ds->header.index_last, fileoff, off_index_last,
-// 									 sizeof(ds->header.index_last));
-// 	ds_alter_sectoff(database, &ds->header.typle_start, fileoff, off_typle_start,
-// 									 sizeof(ds->header.typle_start));
-// 	ds_alter_bodyoff(database, &index, fileoff, index.start, sizeof(index));
-// 	return index;
-// }
+static inline size_t typle_size_from_typle_ram(const DSTypleRAM *ram) {
+	return sizeof(DSTHeader) + sizeof(DSTColumn) * ram->header.cols;
+}
 
-// static void ds_typle_last_alter(Database *database, fileoff_t fileoff,
-// 																DatabaseSection *ds, const DSTypleIn *ityple,
-// 																size_t ityple_size) {
-// 	DSIndex *index = (DSIndex *)(ds->body + ds->header.index_last - sizeof(DSIndex));
-// 	memcpy(ds->body + index->start, ityple, ityple_size);
-// 	ds_alter_bodyoff(database, ityple, fileoff, index->start, ityple_size);
-// }
+// no-check for empty space (+ update DatabaseSection)
+static DSIndex typle_index_create_sync(Database *db, DatabaseSection *ds,
+																					const fileoff_t fileoff,
+																					const size_t typle_size) {
+	DSIndex index = (DSIndex){.is_cleared = false,
+														.start = ds->header.typle_start,
+														.end = ds->header.typle_start + typle_size};
+	// calculate offset where to write
+	const sectoff_t off_index_last = offsetof(DSHeader, index_last);
+	const sectoff_t off_typle_start = offsetof(DSHeader, typle_start);
+	// update ram
+	const bodyoff_t index_prev = ds->header.index_last;
+	ds->header.index_last += sizeof(DSIndex);
+	ds->header.typle_start -= typle_size;
+	// alter sync header
+	section_alter_sync_sectoff(db, fileoff, off_index_last, (BaseSection *)ds,
+														 &ds->header.index_last, sizeof(ds->header.index_last));
+	section_alter_sync_sectoff(db, fileoff, off_typle_start, (BaseSection *)ds,
+														 &ds->header.typle_start, sizeof(ds->header.typle_start));
+	// alter sync index
+	ds_alter_sync_bodyoff(db, ds, &index, fileoff, index_prev, sizeof(index));
+	return index;
+}
+
+// write inlined string and also noninlined (no sense to divide this function)
+// also update typleRAM and DatabaseSection
+static void typle_alter_sync(Database *db, const fileoff_t fileoff,
+																DatabaseSection *ds, const DSIndex *index,
+																DSTypleRAM *ram) {
+	// for each non-inlined cell check, find place, update DSTypleRAM
+	if (!ram->header.is_inline && ram->header.changed) {
+		ram->header.so =
+				da_alter_append(db, ram->header.name, sso_to_size(ram->header.ssize));
+		ram->header.changed = false;
+	}
+	DSTColumnRAM *ramc = ram->columns;
+	while (ramc != NULL) {
+		if (!ramc->is_inline && ramc->changed) {
+			ramc->so = da_alter_append(db, ram->header.name, sso_to_size(ram->header.ssize));
+			ramc->changed = false;
+		}
+		ramc = ramc->next;
+	}
+	// write new updated typle to file
+	DSTyple *typle = ds_typle_ram_to_typle(ram);
+	size_t typle_size = typle_size_from_typle_ram(ram);
+	ds_alter_sync_bodyoff(db, ds, typle, fileoff, index->start, typle_size);
+}
+
+DSTypleRAM *ds_typle_ram_load(Database *db, DatabaseSection *section,
+													 const DSIndex *index) {
+	DSTyple *typle = (DSTyple *)(section->body + index->start);
+	DSTypleRAM *ram = my_malloc(DSTypleRAM);
+	typle_ram_header_load(&ram->header, db, typle);
+	ram->columns = typle_ram_columns_load(db, typle);
+	return ram;
+}
+
+void ds_typle_ram_unload(DSTypleRAM **const ram_ptr) {
+	DSTypleRAM *ram = *ram_ptr;
+	typle_ram_header_unload(&ram->header);
+	if (ram->columns != NULL) {
+		typle_ram_columns_unload(&ram->columns);
+	}
+	free(ram);
+	*ram_ptr = NULL;
+}
 
 // database_table is allocated with name and columns
 // Return NULL is exists
-DSTColumnRAM ds_typle_column_ram_create(const int8_t type,
-																							 const DSTColumnLimits limits, char *name,
-																							 const size_t size) {
-	DSTColumnRAM column =  (DSTColumnRAM){
+DSTColumnRAM ds_typle_column_ram_create(const int8_t type, const DSTColumnLimits limits,
+																				char *name, const size_t size) {
+	DSTColumnRAM column = (DSTColumnRAM){
 			.next = NULL,
 			.limits = limits,
 			.type = type,
 			.name = name,
-			.so_valid = false,
+			.changed = true,
 	};
-  size_to_sso(size, column.ssize);
-  return column;
+	size_to_sso(size, column.ssize);
+	// set is_inlined flag for sso
+	if (size > SSO_MXLEN) {
+		column.is_inline = false;
+	}
+	return column;
 }
 
 DSTypleRAM ds_typle_ram_create(char *name, size_t nsize, DSTColumnRAM *column,
-																			size_t cols) {
+															 size_t cols) {
 	DSTypleRAM ram = (DSTypleRAM){
 			.header = (DSTHeaderRAM){.name = name,
 															 .fileoff = SECTION_OFFSET_NULL,
-															 .so_valid = false},
-			.cols = cols,
+															 .changed = true,
+															 .cols = cols},
 			.columns = column,
 	};
 	size_to_sso(nsize, ram.header.ssize);
+	// set is_inlined flag for sso
+	if (nsize > SSO_MXLEN) {
+		ram.header.is_inline = false;
+	}
 	return ram;
 }
-
-static inline size_t ds_typle_get_size_from_typle_ram(const DSTypleRAM *ram) {
-	return sizeof(DSTHeader) + sizeof(DSTColumn) * ram->cols;
-}
-
-DSTypleRAM *ds_typle_to_typle_ram(const DSTyple *typle) { return NULL; }
-
 
 // inline with small string optimizations (doesn't do anything with strings in separate
 // sections)
 DSTyple *ds_typle_ram_to_typle(const DSTypleRAM *ram) {
-	DSTyple *typle = calloc(1, ds_typle_get_size_from_typle_ram(ram));
-	typle->header.cols = ram->cols;
+	DSTyple *typle = calloc(1, typle_size_from_typle_ram(ram));
+	typle->header.cols = ram->header.cols;
 	// Copy header if is not inlined
-	if (sso_to_size(ram->header.ssize) > sizeof(struct StrNotIn)) {
+	if (sso_to_size(ram->header.ssize) > sizeof(struct StrNoIn)) {
 		typle->header.name.is_inline = false;
 		memcpy(typle->header.name.u.noin.ssize, ram->header.ssize, SSO_STRING_SIZE);
 	} else {
@@ -226,11 +205,11 @@ DSTyple *ds_typle_ram_to_typle(const DSTypleRAM *ram) {
 	// Set columns
 	DSTColumn *colstart = (void *)typle + offsetof(DSTyple, columns);
 	DSTColumnRAM *ramcurrent = ram->columns;
-	for (int i = 0; i < ram->cols; ++i, ramcurrent = ramcurrent->next) {
+	for (int i = 0; i < ram->header.cols; ++i, ramcurrent = ramcurrent->next) {
 		DSTColumn *column = colstart + i;
 		column->limits = ramcurrent->limits;
 		column->type = ramcurrent->type;
-		if (sso_to_size(ramcurrent->ssize) > sizeof(struct StrNotIn)) {
+		if (sso_to_size(ramcurrent->ssize) > sizeof(struct StrNoIn)) {
 			column->name.is_inline = false;
 			memcpy(column->name.u.noin.ssize, ramcurrent->ssize, SSO_STRING_SIZE);
 		} else {
@@ -241,74 +220,74 @@ DSTyple *ds_typle_ram_to_typle(const DSTypleRAM *ram) {
 	return typle;
 }
 
-// static void ds_sync_alter_append_typle(Database *database, fileoff_t ds_fileoff,
-// 																			 DatabaseSection *ds, const DSIndex *index,
-// 																			 const DSTypleRAM *ram) {
-// 	size_t typle_size = ds_typle_get_size_from_typle_ram(ram);
-// 	// Convert ram to typle and find int SOPointers
-// 	DSTyple *typle = ds_typle_ram_to_typle(ram);
-// 	// Find place for not inlined strings and set SOPointer to DSTypleRAM and write when
-// 	// in file
-// 	if (!typle->header.name.is_inline) {
-// 		// find place for them in file and update DSTypleRAM and DSTyple typle
-// 	}
-// 	for (size_t i = 0; i < typle->header.cols; ++i) {
-// 		if (!typle->columns[i].name.is_inline) {
-// 			// do the same
-// 		}
-// 	}
-// 	bodyoff_t offset = ds->header.typle_start - typle_size;
-// 	memcpy(ds->body + offset, typle, 1);
-// 	ds_alter_bodyoff(database, typle, ds_fileoff, offset, typle_size);
-// }
+DSTypleRAMWr ds_table_select(Database *db, const char *name) {
+	assert(db->is_opened);
+	DatabaseSection *ds = ds_load(db, db->dst.ds_first);
+	DSTypleRAMWr result = {.typle = NULL};
+	fileoff_t fileoff = db->dst.ds_first;
+	while (ds != NULL) {
+		bodyoff_t start = 0;
+		const bodyoff_t end = ds->header.index_last;
+		DSTHeaderRAM header;
+		while (start < end) {
+			DSIndex *index = (DSIndex *)(ds->body + start);
+			typle_ram_header_load(&header, db, (DSTyple *)(ds->body + index->start));
+			if (strcmp(header.name, name) == 0) {
+				result = (DSTypleRAMWr){.ifileoff = fileoff,
+																.ibodyoff = start,
+																.typle = ds_typle_ram_load(db, ds, index)};
+				break;
+			}
+			typle_ram_header_unload(&header);
+			start += sizeof(DSIndex);
+		}
+		// if result found -> close resources and return result
+		if (result.typle != NULL) {
+			ds_unload(&ds);
+			return result;
+		} else {
+			DatabaseSectionWr wrapper = ds_load_next(db, ds);
+			fileoff = wrapper.fileoff;
+			ds_unload(&ds);
+			ds = wrapper.ds;
+		}
+	}
+	return (DSTypleRAMWr){.ifileoff = SECTION_OFFSET_NULL, .ibodyoff = 0, .typle = NULL};
+}
 
-// // Append index to DatabaseSection in RAM and file section with address fileoff
-// static void ds_sync_alter_append_index(Database *database, fileoff_t ds_fileoff,
-// 																			 DatabaseSection *ds, const DSIndex *index) {
-// 	bodyoff_t ilast = ds->header.index_last;
-// 	memcpy(ds->body + ilast, index, 1);
-// 	ds_alter_bodyoff(database, index, ds_fileoff, ilast, sizeof(DSIndex));
-// }
+// if found -> return NULL as DSTypleRAMWr.typle (changed for each is set to true)
+DSTypleRAMWr ds_table_create(Database *database, DSTypleRAM *ram) {
+	DSTypleRAMWr result = ds_table_select(database, ram->header.name);
+	if (result.typle != NULL) {
+		ds_typle_ram_unload(&result.typle);
+		return result;
+	}
+	size_t typle_size = typle_size_from_typle_ram(ram);
+	// Put table in current section or create new
+	DatabaseSection *ds = ds_load(database, database->dst.ds_last);
+	result.ifileoff = database->dst.ds_last;
+	size_t space_left = ds_get_space_left(ds);
+	if (space_left <= typle_size + sizeof(DSIndex)) {
+		ds_unload(&ds);
+		DatabaseSectionWr wrapper = ds_create(database, ds, database->dst.ds_last);
+		ds = wrapper.ds;
+		assert(ds_get_space_left(ds) <= typle_size + sizeof(DSIndex));
+		result.ifileoff = wrapper.fileoff;
+	}
+	// Append current section with typle + add notinlined fields
+	DSIndex index = typle_index_create_sync(database, ds, result.ifileoff, typle_size);
+	typle_alter_sync(database, result.ifileoff, ds, &index, ram);
+	result.ibodyoff = ds->header.index_last - sizeof(DSIndex);
+	result.typle = ram;
+	return result;
+}
 
-// // True if it was created, false otherwise
-// bool ds_table_create(Database *database, DSTypleRAMWr *wrapper) {
-// 	assert(database->is_opened);
-// 	DSTypleRAMWr selected = ds_table_select(database, wrapper->typle->header.name);
-// 	if (selected.typle == NULL) {
-// 		return false;
-// 	}
-// 	size_t typle_size = ds_typle_get_size_from_typle_ram(wrapper->typle);
-// 	// put table in current section or create new
-// 	DatabaseSection *ds = ds_load(database, database->dst.ds_last);
-// 	wrapper->ifileoff = database->dst.ds_last;
-// 	size_t space_left = ds_get_space_left(ds);
-// 	if (space_left <= typle_size + sizeof(DSIndex)) {
-// 		ds_unload(&ds);
-// 		DatabaseSectionWr wrapper = ds_create(database, ds, database->dst.ds_last);
-// 		ds = wrapper.ds;
-// 		assert(ds_get_space_left(ds) <= typle_size + sizeof(DSIndex));
-// 		wrapper.fileoff = wrapper.fileoff;
-// 	}
-// 	// DSTyple *typle = create
-// 	// Update returned values
-// 	// ds_index_typle_alter(database, wrapper->ifileoff, ds, ityple, ityple_size);
-// 	wrapper->ibodyoff = ds->header.index_last - sizeof(DSIndex);
-// 	ds_unload(&ds);
-// 	return true;
-// }
-
-// DSTypleInWr ds_table_drop(Database *database, const char *name) {
-// 	assert(database->is_opened);
-// 	FILE *file = database->file;
-// 	DSTypleInWr wrapper = ds_table_select(database, name);
-// 	if (wrapper.has_performed == false) {
-// 		return wrapper;
-// 	}
-// 	DatabaseSection *ds = ds_load(database, wrapper.fileoff);
-// 	DSIndex *index = (DSIndex *)(ds->body + wrapper.bodyoff);
-// 	index->is_cleared = true;
-// 	fseek(file, wrapper.fileoff + ds_get_sectoff(wrapper.bodyoff), SEEK_SET);
-// 	fwrite(index, sizeof(*index), 1, file);
-// 	ds_unload(&ds);
-// 	return wrapper;
-// }
+DSTypleRAMWr ds_table_drop(Database *db, const char *name) {
+	DSTypleRAMWr wrapper = ds_table_select(db, name);
+	if (wrapper.typle == NULL) {
+		return wrapper;
+	}
+	DSIndex index = {.is_cleared = true};
+	ds_alter_bodyoff(db, &index, wrapper.ifileoff, wrapper.ibodyoff, sizeof(index));
+	return wrapper;
+}

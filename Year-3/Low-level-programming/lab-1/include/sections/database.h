@@ -61,37 +61,40 @@ struct DSTyple {
 // DSTyple in RAM
 struct DSTHeaderRAM {
 	fileoff_t fileoff;// offset to table
+	size_t cols;
 
-	bool so_valid;// does name in file is pointed
+	bool changed;// does name in file is pointed
+
+	bool is_inline;
 	SOPointer so;
-
 	char ssize[SSO_STRING_SIZE];
 	char *name;
 };
 
+// linked list
 struct DSTColumnRAM {
 	struct DSTColumnRAM *next;
-	/* TableColumnType */
-	int8_t type;
+
+	int8_t type; /* TableColumnType */
 	struct DSTColumnLimits limits;
 
-	bool so_valid;// does name in file is pointed
-	SOPointer so;
+	bool changed;// does name in file is pointed
 
+	bool is_inline;
+	SOPointer so;
 	char ssize[SSO_STRING_SIZE];
 	char *name;
 };
 
 struct DSTypleRAM {
 	struct DSTHeaderRAM header;
-	size_t cols;
 	struct DSTColumnRAM *columns;
 };
 
 // HELPER
 struct DatabaseSectionWr {// wrapper
 	fileoff_t fileoff;
-	struct DatabaseSection *ds;
+	struct DatabaseSection *ds;// linked list
 };
 
 struct DSTypleRAMWr {
@@ -103,6 +106,7 @@ struct DSTypleRAMWr {
 // Typedefs
 my_defstruct(DSHeader);
 my_defstruct(DatabaseSection);
+my_defstruct(DatabaseSectionWr);
 
 my_defstruct(DSIndex);
 
@@ -113,9 +117,6 @@ my_defstruct(DSTyple);
 
 my_defstruct(DSTIHeader);
 my_defstruct(DSTIColumn);
-my_defstruct(DSTypleIn);
-
-my_defstruct(DatabaseSectionWr);
 
 my_defstruct(DSTHeaderRAM);
 my_defstruct(DSTColumnRAM);
@@ -129,11 +130,12 @@ bodyoff_t ds_get_bodyoff(sectoff_t sectoff);
 sectoff_t ds_get_sectoff(bodyoff_t bodyoff);
 
 // DatabaseSection specific
-DatabaseSectionWr ds_create(Database *database, DatabaseSection *previous,
-														fileoff_t previous_pos);
+DatabaseSectionWr ds_create(Database *db, DatabaseSection *prev, fileoff_t prev_pos);
 void ds_alter(Database *database, const fileoff_t fileoff, const DatabaseSection *ds);
 void ds_alter_bodyoff(Database *database, const void *data, fileoff_t fileoff,
 											bodyoff_t offset, size_t size);
+void ds_alter_sync_bodyoff(Database *database, DatabaseSection *ds, const void *data,
+													 fileoff_t fileoff, bodyoff_t offset, size_t size);
 void ds_drop(Database *database, fileoff_t pos);
 
 DatabaseSectionWr ds_load_next(Database *database, const DatabaseSection *current);
@@ -141,18 +143,17 @@ DatabaseSection *ds_load(Database *database, fileoff_t fileoff);
 void ds_unload(DatabaseSection **ds);
 
 // DatabaseSection Typle and Index specific
-// void ds_typle_inline_unload(DSTypleIn **dttyple);
-// DSTypleIn *typle_inline_load(Database *database, DatabaseSection *section,
-// 														 const DSIndex *index);
+DSTypleRAM *ds_typle_ram_load(Database *db, DatabaseSection *section,
+													 const DSIndex *index);
+void ds_typle_ram_unload(DSTypleRAM **const ram_ptr);
 
 DSTypleRAM ds_typle_ram_create(char *name, size_t nsize, DSTColumnRAM *column,
 															 size_t cols);
 DSTColumnRAM ds_typle_column_ram_create(int8_t type, DSTColumnLimits limits, char *name,
 																				size_t size);
 
-DSTypleRAM *ds_typle_to_typle_ram(const DSTyple *typle);
 DSTyple *ds_typle_ram_to_typle(const DSTypleRAM *typle);
 
-bool ds_table_create(Database *database, DSTypleRAMWr *wrapper);
 DSTypleRAMWr ds_table_select(Database *database, const char *name);
+DSTypleRAMWr ds_table_create(Database *database, DSTypleRAM *wrapper);
 DSTypleRAMWr ds_table_drop(Database *database, const char *name);

@@ -26,7 +26,6 @@ enum SectionTypes {
 };
 
 my_defstruct(BaseSection);
-my_defstruct(SOPointer);
 
 // RAM
 BaseSection *section_malloc(const sectoff_t sect_size);

@@ -1,6 +1,7 @@
 #include "sections/data.h"
 
 #include <assert.h>
+#include <stddef.h>
 
 sectoff_t DATA_SECTION_SIZE = 2048;
 
@@ -28,18 +29,26 @@ void da_alter_bodyoff(Database *db, fileoff_t fileoff, bodyoff_t bodyoff,
 	section_alter_sectoff(db, fileoff, sizeof(DaSHeader) + bodyoff, data, size);
 }
 
-void da_alter_append(Database *db, const void *data, size_t size) {
+SOPointer da_alter_append(Database *db, const void *data, size_t size) {
 	DaSHeader *header =
 			(DaSHeader *)section_header_load(db, db->dst.da_last, sizeof(DaSHeader));
 	assert(header != NULL);
 	// Check size of header and create new if false
 	if (header->base.size - sizeof(DaSHeader) - header->stored_last < size) {
 		section_unload((BaseSection **)&header);
-		header = &da_create(db).da->header;
+		DataSectionWr wrapper = da_create(db);
+		header = &wrapper.da->header;
 		assert(header->base.size - sizeof(DaSHeader) > size);
 	}
+	// Write data and update pointer to empty first
+	SOPointer pointer = (SOPointer){.fileoff = db->dst.da_last, header->stored_last};
 	da_alter_bodyoff(db, db->dst.da_last, header->stored_last, data, size);
+	header->stored_last += size;
+	section_alter_sectoff(db, db->dst.da_last, offsetof(DaSHeader, stored_last),
+												&header->stored_last, sizeof(header->stored_last));
+	// Close resources
 	section_unload((BaseSection **)&header);
+	return pointer;
 }
 
 void da_drop(Database *db, fileoff_t fileoff) { section_drop(db, fileoff); }
