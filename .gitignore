@@ -1,0 +1,8 @@
+build/
+cmake-build-debug/
+
+tmp/
+.cache/
+
+*.log
+
