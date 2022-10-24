@@ -1,5 +1,0 @@
-build/
-.cache/
-*.bin
-cmake-build-debug/
-Testing/
