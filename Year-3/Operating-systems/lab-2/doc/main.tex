@@ -1,0 +1,78 @@
+%форматирование размера документа
+\documentclass[11pt, a4paper]{article}
+
+\usepackage{geometry}
+% total - determines printable width, height
+\geometry{ 
+	a4paper, total={180mm,267mm}
+}
+
+%----text,fonts------------------------------------------------------------------------------------
+\usepackage{mmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{setspace}
+\setstretch{0,9}
+\usepackage{fancyvrb}
+
+%----math,graphics---------------------------------------------------------------------------------
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{filecontents}
+\usepackage{fancyvrb}
+\usepackage{fvextra}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\pgfplotsset{
+	compat=1.17
+}
+
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+  
+\usepackage{wrapfig}
+\usepackage{tabularx}
+
+% relative importing
+\usepackage{import}
+
+% \input{./language.tex}
+
+\begin{document}
+
+\import{.}{titular.tex}
+
+\newpage
+
+\section{Текст задания}
+Разработать комплекс программ на пользовательском уровне и уровне ядра, который собирает информацию на стороне ядра и передает информацию на уровень пользователя, и выводит ее в удобном для чтения человеком виде. Программа на уровне пользователя получает на вход аргумент(ы) командной строки (не адрес!), позволяющие идентифицировать из системных таблиц необходимый путь до целевой структуры, осуществляет передачу на уровень ядра, получает информацию из данной структуры и распечатывает структуру в стандартный вывод. Загружаемый модуль ядра принимает запрос через указанный в задании интерфейс, определяет путь до целевой структуры по переданному запросу и возвращает результат на уровень пользователя.
+
+\bigskip
+\noindent
+Интерфейс передачи между программой пользователя и ядром и целевая структура задается преподавателем. Интерфейс передачи:
+
+\begin{itemize}
+  \item ioctl - передача параметров через управляющий вызов к файлу/устройству.
+\end{itemize}
+
+\section{Выполнение}
+text
+
+\section{Вывод}
+text
+
+\end{document}
