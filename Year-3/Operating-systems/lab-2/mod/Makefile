@@ -6,8 +6,6 @@ MODNAME=ioctlmod
 
 obj-m += $(MODNAME).o
 
-all: default export
-
 default:
 	make -C $(KDIR) O=$(BUILD_KDIR) M=$(BUILD_DIR) src=$(PWD) modules
 
@@ -15,9 +13,12 @@ clean:
 	make -C $(KDIR) O=$(BUILD_KDIR) M=$(BUILD_DIR) src=$(PWD) clean
 	rm -rf $(BUILD_DIR)
 
-VM_ADDRESS=nikit@127.0.0.1
-VM_PORT=3122
-VM_PATH=/home/nikit/data/linux/
+mv_ko: default
+	mv $(BUILD_DIR)/$(MODNAME).ko ./
 
-export:
-	scp -P $(VM_PORT) $(BUILD_DIR)/$(MODNAME).ko $(VM_ADDRESS):$(VM_PATH)
+# export:
+# 	scp -P ${VM_PORT} $(BUILD_DIR)/$(MODNAME).ko ${VM_ADDRESS}:${VM_PATH}
+# 	# also copy whole directory for buiding app
+# 	$(eval PREV_DIR := ${PWD}/)
+# 	cd ..
+# 	scp -r -P ${VM_PORT} $(PREV_DIR) ${VM_ADDRESS}:${VM_PATH}

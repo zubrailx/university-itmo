@@ -3,7 +3,6 @@
 
 struct device_interface {
   atomic_t available;
-  struct semaphore sem;
   struct cdev cdev;
 };
 

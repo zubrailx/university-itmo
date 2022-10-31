@@ -1,11 +1,10 @@
+#include <linux/cdev.h>
 #include <linux/export.h>
 #include <linux/fs.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
-#include <linux/module.h>
-
-#include <linux/cdev.h>
 #include <linux/memblock.h>
+#include <linux/module.h>
 #include <linux/pci.h>
 
 #include "ioctl.h"
@@ -37,11 +36,10 @@ struct file_operations file_operations = {
     .unlocked_ioctl = device_ioctl,
 };
 
-
+// Functions for manipulating device_interface
 static void ioctl_init_device_interface(struct device_interface *interface) {
   memset(interface, 0, sizeof(struct device_interface));
   atomic_set(&interface->available, 1);
-  sema_init(&interface->sem, 1);
 }
 
 static void ioctl_del_device_interface(struct device_interface *interface) {
@@ -53,11 +51,13 @@ static int ioctl_setup_cdev(struct device_interface *interface) {
   return cdev_add(&interface->cdev, devno, 1);
 }
 
-static void ioctl_mod_exit(void) {
+// On module load
+static void __exit ioctl_mod_exit(void) {
   if (dev_class) {
     device_destroy(dev_class, devno);
     class_destroy(dev_class);
-    printk(KERN_INFO "ioctl_mod: dev=%s, class=%s destroyed", DEVICE_NAME, DEVICE_CLASS);
+    printk(KERN_INFO "ioctl_mod: dev=%s, class=%s destroyed", DEVICE_NAME,
+           DEVICE_CLASS);
   }
   cdev_del(&device_interface.cdev);
   unregister_chrdev_region(devno, 1);
@@ -65,6 +65,7 @@ static void ioctl_mod_exit(void) {
   printk(KERN_INFO "ioctl_mod: interface unloaded\n");
 }
 
+// On module exit
 static int __init ioctl_mod_init(void) {
   int result = 0;
 
@@ -92,7 +93,8 @@ static int __init ioctl_mod_init(void) {
     printk(KERN_WARNING "ioctl_mod: can't create device file");
     goto fail;
   }
-  printk(KERN_INFO "ioctl_mod: dev=%s, class=%s created", DEVICE_NAME, DEVICE_CLASS);
+  printk(KERN_INFO "ioctl_mod: dev=%s, class=%s created", DEVICE_NAME,
+         DEVICE_CLASS);
   return 0;
 
 fail:
@@ -103,32 +105,72 @@ fail:
 // public API
 int device_open(struct inode *inode, struct file *file) {
   // inode->i_cdev is offset pointed to device_interface
-  struct pci_dev *dev = NULL;
   struct device_interface *dev_interface;
   dev_interface = container_of(inode->i_cdev, struct device_interface, cdev);
-  printk(KERN_INFO "ioctl_mod (DEBUG)[open]: address %p", dev_interface);
+  printk(KERN_INFO "ioctl_mod: OPENED");
   if (!atomic_dec_and_test(&dev_interface->available)) {
     atomic_inc(&dev_interface->available);
     printk(KERN_ALERT "ioctl_mod: interface is busy, unable to open\n");
     return -EBUSY;
   }
-  // TESTING
-  printk(KERN_INFO "ioctl_mod: memblock_start_of_DRAM %llu", memblock_start_of_DRAM());
-  dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev);
-  // printk(KERN_INFO "ioctl: memblock - %p", &memblock);
   return 0;
 }
 
 int device_release(struct inode *inode, struct file *file) {
   struct device_interface *dev_interface;
   dev_interface = container_of(inode->i_cdev, struct device_interface, cdev);
-  printk(KERN_INFO "ioctl_mod (DEBUG)[release]: address %p", dev_interface);
+  printk(KERN_INFO "ioctl_mod: RELEASED");
   atomic_inc(&dev_interface->available);
   return 0;
 }
 
-
 long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
+  switch (cmd) {
+  case IOCTL_TEST: {
+    uint32_t value;
+    printk(KERN_INFO "ioctl_mod: ioctl(IOCTL_TEST)");
+    if (copy_from_user(&value, (uint32_t *)arg, sizeof(value))) {
+      return -EFAULT;
+    }
+    printk(KERN_INFO "\treceived=%u\n", value);
+
+    value = 0x12345678;
+    if (copy_to_user((uint32_t *)arg, &value, sizeof(value))) {
+      return -EFAULT;
+    }
+    printk(KERN_INFO "\tsent=%u\n", value);
+
+    break;
+  }
+  case IOCTL_READ_MEMBLOCK: { // convert memblock to user_memblock
+    struct user_memblock u_memblock =
+        (struct user_memblock){.bottom_up = memblock.bottom_up,
+                               .current_limit = memblock.current_limit,
+                               .memory = &memblock.memory,
+                               .reserved = &memblock.reserved};
+    printk(KERN_INFO "ioctl_mod: ioctl(IOCTL_READ_MEMBLOCK)");
+    if (copy_to_user((struct user_memblock *)arg, &u_memblock,
+                     sizeof(u_memblock))) {
+      return -EFAULT;
+    }
+    break;
+  }
+  case IOCTL_READ_PCIDEV: {
+    struct pci_dev *dev;
+    struct user_pci_dev u_dev;
+    printk(KERN_INFO "ioctl_mod: ioctl(IOCTL_READ_PCIDEV)");
+    dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, NULL);
+    u_dev = (struct user_pci_dev){.device = dev->device,
+                                  .subsystem_device = dev->subsystem_device,
+                                  .subsystem_vendor = dev->subsystem_vendor,
+                                  .vendor = dev->vendor,
+                                  .devfn = dev->devfn};
+    if (copy_to_user((struct user_pci_dev *)arg, &u_dev, sizeof(u_dev))) {
+      return -EFAULT;
+    }
+    break;
+  }
+  }
   return 0;
 }
 
