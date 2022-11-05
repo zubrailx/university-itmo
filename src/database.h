@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "sect/meta.h"
 #include "dbtypes.h"
+#include "sect/meta.h"
 #include "util.h"
 
 /* Stored in RAM */

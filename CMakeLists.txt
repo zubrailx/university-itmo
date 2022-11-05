@@ -103,6 +103,7 @@ add_test(NAME ${PROJECT_TEST_NAME} COMMAND ${DEBUG_DIRECTORY}/bin/${PROJECT_TEST
 # -----------------------------------------------------------------------------
 # Formatting
 # -----------------------------------------------------------------------------
+message(STATUS "${SRCS}")
 # clang-format
 add_custom_target(clang-format
         COMMAND

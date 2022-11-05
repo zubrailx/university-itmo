@@ -52,7 +52,7 @@ for arg; do
     gen|generate) GENERATE=1 ;;
     test)         TEST=1 ;;
     sep)          SEPARATE=1 ;;
-    target)       CMAKE_BUILD_OPTIONS="$CMAKE_BUILD_OPTIONS --target $value";;
+    t|target)       CMAKE_BUILD_OPTIONS="$CMAKE_BUILD_OPTIONS --target $value";;
     *)            if [ "$key" = "$value" ]; then
                     CMAKE_BUILDTREE_VARIABLES="$CMAKE_BUILDTREE_VARIABLES $key=''"
                   else

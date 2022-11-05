@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base.h"
 #include "../sopointer.h"
+#include "base.h"
 
 extern sectoff_t DATA_SECTION_SIZE;
 

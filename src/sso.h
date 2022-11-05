@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "sopointer.h"
 
@@ -12,7 +12,7 @@
 // Small string optimizations
 my_defstruct(StrNoIn);
 struct StrNoIn {
-  char ssize[SSO_STRING_SIZE]; // string size, low bytes starts from start
+  char ssize[SSO_STRING_SIZE];// string size, low bytes starts from start
   struct SOPointer ptr;
 } __attribute__((packed));
 
