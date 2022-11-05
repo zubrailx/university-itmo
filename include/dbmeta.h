@@ -16,25 +16,24 @@ typedef uint32_t bodyoff_t;
 #define SECTION_CURRENT_PTR 0
 
 /* Stored in file */
+my_defstruct(DatabaseMeta);
 struct DatabaseMeta {
-	bool is_corrupted;
-	fileoff_t ds_first;// first DatabaseSection
-	fileoff_t ds_last;
-	fileoff_t da_last;// first DataSection
-	fileoff_t da_first;
-	fileoff_t pos_empty;
-};
-/* Stored in RAM */
-struct Database {
-	FILE *file;
-	char *name;
-	bool is_opened;
-	struct DatabaseMeta dst;
+  bool is_corrupted;
+  fileoff_t ds_first; // first DatabaseSection
+  fileoff_t ds_last;
+  fileoff_t da_last; // first DataSection
+  fileoff_t da_first;
+  fileoff_t pos_empty;
 };
 
-// Typedefs
-my_defstruct(DatabaseMeta);
+/* Stored in RAM */
 my_defstruct(Database);
+struct Database {
+  FILE *file;
+  char *name;
+  bool is_opened;
+  struct DatabaseMeta dst;
+};
 
 // Function declarations
 Database database_create(const char *filename);

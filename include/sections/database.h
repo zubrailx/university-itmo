@@ -6,6 +6,7 @@
 extern sectoff_t DATABASE_SECTION_SIZE;
 
 // DatabaseSection
+my_defstruct(DSHeader);
 struct DSHeader {
 	struct BaseSection base;
 	fileoff_t next;
@@ -16,11 +17,13 @@ struct DSHeader {
 	bodyoff_t typle_start;
 };
 
+my_defstruct(DatabaseSection);
 struct DatabaseSection {
 	struct DSHeader header;
 	char body[];
 };
 
+my_defstruct(DSIndex);
 struct DSIndex {
 	bodyoff_t start;
 	bodyoff_t end;
@@ -35,17 +38,20 @@ enum TableColumnTypes {
 };
 
 // DSTyple
+my_defstruct(DSTHeader);
 struct DSTHeader {
 	fileoff_t fileoff;
 	size_t cols;
 	struct SSO name;
 };
 
+my_defstruct(DSTColumnLimits);
 struct DSTColumnLimits {
 	bool is_null;
 	bool is_unique;
 };
 
+my_defstruct(DSTColumn);
 struct DSTColumn {
 	/* TableColumnType */
 	int8_t type;
@@ -53,12 +59,14 @@ struct DSTColumn {
 	struct SSO name;
 };
 
+my_defstruct(DSTyple);
 struct DSTyple {
 	struct DSTHeader header;
 	struct DSTColumn columns[];
 };
 
 // DSTyple in RAM
+my_defstruct(DSTHeaderRAM);
 struct DSTHeaderRAM {
 	fileoff_t fileoff;// offset to table
 	size_t cols;
@@ -72,6 +80,7 @@ struct DSTHeaderRAM {
 };
 
 // linked list
+my_defstruct(DSTColumnRAM);
 struct DSTColumnRAM {
 	struct DSTColumnRAM *next;
 
@@ -86,42 +95,25 @@ struct DSTColumnRAM {
 	char *name;
 };
 
+my_defstruct(DSTypleRAM);
 struct DSTypleRAM {
 	struct DSTHeaderRAM header;
 	struct DSTColumnRAM *columns;
 };
 
 // HELPER
+my_defstruct(DatabaseSectionWr);
 struct DatabaseSectionWr {// wrapper
 	fileoff_t fileoff;
 	struct DatabaseSection *ds;// linked list
 };
 
+my_defstruct(DSTypleRAMWr);
 struct DSTypleRAMWr {
 	fileoff_t ifileoff;// section where index is located
 	bodyoff_t ibodyoff;// offset to index
 	struct DSTypleRAM *typle;
 };
-
-// Typedefs
-my_defstruct(DSHeader);
-my_defstruct(DatabaseSection);
-my_defstruct(DatabaseSectionWr);
-
-my_defstruct(DSIndex);
-
-my_defstruct(DSTHeader);
-my_defstruct(DSTColumnLimits);
-my_defstruct(DSTColumn);
-my_defstruct(DSTyple);
-
-my_defstruct(DSTIHeader);
-my_defstruct(DSTIColumn);
-
-my_defstruct(DSTHeaderRAM);
-my_defstruct(DSTColumnRAM);
-my_defstruct(DSTypleRAM);
-my_defstruct(DSTypleRAMWr);
 
 // Function declarations
 size_t ds_get_space_left(const DatabaseSection *dbs);

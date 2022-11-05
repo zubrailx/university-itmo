@@ -5,6 +5,7 @@
 #define SSO_STRING_SIZE (sizeof(size_t) - sizeof(bool))
 #define SSO_MXLEN (sizeof(struct StrNoIn))
 
+my_defstruct(SOPointer);
 struct SOPointer {
 	fileoff_t fileoff;
 	sectoff_t offset;
@@ -12,6 +13,7 @@ struct SOPointer {
 
 // DATABASE SECTION TABLE TYPLE
 // Small string optimizations
+my_defstruct(StrNoIn);
 struct StrNoIn {
 	char ssize[SSO_STRING_SIZE];// string size, low bytes starts from start
 	struct SOPointer ptr;
@@ -25,8 +27,6 @@ struct SSO {
 	} u;
 } __attribute__((packed));
 
-my_defstruct(SOPointer);
-my_defstruct(StrNoIn);
 
 size_t sso_to_size(const char *ssize);
 void size_to_sso(size_t size, char *ssize);

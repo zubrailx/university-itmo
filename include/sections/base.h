@@ -8,6 +8,7 @@
 // NOTE: First - section header offset == 0, this means that freeing section header is
 // NOTE: the same as freeing section
 
+my_defstruct(BaseSection);
 struct BaseSection {
 	uint8_t type;
 	uint32_t size;
@@ -24,8 +25,6 @@ enum SectionTypes {
 	TYPE_TMP,
 	TYPE_DUMPED,
 };
-
-my_defstruct(BaseSection);
 
 // RAM
 BaseSection *section_malloc(const sectoff_t sect_size);
