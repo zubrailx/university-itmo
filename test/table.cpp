@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "dbmeta.h"
-#include "sections/database.h"
+#include "../src/database.h"
+#include "../src/sect/dbase.h"
 }
 
 TEST(DatabaseSection, Create) {

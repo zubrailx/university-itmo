@@ -55,7 +55,7 @@ set(DEBUG_DIRECTORY build/debug)
 # -----------------------------------------------------------------------------
 # Create_library
 add_library(${PROJECT_LIB_NAME} STATIC ${SRCS})
-target_include_directories(${PROJECT_LIB_NAME} PUBLIC include)
+target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 if (DEFINED PROGRAM_LINUX OR UNIX)
   # message(DEBUG ${UNIX})

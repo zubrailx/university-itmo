@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "sect/meta.h"
 #include "dbtypes.h"
 #include "util.h"
-#include "sections/meta.h"
 
 /* Stored in RAM */
 my_defstruct(Database);

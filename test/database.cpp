@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "dbmeta.h"
+#include "../src/database.h"
 }
 
 TEST(Database, Create) {

@@ -1,4 +1,4 @@
-#include "sections/data.h"
+#include "data.h"
 
 #include <assert.h>
 #include <stddef.h>

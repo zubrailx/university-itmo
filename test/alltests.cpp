@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "sections/database.h"
+#include "../src/sect/dbase.h"
 }
 
 int main(int argc, char **argv) {
@@ -14,7 +14,6 @@ int main(int argc, char **argv) {
 	column1.next = &column2;
 	DSTypleRAM ram = ds_typle_ram_create((char *)"table", 5, &column1, 2);
 	ds_table_create(&database, &ram);
-  //
 	database_flush(&database);
 	database_close(&database);
 	// testing::InitGoogleTest(&argc, argv);

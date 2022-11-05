@@ -3,8 +3,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#include "dbmeta.h"
-
+#include "../database.h"
 // NOTE: First - section header offset == 0, this means that freeing section header is
 // NOTE: the same as freeing section
 

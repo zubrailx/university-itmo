@@ -1,7 +1,7 @@
 #pragma once
 
-#include "sections/base.h"
-#include "sections/sso.h"
+#include "base.h"
+#include "../sso.h"
 
 extern sectoff_t DATABASE_SECTION_SIZE;
 

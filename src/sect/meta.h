@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util.h"
-#include "dbtypes.h"
+#include "../util.h"
+#include "../dbtypes.h"
 
 /* Stored in file */
 my_defstruct(DatabaseMeta);
