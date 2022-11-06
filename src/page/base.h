@@ -14,15 +14,15 @@ struct base_page {
 };
 
 enum page_types {
-  TYPE_UNKNOWN,
-  TYPE_DATABASE,
-  TYPE_HASHTABLE,
-  TYPE_BACKET,
-  TYPE_PAGE,
-  TYPE_DATA,
-  TYPE_TABLE,
-  TYPE_TMP,
-  TYPE_DUMPED,
+  PAGE_UNKNOWN,
+  PAGE_DATABASE,
+  PAGE_HASHTABLE,
+  PAGE_BACKET,
+  PAGE_PAGE,
+  PAGE_DATA,
+  PAGE_TABLE,
+  PAGE_TMP,
+  PAGE_DUMPED,
 };
 
 // RAM
@@ -47,3 +47,4 @@ bool page_alter_pageoff_sync(database *database, const fileoff_t fileoff,
 
 bool page_drop(database *database, const fileoff_t fileoff);
 bool page_drop_sync(database *database, const fileoff_t fileoff, base_page *section);
+

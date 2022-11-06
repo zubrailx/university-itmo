@@ -221,9 +221,9 @@ dp_typle *dp_typle_ram_to_typle(const dp_typle_ram *ram) {
 
 dp_typle_ram_wr dp_table_select(database *db, const char *name) {
   assert(db->is_opened);
-  database_page *dp = dp_load(db, db->dst.dp.first);
+  database_page *dp = dp_load(db, db->dst->dp.first);
   dp_typle_ram_wr result = {.typle = NULL};
-  fileoff_t fileoff = db->dst.dp.first;
+  fileoff_t fileoff = db->dst->dp.first;
   while (dp != NULL) {
     bodyoff_t start = 0;
     const bodyoff_t end = dp->header.index_last;
@@ -264,12 +264,12 @@ dp_typle_ram_wr dp_table_create(database *database, dp_typle_ram *ram) {
   }
   size_t typle_size = typle_size_from_typle_ram(ram);
   // Put table in current section or create new
-  database_page *dp = dp_load(database, database->dst.dp.last);
-  result.ifileoff = database->dst.dp.last;
+  database_page *dp = dp_load(database, database->dst->dp.last);
+  result.ifileoff = database->dst->dp.last;
   size_t space_left = dp_get_space_left(dp);
   if (space_left <= typle_size + sizeof(database_index)) {
     dp_unload(&dp);
-    database_page_wr wrapper = dp_create(database, dp, database->dst.dp.last);
+    database_page_wr wrapper = dp_create(database, dp, database->dst->dp.last);
     dp = wrapper.dp;
     assert(dp_get_space_left(dp) <= typle_size + sizeof(database_index));
     result.ifileoff = wrapper.fileoff;

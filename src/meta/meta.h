@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "../dbtypes.h"
 #include "../util.h"
 
@@ -16,4 +18,5 @@ struct database_meta {
     fileoff_t last;
   } da;// data_page
   fileoff_t pos_empty;
+  char *meta_info[];
 };

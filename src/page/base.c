@@ -4,7 +4,7 @@
 #include <malloc.h>
 #include <string.h>
 
-static base_page DUMPED = {.type = TYPE_DUMPED};
+static base_page DUMPED = {.type = PAGE_DUMPED};
 
 base_page *page_malloc(const pageoff_t sect_size) {
   return (base_page *)malloc(sect_size);
@@ -24,7 +24,7 @@ base_page *page_load(const database *database, const fileoff_t offset) {
 base_page *page_load_check_type(const database *database, const fileoff_t fileoff,
                                 int8_t type) {
   base_page *sect = (base_page *)page_load(database, fileoff);
-  if (sect->type != TYPE_DATABASE) {
+  if (sect->type != PAGE_DATABASE) {
     page_unload((base_page **)&sect);
   }
   return sect;
@@ -49,8 +49,8 @@ fileoff_t page_create(database *database, const base_page *sect) {
   FILE *file = database->file;
   assert(file != NULL);
 
-  fileoff_t next_pos = database->dst.pos_empty;
-  database->dst.pos_empty += sect->size;
+  fileoff_t next_pos = database->dst->pos_empty;
+  database->dst->pos_empty += sect->size;
 
   fseek(file, (long)next_pos, SEEK_SET);
   fwrite(sect, sect->size, 1, file);
@@ -91,6 +91,6 @@ bool page_drop(database *database, const fileoff_t fileoff) {
 // Sync means that loaded structure and files are both overwritten, RAM is not
 // deleted but header section type is set to dumped
 bool page_drop_sync(database *database, const fileoff_t fileoff, base_page *sect) {
-  sect->type = TYPE_DUMPED;
+  sect->type = PAGE_DUMPED;
   return page_drop(database, fileoff);
 }

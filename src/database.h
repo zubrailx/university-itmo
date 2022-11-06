@@ -5,17 +5,21 @@
 #include <stdio.h>
 
 #include "dbtypes.h"
-#include "page/meta.h"
+#include "meta/meta.h"
 #include "util.h"
 
 /* Stored in RAM */
 my_defstruct(database);
 struct database {
   FILE *file;
-  char *name;
+  char *fname;
   bool is_opened;
-  struct database_meta dst;
+  bool is_writable;
+  struct database_meta *dst;
 };
 
-void database_alter(const database *database, const char *meta);
+void database_alter(const database *database);
 void database_drop(database **database);
+
+FILE *database_get_file(const database *);
+database_meta* database_get_meta(const database *);

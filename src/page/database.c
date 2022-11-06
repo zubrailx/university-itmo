@@ -26,7 +26,7 @@ inline pageoff_t dp_get_pageoff(bodyoff_t bodyoff) {
 static void dp_init(database_page *dp, fileoff_t previous) {
   database_header *dh = &dp->header;
   // Init database section
-  dh->base.type = TYPE_DATABASE;
+  dh->base.type = PAGE_DATABASE;
   dh->base.size = DATABASE_PAGE_SIZE;
   dh->next = FILEOFF_NULL;
   dh->previous = previous;
@@ -88,7 +88,7 @@ database_page_wr dp_load_next(database *database, const database_page *current) 
 }
 
 database_page *dp_load(database *database, fileoff_t fileoff) {
-  return (database_page *)page_load_check_type(database, fileoff, TYPE_DATABASE);
+  return (database_page *)page_load_check_type(database, fileoff, PAGE_DATABASE);
 }
 
 void dp_unload(database_page **dp) { page_unload((base_page **)dp); }

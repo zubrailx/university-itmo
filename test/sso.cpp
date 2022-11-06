@@ -4,7 +4,7 @@ extern "C" {
 #include "../src/sso.h"
 }
 
-TEST(SSO, Test) {
+TEST(sso, test) {
   size_t size1 = 212140551414;
   char c[SSO_SSIZE_SIZE];
   size_to_sso(size1, c);
