@@ -48,7 +48,7 @@ file(GLOB_RECURSE HDRS
 
 set(TSTS # manual tests
   database.cpp
-  # sso.cpp
+  sso.cpp
 )
 # If defined manual tests then use TSTS variable else find tests using glob
 # Tests are searched in ${PROJECT_SOURCE_TEST_DIR}

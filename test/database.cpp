@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-// #include "../src/database.h"
+#include "../src/database.h"
 #include <database.h>
 }
 

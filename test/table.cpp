@@ -6,7 +6,7 @@ extern "C" {
 }
 
 TEST(DatabaseSection, Create) {
-  database *database = database_create("tmp/database.bin");
+  // database *database = database_create("tmp/database.bin");
   // char *name = strdup("column1");
   // DSTColumnRAM column = ds_typle_column_ram_create(
   //     COLUMN_TYPE_BOOL, (DSTColumnLimits){.is_null = false, .is_unique = false},
@@ -18,5 +18,5 @@ TEST(DatabaseSection, Create) {
   // column.next = &column2;
   // char *table = strdup("table1");
   // DSTypleRAM typle = ds_typle_ram_create(table, strlen(table), &column, 2);
-  database_close(&database);
+  // database_close(&database);
 }
