@@ -30,50 +30,67 @@ create table recipe(
   name varchar(255) not null,
   description text,
   calories integer
+    check(calories >= 0)
 );
 
 create table ingredient(
   id serial primary key,
   name varchar(255) not null,
   description text,
-  unit integer not null references unit
+  unit_id integer not null references unit
 );
 
 -- Associative
 create table ingredient_price(
   id serial primary key,
-  supplier_id integer not null references supplier,
-  ingredient_id integer not null references ingredient,
-  amount integer not null,
+  supplier_id integer not null references supplier
+    on update cascade on delete cascade,
+  ingredient_id integer not null references ingredient
+    on update cascade on delete restrict,
+  amount integer not null
+    check(amount >= 0),
   price integer not null
+    check(price >=0)
 );
 
 create table recipe_item(
   id serial primary key,
-  ingredient_id integer not null references ingredient,
-  recipe_id integer not null references recipe,
-  amount integer default 1 not null,
+  recipe_id integer not null references recipe
+    on update cascade on delete cascade,
+  ingredient_id integer not null references ingredient
+    on update cascade on delete restrict,
+  amount integer default 1 not null
+    check(amount >= 0),
   required boolean default false not null
 );
 
 create table stock(
   id serial primary key,
-  cafe_id integer not null references cafe,
-  ingredient_id integer not null references ingredient,
-  amount integer not null,
+  cafe_id integer not null references cafe
+    on update cascade on delete cascade,
+  ingredient_id integer not null references ingredient
+    on update cascade on delete restrict,
+  amount integer not null
+    check(amount >= 0),
   bought_date timestamp with time zone not null,
-  expiry_date timestamp with time zone not null
+  expiry_date timestamp with time zone not null,
+  constraint stock_bought_expiry_date CHECK(bought_date < expiry_date)
 );
 
 create table cafe2menu(
   id serial primary key,
-  cafe_id integer not null references cafe,
+  cafe_id integer not null references cafe
+    on update cascade on delete cascade,
   menu_id integer not null references menu
+    on update cascade on delete restrict
 );
 
 create table menu_item(
   id serial primary key,
-  menu_id integer not null references menu,
-  recipe_id integer not null references recipe,
+  menu_id integer not null references menu
+    on update cascade on delete cascade,
+  recipe_id integer not null references recipe
+    on update cascade on delete restrict,
   price integer not null
+    check(price >= 0)
 );
