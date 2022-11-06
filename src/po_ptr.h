@@ -3,8 +3,8 @@
 #include "dbtypes.h"
 #include "util.h"
 
-my_defstruct(SOPointer);
-struct SOPointer {
+my_defstruct(po_ptr);
+struct po_ptr {
   fileoff_t fileoff;
-  sectoff_t offset;
+  pageoff_t offset;
 };

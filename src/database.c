@@ -1,90 +1,102 @@
+#include <database.h>
+
 #include <assert.h>
 #include <malloc.h>
 #include <string.h>
 
 #include "database.h"
-#include "sect/data.h"
-#include "sect/dbase.h"
+#include "page/data.h"
+#include "page/database.h"
 
 const char META_INFO[] = "version-DEV:zubrailx";
 
 // needs file to read
-static void database_load(Database *database) {
-  DatabaseMeta stored;
+static void database_load(database *database) {
+  database_meta stored;
   rewind(database->file);
   assert(fread(&stored, sizeof(stored), 1, database->file));
   database->dst = stored;
 }
 
-Database database_create(const char *filename) {
+static void database_create_pages(database *database) {
+  // Create first database_section
+  database_page_wr dswr = dp_create(database, NULL, 0);
+  database->dst.dp.first = dswr.fileoff;
+  database->dst.dp.last = dswr.fileoff;
+  // Create first data section
+  data_page_wr dawr = da_create(database);
+  database->dst.da.first = dswr.fileoff;
+  database->dst.da.last = dswr.fileoff;
+
+  da_unload(&dawr.da);
+  dp_unload(&dswr.dp);
+}
+
+database *database_create(const char *filename) {
   FILE *file = fopen(filename, "w+b");
   assert(file != NULL);
 
-  fileoff_t offset = sizeof(DatabaseMeta) + strlen(META_INFO);
+  fileoff_t offset = sizeof(database_meta) + strlen(META_INFO);
   // init database entry to store in RAM
-  Database database = {.file = file,
-                       .name = strdup(filename),
-                       .is_opened = true,
-                       .dst = (DatabaseMeta){
-                           .is_corrupted = false,
-                           .pos_empty = offset,
-                       }};
-  // create first sections database section
-  DatabaseSectionWr dswr = ds_create(&database, NULL, 0);
-  database.dst.ds_first = dswr.fileoff;
-  database.dst.ds_last = dswr.fileoff;
-  DataSectionWr dawr = da_create(&database);
-  database.dst.da_first = dswr.fileoff;
-  database.dst.da_last = dswr.fileoff;
-  da_unload(&dawr.da);
-  ds_unload(&dswr.ds);
-  return database;
+  database *db = my_malloc(database);
+  *db = (database){.file = file,
+                   .name = strdup(filename),
+                   .is_opened = true,
+                   .dst = (database_meta){
+                       .is_corrupted = false,
+                       .pos_empty = offset,
+                   }};
+  database_create_pages(db);
+  return db;
 }
 
-void database_flush(const Database *database) {
-  DatabaseMeta stored = database->dst;
+void database_flush(const database *database) {
+  database_meta stored = database->dst;
   rewind(database->file);
   fwrite(&stored, sizeof(stored), 1, database->file);
   fflush(database->file);
 }
 
-void database_alter(const Database *database, const char *meta) {
-  DatabaseMeta stored = database->dst;
+void database_alter(const database *database, const char *meta) {
+  database_meta stored = database->dst;
   size_t total_size = sizeof(stored) + strlen(meta);
-  assert(total_size <= stored.pos_empty && total_size <= stored.ds_first);
+  assert(total_size <= stored.pos_empty && total_size <= stored.dp.first);
   // flush data (rewind + write)
   database_flush(database);
   fwrite(meta, strlen(meta), 1, database->file);
 }
 
-void database_drop(Database *database) {
+static void database_free(database **db_ptr) {
+  database *database = *db_ptr;
+  free(database->name);
+  free(database);
+  *db_ptr = NULL;
+}
+
+void database_drop(database **db_ptr) {
+  database *database = *db_ptr;
   fclose(database->file);
   remove(database->name);
-  free(database->name);
-  database->file = NULL;
-  database->name = NULL;
-  database->is_opened = false;
+  database_free(db_ptr);
 }
 
-Database database_open(const char *filename) {
+database *database_open(const char *filename) {
   FILE *file = fopen(filename, "r+b");
   assert(file != NULL);
-  Database database;
+  database *db = my_malloc(database);
   // init database entry to store in RAM
-  database.is_opened = true;
-  database.file = file;
-  database.name = strdup(filename);
-  database_load(&database);
-  return database;
+  db->is_opened = true;
+  db->file = file;
+  db->name = strdup(filename);
+  database_load(db);
+  return db;
 }
 
-void database_close(Database *database) {
+void database_close(database **db_ptr) {
+  database *database = *db_ptr;
   database_flush(database);
   fclose(database->file);
-  free(database->name);
-  database->file = NULL;
-  database->name = NULL;
-  database->is_opened = false;
+  database_free(db_ptr);
 }
 
-void database_remove(Database *database) { database_drop(database); }
+void database_remove(database **database) { database_drop(database); }

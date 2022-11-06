@@ -3,25 +3,29 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "sopointer.h"
+#include "po_ptr.h"
+#include "util.h"
 
-#define SSO_STRING_SIZE (sizeof(size_t) - sizeof(bool))
-#define SSO_MXLEN (sizeof(struct StrNoIn))
+#define SSO_SSIZE_SIZE (sizeof(size_t) - sizeof(bool))
+#define SSO_MXLEN (sizeof(STRUCT_STR_NOT_IN))
 
-// DATABASE SECTION TABLE TYPLE
-// Small string optimizations
-my_defstruct(StrNoIn);
-struct StrNoIn {
-  char ssize[SSO_STRING_SIZE];// string size, low bytes starts from start
-  struct SOPointer ptr;
-} __attribute__((packed));
+/* Struct that stored if string is not inlined
+ * @ssize string size
+ * @ptr pointer to string in different page
+ */
+#define STRUCT_STR_NOT_IN                                                              \
+  struct {                                                                             \
+    char ssize[SSO_SSIZE_SIZE];                                                        \
+    struct po_ptr po_ptr;                                                              \
+  } __attribute__((packed))
 
-struct SSO {
+my_defstruct(page_sso);
+struct page_sso {
   bool is_inline;
   union {
-    struct StrNoIn noin;
+    STRUCT_STR_NOT_IN;
     char name[SSO_MXLEN];
-  } u;
+  };
 } __attribute__((packed));
 
 size_t sso_to_size(const char *ssize);
