@@ -33,6 +33,8 @@ add_compile_options(
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/arc)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+set(PROJECT_SOURCE_TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 # file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/example)
 
 file(GLOB_RECURSE SRCS
@@ -44,10 +46,25 @@ file(GLOB_RECURSE HDRS
   ${CMAKE_SOURCE_DIR}/src/*.h
   ${CMAKE_SOURCE_DIR}/include/*.h)
 
-file(GLOB_RECURSE TSTS
-  CONFIGURE_DEPENDS
-  ${CMAKE_SOURCE_DIR}/test/*.cpp
-  ${CMAKE_SOURCE_DIR}/test/*.c)
+set(TSTS # manual tests
+  database.cpp
+  # sso.cpp
+)
+# If defined manual tests then use TSTS variable else find tests using glob
+# Tests are searched in ${PROJECT_SOURCE_TEST_DIR}
+if (DEFINED TEST_MANUAL)
+  set(_TSTS ${TSTS})
+  unset(TSTS)
+  foreach(test ${_TSTS})
+    list(APPEND TSTS "${PROJECT_SOURCE_TEST_DIR}/${test}")
+  endforeach()
+  unset(_TSTS)
+else()
+  file(GLOB_RECURSE TSTS CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/test/*.cpp)
+endif()
+unset(TEST_MANUAL CACHE)
+set(ignoreMe "${TEST_MANUAL}")
 
 set(DEBUG_DIRECTORY build/debug)
 # -----------------------------------------------------------------------------
@@ -93,17 +110,20 @@ endif()
 # -----------------------------------------------------------------------------
 # Executable tests
 # -----------------------------------------------------------------------------
-add_executable(${PROJECT_TEST_NAME} ${TSTS})
-target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
-
-add_test(NAME ${PROJECT_TEST_NAME} COMMAND ${DEBUG_DIRECTORY}/bin/${PROJECT_TEST_NAME}
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+if (DEFINED TSTS)
+  message(STATUS "TESTS: ${TSTS}")
+  add_executable(${PROJECT_TEST_NAME} ${TSTS})
+  target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
+  # Tests
+  add_test(NAME ${PROJECT_TEST_NAME} COMMAND ${DEBUG_DIRECTORY}/bin/${PROJECT_TEST_NAME}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()
 # include(GoogleTest)
 # gtest_discover_tests(${PROJECT_TEST_NAME})
 # -----------------------------------------------------------------------------
 # Formatting
 # -----------------------------------------------------------------------------
-message(STATUS "${SRCS}")
+# message(STATUS "sources: ${SRCS}")
 # clang-format
 add_custom_target(clang-format
         COMMAND
