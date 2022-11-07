@@ -8,6 +8,7 @@
 }
 
 %----text,fonts------------------------------------------------------------------------------------
+% \usepackage{fontspec}
 \usepackage{mmap}
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -15,6 +16,8 @@
 \usepackage{setspace}
 \setstretch{0,9}
 \usepackage{fancyvrb}
+\usepackage{courier}
+% \setmonofont{FiraCode Nerd Font Mono}
 
 %----math,graphics---------------------------------------------------------------------------------
 \usepackage{amsmath,amsfonts,amssymb}
@@ -33,7 +36,7 @@
     pdftitle={Overleaf Example},
     pdfpagemode=FullScreen,
 }
-
+\VerbatimFootnotes % Required, otherwise verbatim does not work in footnotes!
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -50,7 +53,7 @@
 % relative importing
 \usepackage{import}
 
-% \input{./language.tex}
+\input{./language.tex}
 
 \begin{document}
 
@@ -70,9 +73,95 @@
 \end{itemize}
 
 \section{Выполнение}
-text
+
+\subsection{Листинг модуля}
+
+\lstinputlisting[
+  style = User-C,
+caption = {\texttt{\detokenize{ioctl.h}}}
+  ]{../mod/ioctl.h}
+
+\lstinputlisting[
+  style = User-C,
+  caption ={\texttt{\detokenize{ioctl_dev.h}}} 
+  ]{../mod/ioctl_dev.h}
+
+\lstinputlisting[
+  style = User-C,
+  caption ={\texttt{\detokenize{ioctlmod.c}}} 
+]{../mod/ioctlmod.c}
+
+
+\subsection{Листинг пользовательской программы}
+
+\lstinputlisting[
+  style = User-C,
+  caption ={\texttt{\detokenize{main.c}}} 
+]{../app/main.c}
+
+\subsection{Скрипты}
+
+\lstinputlisting[
+  style = User-scripts,
+  caption ={\texttt{\detokenize{Makefile}} модуля} 
+]{../mod/Makefile}
+
+\lstinputlisting[
+  style = User-scripts,
+  caption ={\texttt{\detokenize{build-archive.sh}}} 
+]{../scripts/build-archive.sh}
+
+\lstinputlisting[
+  style = User-scripts,
+  caption ={\texttt{\detokenize{test-module.sh}}} 
+]{../scripts/test-module.sh}
+
+\lstinputlisting[
+  style = User-scripts,
+  caption ={\texttt{\detokenize{install-kernel.sh}}} 
+]{../scripts/install-kernel.sh}
+
+\subsection{Результаты работы программы}
+
+\begin{lstlisting}[
+  style = User-output,
+  caption = {Output}
+]
+nikit@vmk:~/data/linux$ make -C lab/app run
+make: Entering directory '/home/nikit/data/linux/lab/app'
+sudo ./build/app
+[INFO]: Open device
+IOCTL_TEST: received value(HEX)=12345678
+IOCTL_READ_MEMBLOCK: received value struct user_memblock=0x7ffd1b2b1890: {
+  bottom_up=0
+  current_limit=4831838208
+  memory=0xffffffffaba70d90
+  reserved=0xffffffffaba70db8
+}
+IOCTL_READ_PCIDEV: received value struct user_pci_dev=0x7ffd1b2b18b8: {
+  devfn=0
+  vendor=32902
+  device=4663
+  subsystem_vendor=0
+  subsystem_device=0
+}
+[INFO]: Close device
+make: Leaving directory '/home/nikit/data/linux/lab/app'
+
+nikit@vmk:~/data/linux$ dmesg
+[   66.059766] ioctlmod: loading out-of-tree module taints kernel.
+[   66.060171] ioctl_mod: interface loaded
+[   66.063085] ioctl_mod: dev=dev_ioctl, class=devc_ioctl created
+[  126.195155] ioctl_mod: OPENED
+[  126.195163] ioctl_mod: ioctl(IOCTL_TEST)
+[  126.195164]  received=2271560481
+[  126.195166]  sent=305419896
+[  126.195950] ioctl_mod: ioctl(IOCTL_READ_MEMBLOCK)
+[  126.197450] ioctl_mod: ioctl(IOCTL_READ_PCIDEV)
+\end{lstlisting}
 
 \section{Вывод}
-text
+В ходе выполнения данной лабораторной работы были выполнены исследования в области того, каким образом можно экспортировать функции ядра, если они изначально недоступны для модулей. Также было понято, что драйверы - тоже модули ядра, соответственно по заданию требовалось написать свой драйвер.
+Кроме того, было изучено, как писать свой драйвер ioctl, syscall, собирать ядро и модули с основной машины для виртуальной для более быстрой компиляции.
 
 \end{document}
