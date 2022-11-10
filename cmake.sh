@@ -39,6 +39,11 @@ TEST=
 SEPARATE=
 TEST_EXEC=bin/dbms_test
 
+function echosc() {
+  echo -n "[CMAKE.SH]: Running "
+  echo $@
+}
+
 for arg; do
   key=${arg%%=*}
   value=${arg#*=} # file arg without = then [value = key]
@@ -65,17 +70,30 @@ done
 if [[ -n $TEST ]]; then
   cd $DIR
   if [[ -n $SEPARATE ]]; then
+    echosc "TEST SEPARATE"
     ./$BUILD_DIR/$TEST_EXEC --gtest_color=yes
   else
+    echosc "TEST GROUPED"
     cd $BUILD_DIR && ctest --gtest-color=yes
   fi
 else
   # Reset
-  [[ -n $RESET && -d $BUILD_DIR ]] && rm -rf $BUILD_DIR
+  if [[ -n $RESET && -d $BUILD_DIR ]]; then
+    echosc "RESET"
+    rm -rf $BUILD_DIR
+  fi
   # Generate
-  [[ "$GENERATE" -ne 0 ]] && $CMAKE -S . -B $BUILD_DIR $CMAKE_BUILDTREE_OPTIONS -DCMAKE_BUILD_TYPE=$TYPE $CMAKE_BUILDTREE_VARIABLES
+  if [[ -n $RESET || -n $GENERATE ]]; then
+    GENERATE=1
+    echosc "GENERATE"
+    $CMAKE -S . -B $BUILD_DIR $CMAKE_BUILDTREE_OPTIONS -DCMAKE_BUILD_TYPE=$TYPE $CMAKE_BUILDTREE_VARIABLES
+  fi
   # Clean
-  [[ -n $CLEAN ]] && $CMAKE --build $BUILD_DIR --target clean
+  if [[ -z $GENERATE && -n $CLEAN ]]; then
+    echosc "CLEAN"
+    $CMAKE --build $BUILD_DIR --target clean
+  fi
   # Build
-  [[ -d $BUILD_DIR ]] && $CMAKE --build $BUILD_DIR $VERBOSE $JOBS $CMAKE_BUILD_OPTIONS
+  echosc "BUILD"
+  $CMAKE --build $BUILD_DIR $VERBOSE $JOBS $CMAKE_BUILD_OPTIONS
 fi
