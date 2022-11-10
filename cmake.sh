@@ -24,23 +24,27 @@ USAGE="
 
 CMAKE=cmake
 BUILD=./build
+
+TARGET_BUILD=1 # run always target
 TYPE=DEBUG
 BUILD_DIR=$BUILD/debug
-CLEAN=
-RESET=
+
+TARGET_CLEAN=
+TARGET_RESET=
 VERBOSE=
-GENERATE=
+TARGET_GENERATE=
 JOBS="-j8"
+
 CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_LINUX=''" 
 # CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_WINDOWS=''" 
 CMAKE_BUILDTREE_OPTIONS="" # --warn-uninitialized
 CMAKE_BUILD_OPTIONS=""
 
-TEST=
+TARGET_TEST=
 SEPARATE=
 TEST_EXEC=bin/dbms_test
 
-VALGRIND=
+TARGET_VALGRIND=
 VALGRIND_ARGS=--leak-check=yes
 VALGRIND_PROG=$TEST_EXEC
 
@@ -57,12 +61,12 @@ for arg; do
     -v|--verbose) VERBOSE='-v'  ;;
     debug)        TYPE=DEBUG;   BUILD_DIR=$BUILD/debug ;;
     release)      TYPE=RELEASE; BUILD_DIR=$BUILD/release ;;
-    clean)        CLEAN=1  ;;
-    reset)        RESET=1 ;;
-    gen|generate) GENERATE=1 ;;
-    test)         TEST=1 ;;
-    val|valgrind) VALGRIND=1 ;;
+    clean)        TARGET_CLEAN=1  ;;
+    reset)        TARGET_RESET=1 ;;
+    gen|generate) TARGET_GENERATE=1 ;;
+    test)         TARGET_TEST=1 ;;
     sep)          SEPARATE=1 ;;
+    val|valgrind) TARGET_VALGRIND=1 ;;
     t|target)       CMAKE_BUILD_OPTIONS="$CMAKE_BUILD_OPTIONS --target $value";;
     *)            if [ "$key" = "$value" ]; then
                     CMAKE_BUILDTREE_VARIABLES="$CMAKE_BUILDTREE_VARIABLES $key=''"
@@ -73,7 +77,29 @@ for arg; do
 done
 
 # COMMANDS
-if [[ -n $TEST ]]; then
+# Reset
+if [[ -n $TARGET_RESET && -d $BUILD_DIR ]]; then
+  echosc "RESET"
+  rm -rf $BUILD_DIR
+fi
+# Generate CMake
+if [[ -n $TARGET_RESET || -n $TARGET_GENERATE ]]; then
+  GENERATE=1
+  echosc "GENERATE"
+  $CMAKE -S . -B $BUILD_DIR $CMAKE_BUILDTREE_OPTIONS -DCMAKE_BUILD_TYPE=$TYPE $CMAKE_BUILDTREE_VARIABLES
+fi
+# Clean
+if [[ -z $TARGET_GENERATE && -n $TARGET_CLEAN ]]; then
+  echosc "CLEAN"
+  $CMAKE --build $BUILD_DIR --target clean
+fi
+# Build
+if [[ -n $TARGET_BUILD ]]; then
+  echosc "BUILD"
+  $CMAKE --build $BUILD_DIR $VERBOSE $JOBS $CMAKE_BUILD_OPTIONS
+fi
+# Test
+if [[ -n $TARGET_TEST ]]; then
   cd $DIR
   if [[ -n $SEPARATE ]]; then
     echosc "TEST SEPARATE"
@@ -82,27 +108,9 @@ if [[ -n $TEST ]]; then
     echosc "TEST GROUPED"
     cd $BUILD_DIR && ctest --gtest-color=yes
   fi
-elif [[ -n $VALGRIND ]]; then
+fi
+# Valgrind checks
+if [[ -n $TARGET_VALGRIND ]]; then
   echosc "VALGRIND"
   valgrind $VALGRIND_ARGS ./$BUILD_DIR/$VALGRIND_PROG
-else
-  # Reset
-  if [[ -n $RESET && -d $BUILD_DIR ]]; then
-    echosc "RESET"
-    rm -rf $BUILD_DIR
-  fi
-  # Generate
-  if [[ -n $RESET || -n $GENERATE ]]; then
-    GENERATE=1
-    echosc "GENERATE"
-    $CMAKE -S . -B $BUILD_DIR $CMAKE_BUILDTREE_OPTIONS -DCMAKE_BUILD_TYPE=$TYPE $CMAKE_BUILDTREE_VARIABLES
-  fi
-  # Clean
-  if [[ -z $GENERATE && -n $CLEAN ]]; then
-    echosc "CLEAN"
-    $CMAKE --build $BUILD_DIR --target clean
-  fi
-  # Build
-  echosc "BUILD"
-  $CMAKE --build $BUILD_DIR $VERBOSE $JOBS $CMAKE_BUILD_OPTIONS
 fi
