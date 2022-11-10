@@ -35,9 +35,14 @@ CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_LINUX=''"
 # CMAKE_BUILDTREE_VARIABLES="-DPROGRAM_WINDOWS=''" 
 CMAKE_BUILDTREE_OPTIONS="" # --warn-uninitialized
 CMAKE_BUILD_OPTIONS=""
+
 TEST=
 SEPARATE=
 TEST_EXEC=bin/dbms_test
+
+VALGRIND=
+VALGRIND_ARGS=--leak-check=yes
+VALGRIND_PROG=$TEST_EXEC
 
 function echosc() {
   echo -n "[CMAKE.SH]: Running "
@@ -56,6 +61,7 @@ for arg; do
     reset)        RESET=1 ;;
     gen|generate) GENERATE=1 ;;
     test)         TEST=1 ;;
+    val|valgrind) VALGRIND=1 ;;
     sep)          SEPARATE=1 ;;
     t|target)       CMAKE_BUILD_OPTIONS="$CMAKE_BUILD_OPTIONS --target $value";;
     *)            if [ "$key" = "$value" ]; then
@@ -76,6 +82,9 @@ if [[ -n $TEST ]]; then
     echosc "TEST GROUPED"
     cd $BUILD_DIR && ctest --gtest-color=yes
   fi
+elif [[ -n $VALGRIND ]]; then
+  echosc "VALGRIND"
+  valgrind $VALGRIND_ARGS ./$BUILD_DIR/$VALGRIND_PROG
 else
   # Reset
   if [[ -n $RESET && -d $BUILD_DIR ]]; then
