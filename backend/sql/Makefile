@@ -14,10 +14,17 @@ PSQL_DIR=scripts
 PSQL_NAMES=$(patsubst $(PSQL_DIR)/%, %, $(wildcard $(PSQL_DIR)/*.sh))
 PSQL_TARGET=.
 
+SQL_INIT=init.sql destroy.sql
+
 all: export
 
 # Copy sql and sh scripts
-export: export_ddls export_psql
+export: export_ddls export_psql export_init
+
+export_init:
+	@$(SCP) -P $(HOSTPORT) $(SQL_INIT)  \
+		$(STUDENT_ID)@$(HOSTNAME):/home/studs/$(STUDENT_ID)/$(STUDENT_PATH)/
+
 
 export_psql:
 	@$(SCP) -P $(HOSTPORT) $(patsubst %, $(PSQL_DIR)/%, $(PSQL_NAMES)) \
