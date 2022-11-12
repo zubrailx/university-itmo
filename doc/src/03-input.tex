@@ -28,12 +28,14 @@
 
 ## Создание объектов
 
+Идет в правильном порядке запуска скриптов.
+
 ### Таблицы
 \end{markdown}
 \lstinputlisting[
   style = User-SQL,
   % caption = {create-functions.sql}
-  ]{../../backend/sql/create-scheme.sql}
+  ]{../../backend/sql/ddl/create-scheme.sql}
 
 \begin{markdown}
 ### Функции
@@ -41,15 +43,7 @@
 \lstinputlisting[
   style = User-SQL,
   % caption = {create-functions.sql}
-  ]{../../backend/sql/create-functions.sql}
-
-\begin{markdown}
-### Триггеры
-\end{markdown}
-\lstinputlisting[
-  style = User-SQL,
-  % caption = {create-triggers}
-  ]{../../backend/sql/create-triggers.sql}
+  ]{../../backend/sql/ddl/create-functions.sql}
 
 \begin{markdown}
 ### Процедуры
@@ -57,7 +51,16 @@
 \lstinputlisting[
   style = User-SQL,
   % caption = {create-procedures}
-  ]{../../backend/sql/create-procedures.sql}
+  ]{../../backend/sql/ddl/create-procedures.sql}
+
+\begin{markdown}
+### Триггеры
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {create-triggers}
+  ]{../../backend/sql/ddl/create-triggers.sql}
+
 
 \begin{markdown}
 ## Удаление объектов
@@ -66,8 +69,24 @@
 \end{markdown}
 \lstinputlisting[
   style = User-SQL,
+  % caption = {drop-procedures}
+  ]{../../backend/sql/ddl/drop-scheme.sql}
+
+\begin{markdown}
+### Триггеры
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
   % caption = {drop-scheme}
-  ]{../../backend/sql/drop-scheme.sql}
+  ]{../../backend/sql/ddl/drop-triggers.sql}
+
+\begin{markdown}
+### Процедуры
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-scheme}
+  ]{../../backend/sql/ddl/drop-procedures.sql}
 
 \begin{markdown}
 ### Функции
@@ -75,17 +94,8 @@
 \lstinputlisting[
   style = User-SQL,
   % caption = {drop-functions}
-  ]{../../backend/sql/drop-functions.sql}
+  ]{../../backend/sql/ddl/drop-functions.sql}
 
 \begin{markdown}
-### Процедуры
+## Запросы
 \end{markdown}
-\lstinputlisting[
-  style = User-SQL,
-  % caption = {drop-procedures}
-  ]{../../backend/sql/drop-procedures.sql}
-
-\begin{markdown}
-## Скрипты
-\end{markdown}
-

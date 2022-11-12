@@ -1,0 +1,8 @@
+#!/bin/sh
+
+CREATE_FILES="create-scheme.sql create-functions.sql create-procedures.sql create-triggers.sql"
+for file in $CREATE_FILES
+do
+        echo "Executing $file:"
+        psql -h pg -d studs -f $file
+done
