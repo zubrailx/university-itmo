@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CREATE_FILES="create-scheme.sql create-functions.sql create-procedures.sql create-triggers.sql"
+CREATE_FILES="create-scheme.sql create-functions.sql create-procedures.sql"
 for file in $CREATE_FILES
 do
         echo "Executing $file:"

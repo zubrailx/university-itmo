@@ -11,7 +11,7 @@ psql (PostgreSQL) 14.2
 
 ### SQL naming
 
-* tf - trigger function
+* tf - trigger procedure
 * tr - trigger
 
 ### SQL script ordering
@@ -20,10 +20,8 @@ psql (PostgreSQL) 14.2
 * create-scheme.sql
 * create-functions.sql
 * create-procedures.sql
-* create-triggers.sql
 
 #### Dropping:
 * drop-scheme.sql
-* drop-triggers.sql
 * drop-procedures.sql
 * drop-functions.sql
