@@ -1,13 +1,16 @@
 drop table if exists
-  unit,
-  supplier,
-  cafe,
-  menu,
-  recipe,
-  ingredient,
-  ingredient_price,
-  recipe_item,
-  stock,
+  units,
+  suppliers,
+  cafes,
+  menus,
+  recipes,
+  ingredients,
+  prices,
+  orders,
+  recipe2ingr,
+  stocks,
   cafe2menu,
   menu2recipe
 cascade;
+
+drop type order_status;

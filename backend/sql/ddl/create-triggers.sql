@@ -10,7 +10,7 @@ end
 $$; 
 
 create or replace trigger tr_cafe_menu_count
-before insert on cafe
+before insert on cafes
 for each row execute procedure tf_cafe_menu_count();
 
 
@@ -46,7 +46,7 @@ end
 $$; 
 
 create or replace trigger tr_menu_recipe_count 
-before insert on menu
+before insert on menus
 for each row execute procedure tf_menu_recipe_count();
 
 
