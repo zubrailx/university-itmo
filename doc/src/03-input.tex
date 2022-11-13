@@ -133,4 +133,34 @@
 
 \begin{markdown}
 ## Индексы
+
+### Описание
+По умолчания для primary key PSQL использует btree. На основании полученная даталогической модели и написанным выше запросам были выбраны следующие индексы, исключая индексы по умолчанию:
 \end{markdown}
+
+\begin{itemize}
+  \item \Verb"prices(nominal_price)" - btree. Будет производиться сортировка чисел.
+  \item \Verb"stocks(expiry_date)" - btree. Осуществление сортировки и фильтрации по времени окончания срока хранения.
+  \item \Verb"cafes(name)" - gin. Поиск кафе по паттерну.
+  \item \Verb"menus(name)" - gin. Поиск позиции в меню по паттерну.
+  \item \Verb"recipes(name)" - gin. Поиск рецепта по паттерну.
+  \item \Verb"ingredients(name)" - gin. Поиск ингредиента по паттерну.
+\end{itemize}
+
+Однако поскольку вылетает ошибка при попытке создания gin и мы не имеем достаточными правами доступа к дб, чтобы ее исправить, то обойдемся btree. Описание ошибки:
+
+\begin{lstlisting}[
+  style = User-output
+]
+psql:create-indexes.sql:5: ERROR:  data type character varying has no default operator class for access method "gin"
+ПОДСКАЗКА:  You must specify an operator class for the index or define a default operator class for the data type.
+\end{lstlisting}
+
+\begin{markdown}
+### Реализация
+\end{markdown}
+
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/ddl/create-indexes.sql}

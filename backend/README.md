@@ -18,6 +18,7 @@ psql (PostgreSQL) 14.2
 
 #### Creation:
 * create-scheme.sql
+* create-indexes.sql
 * create-functions.sql
 * create-procedures.sql
 
