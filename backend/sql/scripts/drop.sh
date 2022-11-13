@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DROP_FILES="drop-scheme.sql drop-procedures.sql drop-functions.sql"
+DROP_FILES="destroy.sql drop-scheme.sql drop-procedures.sql drop-functions.sql"
 
 for file in $DROP_FILES
 do

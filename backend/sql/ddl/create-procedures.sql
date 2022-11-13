@@ -20,9 +20,9 @@ language plpgsql
 as $$
 begin
   if (TG_OP = 'INSERT') then
-    update cafe set menu_count = menu_count + 1 where id = NEW.cafe_id;
+    update cafes set menu_count = menu_count + 1 where id = NEW.cafe_id;
   elseif (TG_OP = 'DELETE') then
-    update cafe set menu_count = menu_count - 1 where id = OLD.cafe_id;
+    update cafes set menu_count = menu_count - 1 where id = OLD.cafe_id;
     return OLD;
   end if;
   return NEW;
@@ -56,9 +56,9 @@ language plpgsql
 as $$
 begin
   if (TG_OP = 'INSERT') then
-    update menu set recipe_count = recipe_count + 1 where id = NEW.menu_id;
+    update menus set recipe_count = recipe_count + 1 where id = NEW.menu_id;
   elseif (TG_OP = 'DELETE') then
-    update menu set recipe_count = recipe_count - 1 where id = OLD.menu_id;
+    update menus set recipe_count = recipe_count - 1 where id = OLD.menu_id;
     return OLD;
   end if;
   return NEW;
@@ -68,3 +68,33 @@ $$;
 create or replace trigger tr_menu_update_count
 before insert or delete on menu2recipe
 for each row execute procedure tf_menu_update_count();
+
+-- Order trigger on table orders update
+create or replace function tf_order_status_updated()
+returns trigger
+as $$
+declare
+  v_price record;
+begin
+  select * into v_price from prices where id = OLD.price_id limit 1;
+  if (OLD.status = 'paid' and NEW.status = 'received') then
+    insert into stocks(cafe_id, ingredient_id, amount, bought_date)
+    values(
+      NEW.cafe_id,
+      v_price.ingredient_id,
+      get_amount_from_nominal(v_price.nominal, NEW.nominal_count),
+      clock_timestamp()
+    );
+  elsif (OLD.status = 'received' and NEW.status <> 'received') then
+    raise notice 'Cannot update status of %, it is final', v_price.id;
+    return OLD;
+  end if;
+  return NEW;
+end
+$$
+language plpgsql;
+
+create or replace trigger tr_insert_order_in_stock
+after update of status on orders
+for each row
+execute procedure tf_order_status_updated();

@@ -1,6 +1,8 @@
+-- Add order status
 alter type order_status add value 'paid';
 alter type order_status add value 'received';
 
+-- Add initial units
 insert into units(name) values('milliliter');
 insert into units(name) values('unit'); -- кол-во штук
 
@@ -23,27 +25,6 @@ returns double precision
 as $$
 begin
   return cnt / 28.35;
-end
-$$
-language plpgsql;
-
--- pounds
-insert into units(name) values('pounds');
-
-create or replace function pound_to_ounce(cnt double precision)
-returns double precision
-as $$
-begin
-  return cnt * 16;
-end
-$$
-language plpgsql;
-
-create or replace function ounce_to_pound(cnt double precision)
-returns double precision
-as $$
-begin
-  return cnt / 16;
 end
 $$
 language plpgsql;

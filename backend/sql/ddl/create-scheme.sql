@@ -11,7 +11,8 @@ create type order_status as enum();
 create table suppliers(
   id serial primary key,
   name varchar(255) not null,
-  description text
+  description text,
+  address text
 );
 
 create table cafes(
@@ -42,7 +43,8 @@ create table ingredients(
   name varchar(255) not null,
   description text,
   unit_id integer not null references units
-    on update cascade on delete cascade
+    on update cascade on delete cascade,
+  unique(name, unit_id)
 );
 
 -- Associative
@@ -52,7 +54,7 @@ create table prices(
     on update cascade on delete cascade,
   ingredient_id integer not null references ingredients
     on update cascade on delete cascade,
-  nominal integer not null
+  nominal integer default 1 not null
     check(nominal > 0),
   nominal_price integer not null
     check(nominal_price >= 0),
@@ -66,7 +68,7 @@ create table orders(
   id serial primary key,
   price_id integer not null,
   nominal_count integer not null,
-  stock_id integer not null,
+  cafe_id integer not null,
   status order_status not null
 );
 
@@ -89,9 +91,8 @@ create table stocks(
     on update cascade on delete cascade,
   amount integer not null
     check(amount >= 0),
-  bought_date timestamp with time zone not null,
-  expiry_date timestamp with time zone not null,
-  constraint stock_bought_expiry_date check(bought_date < expiry_date)
+  bought_date timestamp with time zone,
+  expiry_date timestamp with time zone
 );
 
 create table cafe2menu(
