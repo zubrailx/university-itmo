@@ -1,6 +1,6 @@
-##
+## Before the scene
 
-Замутил кучу приколов с MBR, чтобы и legacy и uefi запускать. Зато теперь могу и так и так запускаться.
+Before doing this, managed to set up UEFI on MBR partition. Now legacy/BOOT and UEFI both can be used to load virtual machine.
 
 ## Initial steps
 
