@@ -7,7 +7,10 @@ Before doing this, managed to set up UEFI on MBR partition. Now legacy/BOOT and 
 Append gnu-efi root Makefile with name of your directory
 
 ```
-
 SUBDIRS = lib gnuefi inc apps uefi-app <- uefi-app is appended
 gnuefi: lib
 ```
+
+## Task description
+
+Write a UEFI application that prints memory map.
