@@ -8,12 +8,19 @@ Create a basic example of DBMS with rational structure which is located in singl
 * Load - load in ram
 * Unload - unload from ram
 
-#### Section in file + sync with RAM:
-* Alter - update section in file (write some data to it)
-* Create - create structure in file
-* Drop - remove structure from file
+#### Operations with RAM
+
+* construct - malloc and init
+* destruct - free
+
+#### Operations with sections/pages in FILE
+
+* create - create page
+* alter - update page
+* drop - remove page
 
 ### Build system
+
 ```sh
 # Some aliases for cmake usage (read it to get actual commands)
 ./cmake.sh -h 
@@ -29,10 +36,8 @@ Create a basic example of DBMS with rational structure which is located in singl
 ```
 
 ### Function abbreviations
-* section - base section
-* database - database meta to store information about different types of sections
-* ds - database section
-* dt - database typle - typle that contains info about table
-* ityple - typle that is inlined (e.g. string pointers are actual strings)
-* ts - table section
-* tt - table typle (row in table) 
+
+* meta - meta page with information about database
+* dp - database page
+* tp - table page
+* da - data page (for strings)

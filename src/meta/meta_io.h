@@ -1,10 +1,8 @@
-#include "meta.h"
-
 #include <database.h>
+#include "../util.h"
 
-database_meta *meta_load(const database *db);
-void meta_unload(database_meta **meta);
+my_defstruct(database_meta);
 
-void meta_alter(const database *db);
-database_meta *meta_create(const database *db, const char* meta_info);
-
+void meta_select(database_meta *meta, const database *db);
+void meta_alter(const database_meta *meta, database *db);
+void meta_create(const database_meta *meta, database *db);

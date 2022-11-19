@@ -6,38 +6,39 @@
 #include <string.h>
 
 #include "../database.h"
-#include "../page/data.h"
-#include "../page/database.h"
-#include "../util.h"
+#include "meta.h"
+#include "meta_io.h"
 
-database_meta *meta_load(const database *db) {
-  FILE *file = database_get_file(db);
-  database_meta *meta = my_malloc(database_meta);
-  rewind(file);
-  assert(!fread(meta, sizeof(database_meta), 1, file));
+database_meta *meta_construct() {
+  database_meta *meta = malloc(sizeof(database_meta));
   return meta;
 }
 
-void meta_unload(database_meta **meta) {
-  free(*meta);
-  *meta = NULL;
+void meta_destruct(database_meta **meta_ptr) {
+  free(*meta_ptr);
+  *meta_ptr = NULL;
 }
 
-static void meta_alter_sep(const database *db, const database_meta *meta) {
+// Prepare meta for creation (init with pointers)
+void meta_prepare_create(database_meta *meta, fileoff_t dp_first, fileoff_t da_first) {
+  meta->pos_empty = sizeof(database_meta);
+  meta->dp.first = dp_first;
+  meta->dp.last = dp_first;
+  meta->da.first = da_first;
+  meta->da.last = da_first;
+}
+
+void meta_select(database_meta *meta, const database *db) {
+  FILE *file = database_get_file(db);
+  rewind(file);
+  assert(!fread(meta, sizeof(database_meta), 1, file));
+}
+
+void meta_alter(const database_meta *meta, database *db) {
   FILE *file = database_get_file(db);
   rewind(file);
   fwrite(meta, sizeof(database_meta), 1, file);
 }
-// Description cannot be changed since creation
-void meta_alter(const database *db) { meta_alter_sep(db, database_get_meta(db)); }
 
-// Meta is not saved in database because we don't know it's content
-database_meta *meta_create(const database *db, const char* meta_info) {
-  fileoff_t offset = sizeof(database_meta) + strlen(meta_info);
-  database_meta *meta = my_malloc(database_meta);
-  *meta = (database_meta){.is_corrupted = false, .pos_empty = offset};
-  // write meta to file
-  meta_alter_sep(db, meta);
-  fwrite(meta_info, strlen(meta_info), 1, database_get_file(db));
-  return meta;
-}
+// Alias to meta_alter
+void meta_create(const database_meta *meta, database *db) { meta_alter(meta, db); }

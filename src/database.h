@@ -15,11 +15,9 @@ struct database {
   char *fname;
   bool is_opened;
   bool is_writable;
-  struct database_meta *dst;
 };
 
 void database_alter(const database *database);
 void database_drop(database **database);
 
 FILE *database_get_file(const database *);
-database_meta* database_get_meta(const database *);

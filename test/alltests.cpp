@@ -1,22 +1,18 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "../src/sect/dbase.h"
 }
 
-int main(int argc, char **argv) {
+int test(int argc, char **argv) {
+  return 0;
+}
+
+int test_google(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
-// Database database = database_create("tmp/test.bin");
-// // database.dst.is_corrupted = true;
-// DSTColumnRAM column1 = ds_typle_column_ram_create(
-//     COLUMN_TYPE_BOOL, (DSTColumnLimits){}, (char *)"column1", 7);
-// DSTColumnRAM column2 = ds_typle_column_ram_create(
-//     COLUMN_TYPE_INT, (DSTColumnLimits){}, (char *)"column2", 7);
-// column1.next = &column2;
-// DSTypleRAM ram = ds_typle_ram_create((char *)"table", 5, &column1, 2);
-// ds_table_create(&database, &ram);
-// database_flush(&database);
-// database_close(&database);
+int main(int argc, char **argv) {
+  // return test(argc, argv);
+  return test_google(argc, argv);
+}
