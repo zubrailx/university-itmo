@@ -2,7 +2,7 @@
 
 #include "../util/types.h"
 #include "base.h"
-#include "base_fm.h"
+#include "base_io.h"
 
 extern size_t DATABASE_PAGE_SIZE;
 
