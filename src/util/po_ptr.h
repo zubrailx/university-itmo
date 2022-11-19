@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dbtypes.h"
-#include "util.h"
+#include "types.h"
+#include "define.h"
 
 my_defstruct(po_ptr);
 struct po_ptr {

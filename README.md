@@ -5,19 +5,19 @@ Create a basic example of DBMS with rational structure which is located in singl
 ### Uniformed operations for function naming
 
 #### Structure / Section in RAM:
-* Load - load in ram
-* Unload - unload from ram
 
-#### Operations with RAM
-
-* construct - malloc and init
-* destruct - free
+* -
 
 #### Operations with sections/pages in FILE
 
 * create - create page
 * alter - update page
 * drop - remove page
+
+#### Operations with RAM
+
+* other than before
+* construct, destruct ...
 
 ### Build system
 
