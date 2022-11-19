@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../util/types.h"
-#include "base.h"
-#include "base_io.h"
+#include "../../util/types.h"
+#include "../base/base.h"
+#include "../base/base_io.h"
 
 extern size_t DATABASE_PAGE_SIZE;
 
@@ -26,11 +26,13 @@ struct database_page {
 } __attribute__((packed));
 
 inline struct page_size dp_size_from_cap(struct page_cap cap) {
-  return (struct page_size){.bytes = cap.bytes + offsetof(database_page, body)};
+  return (struct page_size){.bytes =
+                                cap.bytes + (uint32_t)offsetof(database_page, body)};
 }
 
 inline struct page_cap dp_cap_from_size(struct page_size size) {
-  return (struct page_cap){.bytes = size.bytes + offsetof(database_page, body)};
+  return (struct page_cap){.bytes =
+                               size.bytes + (uint32_t)offsetof(database_page, body)};
 }
 
 // RAM

@@ -26,3 +26,6 @@ void meta_init_pages(dbmeta *meta, fileoff_t dp_first, fileoff_t da_first) {
   meta->da.last = da_first;
 }
 
+fileoff_t meta_get_next_pos(const dbmeta *meta) { return meta->pos_empty; }
+void meta_set_dp_last_pos(dbmeta *meta, fileoff_t dp_last) { meta->dp.last = dp_last; }
+void meta_set_da_last_pos(dbmeta *meta, fileoff_t da_last) { meta->da.last = da_last; }

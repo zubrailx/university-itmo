@@ -20,7 +20,7 @@ TEST(database_public, open) {
   dbms *db = dbms_create("tmp/dbms.bin");
   dbms_close(&db);
   db = dbms_open("tmp/dbms.bin");
-  printf("%zu, %zu, %zu, %zu", db->meta->da.first, db->meta->da.last, db->meta->dp.first, db->meta->dp.last);
+  printf("%zu, %zu, %zu, %zu\n", db->meta->da.first, db->meta->da.last, db->meta->dp.first, db->meta->dp.last);
   dbms_close(&db);
   std::remove("tmp/dbms.bin");
 }

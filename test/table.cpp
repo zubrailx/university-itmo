@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
 extern "C" {
+#include "../src/page/database/database.h"
 }
 
-TEST(DatabaseSection, Create) {
+TEST(database_page, create) {
+
 }
