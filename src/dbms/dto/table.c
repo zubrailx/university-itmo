@@ -28,11 +28,11 @@ struct dto_table *dto_table_construct(char *name) {
   return table;
 }
 
-void dto_typle_destruct(struct dto_table **typle_ptr) {
+void dto_table_destruct(struct dto_table **typle_ptr) {
   free((*typle_ptr)->header.name);
   dto_table_column *cur = (*typle_ptr)->first;
   while (cur != NULL) {
-    dto_table_column *next = cur->next;
+  dto_table_column *next = cur->next;
     dto_table_column_destruct(&cur);
     cur = next;
   }
@@ -40,7 +40,7 @@ void dto_typle_destruct(struct dto_table **typle_ptr) {
   *typle_ptr = NULL;
 }
 
-void dto_typle_add_column(struct dto_table *typle, char *name,
+void dto_table_add_column(struct dto_table *typle, char *name,
                           enum table_column_types type, struct dpt_col_limits lims) {
   dto_table_column *col = dto_table_column_construct(name, &type, &lims);
   if (typle->first == NULL) {

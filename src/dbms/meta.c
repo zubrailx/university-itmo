@@ -9,6 +9,7 @@
 
 dbmeta *meta_construct() {
   dbmeta *meta = my_malloc(dbmeta);
+  *meta = (dbmeta){}; // init with zeroes
   return meta;
 }
 
