@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "../src/sso.h"
+#include "../src/util/sso.h"
 }
 
 TEST(sso, test) {

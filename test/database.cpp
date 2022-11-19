@@ -4,8 +4,8 @@
 
 extern "C" {
 #include <database.h>
-#include "../src/dbms.h"
-#include "../src/meta/meta.h"
+#include "../src/dbms/dbms.h"
+#include "../src/dbms/meta.h"
 }
 
 TEST(database_public, create) {

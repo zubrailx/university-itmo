@@ -1,8 +1,9 @@
 #pragma once
 
 #include <inttypes.h>
+#include <stddef.h>
 
-typedef uint64_t fileoff_t;
+typedef int64_t fileoff_t;
 typedef uint32_t pageoff_t;
 typedef uint32_t bodyoff_t;
 
