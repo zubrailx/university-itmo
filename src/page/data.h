@@ -20,6 +20,8 @@ struct data_page {
 struct data_page *da_construct(struct page_size size);
 void da_destruct(struct data_page **page_ptr);
 
+// Operations
+
 // FILE
 PAGE_DEFAULT_CREATE(struct data_page, da)
 PAGE_DEFAULT_ALTER(struct data_page, da)
