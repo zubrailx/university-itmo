@@ -1,9 +1,10 @@
-#include "dbms.h"
-
 #include <malloc.h>
 
-#include "meta.h"
-#include "meta_io.h"
+#include <database.h>
+
+#include "../dbms.h"
+#include "../meta.h"
+#include "../meta_io.h"
 
 static dbms *dbms_construct(const char *fname, bool do_trunc) {
   dbms *db = my_malloc(dbms);
@@ -17,7 +18,7 @@ static void dbms_destruct(dbms **dbms_ptr) {
   meta_destruct(&(*dbms_ptr)->meta);
   free(*dbms_ptr);
   *dbms_ptr = NULL;
-} 
+}
 
 // Create database and write to file
 dbms *dbms_create(const char *fname) {
@@ -43,7 +44,7 @@ static void dbms_flush(struct dbms *db) {
 }
 
 void dbms_close(struct dbms **dbms_ptr) {
-  dbms_flush(*dbms_ptr); 
+  dbms_flush(*dbms_ptr);
   dbms_destruct(dbms_ptr);
 }
 void dbms_remove(struct dbms **dbms_ptr) {

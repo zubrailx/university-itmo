@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "../src/dbms/dbms_op.h"
+#include "../src/dbms/op/table.h"
+#include "../src/dbms/op/table_dto.h"
 }
 
 TEST(dbms_table, create) {

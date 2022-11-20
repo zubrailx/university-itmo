@@ -1,4 +1,4 @@
-#include "table.h"
+#include "table_dto.h"
 
 #include <malloc.h>
 #include <string.h>

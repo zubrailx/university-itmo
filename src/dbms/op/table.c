@@ -1,4 +1,4 @@
-#include "dbms_op.h"
+#include "table.h"
 
 bool dbms_table_exists(struct dbms *dbms, struct dto_table *table) {
   

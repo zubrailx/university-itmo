@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dbfile.h"
+#include "../util/define.h"
 
 my_defstruct(dbms);
 struct dbms {
