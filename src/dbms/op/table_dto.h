@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../page/database/typle.h"
+#include "../../page/database_typle.h"
 
 my_defstruct(dto_table_column);
 struct dto_table_column {

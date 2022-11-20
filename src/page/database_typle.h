@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../sso.h"
+#include "sso.h"
 
 // FILE
 my_defstruct(dpt_header);

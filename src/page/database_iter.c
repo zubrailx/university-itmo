@@ -1,5 +1,5 @@
-#include "iterator.h"
-#include "../index.h"
+#include "database_iter.h"
+#include "index.h"
 
 // TODO: test
 

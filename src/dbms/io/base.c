@@ -1,11 +1,11 @@
-#include "base_io.h"
+#include "base.h"
 
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 
 #include "../../dbms/dbfile.h"
-#include "base.h"
+#include "../../page/base.h"
 
 static base_header DUMPED = (base_header){.type = PAGE_DUMPED};
 

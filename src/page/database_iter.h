@@ -1,13 +1,13 @@
 #pragma once
 
 #include "database.h"
-#include "typle.h"
+#include "database_typle.h"
 
 my_defstruct(dp_typle_iterator);
 struct dp_typle_iterator {
   struct database_page *page;
   pageoff_t icur;
-  pageoff_t iend; // points after last element in list
+  pageoff_t iend;// points after last element in list
 };
 
 struct dp_typle_iterator dp_get_typle_iterator(struct database_page *page);

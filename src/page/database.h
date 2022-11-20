@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../base/base.h"
-#include "../base/base_io.h"
+#include "base.h"
 
 /*
 Structure: database_page
@@ -14,8 +13,6 @@ Structure: database_page
   |------------------|
 
 */
-struct dbfile;
-
 my_defstruct(database_header);
 struct database_header {
   struct base_header base;
@@ -35,11 +32,5 @@ struct database_page {
 BODYOFF_TO_PAGEOFF(database_header, dp)
 PAGEOFF_TO_BODYOFF(database_header, dp)
 
-// RAM
 struct database_page *dp_construct(struct pageoff_t size);
 void dp_destruct(struct database_page **page_ptr);
-
-// FILE
-PAGE_DEFAULT_CREATE(struct database_page, dp)
-PAGE_DEFAULT_ALTER(struct database_page, dp)
-PAGE_DEFAULT_DROP(struct database_page, dp)
