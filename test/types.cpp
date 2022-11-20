@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "../src/page/internals.h"
+#include <util/internals.h>
 }
 
 TEST(types, sizes) {

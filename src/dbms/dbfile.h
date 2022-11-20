@@ -1,9 +1,9 @@
 #pragma once
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
-#include "../util/define.h"
+#include <util/define.h>
 
 /* Stored in RAM */
 my_defstruct(dbfile);
@@ -25,4 +25,3 @@ void dbfile_destruct(dbfile **dbfile);
 bool dbfile_flush(dbfile *dbfile);
 bool dbfile_close(dbfile *dbfile);
 void dbfile_remove(dbfile *dbfile);
-

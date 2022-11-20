@@ -2,8 +2,8 @@
 
 #include <stdbool.h>
 
-#include "../page/internals.h"
-#include "../util/define.h"
+#include <util/define.h>
+#include <util/internals.h>
 
 /* Stored in file */
 my_defstruct(dbmeta);
@@ -24,5 +24,5 @@ void meta_destruct(struct dbmeta **meta_ptr);
 void meta_init_pages(struct dbmeta *meta, fileoff_t dp_first, fileoff_t da_first);
 
 fileoff_t meta_get_next_pos(const dbmeta *meta);
-void meta_set_dp_last_pos(dbmeta *meta, fileoff_t dp_last);
-void meta_set_da_last_pos(dbmeta *meta, fileoff_t da_last);
+void meta_set_dp_last_pos(dbmeta *meta, const fileoff_t dp_last);
+void meta_set_da_last_pos(dbmeta *meta, const fileoff_t da_last);

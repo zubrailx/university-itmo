@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../util/define.h"
+#include <util/define.h>
 
 my_defstruct(dbms);
 struct dbms {
-  struct dbfile *file; 
+  struct dbfile *dbfile;
   struct dbmeta *meta;
 };

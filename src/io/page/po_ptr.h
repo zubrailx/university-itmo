@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../util/define.h"
-#include "internals.h"
+#include <util/define.h>
+#include <util/internals.h>
 
 my_defstruct(po_ptr);
 struct po_ptr {

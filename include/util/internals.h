@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 
-#include "../util/define.h"
+#include "define.h"
 
 // Size of page or offset in page
 my_defstruct(pageoff_t);

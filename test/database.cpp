@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 extern "C" {
-#include "../src/dbms/dbms.h"
+#include "../src/dbms.h"
 #include "../src/dbms/meta.h"
 #include "../src/dbms/dbfile.h"
 #include <database.h>
@@ -29,7 +29,7 @@ TEST(database_public, open) {
 
 TEST(database_public, remove) {
   dbms *db = dbms_create("tmp/dbms.bin");
-  EXPECT_EQ(db->file->is_opened, true);
+  EXPECT_EQ(db->dbfile->is_opened, true);
   dbms_remove(&db);
   EXPECT_EQ(db, nullptr);
   EXPECT_NE(access("tmp/dbms.bin", F_OK), 0);

@@ -1,6 +1,6 @@
 #include "data.h"
 
-#include "internals.h"
+#include <util/internals.h>
 
 struct data_page *da_construct(struct pageoff_t size) {
   return (data_page *)page_construct(size, PAGE_DATA);

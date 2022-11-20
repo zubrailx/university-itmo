@@ -2,8 +2,8 @@
 
 #include <stddef.h>
 
-#include "../util/define.h"
-#include "internals.h"
+#include <util/define.h>
+#include <util/internals.h>
 
 my_defstruct(page_index);
 struct page_index {

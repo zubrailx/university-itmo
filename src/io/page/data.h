@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../util/define.h"
+#include <util/define.h>
+
 #include "base.h"
 
 my_defstruct(data_header);

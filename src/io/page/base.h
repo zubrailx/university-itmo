@@ -2,8 +2,8 @@
 
 #include <inttypes.h>
 
-#include "../util/define.h"
-#include "internals.h"
+#include <util/define.h>
+#include <util/internals.h>
 
 my_defstruct(base_header);
 struct base_header {
