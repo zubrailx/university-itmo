@@ -2,7 +2,8 @@
 
 #include <assert.h>
 
-#include "../dbms/meta.h"
+// Meta is stored in file for proper loading
+#include "../core/meta.h"
 
 void meta_load(dbmeta *meta, FILE *file) {
   rewind(file);

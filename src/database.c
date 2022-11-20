@@ -2,10 +2,10 @@
 
 #include <database.h>
 
-#include "dbms.h"
-#include "dbms/dbfile.h"
-#include "dbms/meta.h"
-#include "io/meta.h"
+#include "dbms/core/dbms.h"
+#include "dbms/core/dbfile.h"
+#include "dbms/core/meta.h"
+#include "dbms/io/meta.h"
 
 static dbms *dbms_construct(const char *fname, bool do_trunc) {
   dbms *db = my_malloc(dbms);

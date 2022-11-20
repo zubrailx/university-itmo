@@ -3,9 +3,9 @@
 #include <unistd.h>
 
 extern "C" {
-#include "../src/dbms.h"
-#include "../src/dbms/meta.h"
-#include "../src/dbms/dbfile.h"
+#include "../src/dbms/core/dbms.h"
+#include "../src/dbms/core/meta.h"
+#include "../src/dbms/core/dbfile.h"
 #include <database.h>
 }
 
