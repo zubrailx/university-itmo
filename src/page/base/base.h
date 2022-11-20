@@ -8,7 +8,7 @@
 my_defstruct(base_header);
 struct base_header {
   uint8_t type;
-  struct page_size size;
+  struct pageoff_t size;
 };
 
 my_defstruct(base_page);
@@ -28,5 +28,14 @@ enum page_types {
   PAGE_DUMPED,
 };
 
-base_page *page_construct(const struct page_size size, enum page_types type);
+base_page *page_construct(const struct pageoff_t size, enum page_types type);
 void page_destruct(struct base_page **page_ptr);
+
+#define BODYOFF_TO_PAGEOFF(header_type, prefix)                                        \
+  inline pageoff_t prefix##_bodyoff_to_pageoff(bodyoff_t bodyoff) {                    \
+    return get_pageoff_t(bodyoff.bytes + sizeof(header_type));                         \
+  }
+#define PAGEOFF_TO_BODYOFF(header_type, prefix)                                        \
+  inline bodyoff_t prefix##_pageoff_to_bodyoff(pageoff_t pageoff) {                    \
+    return get_bodyoff_t(pageoff.bytes - sizeof(header_type));                         \
+  }

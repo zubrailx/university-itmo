@@ -24,8 +24,8 @@ dbms *dbms_create(const char *fname) {
   dbms *dbms = dbms_construct(fname, true);
   meta_create(dbms->meta, dbms->file);
   // TODO: create pages
-  fileoff_t dp_addr = 1234;
-  fileoff_t da_addr = 2345;
+  fileoff_t dp_addr = get_fileoff_t(1234);
+  fileoff_t da_addr = get_fileoff_t(2345);
   meta_init_pages(dbms->meta, dp_addr, da_addr);
   meta_alter(dbms->meta, dbms->file);
   return dbms;

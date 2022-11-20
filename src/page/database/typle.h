@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../../util/sso.h"
-#include "../../util/types.h"
+#include "../sso.h"
 
 // FILE
 my_defstruct(dpt_header);
@@ -37,28 +36,3 @@ struct dp_typle {
   struct dpt_header header;
   struct dpt_column columns[];
 } __attribute__((packed));
-
-// Wrappers to contain proper address of pages that are loaded in ram)
-// NOTE: will be replaced after pagepool implemented
-
-// my_defstruct(dpt_column_wr);
-// struct dpt_column_wr {
-//   void *addr;      // address of string in ram (if it is not sso)
-//   pageoff_t offset;// offset of this ram page
-//   bool is_staged;
-//   struct dpt_column column;
-// };
-
-// my_defstruct(dpt_header_wr);
-// struct dpt_header_wr {
-//   void *addr;
-//   pageoff_t offset;
-//   bool is_staged;
-//   struct dpt_header header;
-// };
-
-// my_defstruct(dpt_typle_wr);
-// struct dpt_typle_wr {
-//   struct dpt_header_wr header;
-//   struct dpt_column_wr columns[];
-// } __attribute__((packed));

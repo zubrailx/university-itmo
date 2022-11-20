@@ -3,14 +3,14 @@
 #include <unistd.h>
 
 extern "C" {
-#include <database.h>
 #include "../src/dbms/dbms.h"
 #include "../src/dbms/meta.h"
+#include <database.h>
 }
 
 TEST(database_public, create) {
   dbms *db = dbms_create("tmp/dbms.bin");
-  EXPECT_EQ(db->meta->pos_empty, sizeof(dbmeta));
+  EXPECT_EQ(db->meta->pos_empty.bytes, sizeof(dbmeta));
   dbms_close(&db);
   EXPECT_EQ(db, nullptr);
   std::remove("tmp/dbms.bin");
@@ -20,7 +20,8 @@ TEST(database_public, open) {
   dbms *db = dbms_create("tmp/dbms.bin");
   dbms_close(&db);
   db = dbms_open("tmp/dbms.bin");
-  printf("%zu, %zu, %zu, %zu\n", db->meta->da.first, db->meta->da.last, db->meta->dp.first, db->meta->dp.last);
+  printf("%zu, %zu, %zu, %zu\n", db->meta->da.first.bytes, db->meta->da.last.bytes,
+         db->meta->dp.first.bytes, db->meta->dp.last.bytes);
   dbms_close(&db);
   std::remove("tmp/dbms.bin");
 }

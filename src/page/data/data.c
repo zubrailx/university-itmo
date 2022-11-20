@@ -1,9 +1,8 @@
 #include "data.h"
-
-size_t DATA_PAGE_SIZE = 1024;
+#include "../internals.h"
 
 // RAM
-struct data_page *da_construct(struct page_size size) {
+struct data_page *da_construct(struct pageoff_t size) {
   return (data_page *)page_construct(size, PAGE_DATA);
 }
 

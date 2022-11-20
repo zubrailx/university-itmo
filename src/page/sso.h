@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "define.h"
+#include "../util/define.h"
 #include "po_ptr.h"
 
 #define SSO_SSIZE_SIZE (sizeof(size_t) - sizeof(bool))

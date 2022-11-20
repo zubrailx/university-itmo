@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include "../util/types.h"
+#include "../page/internals.h"
 #include "../util/define.h"
 
 /* Stored in file */

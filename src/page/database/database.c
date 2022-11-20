@@ -1,9 +1,7 @@
 #include "./database.h"
 
-size_t DATABASE_PAGE_SIZE = 1024;
-
 // RAM
-struct database_page *dp_construct(struct page_size size) {
+struct database_page *dp_construct(struct pageoff_t size) {
   return (database_page *)page_construct(size, PAGE_DATABASE);
 }
 

@@ -6,7 +6,7 @@
 
 my_defstruct(data_header);
 struct data_header {
-  struct base_page base;
+  struct base_header base;
   bodyoff_t stored_last;
 };
 
@@ -16,8 +16,12 @@ struct data_page {
   uint8_t body[];
 } __attribute__((packed));
 
+// Bodyoff/pageoff
+BODYOFF_TO_PAGEOFF(data_header, da)
+PAGEOFF_TO_BODYOFF(data_header, da)
+
 // RAM
-struct data_page *da_construct(struct page_size size);
+struct data_page *da_construct(struct pageoff_t size);
 void da_destruct(struct data_page **page_ptr);
 
 // Operations
