@@ -2,12 +2,10 @@
 
 #include <stdbool.h>
 
-#include <util/define.h>
 #include <util/internals.h>
 
 /* Stored in file */
-my_defstruct(dbmeta);
-struct dbmeta {
+typedef struct dbmeta {
   struct {// database_page
     fileoff_t first;
     fileoff_t last;
@@ -17,7 +15,7 @@ struct dbmeta {
     fileoff_t last;
   } da;// data_page
   fileoff_t pos_empty;
-};
+} dbmeta;
 
 struct dbmeta *meta_construct();
 void meta_destruct(struct dbmeta **meta_ptr);

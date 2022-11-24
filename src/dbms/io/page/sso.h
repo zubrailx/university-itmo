@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include <util/define.h>
-
 #include "po_ptr.h"
 
 #define SSO_SSIZE_SIZE (sizeof(size_t) - sizeof(bool))
@@ -24,14 +22,13 @@
 struct _str_not_in _STR_NOT_IN;
 
 // Small string optimization struct with anonymous struct inside
-my_defstruct(page_sso);
-struct page_sso {
+typedef struct page_sso {
   bool is_inline;
   union {
     struct _STR_NOT_IN;
     char name[SSO_MXLEN];
   };
-} __attribute__((packed));
+} __attribute__((packed)) page_sso;
 
 size_t sso_to_size(const char *ssize);
 void size_to_sso(size_t size, char *ssize);

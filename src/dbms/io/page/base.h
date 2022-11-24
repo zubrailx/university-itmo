@@ -2,19 +2,16 @@
 
 #include <inttypes.h>
 
-#include <util/define.h>
 #include <util/internals.h>
 
-my_defstruct(base_header);
-struct base_header {
+typedef struct base_header {
   uint8_t type;
   struct pageoff_t size;
-};
+} base_header;
 
-my_defstruct(base_page);
-struct base_page {
+typedef struct base_page {
   struct base_header header;
-} __attribute__((packed));
+} __attribute__((packed)) base_page;
 
 enum page_types {
   PAGE_UNKNOWN,

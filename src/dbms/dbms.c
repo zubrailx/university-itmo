@@ -2,10 +2,13 @@
 
 #include <database.h>
 
-#include "dbms/core/dbms.h"
-#include "dbms/core/dbfile.h"
-#include "dbms/core/meta.h"
-#include "dbms/io/meta.h"
+#include <util/define.h>
+
+#include "core/dbfile.h"
+#include "core/dbms.h"
+#include "core/meta.h"
+#include "io/meta.h"
+#include "page.h"
 
 static dbms *dbms_construct(const char *fname, bool do_trunc) {
   dbms *db = my_malloc(dbms);
@@ -26,11 +29,9 @@ dbms *dbms_create(const char *fname) {
   dbms *dbms = dbms_construct(fname, true);
   meta_create(dbms->meta, dbms->dbfile->file);
   // create pages
-
-  // TODO: create pages
-  fileoff_t dp_addr = get_fileoff_t(1234);
-  fileoff_t da_addr = get_fileoff_t(2345);
-  meta_init_pages(dbms->meta, dp_addr, da_addr);
+  dbms_dp_create(dbms);
+  dbms_da_create(dbms);
+  // update meta
   meta_alter(dbms->meta, dbms->dbfile->file);
   return dbms;
 }

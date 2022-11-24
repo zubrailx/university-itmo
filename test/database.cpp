@@ -11,7 +11,6 @@ extern "C" {
 
 TEST(database_public, create) {
   dbms *db = dbms_create("tmp/dbms.bin");
-  EXPECT_EQ(db->meta->pos_empty.bytes, sizeof(dbmeta));
   dbms_close(&db);
   EXPECT_EQ(db, nullptr);
   std::remove("tmp/dbms.bin");
@@ -20,11 +19,18 @@ TEST(database_public, create) {
 TEST(database_public, open) {
   dbms *db = dbms_create("tmp/dbms.bin");
   dbms_close(&db);
-  db = dbms_open("tmp/dbms.bin");
-  printf("%zu, %zu, %zu, %zu\n", db->meta->da.first.bytes, db->meta->da.last.bytes,
-         db->meta->dp.first.bytes, db->meta->dp.last.bytes);
+  dbms *opened = dbms_open("tmp/dbms.bin");
+  db = dbms_create("tmp/dbms2.bin");
+  EXPECT_EQ(opened->meta->pos_empty.bytes, db->meta->pos_empty.bytes);
+  EXPECT_EQ(opened->meta->da.first.bytes, db->meta->da.first.bytes);
+  EXPECT_EQ(opened->meta->da.last.bytes, db->meta->da.last.bytes);
+  EXPECT_EQ(opened->meta->dp.first.bytes, db->meta->dp.first.bytes);
+  EXPECT_EQ(opened->meta->dp.last.bytes, db->meta->dp.last.bytes);
   dbms_close(&db);
+  dbms_close(&opened);
+  EXPECT_EQ(db, nullptr);
   std::remove("tmp/dbms.bin");
+  std::remove("tmp/dbms2.bin");
 }
 
 TEST(database_public, remove) {

@@ -5,12 +5,11 @@
 #include <util/define.h>
 #include <util/internals.h>
 
-my_defstruct(page_index);
-struct page_index {
+typedef struct page_index {
   pageoff_t start;
   pageoff_t end;
   bool is_present;
-};
+} page_index;
 
 inline void *page_index_get_ptr(void *page, struct page_index *index) {
   return page + index->start.bytes;

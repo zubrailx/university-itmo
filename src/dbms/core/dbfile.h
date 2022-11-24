@@ -3,16 +3,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <util/define.h>
-
 /* Stored in RAM */
-my_defstruct(dbfile);
-struct dbfile {
+typedef struct dbfile {
   FILE *file;
   char *fname;
   bool is_opened;
   bool is_writable;
-};
+} dbfile;
 
 FILE *dbfile_file(dbfile *dbfile);
 const char *dbfile_name(dbfile *dbfile);

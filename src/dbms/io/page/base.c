@@ -10,6 +10,8 @@ base_page *page_construct(const struct pageoff_t size, enum page_types type) {
 }
 
 void page_destruct(struct base_page **page_ptr) {
-  free((void *)*page_ptr);
-  *page_ptr = NULL;
+  if (*page_ptr) {
+    free((void *)*page_ptr);
+    *page_ptr = NULL;
+  }
 }

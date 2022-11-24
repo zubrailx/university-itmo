@@ -1,26 +1,28 @@
 #pragma once
 
 #include <inttypes.h>
+#include <stdbool.h>
 
-#include "define.h"
+// inline int64_t op_foff_sum(int64_t a, int64_t b) { return a + b; }
+
+// inline int64_t op_foff_sub(int64_t a, int64_t b) { return a - b; }
 
 // Size of page or offset in page
-my_defstruct(pageoff_t);
-struct pageoff_t {
+typedef struct pageoff_t {
   uint32_t bytes;
-};
+} pageoff_t;
 
 // Size of body or offset in body
-my_defstruct(bodyoff_t);
-struct bodyoff_t {
+typedef struct bodyoff_t {
   uint32_t bytes;
-};
+} bodyoff_t;
 
 // Offset in file
-my_defstruct(fileoff_t);
-struct fileoff_t {
+typedef struct fileoff_t {
   int64_t bytes;
-};
+} fileoff_t;
+
+inline bool fileoff_is_null(struct fileoff_t off) { return off.bytes == 0; }
 
 inline struct pageoff_t get_pageoff_t(uint32_t size) {
   return (pageoff_t){.bytes = size};
@@ -31,3 +33,8 @@ inline struct bodyoff_t get_bodyoff_t(uint32_t size) {
 inline struct fileoff_t get_fileoff_t(int64_t size) {
   return (fileoff_t){.bytes = size};
 }
+
+// inline fileoff_t op_fileoff_t(int64_t (*op)(int64_t, int64_t), fileoff_t a,
+//                               fileoff_t b) {
+//   return get_fileoff_t(op(a.bytes, b.bytes));
+// }
