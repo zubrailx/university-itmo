@@ -2,6 +2,7 @@ import sys
 import time
 import re
 import os
+import traceback
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -13,74 +14,117 @@ def get_lines_path(path):
     file.close()
     return lines
 
+def first_not_none_regex(reg_list: list, line: str):
+    for idx, reg in enumerate(reg_list):
+        res = reg.search(line)
+        if res is not None:
+            return (idx, res)
+    return (-1, None)
+
+
+time_reg_pat = [
+    (r"(\d\d:\d\d:\d\d)\s+", r"%H:%M:%S"), 
+    (r"(\d\d:\d\d:\d\d\s+[AP]M)", r"%I:%M:%S %p")
+]
+regex_time_lt = [re.compile(reg_pat[0], flags=re.M) for reg_pat in time_reg_pat]
+
 def parse_and_display_cpu(path, output):
     data_cpu = {
         "header": ["DATE", "UID", "PID", "%usr", "%system", "%guest", "%wait", "%CPU", "CPU", "Command"],
-        "pattern_header": r"^(\d\d:\d\d:\d\d\s+[AP]M)\s+(UID)\s+(PID)\s+(%usr)\s+(%system)\s+(%guest)\s+(%wait)\s+(%CPU)\s+(CPU)\s+(Command)$",
-        "pattern_data": r"^(\d\d:\d\d:\d\d\s+[AP]M)\s+(\d+)\s+(\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+)\s+(.+)$",
+        "pattern_header": [
+            r"^(\d\d:\d\d:\d\d\s+[AP]M)\s+(UID)\s+(PID)\s+(%usr)\s+(%system)\s+(%guest)\s+(%wait)\s+(%CPU)\s+(CPU)\s+(Command)$",
+            r"^(\d\d:\d\d:\d\d\s+)\s+(UID)\s+(PID)\s+(%usr)\s+(%system)\s+(%guest)\s+(%wait)\s+(%CPU)\s+(CPU)\s+(Command)$"
+        ],
+        "pattern_data": [
+            r"^(\d\d:\d\d:\d\d\s+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+)\s+(.+)$",
+            r"^(\d\d:\d\d:\d\d\s+)\s+(\d+)\s+(\d+)\s+(\d+,\d+)\s+(\d+,\d+)\s+(\d+,\d+)\s+(\d+,\d+)\s+(\d+,\d+)\s+(\d+)\s+(.+)$"
+        ],
         "data" : []
     }
     data_mem = {
         "header":["DATE", "UID", "PID", "minftl/s", "majflt/s", "VSZ", "RSS", "%MEM", "Command"], 
-        "pattern_header": r"(\d\d:\d\d:\d\d\s+[AP]M)\s+(UID)\s+(PID)\s+(minflt\/s)\s+(majflt\/s)\s+(VSZ)\s+(RSS)\s+(%MEM)\s+(Command)",
-        "pattern_data": r"^(\d\d:\d\d:\d\d\s+[AP]M)\s+(\d+)\s+(\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+)\s+(.+)$",
+        "pattern_header": [
+            r"(\d\d:\d\d:\d\d\s+[AP]M)\s+(UID)\s+(PID)\s+(minflt\/s)\s+(majflt\/s)\s+(VSZ)\s+(RSS)\s+(%MEM)\s+(Command)",
+            r"(\d\d:\d\d:\d\d\s+)\s+(UID)\s+(PID)\s+(minflt\/s)\s+(majflt\/s)\s+(VSZ)\s+(RSS)\s+(%MEM)\s+(Command)",
+        ],
+        "pattern_data": [
+            r"^(\d\d:\d\d:\d\d\s+[AP]M)\s+(\d+)\s+(\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+)\s+(.+)$",
+            r"^(\d\d:\d\d:\d\d\s+)\s+(\d+)\s+(\d+)\s+(\d+,\d+)\s+(\d+,\d+)\s+(\d+)\s+(\d+)\s+(\d+,\d+)\s+(.+)$",
+        ],
         "data" : []
     }
-    regex_title_cpu = re.compile(data_cpu["pattern_header"], flags=re.M)
-    regex_data_cpu = re.compile(data_cpu["pattern_data"], flags=re.M)
-    regex_title_mem = re.compile(data_mem["pattern_header"], flags=re.M)
-    regex_data_mem = re.compile(data_mem["pattern_data"], flags=re.M)
+
+    regex_title_cpu_lt = [re.compile(reg, flags=re.M) for reg in data_cpu["pattern_header"]]
+    regex_data_cpu_lt = [re.compile(reg, flags=re.M) for reg in data_cpu["pattern_data"]]
+    regex_title_mem_lt = [re.compile(reg, flags=re.M) for reg in data_mem["pattern_header"]]
+    regex_data_mem_lt = [re.compile(reg, flags=re.M) for reg in data_mem["pattern_data"]]
 
     def process_data_cpu(match):
-        data_cpu["data"].append([
-            # datetime.datetime.fromtimestamp(time.mktime(time.strptime(match[1], r"%I:%M:%S %p"))),
-            time.strptime(match[1], r"%I:%M:%S %p"),
+        time_idx, time_match = first_not_none_regex(regex_time_lt, match[1])
+        lst = []
+
+        if time_match is not None:
+            lst.append(time.strptime(time_match[1], time_reg_pat[time_idx][1]))
+        else:
+            lst.append(None)
+
+        lst.extend([
             int(match[2]),
             int(match[3]),
-            float(match[4]),
-            float(match[5]),
-            float(match[6]),
-            float(match[7]),
-            float(match[8]),
+            float(match[4].replace(",", ".")),
+            float(match[5].replace(",", ".")),
+            float(match[6].replace(",", ".")),
+            float(match[7].replace(",", ".")),
+            float(match[8].replace(",", ".")),
             int(match[9]),
             match[10]
         ])
+        data_cpu["data"].append(lst)
+
 
     def process_data_mem(match):
-        data_mem["data"].append([
-            time.strptime(match[1], r"%I:%M:%S %p"),
+        time_idx, time_match = first_not_none_regex(regex_time_lt, match[1])
+        lst = []
+
+        if time_match is not None:
+            lst.append(time.strptime(time_match[1], time_reg_pat[time_idx][1]))
+        else:
+            lst.append(None)
+        
+        lst.extend([
             int(match[2]),
             int(match[3]),
-            float(match[4]),
-            float(match[5]),
+            float(match[4].replace(",", ".")),
+            float(match[5].replace(",", ".")),
             int(match[6]),
             int(match[7]),
-            float(match[8]),
+            float(match[8].replace(",", ".")),
             match[9]
-        ])
+       ])
+        data_mem["data"].append(lst)
+
 
     is_inside_cpu = False
     is_inside_mem = False
     for line in get_lines_path(path):
         # check next line for data
         if is_inside_cpu:
-            res_cpu = regex_data_cpu.search(line)
+            res_cpu = first_not_none_regex(regex_data_cpu_lt, line)[1] 
             if res_cpu is None:
                 is_inside_cpu = False
             else:
                 process_data_cpu(res_cpu)
                 continue
         elif is_inside_mem:
-            res_mem = regex_data_mem.search(line)
+            res_mem = first_not_none_regex(regex_data_mem_lt, line)[1]
             if res_mem is None:
                 is_inside_mem = False
             else:
                 process_data_mem(res_mem)
                 continue
 
-        # check if next line is header
-        res_cpu = regex_title_cpu.search(line)
-        res_mem = regex_title_mem.search(line)
+        res_cpu = first_not_none_regex(regex_title_cpu_lt, line)[1]
+        res_mem = first_not_none_regex(regex_title_mem_lt, line)[1]
         if res_cpu is not None:
             is_inside_cpu = True
         elif res_mem is not None:
@@ -163,20 +207,23 @@ def parse_and_display_io(path, output):
     data_io = {
         "header":["Device", "tps", "kB_read/s", "kB_wrtn/s", "kB_dscd/s", "kB_read", "kB_wrtn", "kB_dscd"], 
         "pattern_header": r"^(Device)\s+(tps)\s+(kB_read/s)\s+(kB_wrtn/s)\s+(kB_dscd/s)\s+(kB_read)\s+(kB_wrtn)\s+(kB_dscd)$",
-        "pattern_data": r"^(\S+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+)\s+(\d+)\s+(\d+)$",
+        "pattern_data": [
+            r"^(\S+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+)\s+(\d+)\s+(\d+)$",
+            r"^(\S+)\s+(\d+\,\d+)\s+(\d+\,\d+)\s+(\d+\,\d+)\s+(\d+\,\d+)\s+(\d+)\s+(\d+)\s+(\d+)$"
+        ],
         "data" : []
     }
     regex_title_io = re.compile(data_io["pattern_header"], flags=re.M)
-    regex_data_io = re.compile(data_io["pattern_data"], flags=re.M)
+    regex_data_io_lt = [re.compile(reg, flags=re.M) for reg in data_io["pattern_data"]]
 
     def process_data_io(match):
         data_io["data"].append([
             # datetime.datetime.fromtimestamp(time.mktime(time.strptime(match[1], r"%I:%M:%S %p"))),
             match[1],
-            float(match[2]),
-            float(match[3]),
-            float(match[4]),
-            float(match[5]),
+            float(match[2].replace(",", ".")),
+            float(match[3].replace(",", ".")),
+            float(match[4].replace(",", ".")),
+            float(match[5].replace(",", ".")),
             int(match[6]),
             int(match[7]),
             int(match[8]),
@@ -186,7 +233,7 @@ def parse_and_display_io(path, output):
     for line in get_lines_path(path):
         # check next line for data
         if is_inside_io:
-            res_io = regex_data_io.search(line)
+            res_io = first_not_none_regex(regex_data_io_lt, line)[1]
             if res_io is None:
                 is_inside_io = False
             else:
@@ -323,11 +370,14 @@ def parse_and_display_state(path, output):
     data_state = {
         "header":["PID", "USER", "PR", "NI", "VIRT", "RES", "SHR", "S", "%CPU", "%MEM", "TIME+", "COMMAND"], 
         "pattern_header": r"^[^\S\n\r]+(PID)\s+(USER)\s+(PR)\s+(NI)\s+(VIRT)\s+(RES)\s+(SHR)\s+(S)\s+(%CPU)\s+(%MEM)\s+(TIME\+)\s+(COMMAND)$",
-        "pattern_data": r"^\s+(\d+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+:\d+\.\d+)\s+(\S+)$",
+        "pattern_data": [
+            r"^\s+(\d+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+:\d+\.\d+)\s+(\S+)$",
+            r"^\s+(\d+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\S)\s+(\d+,\d+)\s+(\d+,\d+)\s+(\d+:\d+\.\d+)\s+(\S+)$"
+        ],
         "data" : []
     }
     regex_title_state = re.compile(data_state["pattern_header"], flags=re.M)
-    regex_data_state = re.compile(data_state["pattern_data"], flags=re.M)
+    regex_data_state_lt = [re.compile(reg, flags=re.M) for reg in data_state["pattern_data"]]
 
     def process_data_state(match, idx):
         data_state["data"][idx].append([
@@ -339,7 +389,7 @@ def parse_and_display_state(path, output):
             match[6],
             int(match[7]),
             match[8],
-            float(match[9]),
+            float(match[9].replace(",", ".")),
             match[10],
             match[11],
         ])
@@ -348,7 +398,7 @@ def parse_and_display_state(path, output):
     for line in get_lines_path(path):
         # check next line for data
         if is_inside_state:
-            res_state = regex_data_state.search(line)
+            res_state = first_not_none_regex(regex_data_state_lt, line)[1]
             if res_state is None:
                 is_inside_state = False
             else:
@@ -470,7 +520,11 @@ if __name__ == "__main__":
     path_state = None
     path_output_dir = ""
 
-    path_state = "/home/nikit/git/University-ITMO/Year-3/Operating-systems/os-1-state.log"
+    # path_cpu = "logs/os-1-cpu.log"
+    # path_io = "logs/os-1-io.log"
+    # path_net = "logs/os-1-net.log"
+    # path_state = "logs/os-1-state.log"
+
     args = sys.argv
     for arg in args[1:]:
         key, val = arg[0:2], arg[3:]
@@ -487,11 +541,17 @@ if __name__ == "__main__":
                 path_output_dir = val
             case _:
                 print(f"Unknown argument: {key}={val}")
-    if path_cpu is not None:
-        parse_and_display_cpu(path_cpu, path_output_dir)
-    if path_io is not None:
-        parse_and_display_io(path_io, path_output_dir)
-    if path_net is not None:
-        parse_and_display_net(path_net, path_output_dir)
-    if path_state is not None:
-        parse_and_display_state(path_state, path_output_dir)
+    try:
+        if path_cpu is not None:
+            parse_and_display_cpu(path_cpu, path_output_dir)
+        if path_io is not None:
+            parse_and_display_io(path_io, path_output_dir)
+        if path_net is not None:
+            parse_and_display_net(path_net, path_output_dir)
+        if path_state is not None:
+            parse_and_display_state(path_state, path_output_dir)
+    except ZeroDivisionError as e:
+        traceback.print_exception(e)
+        print("\nЧел проверь регулярки и данные.")
+    else:
+        print('Processing Complete. No errors detected.')

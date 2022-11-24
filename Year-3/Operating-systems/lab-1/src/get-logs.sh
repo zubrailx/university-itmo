@@ -1,14 +1,15 @@
 #!/bin/bash
 
 set -e
-
-PWD_DIR=`pwd`
-SCRIPT_DIR=`dirname "$0"`
-LOGS_DIR="$SCRIPT_DIR/logs"
+set -u
 
 PROC_PID=$1
 DELAY=$2
 COUNT=$3
+
+PWD_DIR=`pwd`
+SCRIPT_DIR=`dirname "$0"`
+LOGS_DIR="$SCRIPT_DIR/logs"
 
 DISK=/dev/sda1
 NET_INT=veth-t
