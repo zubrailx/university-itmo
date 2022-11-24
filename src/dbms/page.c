@@ -29,7 +29,7 @@ fileoff_t dbms_dp_create(dbms *dbms) {
     pageoff_t prev_size;
     page_load_size(&prev_size, file, prev_pos);
     database_page *prev = dp_construct(prev_size);
-    page_load((base_page *)prev, file, prev_pos);
+    dp_load(prev, file, prev_pos);
     // Link previous page with current
     prev->header.next = dp_pos;
     dp->header.prev = prev_pos;
