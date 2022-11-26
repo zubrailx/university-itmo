@@ -33,15 +33,18 @@ void dbms_insert_table(const struct dto_table *dto_table, struct dbms *dbms) {
     dto_col = dto_col->next;
   }
   // select last page
-  database_page *page = dbms_dp_select(dbms, dbms->meta->dp.last);
+  fileoff_t page_loc = dbms->meta->dp.last;
+  database_page *page = dbms_dp_select(dbms, page_loc);
   if (dp_insert_typle(page, typle).bytes == 0) {
     dp_destruct(&page);
 
     pageoff_t size =
         dp_bodyoff_to_pageoff(get_bodyoff_t(typle_size + sizeof(page_index)));
-    fileoff_t page_loc = dbms_dp_create(dbms, size, &page);
+    page_loc = dbms_dp_create(dbms, size, &page);
 
     assert(dp_insert_typle(page, typle).bytes > 0);
-    dbms_dp_close(&page, page_loc, dbms);
   }
+  // close resources
+  dbms_dp_close(&page, page_loc, dbms);
+  free(typle);
 }
