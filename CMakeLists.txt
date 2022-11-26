@@ -77,17 +77,15 @@ target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/incl
 
 target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
-  $<$<CONFIG:DEBUG>:-g>
-  $<$<CONFIG:DEBUG>:-Og>
+  $<$<CONFIG:DEBUG>:-g -Og>
   $<$<CONFIG:RELEASE>:-O3>
-  $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 target_link_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
-  $<$<CONFIG:DEBUG>:-g>
-  $<$<CONFIG:DEBUG>:-Og>
+  $<$<CONFIG:DEBUG>:-g -Og>
   $<$<CONFIG:RELEASE>:-O3>
-  $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 
 if (DEFINED PROGRAM_LINUX OR UNIX)
@@ -142,7 +140,7 @@ if (DEFINED TSTS)
   target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
 
   # Tests
-  add_test(NAME ${PROJECT_TEST_NAME} COMMAND ${DEBUG_DIRECTORY}/bin/${PROJECT_TEST_NAME}
+  add_test(NAME ${PROJECT_TEST_NAME} COMMAND $<TARGET_FILE:${PROJECT_TEST_NAME}> 
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
 # include(GoogleTest)
