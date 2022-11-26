@@ -6,6 +6,7 @@
 #include "core/meta.h"
 #include "page.h"
 
+// TESTING----------------
 // Iterator on pages
 typedef struct dp_page_iter {
   struct database_page *cur;
@@ -28,6 +29,7 @@ static bool dp_page_iter_next(dp_page_iter *it, struct dbms *dbms) {
   return false;
 }
 
+// NOTE: NO NEED TO FREE PAGES, THEY ARE MANAGED BY ITERATOR
 static dp_page_iter *dp_page_iter_construct(dbms *dbms) {
   dp_page_iter *iterator = my_malloc(dp_page_iter);
 
@@ -57,7 +59,8 @@ static database_page *dp_page_iter_get(dp_page_iter *it) { return it->cur; }
 struct dp_iter *dp_iter_construct(struct dbms *dbms) {
   dp_iter *iter = my_malloc(dp_iter);
   iter->page_iter = dp_page_iter_construct(dbms);
-  iter->typle_iter = dp_typle_iter_construct(dp_page_iter_get(iter->page_iter));
+  database_page *page = dp_page_iter_get(iter->page_iter);
+  iter->typle_iter = dp_typle_iter_construct(page);
   return iter;
 }
 
@@ -78,7 +81,8 @@ bool dp_iter_next(struct dp_iter *it, struct dbms *dbms) {
     dp_typle_iter_destruct(&it->typle_iter);
 
     while (dp_page_iter_next(it->page_iter, dbms)) {
-      it->typle_iter = dp_typle_iter_construct(dp_page_iter_get(it->page_iter));
+      database_page *page = dp_page_iter_get(it->page_iter);
+      it->typle_iter = dp_typle_iter_construct(page);
 
       if (dp_typle_iter_get(it->typle_iter) != NULL) {
         return true;

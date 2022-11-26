@@ -30,7 +30,10 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
   dbmeta *meta = dbms->meta;
   FILE *file = dbms->dbfile->file;
 
-  database_page *dp = dp_construct(get_page_size(DATABASE_PAGE_MIN_SIZE, dp_size));
+  fileoff_t prev_pos = meta->dp.last;
+
+  database_page *dp = dp_construct_init(get_page_size(DATABASE_PAGE_MIN_SIZE, dp_size),
+                                        prev_pos, FILEOFF_NULL);
   fileoff_t dp_pos = meta->pos_empty;
   meta->pos_empty = get_fileoff_t(dp_pos.bytes + dp->header.base.size.bytes);
   // If no pages are stored
@@ -38,7 +41,6 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
     meta->dp.first = dp_pos;
   } else {
     // There is at least one page allocated
-    fileoff_t prev_pos = meta->dp.last;
     pageoff_t prev_size;
     page_load_size(&prev_size, file, prev_pos);
     database_page *prev = dp_construct(prev_size);
@@ -50,7 +52,7 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
   }
   meta->dp.last = dp_pos;
 
-  dp_create(dp, file, meta->pos_empty);
+  dp_create(dp, file, dp_pos);
   *dp_ptr_out = dp;
   return dp_pos;
 }
@@ -86,7 +88,7 @@ fileoff_t dbms_da_create(dbms *dbms, pageoff_t page_size, data_page **da_ptr_out
   dbmeta *meta = dbms->meta;
   FILE *file = dbms->dbfile->file;
 
-  data_page *da = da_construct(get_page_size(DATA_PAGE_MIN_SIZE, page_size));
+  data_page *da = da_construct_init(get_page_size(DATA_PAGE_MIN_SIZE, page_size));
   fileoff_t da_pos = meta->pos_empty;
   meta->pos_empty = get_fileoff_t(da_pos.bytes + da->header.base.size.bytes);
   // If no pages are stored
@@ -95,7 +97,7 @@ fileoff_t dbms_da_create(dbms *dbms, pageoff_t page_size, data_page **da_ptr_out
   }
   meta->da.last = da_pos;
 
-  da_create(da, file, meta->pos_empty);
+  da_create(da, file, da_pos);
   *da_ptr_out = da;
   return da_pos;
 }

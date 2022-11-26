@@ -6,7 +6,7 @@
 
 typedef struct data_header {
   struct base_header base;
-  bodyoff_t stored_last;
+  pageoff_t stored_end;
 } data_header;
 
 typedef struct data_page {
@@ -19,6 +19,7 @@ INLINE_BODYOFF_TO_PAGEOFF(data_page, body, da)
 INLINE_PAGEOFF_TO_BODYOFF(data_page, body, da)
 
 struct data_page *da_construct(struct pageoff_t size);
+struct data_page *da_construct_init(struct pageoff_t size);
 void da_destruct(struct data_page **page_ptr);
 size_t da_space_left(const struct data_page *page);
 pageoff_t da_insert_data(struct data_page *page, const void *data, size_t size);

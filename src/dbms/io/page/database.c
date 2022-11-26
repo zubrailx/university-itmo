@@ -11,6 +11,16 @@ struct database_page *dp_construct(struct pageoff_t size) {
   return (database_page *)page_construct(size, PAGE_DATABASE);
 }
 
+struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
+                                        fileoff_t next) {
+  database_page *page = dp_construct(size);
+  page->header.index_start = page->header.base.size;
+  page->header.typle_end = get_pageoff_t(offsetof(database_page, body));
+  page->header.next = next;
+  page->header.prev = prev;
+  return page;
+}
+
 void dp_destruct(struct database_page **page_ptr) {
   page_destruct((base_page **)page_ptr);
 }
@@ -20,7 +30,7 @@ static pageoff_t dp_get_next_index_pageoff(const struct database_page *page,
                                            pageoff_t cur) {
   while (cur.bytes > page->header.index_start.bytes) {
     cur = get_pageoff_t(cur.bytes - sizeof(page_index));
-    page_index *idx = (void *)page + cur.bytes;
+    page_index *idx = (page_index *)((char *)page + cur.bytes);
     if (idx->is_present) {
       break;
     }
@@ -34,10 +44,12 @@ static inline bool dp_iter_is_end(dp_typle_iter *it) {
 
 struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page) {
   dp_typle_iter *iter = my_malloc(dp_typle_iter);
+  pageoff_t first = get_pageoff_t(page->header.base.size.bytes - sizeof(page_index));
   if (page != NULL) {
     *iter = (dp_typle_iter){
         .page = page,
-        .icur = dp_get_next_index_pageoff(page, page->header.base.size),
+        .icur = dp_get_next_index_pageoff(page, first),
+        // points over the last element
         .iend = get_pageoff_t(page->header.index_start.bytes - sizeof(page_index))};
   } else {
     // main info - icur = iend
@@ -59,7 +71,10 @@ bool dp_typle_iter_next(struct dp_typle_iter *it) {
 }
 
 struct dp_typle *dp_typle_iter_get(struct dp_typle_iter *it) {
-  return dp_iter_is_end(it) ? NULL : (void *)it->page + it->icur.bytes;
+  if (dp_iter_is_end(it))
+    return NULL;
+  page_index *idx = (void *)it->page + it->icur.bytes;
+  return (void *)it->page + idx->start.bytes;
 }
 
 size_t dp_space_left(const struct database_page *page) {
@@ -84,10 +99,13 @@ pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle) {
                                     .start = tpl_off_start,
                                     .end = get_pageoff_t(tpl_off_start.bytes + size)};
 
-    void *idx_ptr = (void *)page + idx_off_start.bytes;
+    void *idx_ptr = (char *)page + idx_off_start.bytes;
     memcpy(idx_ptr, &index, sizeof(page_index));
-    void *tpl_ptr = (void *)page + tpl_off_start.bytes;
+    void *tpl_ptr = (char *)page + tpl_off_start.bytes;
     memcpy(tpl_ptr, typle, size);
+
+    page->header.index_start = idx_off_start;
+    page->header.typle_end = index.end;
     // return idx start
     return idx_off_start;
   }

@@ -12,7 +12,7 @@ typedef struct page_index {
 } page_index;
 
 inline void *page_index_get_ptr(void *page, struct page_index *index) {
-  return page + index->start.bytes;
+  return (char *)page + index->start.bytes;
 }
 inline size_t page_index_get_size(struct page_index *index) {
   return index->end.bytes - index->start.bytes;

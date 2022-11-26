@@ -9,7 +9,7 @@
 
 dbmeta *meta_construct() {
   dbmeta *meta = my_malloc(dbmeta);
-  *meta = (dbmeta){.pos_empty = get_fileoff_t(sizeof(dbmeta))};
+  *meta = (dbmeta){.pos_empty = get_fileoff_t(sizeof(dbmeta)), .da = {}, .dp = {}};
   return meta;
 }
 

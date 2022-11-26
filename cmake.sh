@@ -77,6 +77,8 @@ for arg; do
   esac
 done
 
+mkdir -p $BUILD_DIR
+
 # COMMANDS
 # Reset
 if [[ -n $TARGET_RESET && -d $BUILD_DIR ]]; then

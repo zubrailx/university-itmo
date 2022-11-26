@@ -78,6 +78,8 @@ typedef struct dp_typle_iter {
 } dp_typle_iter;
 
 struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page);
+struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
+                                        fileoff_t next);
 bool dp_typle_iter_next(struct dp_typle_iter *it);
 struct dp_typle *dp_typle_iter_get(struct dp_typle_iter *it);
 void dp_typle_iter_destruct(struct dp_typle_iter **it_ptr);

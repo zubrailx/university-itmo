@@ -13,10 +13,15 @@ bool dbms_table_exists(struct dbms *dbms, struct dto_table *table) {
     char *name;
     struct data_page *da = dbms_get_sso_string(&name, &typle->header.sso, dbms);
     if (!strcmp(name, table->name)) {
+      dp_iter_destruct(&iter);
       return true;
     }
     da_destruct(&da);
+
+    dp_iter_next(iter, dbms);
+    typle = dp_iter_get(iter);
   }
+  dp_iter_destruct(&iter);
   return false;
 }
 
