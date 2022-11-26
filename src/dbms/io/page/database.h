@@ -54,7 +54,6 @@ enum table_column_type {
 
 typedef struct dpt_col_limits {
   bool is_null;
-  bool is_unique;
 } dpt_col_limits;
 
 typedef struct dpt_column {
