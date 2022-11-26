@@ -1,4 +1,4 @@
-## Lab-1 (DBMS) (DEPRECATED INFO)
+## Lab-1 DBMS (DEPRECATED INFO)
 
 Create a basic example of DBMS with rational structure which is located in single file.
 
