@@ -87,3 +87,5 @@ void dp_typle_iter_destruct(struct dp_typle_iter **it_ptr);
 size_t dp_space_left(const struct database_page *page);
 pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle);
 size_t dp_typle_size(size_t columns);
+
+bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);

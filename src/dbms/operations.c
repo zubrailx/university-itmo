@@ -8,7 +8,7 @@
 #include "sso.h"
 
 // Just insert table, no checks for existance
-void dbms_insert_table(const struct dto_table *dto_table, struct dbms *dbms) {
+void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   // Convert dto to entity
   dpt_header header = {};
   header.cols = dto_table_columns(dto_table);
@@ -47,4 +47,12 @@ void dbms_insert_table(const struct dto_table *dto_table, struct dbms *dbms) {
   // close resources
   dbms_dp_close(&page, page_loc, dbms);
   free(typle);
+}
+
+bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t pageoff,
+                     struct dbms *dbms) {
+  database_page *page = dbms_dp_select(dbms, fileoff);
+  bool res = dp_drop_table(page, pageoff);
+  dbms_dp_close(&page, fileoff, dbms);
+  return res;
 }

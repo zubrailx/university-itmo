@@ -10,20 +10,20 @@
 // Iterator on pages
 typedef struct dp_page_iter {
   struct database_page *cur;
-  fileoff_t next;
+  fileoff_t cur_loc;
   // fileoff_t iend;
 } dp_page_iter;
 
 static void dp_page_iter_set(dp_page_iter *iter, database_page *cur) {
   iter->cur = cur;
-  iter->next = cur != NULL ? cur->header.next : FILEOFF_NULL;
+  iter->cur_loc = cur->header.next;
 }
 
 static bool dp_page_iter_next(dp_page_iter *it, struct dbms *dbms) {
   dp_destruct(&it->cur);
 
-  if (!fileoff_is_null(it->next)) {
-    dp_page_iter_set(it, dbms_dp_select(dbms, it->next));
+  if (!fileoff_is_null(it->cur->header.next)) {
+    dp_page_iter_set(it, dbms_dp_select(dbms, it->cur->header.next));
     return true;
   }
   return false;
@@ -33,10 +33,13 @@ static bool dp_page_iter_next(dp_page_iter *it, struct dbms *dbms) {
 static dp_page_iter *dp_page_iter_construct(dbms *dbms) {
   dp_page_iter *iterator = my_malloc(dp_page_iter);
 
-  fileoff_t page_start = dbms->meta->dp.first;
-  *iterator = (dp_page_iter){.cur = NULL, .next = page_start};
-
-  dp_page_iter_next(iterator, dbms);
+  fileoff_t page_loc = dbms->meta->dp.first;
+  if (page_loc.bytes) {
+    database_page *first = dbms_dp_select(dbms, page_loc);
+    *iterator = (dp_page_iter){.cur = first, .cur_loc = page_loc};
+  } else {
+    *iterator = (dp_page_iter){.cur = NULL, .cur_loc = get_fileoff_t(0)};
+  }
   return iterator;
 }
 
@@ -95,3 +98,8 @@ bool dp_iter_next(struct dp_iter *it, struct dbms *dbms) {
 struct dp_typle *dp_iter_get(struct dp_iter *it) {
   return dp_typle_iter_get(it->typle_iter);
 }
+
+// Return current iterator page fileoff
+fileoff_t dp_iter_cur_page(struct dp_iter *iter) { return iter->page_iter->cur_loc; }
+// Return current iterator page offset
+pageoff_t dp_iter_cur_index(struct dp_iter *iter) { return iter->typle_iter->icur; }

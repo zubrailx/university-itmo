@@ -15,3 +15,6 @@ void dp_iter_destruct(struct dp_iter **iter_ptr);
 bool dp_iter_next(struct dp_iter *it, struct dbms *dbms);
 struct dp_typle *dp_iter_get(struct dp_iter *it);
 void dp_iter_destruct(struct dp_iter **it_ptr);
+
+fileoff_t dp_iter_cur_page(struct dp_iter *iter);
+pageoff_t dp_iter_cur_index(struct dp_iter *iter);

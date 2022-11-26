@@ -1,5 +1,6 @@
 #include "database.h"
 
+#include <assert.h>
 #include <malloc.h>
 #include <string.h>
 
@@ -108,5 +109,22 @@ pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle) {
     page->header.typle_end = index.end;
     // return idx start
     return idx_off_start;
+  }
+}
+
+bool dp_drop_table(struct database_page *page, const pageoff_t pageoff) {
+  assert(page->header.base.size.bytes >= pageoff.bytes + sizeof(page_index));
+  assert(page->header.index_start.bytes <= pageoff.bytes);
+
+  page_index *index = (void *)page + pageoff.bytes;
+
+  if (!index->is_present) {
+    return false;
+  } else {
+    size_t size = index->end.bytes - index->start.bytes;
+    void *typle_ptr = (void *)page + index->start.bytes;
+    memset(typle_ptr, 0, size);
+    index->is_present = false;
+    return true;
   }
 }
