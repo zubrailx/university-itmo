@@ -28,11 +28,11 @@ enum page_types {
 base_page *page_construct(const struct pageoff_t size, enum page_types type);
 void page_destruct(struct base_page **page_ptr);
 
-#define BODYOFF_TO_PAGEOFF(header_type, prefix)                                        \
+#define BODYOFF_TO_PAGEOFF(page_type, m_body, prefix)                                  \
   inline pageoff_t prefix##_bodyoff_to_pageoff(bodyoff_t bodyoff) {                    \
-    return get_pageoff_t(bodyoff.bytes + sizeof(header_type));                         \
+    return get_pageoff_t(bodyoff.bytes + offsetof(page_type, m_body));                 \
   }
-#define PAGEOFF_TO_BODYOFF(header_type, prefix)                                        \
+#define PAGEOFF_TO_BODYOFF(page_type, m_body, prefix)                                  \
   inline bodyoff_t prefix##_pageoff_to_bodyoff(pageoff_t pageoff) {                    \
-    return get_bodyoff_t(pageoff.bytes - sizeof(header_type));                         \
+    return get_bodyoff_t(pageoff.bytes - offsetof(page_type, m_body));                 \
   }

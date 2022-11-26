@@ -2,8 +2,6 @@
 
 #include <util/internals.h>
 
-// TODO: implement when whole system will work correctly
-// (DONT USE IT CURRENTLY, NIKITA, DONT BE STUPID)
 struct dbms;
 
 // Iterator on every typle of every page
@@ -12,6 +10,8 @@ typedef struct dp_iter {
   struct dp_typle_iter *typle_iter;
 } dp_iter;
 
-struct dp_iter dp_iterator(struct dbms *dbms);
-bool dp_iter_next(struct dp_iter *it);
+struct dp_iter *dp_iter_construct(struct dbms *dbms);
+void dp_iter_destruct(struct dp_iter **iter_ptr);
+bool dp_iter_next(struct dp_iter *it, struct dbms *dbms);
 struct dp_typle *dp_iter_get(struct dp_iter *it);
+void dp_iter_destruct(struct dp_iter **it_ptr);

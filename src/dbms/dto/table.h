@@ -32,3 +32,4 @@ void dto_table_destruct(struct dto_table **table_ptr);
 void dto_table_add_column(struct dto_table *table, const char *name,
                           const enum dto_table_column_type type,
                           const struct dto_table_column_limits lims);
+int dto_table_columns(const dto_table *table);

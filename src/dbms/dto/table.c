@@ -54,3 +54,13 @@ void dto_table_add_column(struct dto_table *table, const char *name,
     table->last = col;
   }
 }
+
+int dto_table_columns(const dto_table *table) {
+  int cnt = 0;
+  dto_table_column *cur = table->first;
+  while (cur != NULL) {
+    cur = cur->next;
+    ++cnt;
+  }
+  return cnt;
+}

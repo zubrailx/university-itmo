@@ -29,8 +29,8 @@ dbms *dbms_create(const char *fname) {
   dbms *dbms = dbms_construct(fname, true);
   meta_create(dbms->meta, dbms->dbfile->file);
   // create pages
-  dbms_dp_create(dbms);
-  dbms_da_create(dbms);
+  dbms_dp_create_close(dbms, get_pageoff_t(0));
+  dbms_da_create_close(dbms, get_pageoff_t(0));
   // update meta
   meta_alter(dbms->meta, dbms->dbfile->file);
   return dbms;

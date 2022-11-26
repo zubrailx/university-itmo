@@ -22,6 +22,7 @@ typedef struct fileoff_t {
   int64_t bytes;
 } fileoff_t;
 
+#define FILEOFF_NULL ((struct fileoff_t){.bytes = 0})
 inline bool fileoff_is_null(struct fileoff_t off) { return off.bytes == 0; }
 
 inline struct pageoff_t get_pageoff_t(uint32_t size) {
