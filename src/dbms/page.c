@@ -6,10 +6,12 @@
 #include "core/pagepool.h"
 #include "io/data.h"
 #include "io/database.h"
+#include "io/table.h"
 #include <assert.h>
 
 const pageoff_t DATABASE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 const pageoff_t DATA_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
+const pageoff_t TABLE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 
 static pageoff_t get_page_size(const pageoff_t min_size, const pageoff_t size) {
   return size.bytes > min_size.bytes ? size : min_size;
@@ -41,11 +43,7 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
     meta->dp.first = dp_pos;
   } else {
     // There is at least one page allocated
-    pageoff_t prev_size;
-    page_load_size(&prev_size, file, prev_pos);
-    database_page *prev = dp_construct(prev_size);
-    dp_load(prev, file, prev_pos);
-    // Link previous page with current
+    database_page *prev = dbms_dp_select(dbms, prev_pos);
     prev->header.next = dp_pos;
     dp->header.prev = prev_pos;
     dbms_dp_close(&prev, prev_pos, dbms);
@@ -134,4 +132,49 @@ void dbms_da_insert_data(const void *data, size_t size, dbms *dbms,
   fileoff_out->bytes = fileoff.bytes;
   pageoff_out->bytes = pageoff.bytes;
   dbms_da_close(&da, *fileoff_out, dbms);
+}
+
+// TABLE_PAGE
+fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos) {
+  table_page *page;
+  fileoff_t page_pos = dbms_tp_create(dbms, size, prev_pos, &page);
+  tp_destruct(&page);
+  return page_pos;
+}
+
+fileoff_t dbms_tp_create(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
+                         table_page **tp_ptr_out) {
+  dbmeta *meta = dbms->meta;
+  FILE *file = dbms->dbfile->file;
+
+  table_page *tp = tp_construct_init(get_page_size(TABLE_PAGE_MIN_SIZE, size), prev_pos,
+                                     get_fileoff_t(0));
+  fileoff_t tp_pos = meta->pos_empty;
+
+  meta->pos_empty = get_fileoff_t(tp_pos.bytes + tp->header.base.size.bytes);
+
+  if (prev_pos.bytes != 0) {
+    table_page *prev = dbms_tp_select(dbms, prev_pos);
+    prev->header.next = tp_pos;
+    tp->header.prev = prev_pos;
+    dbms_tp_close(&prev, prev_pos, dbms);
+  }
+
+  tp_create(tp, file, tp_pos);
+  *tp_ptr_out = tp;
+  return tp_pos;
+}
+
+table_page *dbms_tp_select(dbms *dbms, fileoff_t page_start) {
+  FILE *file = dbms->dbfile->file;
+  pageoff_t size;
+  page_load_size(&size, file, page_start);
+  table_page *tp = tp_construct(size);
+  tp_load(tp, file, page_start);
+  return tp;
+}
+
+void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms) {
+  tp_alter(*page_ptr, dbms->dbfile->file, page_start);
+  tp_destruct(page_ptr);
 }

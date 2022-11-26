@@ -51,4 +51,10 @@ TPT_COLUMN_ENTRY(uint32_t, uint32_t)
 TPT_COLUMN_ENTRY(bool, bool)
 TPT_COLUMN_ENTRY(struct page_sso, sso)
 
+// Constructors/destructors
+PAGE_CONSTRUCT_DEFAULT(table_page, tp)
+PAGE_DESTRUCT_DEFAULT(table_page, tp)
+struct table_page *tp_construct_init(struct pageoff_t size, fileoff_t prev,
+                                     fileoff_t next);
+
 // TODO: ITERATORS(for tpt_entry_base)

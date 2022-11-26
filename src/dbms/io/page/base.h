@@ -28,6 +28,24 @@ enum page_types {
 base_page *page_construct(const struct pageoff_t size, enum page_types type);
 void page_destruct(struct base_page **page_ptr);
 
+// Constructors / destructors
+#define PAGE_CONSTRUCT_DEFAULT(page_type, prefix)                                      \
+  page_type *prefix##_construct(struct pageoff_t size);
+
+#define PAGE_CONSTRUCT_DEFAULT_IMPL(page_type, prefix, ENUM_PAGE)                      \
+  page_type *prefix##_construct(struct pageoff_t size) {                               \
+    return (page_type *)page_construct(size, ENUM_PAGE);                               \
+  }
+
+#define PAGE_DESTRUCT_DEFAULT(page_type, prefix)                                       \
+  void prefix##_destruct(struct page_type **page_ptr);
+
+#define PAGE_DESTRUCT_DEFAULT_IMPL(page_type, prefix)                                  \
+  void prefix##_destruct(struct page_type **page_ptr) {                                \
+    return page_destruct((base_page **)page_ptr);                                      \
+  }
+
+// Fileoff / pageoff
 #define INLINE_BODYOFF_TO_PAGEOFF(page_type, m_body, prefix)                           \
   inline pageoff_t prefix##_bodyoff_to_pageoff(bodyoff_t bodyoff) {                    \
     return get_pageoff_t(bodyoff.bytes + offsetof(page_type, m_body));                 \

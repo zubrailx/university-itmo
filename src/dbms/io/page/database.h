@@ -30,13 +30,6 @@ typedef struct database_page {
   uint8_t body[];
 } __attribute__((packed)) database_page;
 
-// Bodyoff to pageoff
-INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
-INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
-
-struct database_page *dp_construct(struct pageoff_t size);
-void dp_destruct(struct database_page **page_ptr);
-
 // TYPLE
 typedef struct dpt_header {
   fileoff_t fileoff;// first page of table
@@ -76,9 +69,18 @@ typedef struct dp_typle_iter {
   pageoff_t iend;// points after last element in list
 } dp_typle_iter;
 
-struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page);
+// Bodyoff to pageoff
+INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
+INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
+
+// Constructors/destructors for database_page
+PAGE_CONSTRUCT_DEFAULT(database_page, dp)
+PAGE_DESTRUCT_DEFAULT(database_page, dp)
 struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
                                         fileoff_t next);
+
+// Typle, iterators
+struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page);
 bool dp_typle_iter_next(struct dp_typle_iter *it);
 struct dp_typle *dp_typle_iter_get(struct dp_typle_iter *it);
 void dp_typle_iter_destruct(struct dp_typle_iter **it_ptr);

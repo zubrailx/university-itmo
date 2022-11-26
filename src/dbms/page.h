@@ -3,6 +3,7 @@
 #include "core/dbms.h"
 #include "io/page/data.h"
 #include "io/page/database.h"
+#include "io/page/table.h"
 #include <util/internals.h>
 
 // DATABASE PAGE
@@ -19,3 +20,10 @@ void dbms_da_close(data_page **page_ptr, fileoff_t page_start, dbms *dbms);
 
 void dbms_da_insert_data(const void *data, size_t size, dbms *dbms,
                          fileoff_t *fileoff_out, pageoff_t *pageoff_out);
+
+// TABLE PAGE
+fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos);
+fileoff_t dbms_tp_create(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
+                         table_page **tp_ptr_out);
+table_page *dbms_tp_select(dbms *dbms, fileoff_t page_start);
+void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms);

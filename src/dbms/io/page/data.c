@@ -6,17 +6,14 @@
 EXTERN_INLINE_BODYOFF_TO_PAGEOFF(data_page, body, da)
 EXTERN_INLINE_PAGEOFF_TO_BODYOFF(data_page, body, da)
 
-struct data_page *da_construct(struct pageoff_t size) {
-  return (data_page *)page_construct(size, PAGE_DATA);
-}
+PAGE_CONSTRUCT_DEFAULT_IMPL(data_page, da, PAGE_DATA)
+PAGE_DESTRUCT_DEFAULT_IMPL(data_page, da)
 
 struct data_page *da_construct_init(struct pageoff_t size) {
   data_page *page = da_construct(size);
   page->header.stored_end = get_pageoff_t(offsetof(data_page, body));
   return page;
 }
-
-void da_destruct(struct data_page **page_ptr) { page_destruct((base_page **)page_ptr); }
 
 size_t da_space_left(const struct data_page *page) {
   return (page->header.base.size.bytes - page->header.stored_end.bytes);

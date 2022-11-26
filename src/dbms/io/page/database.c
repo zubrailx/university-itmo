@@ -7,10 +7,9 @@
 EXTERN_INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
 EXTERN_INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
 
-// PAGE
-struct database_page *dp_construct(struct pageoff_t size) {
-  return (database_page *)page_construct(size, PAGE_DATABASE);
-}
+// Constructors/destructors
+PAGE_CONSTRUCT_DEFAULT_IMPL(database_page, dp, PAGE_DATABASE)
+PAGE_DESTRUCT_DEFAULT_IMPL(database_page, dp)
 
 struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
                                         fileoff_t next) {
@@ -21,11 +20,6 @@ struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
   page->header.prev = prev;
   return page;
 }
-
-void dp_destruct(struct database_page **page_ptr) {
-  page_destruct((base_page **)page_ptr);
-}
-
 // ITERATOR
 static pageoff_t dp_get_next_index_pageoff(const struct database_page *page,
                                            pageoff_t cur) {
