@@ -18,16 +18,19 @@ project(${PROJECT_NAME} LANGUAGES C CXX)
 set(CMAKE_CXX_FLAGS "-std=c++2b ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "-std=c2x ${CMAKE_C_FLAGS}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CONFIGURATION_TYPES Debug Release)
-add_compile_options(
-  -Wall
-  # -Wextra
-  # -Wconversion
-  # -Wsign-conversion
-  $<$<CONFIG:DEBUG>:-g>
-  $<$<CONFIG:DEBUG>:-Og>
-  $<$<CONFIG:RELEASE>:-O3>
-)
+set(CMAKE_CONFIGURATION_TYPES Debug Release Sanitized)
+
+# add_compile_options(
+#   -Wall
+#   # -Wextra
+#   # -Wconversion
+#   # -Wsign-conversion
+#   $<$<CONFIG:DEBUG>:-g>
+#   $<$<CONFIG:DEBUG>:-Og>
+#   $<$<CONFIG:RELEASE>:-O3>
+#   # - sanitizer
+#   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak>
+# )
 
 # add_link_options()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -65,14 +68,27 @@ else()
 endif()
 unset(TEST_MANUAL CACHE)
 set(ignoreMe "${TEST_MANUAL}")
-
-set(DEBUG_DIRECTORY build/debug)
 # -----------------------------------------------------------------------------
 # Configurations
 # -----------------------------------------------------------------------------
 # Create_library
 add_library(${PROJECT_LIB_NAME} STATIC ${SRCS})
 target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+target_compile_options(${PROJECT_LIB_NAME} PUBLIC
+  -Wall
+  $<$<CONFIG:DEBUG>:-g>
+  $<$<CONFIG:DEBUG>:-Og>
+  $<$<CONFIG:RELEASE>:-O3>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
+)
+target_link_options(${PROJECT_LIB_NAME} PUBLIC
+  -Wall
+  $<$<CONFIG:DEBUG>:-g>
+  $<$<CONFIG:DEBUG>:-Og>
+  $<$<CONFIG:RELEASE>:-O3>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
+)
 
 if (DEFINED PROGRAM_LINUX OR UNIX)
   # message(DEBUG ${UNIX})
@@ -103,10 +119,20 @@ FetchContent_MakeAvailable(googletest)
 # -----------------------------------------------------------------------------
 # Executable main.c
 # -----------------------------------------------------------------------------
-if (EXISTS "${PROJECT_SOURCE_DIR}/src/main.c")
-  add_executable(${PROJECT_EXEC_NAME} src/main.c)
-  target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
-endif()
+# if (EXISTS "${PROJECT_SOURCE_DIR}/app/main.c")
+#   add_executable(${PROJECT_EXEC_NAME} app/main.c)
+  # Add sanitizer
+  # target_compile_options(${PROJECT_EXEC_NAME} PUBLIC
+  #   -g
+  #   $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
+  # )
+  # target_link_options(${PROJECT_EXEC_NAME} PUBLIC
+  #   -g
+  #   $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
+  # )
+#   target_include_directories(${PROJECT_EXEC_NAME} PUBLIC)
+#   target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
+# endif()
 # -----------------------------------------------------------------------------
 # Executable tests
 # -----------------------------------------------------------------------------
@@ -114,6 +140,7 @@ if (DEFINED TSTS)
   message(STATUS "TESTS: ${TSTS}")
   add_executable(${PROJECT_TEST_NAME} ${TSTS})
   target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
+
   # Tests
   add_test(NAME ${PROJECT_TEST_NAME} COMMAND ${DEBUG_DIRECTORY}/bin/${PROJECT_TEST_NAME}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

@@ -26,7 +26,7 @@ CMAKE=cmake
 BUILD=./build
 
 TARGET_BUILD=1 # run always target
-TYPE=DEBUG
+TYPE=Debug
 BUILD_DIR=$BUILD/debug
 
 TARGET_CLEAN=
@@ -59,8 +59,9 @@ for arg; do
   case "$key" in
     --help|-h|help)    echo -e $USAGE; exit 0;;
     -v|--verbose) VERBOSE='-v'  ;;
-    debug)        TYPE=DEBUG;   BUILD_DIR=$BUILD/debug ;;
-    release)      TYPE=RELEASE; BUILD_DIR=$BUILD/release ;;
+    debug)        TYPE=Debug;   BUILD_DIR=$BUILD/debug ;;
+    release)      TYPE=Release; BUILD_DIR=$BUILD/release ;;
+    sanitized)    TYPE=Sanitized; BUILD_DIR=$BUILD/sanitized ;;
     clean)        TARGET_CLEAN=1  ;;
     reset)        TARGET_RESET=1 ;;
     gen|generate) TARGET_GENERATE=1 ;;

@@ -3,6 +3,9 @@
 #include <string.h>
 #include <util/internals.h>
 
+EXTERN_INLINE_BODYOFF_TO_PAGEOFF(data_page, body, da)
+EXTERN_INLINE_PAGEOFF_TO_BODYOFF(data_page, body, da)
+
 struct data_page *da_construct(struct pageoff_t size) {
   return (data_page *)page_construct(size, PAGE_DATA);
 }

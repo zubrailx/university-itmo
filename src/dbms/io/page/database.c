@@ -3,6 +3,9 @@
 #include <malloc.h>
 #include <string.h>
 
+EXTERN_INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
+EXTERN_INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
+
 // PAGE
 struct database_page *dp_construct(struct pageoff_t size) {
   return (database_page *)page_construct(size, PAGE_DATABASE);

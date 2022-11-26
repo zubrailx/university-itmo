@@ -31,8 +31,8 @@ typedef struct database_page {
 } __attribute__((packed)) database_page;
 
 // Bodyoff to pageoff
-BODYOFF_TO_PAGEOFF(database_page, body, dp)
-PAGEOFF_TO_BODYOFF(database_page, body, dp)
+INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
+INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
 
 struct database_page *dp_construct(struct pageoff_t size);
 void dp_destruct(struct database_page **page_ptr);
