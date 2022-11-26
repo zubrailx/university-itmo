@@ -5,11 +5,7 @@
 #include <string.h>
 
 #include "converters/table.h"
-#include "core/dbfile.h"
-#include "core/dbms.h"
 #include "core/meta.h"
-#include "dto/table.h"
-#include "io/page/database.h"
 #include "page.h"
 #include "sso.h"
 

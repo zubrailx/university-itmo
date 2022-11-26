@@ -1,15 +1,10 @@
 #include "table.h"
 
-#include <string.h>
-
-#include "dbms/core/meta.h"
-#include "dbms/operations.h"
-#include "dbms/dto/table.h"
-#include "dbms/io/page/data.h"
-#include "dbms/io/page/database.h"
 #include "dbms/iterator.h"
+#include "dbms/operations.h"
 #include "dbms/page.h"
 #include "dbms/sso.h"
+#include <string.h>
 
 bool dbms_table_exists(struct dbms *dbms, struct dto_table *table) {
   dp_iter *iter = dp_iter_construct(dbms);

@@ -3,11 +3,7 @@
 #include <assert.h>
 #include <malloc.h>
 
-#include "core/dbfile.h"
-#include "core/dbms.h"
 #include "core/meta.h"
-#include "io/database.h"
-#include "io/page/database.h"
 #include "page.h"
 
 // Iterator on pages

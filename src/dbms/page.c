@@ -4,11 +4,8 @@
 #include "core/dbfile.h"
 #include "core/meta.h"
 #include "core/pagepool.h"
-
 #include "io/data.h"
 #include "io/database.h"
-#include "io/page/data.h"
-#include "io/page/database.h"
 #include <assert.h>
 
 const pageoff_t DATABASE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
