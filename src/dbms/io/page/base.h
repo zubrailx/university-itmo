@@ -14,14 +14,10 @@ typedef struct base_page {
 } __attribute__((packed)) base_page;
 
 enum page_types {
-  PAGE_UNKNOWN,
+  PAGE_UNKNOWN = 0,
   PAGE_DATABASE,
-  PAGE_HASHTABLE,
-  PAGE_BACKET,
-  PAGE_PAGE,
   PAGE_DATA,
   PAGE_TABLE,
-  PAGE_TMP,
   PAGE_DUMPED,
 };
 

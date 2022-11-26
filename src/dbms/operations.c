@@ -12,7 +12,8 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   // Convert dto to entity
   dpt_header header = {};
   header.cols = dto_table_columns(dto_table);
-  header.fileoff = get_fileoff_t(0);// TODO: add table page
+  header.fileoff = dbms_tp_create_close(dbms, get_pageoff_t(0),
+                                        get_fileoff_t(0));
   dbms_insert_sso(&header.sso, dto_table->name, dbms);
 
   // construct dptyple
@@ -52,6 +53,8 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
 bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t pageoff,
                      struct dbms *dbms) {
   database_page *page = dbms_dp_select(dbms, fileoff);
+  // TODO: delete all pages in file that belongs to this table
+  // AFTER: create iterator
   bool res = dp_drop_table(page, pageoff);
   dbms_dp_close(&page, fileoff, dbms);
   return res;
