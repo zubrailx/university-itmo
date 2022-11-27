@@ -1,23 +1,6 @@
-## Lab-1 DBMS (DEPRECATED INFO)
+## Lab-1 DBMS (doc is out of date)
 
 Create a basic example of DBMS with rational structure which is located in single file.
-
-### Uniformed operations for function naming
-
-#### Structure / Section in RAM:
-
-* -
-
-#### Operations with sections/pages in FILE
-
-* create - create page
-* alter - update page
-* drop - remove page
-
-#### Operations with RAM
-
-* other than before
-* construct, destruct ...
 
 ### Build system
 
@@ -29,15 +12,30 @@ Create a basic example of DBMS with rational structure which is located in singl
 ./cmake.sh gen [(debug|release)] # generate build-tree + build (default to debug)
 
 # Tests
-./cmake.sh test # run tests
+./cmake.sh [target] {test [sep]}|{valgrind}
+# Sanitized
+./cmake.sh gen sanitized && ./cmake.sh sanitized test
 
-# Run executable (if src/main.c is present):
-./build/(debug|release)/bin/dbms_exec
+# Run executable (if app/main.c is present):
+./build/(debug|release|sanitized)/bin/dbms_exec
 ```
 
-### Function abbreviations
+### Uniformed operations for function naming
 
-* meta - meta page with information about database
+#### Operations with sections/pages in FILE
+
+* create - create page
+* alter - update page
+* drop - remove page
+
+#### Function prefix
+
+* dbms - function managed by DBMS
 * dp - database page
 * tp - table page
 * da - data page (for strings)
+
+#### Operations with RAM
+
+* other than before
+* construct, destruct ...
