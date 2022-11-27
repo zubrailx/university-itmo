@@ -12,8 +12,7 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   // Convert dto to entity
   dpt_header header = {};
   header.cols = dto_table_columns(dto_table);
-  header.fileoff = dbms_tp_create_close(dbms, get_pageoff_t(0),
-                                        get_fileoff_t(0));
+  header.fileoff = dbms_tp_create_close(dbms, get_pageoff_t(0), get_fileoff_t(0));
   dbms_insert_sso(&header.sso, dto_table->name, dbms);
 
   // construct dptyple
@@ -49,6 +48,8 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   dbms_dp_close(&page, page_loc, dbms);
   free(typle);
 }
+
+void dbms_drop_table_pages(const dp_typle *typle, struct dbms *dbms) {}
 
 bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t pageoff,
                      struct dbms *dbms) {

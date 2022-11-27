@@ -20,10 +20,11 @@ static void dp_page_iter_set(dp_page_iter *iter, database_page *cur) {
 }
 
 static bool dp_page_iter_next(dp_page_iter *it, struct dbms *dbms) {
+  fileoff_t next_loc = it->cur->header.next;
   dp_destruct(&it->cur);
 
-  if (!fileoff_is_null(it->cur->header.next)) {
-    dp_page_iter_set(it, dbms_dp_select(dbms, it->cur->header.next));
+  if (!fileoff_is_null(next_loc)) {
+    dp_page_iter_set(it, dbms_dp_select(dbms, next_loc));
     return true;
   }
   return false;
@@ -91,6 +92,8 @@ bool dp_iter_next(struct dp_iter *it, struct dbms *dbms) {
         return true;
       }
     }
+    // if no pages found create empty iterator
+    it->typle_iter = dp_typle_iter_construct(NULL);
   }
   return false;
 }

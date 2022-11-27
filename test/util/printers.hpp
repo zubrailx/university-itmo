@@ -1,5 +1,3 @@
-#include "gtest/gtest.h"
-
 extern "C" {
 #include "../src/dbms/core/dbfile.h"
 #include "../src/dbms/core/dbms.h"
@@ -12,17 +10,5 @@ extern "C" {
 #include <database.h>
 }
 
-
-int test(int argc, char **argv) {
-  return 0;
-}
-
-int test_google(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
-int main(int argc, char **argv) {
-  // return test(argc, argv);
-  return test_google(argc, argv);
-}
+void print_database_page(database_page *page);
+void print_database_typle(dp_typle *typle);

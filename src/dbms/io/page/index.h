@@ -8,7 +8,6 @@
 typedef struct page_index {
   pageoff_t start;
   pageoff_t end;
-  bool is_present;
 } page_index;
 
 inline void *page_index_get_ptr(void *page, struct page_index *index) {

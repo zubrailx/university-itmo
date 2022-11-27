@@ -32,6 +32,7 @@ typedef struct database_page {
 
 // TYPLE
 typedef struct dpt_header {
+  bool is_present;
   fileoff_t fileoff;// first page of table
   size_t cols;
   struct page_sso sso;

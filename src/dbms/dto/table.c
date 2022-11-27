@@ -31,6 +31,7 @@ struct dto_table *dto_table_construct(const char *name) {
 }
 
 void dto_table_destruct(struct dto_table **typle_ptr) {
+  if (*typle_ptr == NULL) return;
   free((*typle_ptr)->name);
   dto_table_column *cur = (*typle_ptr)->first;
   while (cur != NULL) {
