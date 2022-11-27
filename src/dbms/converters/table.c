@@ -2,13 +2,13 @@
 
 enum table_column_type
 table_column_type_to_page(const enum dto_table_column_type from) {
-  switch ((int)from) {
+  switch ((uint8_t)from) {
   case DTO_COLUMN_BOOL:
     return COLUMN_TYPE_BOOL;
   case DTO_COLUMN_FLOAT:
-    return COLUMN_TYPE_FLOAT;
+    return COLUMN_TYPE_DOUBLE;
   case DTO_COLUMN_INT:
-    return COLUMN_TYPE_INT;
+    return COLUMN_TYPE_INT32;
   case DTO_COLUMN_STRING:
     return COLUMN_TYPE_STRING;
   }

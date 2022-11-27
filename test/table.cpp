@@ -48,8 +48,7 @@ TEST(table, list_inserted) {
   dp_typle *typle = dp_iter_get(iter);
   while (typle) {
     // print_database_typle(typle);
-
-    dp_iter_next(iter, dbms);
+    dp_iter_next(iter);
     typle = dp_iter_get(iter);
   }
   dp_iter_destruct(&iter);

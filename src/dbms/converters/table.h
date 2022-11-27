@@ -1,5 +1,6 @@
 #include "../dto/table.h"
 #include "../io/page/database.h"
+#include "../io/page/column.h"
 
 enum table_column_type table_column_type_to_page(const enum dto_table_column_type from);
 

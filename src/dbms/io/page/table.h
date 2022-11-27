@@ -1,10 +1,11 @@
 #pragma once
 
 #include "base.h"
+#include "column.h"
 #include "sso.h"
 
 // NOTE: currently without indexes
-
+struct dp_typle;
 /*
 Structure: table_page
   |------------------|
@@ -28,28 +29,48 @@ typedef struct table_page {
   uint8_t body[];
 } __attribute__((packed)) table_page;
 
+// Typle
+#define _TPT_COLUMN_BASE                                                               \
+  { bool is_null; }
+
+typedef struct tpt_column_base _TPT_COLUMN_BASE tpt_column_base;
+
+#define TPT_COLUMN(type, enum)                                                         \
+  typedef struct tpt_column_##type {                                                   \
+    struct _TPT_COLUMN_BASE;                                                           \
+    char entry[sizeof(type)];                                                          \
+  } tpt_entry_##type;                                                                  \
+                                                                                       \
+  inline size_t tpt_column_##enum##_size() { return sizeof(struct tpt_column_##type); }
+
+#define EXTERN_INLINE_TPT_COLUMN(type, enum) extern size_t tpt_column_##enum##_size();
+
+#define _TPT_COLUMN_SIZE(enum) tpt_column_##enum##_size()
+
+TPT_COLUMN(double, COLUMN_TYPE_DOUBLE)
+TPT_COLUMN(int32_t, COLUMN_TYPE_INT32)
+TPT_COLUMN(bool, COLUMN_TYPE_BOOL)
+TPT_COLUMN(page_sso, COLUMN_TYPE_STRING)
+
+typedef struct tpt_header {
+  bool is_present;
+} tpt_header;
+
+typedef struct tp_typle {
+  struct tpt_header header;
+  struct tpt_column_base columns[];// just the pointer to the first entry start
+} __attribute__((packed)) tp_typle;
+
+// Iterators
+typedef struct tp_typle_iter {
+  struct table_page *page;
+  pageoff_t tcur;
+  pageoff_t tend;
+  size_t typle_size;
+} tp_typle_iter;
+
 INLINE_BODYOFF_TO_PAGEOFF(table_page, body, tp)
 INLINE_PAGEOFF_TO_BODYOFF(table_page, body, tp)
-
-// columns types
-#define _TPT_ENTRY_BASE                                                                \
-  {                                                                                    \
-    bool is_present;                                                                   \
-    bool is_null;                                                                      \
-  }
-
-typedef struct tpt_entry_base _TPT_ENTRY_BASE tpt_entry_base;
-
-#define TPT_COLUMN_ENTRY(type, suffix)                                                 \
-  typedef struct tpt_entry_##suffix {                                                  \
-    struct _TPT_ENTRY_BASE;                                                            \
-    char entry[sizeof(type)];                                                          \
-  } tpt_entry_##suffix;
-
-TPT_COLUMN_ENTRY(double, double)
-TPT_COLUMN_ENTRY(uint32_t, uint32_t)
-TPT_COLUMN_ENTRY(bool, bool)
-TPT_COLUMN_ENTRY(struct page_sso, sso)
 
 // Constructors/destructors
 PAGE_CONSTRUCT_DEFAULT(table_page, tp)
@@ -57,4 +78,11 @@ PAGE_DESTRUCT_DEFAULT(table_page, tp)
 struct table_page *tp_construct_init(struct pageoff_t size, fileoff_t prev,
                                      fileoff_t next);
 
+size_t tp_get_typle_size(const struct dp_typle *typle);
+// Iterators
+struct tp_typle_iter *tp_typle_iter_construct(struct table_page *page,
+                                              size_t typle_size);
+bool tp_typle_iter_next(struct tp_typle_iter *it);
+struct tp_typle *tp_typle_iter_get(struct tp_typle_iter *it);
+void tp_typle_iter_destruct(struct tp_typle_iter **it_ptr);
 // TODO: ITERATORS(for tpt_entry_base)

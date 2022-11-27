@@ -22,7 +22,7 @@ bool table_find(struct dbms *dbms, struct dto_table *table, fileoff_t *fileoff_o
     }
     da_destruct(&da);
 
-    dp_iter_next(iter, dbms);
+    dp_iter_next(iter);
     typle = dp_iter_get(iter);
   }
   dp_iter_destruct(&iter);

@@ -38,30 +38,20 @@ typedef struct dpt_header {
   struct page_sso sso;
 } dpt_header;
 
-enum table_column_type {
-  COLUMN_TYPE_INT = 0,
-  COLUMN_TYPE_FLOAT = 1,
-  COLUMN_TYPE_STRING = 2,
-  COLUMN_TYPE_BOOL = 3,
-  COLUMN_TYPE_UNKNOWN
-};
-
 typedef struct dpt_col_limits {
   bool is_null;
 } dpt_col_limits;
 
 typedef struct dpt_column {
-  /* TableColumnType */
-  int8_t type;
+  int8_t type; /* table_column_type */
   struct dpt_col_limits limits;
   struct page_sso sso;
 } dpt_column;
 
-typedef struct dp_typle dp_typle;
-struct dp_typle {
+typedef struct dp_typle {
   struct dpt_header header;
   struct dpt_column columns[];
-} __attribute__((packed));
+} __attribute__((packed)) dp_typle;
 
 // ITERATOR
 typedef struct dp_typle_iter {
@@ -80,14 +70,15 @@ PAGE_DESTRUCT_DEFAULT(database_page, dp)
 struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
                                         fileoff_t next);
 
-// Typle, iterators
+// Typle
+size_t dp_space_left(const struct database_page *page);
+size_t dp_typle_size(size_t columns);
+
+pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle);
+bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);
+
+// Iterators
 struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page);
 bool dp_typle_iter_next(struct dp_typle_iter *it);
 struct dp_typle *dp_typle_iter_get(struct dp_typle_iter *it);
 void dp_typle_iter_destruct(struct dp_typle_iter **it_ptr);
-
-size_t dp_space_left(const struct database_page *page);
-pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle);
-size_t dp_typle_size(size_t columns);
-
-bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);

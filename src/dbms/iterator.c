@@ -6,8 +6,7 @@
 #include "core/meta.h"
 #include "page.h"
 
-// TESTING----------------
-// Iterator on pages
+// Database Page
 typedef struct dp_page_iter {
   struct database_page *cur;
   fileoff_t cur_loc;
@@ -35,7 +34,7 @@ static dp_page_iter *dp_page_iter_construct(dbms *dbms) {
   dp_page_iter *iterator = my_malloc(dp_page_iter);
 
   fileoff_t page_loc = dbms->meta->dp.first;
-  if (page_loc.bytes) {
+  if (!fileoff_is_null(page_loc)) {
     database_page *first = dbms_dp_select(dbms, page_loc);
     *iterator = (dp_page_iter){.cur = first, .cur_loc = page_loc};
   } else {
@@ -65,6 +64,7 @@ struct dp_iter *dp_iter_construct(struct dbms *dbms) {
   iter->page_iter = dp_page_iter_construct(dbms);
   database_page *page = dp_page_iter_get(iter->page_iter);
   iter->typle_iter = dp_typle_iter_construct(page);
+  iter->dbms = dbms;
   return iter;
 }
 
@@ -79,12 +79,12 @@ void dp_iter_destruct(struct dp_iter **iter_ptr) {
   *iter_ptr = NULL;
 }
 
-bool dp_iter_next(struct dp_iter *it, struct dbms *dbms) {
+bool dp_iter_next(struct dp_iter *it) {
   if (!dp_typle_iter_next(it->typle_iter)) {
 
     dp_typle_iter_destruct(&it->typle_iter);
 
-    while (dp_page_iter_next(it->page_iter, dbms)) {
+    while (dp_page_iter_next(it->page_iter, it->dbms)) {
       database_page *page = dp_page_iter_get(it->page_iter);
       it->typle_iter = dp_typle_iter_construct(page);
 
@@ -106,3 +106,98 @@ struct dp_typle *dp_iter_get(struct dp_iter *it) {
 fileoff_t dp_iter_cur_page(struct dp_iter *iter) { return iter->page_iter->cur_loc; }
 // Return current iterator page offset
 pageoff_t dp_iter_cur_index(struct dp_iter *iter) { return iter->typle_iter->icur; }
+
+// Table Page
+typedef struct tp_page_iter {
+  struct table_page *cur;
+  fileoff_t cur_loc;
+} tp_page_iter;
+
+static void tp_page_iter_set(tp_page_iter *iter, table_page *cur) {
+  iter->cur = cur;
+  iter->cur_loc = cur->header.next;
+}
+
+static bool tp_page_iter_next(tp_page_iter *it, struct dbms *dbms) {
+  fileoff_t next_loc = it->cur->header.next;
+  tp_destruct(&it->cur);
+
+  if (!fileoff_is_null(next_loc)) {
+    tp_page_iter_set(it, dbms_tp_select(dbms, next_loc));
+    return true;
+  }
+  return false;
+}
+
+static tp_page_iter *tp_page_iter_construct(struct dbms *dbms, const dp_typle *typle) {
+  tp_page_iter *iter = my_malloc(tp_page_iter);
+
+  fileoff_t page_loc = typle->header.fileoff;
+  if (!fileoff_is_null(page_loc)) {
+    table_page *first = dbms_tp_select(dbms, page_loc);
+    *iter = (tp_page_iter){.cur = first, .cur_loc = page_loc};
+  } else {
+    *iter = (tp_page_iter){.cur = NULL, .cur_loc = get_fileoff_t(0)};
+  }
+  return iter;
+}
+
+static void tp_page_iter_destruct(tp_page_iter **iter_ptr) {
+  if (*iter_ptr == NULL)
+    return;
+  tp_page_iter *iter = *iter_ptr;
+  if (iter->cur != NULL) {
+    tp_destruct(&iter->cur);
+  }
+  free(iter);
+  *iter_ptr = NULL;
+}
+
+static table_page *tp_page_iter_get(tp_page_iter *it) { return it->cur; }
+
+// Typle iterator
+struct tp_iter *tp_iter_construct(struct dbms *dbms, const dp_typle *typle) {
+  tp_iter *iter = my_malloc(tp_iter);
+  *iter = (tp_iter){
+      .dbms = dbms,
+      .page_iter = tp_page_iter_construct(dbms, typle),
+      .typle_size = tp_get_typle_size(typle),
+  };
+  table_page *page = tp_page_iter_get(iter->page_iter);
+  iter->typle_iter = tp_typle_iter_construct(page, iter->typle_size);
+  return iter;
+}
+
+void tp_iter_destruct(struct tp_iter **iter_ptr) {
+  tp_iter *iter = *iter_ptr;
+  if (iter == NULL)
+    return;
+  tp_typle_iter_destruct(&iter->typle_iter);
+  tp_page_iter_destruct(&iter->page_iter);
+  free(iter);
+  *iter_ptr = NULL;
+}
+
+bool tp_iter_next(struct tp_iter *it) {
+  if (!tp_typle_iter_next(it->typle_iter)) {
+    tp_typle_iter_destruct(&it->typle_iter);
+
+    while (tp_page_iter_next(it->page_iter, it->dbms)) {
+      table_page *page = tp_page_iter_get(it->page_iter);
+      it->typle_iter = tp_typle_iter_construct(page, it->typle_size);
+
+      if (tp_typle_iter_get(it->typle_iter) != NULL) {
+        return true;
+      }
+    }
+    it->typle_iter = tp_typle_iter_construct(NULL, it->typle_size);
+  }
+  return false;
+}
+
+struct tp_typle *tp_iter_get(struct tp_iter *iter) {
+  return tp_typle_iter_get(iter->typle_iter);
+}
+
+fileoff_t tp_iter_cur_page(struct tp_iter *iter) { return iter->page_iter->cur_loc; }
+pageoff_t tp_iter_cur_typle(struct tp_iter *iter) { return iter->typle_iter->tcur; }
