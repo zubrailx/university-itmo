@@ -77,13 +77,13 @@ target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/incl
 
 target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
-  $<$<CONFIG:DEBUG>:-g -Og>
+  $<$<CONFIG:DEBUG>:-g -O0>
   $<$<CONFIG:RELEASE>:-O3>
   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 target_link_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
-  $<$<CONFIG:DEBUG>:-g -Og>
+  $<$<CONFIG:DEBUG>:-g -O0>
   $<$<CONFIG:RELEASE>:-O3>
   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
@@ -148,7 +148,8 @@ endif()
 # -----------------------------------------------------------------------------
 # Formatting
 # -----------------------------------------------------------------------------
-# message(STATUS "sources: ${SRCS}")
+# message(STATUS "CXX_FLAGS: ${CMAKE_C_FLAGS}")
+# message(STATUS "C_FLAGS: ${CMAKE_CXX_FLAGS}")
 # clang-format
 add_custom_target(clang-format
         COMMAND
