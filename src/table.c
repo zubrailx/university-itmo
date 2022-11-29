@@ -1,7 +1,7 @@
 #include "table.h"
 
 #include "dbms/op_sso.h"
-#include "dbms/operations.h"
+#include "dbms/op_table.h"
 #include "dbms/page.h"
 #include "dbms/typle_iter.h"
 #include <string.h>

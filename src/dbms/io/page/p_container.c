@@ -24,7 +24,7 @@ bool container_empty(const struct page_container *page) {
   return page->header.end.bytes == offsetof(struct page_container, body);
 }
 
-bool container_push(struct page_container *page, struct page_entry *entry) {
+bool container_push(struct page_container *page, const struct page_entry *entry) {
   if (!container_is_full(page)) {
     page_entry *ptr = (void *)page + page->header.end.bytes;
     *ptr = *entry;
@@ -42,10 +42,12 @@ struct page_entry *container_pop(struct page_container *page) {
     return entry;
   }
 }
-struct page_entry *container_top(struct page_container *page) {
+struct page_entry *container_top(const struct page_container *page) {
   if (container_empty(page)) {
     return NULL;
   } else {
     return (void *)page + page->header.end.bytes - sizeof(struct page_entry);
   }
 }
+
+extern inline page_entry page_entry_construct(fileoff_t fileoff);

@@ -35,10 +35,16 @@ static struct dp_typle *_create_typle(const struct dto_table *dto_table,
   return typle;
 }
 
+// create pages needed
 static void _create_typle_init(struct dp_typle *typle, struct dbms *dbms) {
   typle->header.first = dbms_tp_create_close(dbms, SIZE_DEFAULT, FILEOFF_NULL);
   typle->header.last = typle->header.first;
-  typle->header.gappy_last = dbms_container_create_close(dbms, SIZE_DEFAULT);
+  // create container and add page inside it 
+  page_container *cont;
+  typle->header.gappy_last = dbms_container_create(dbms, SIZE_DEFAULT, &cont);
+  struct page_entry entry = page_entry_construct(typle->header.first);
+  container_push(cont, &entry);
+  dbms_container_close(&cont, typle->header.gappy_last, dbms);
 }
 
 // Just insert table, no checks for existance
