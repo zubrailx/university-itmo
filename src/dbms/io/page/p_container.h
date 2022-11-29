@@ -4,7 +4,7 @@
 #include "page_entry.h"
 
 /*
-Structure: database_page
+Structure: container_page
   |------------------|
   |HHHHHHH|TTTT      | H - header
   |------------------| T - entries

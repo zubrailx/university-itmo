@@ -7,6 +7,9 @@
 #include "io/page/p_table.h"
 #include <util/internals.h>
 
+// drop pages
+void dbms_page_drop(dbms *dbms, fileoff_t page_start);
+
 // DATABASE PAGE
 fileoff_t dbms_dp_create_close(dbms *dbms, pageoff_t size);
 fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_out);
@@ -31,6 +34,7 @@ void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms);
 
 // FREE PAGE CONTAINER
 fileoff_t dbms_container_create_close(dbms *dbms, pageoff_t size);
-fileoff_t dbms_container_create(dbms *dbms, pageoff_t size, page_container **tp_ptr_out);
+fileoff_t dbms_container_create(dbms *dbms, pageoff_t size,
+                                page_container **tp_ptr_out);
 page_container *dbms_container_select(dbms *dbms, fileoff_t page_start);
 void dbms_container_close(page_container **page_ptr, fileoff_t page_start, dbms *dbms);

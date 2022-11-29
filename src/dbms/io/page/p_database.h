@@ -1,7 +1,7 @@
 #pragma once
 
-#include "p_base.h"
 #include "index.h"
+#include "p_base.h"
 #include "sso.h"
 
 /*
@@ -38,7 +38,7 @@ typedef struct dpt_header {
 
   fileoff_t first; /* first and last page of the table */
   fileoff_t last;
-  fileoff_t gappy_pages; /* pointer to list of gappy pages */
+  fileoff_t gappy_last; /* pointer to last elements in gappy */
 } dpt_header;
 
 typedef struct dpt_col_limits {
@@ -79,6 +79,9 @@ size_t dp_typle_size(size_t columns);
 
 pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle);
 bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);
+
+dp_typle *dp_typle_locate(const struct database_page *page,
+                          const pageoff_t idx_pageoff);
 
 // Iterators
 struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page);

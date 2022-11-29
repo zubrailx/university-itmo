@@ -44,7 +44,7 @@ Create a basic example of DBMS with rational structure which is located in singl
 
 - [x] Create dumped page container to store pages that are deleted (dumped)
 
-- [ ] Update table_typle to store pointer to last page.
+- [x] Update table_typle to store pointer to last page and add gappy page.
 - [ ] Update table_page to work with page_holes (like indexes but points to empty holes in page to do insertion and deletion with O(1)).
 - [ ] Implement insertion and deletion of  row in table.
 - [ ] Create special linked list of pages for table to store there not-full pages where typles can be written.

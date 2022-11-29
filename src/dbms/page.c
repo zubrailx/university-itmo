@@ -19,8 +19,13 @@ static pageoff_t get_page_size(const pageoff_t min_size, const pageoff_t size) {
   return size.bytes > min_size.bytes ? size : min_size;
 }
 
-// DATABASE PAGE
+// TODO: insert page in dumped page stack
+void dbms_page_drop(dbms *dbms, fileoff_t page_start) {
+  page_drop(dbms->dbfile->file, page_start);
+}
 
+
+// DATABASE PAGE
 // Create page and close it immediately
 fileoff_t dbms_dp_create_close(dbms *dbms, pageoff_t dp_size) {
   database_page *page;

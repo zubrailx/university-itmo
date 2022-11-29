@@ -29,7 +29,7 @@ size_t dp_typle_size(size_t columns) {
   return offsetof(dp_typle, columns) + sizeof(dpt_column) * columns;
 }
 
-static dp_typle *dp_typle_locate(const struct database_page *page,
+dp_typle *dp_typle_locate(const struct database_page *page,
                                  const pageoff_t idx_pageoff) {
   assert(page->header.base.size.bytes >= idx_pageoff.bytes + sizeof(page_index));
   assert(page->header.index_start.bytes <= idx_pageoff.bytes);

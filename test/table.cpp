@@ -44,14 +44,7 @@ TEST(table, list_inserted) {
   table->name = strdup("table 4");
   EXPECT_EQ(table_create(dbms, table), true);
 
-  dp_iter *iter = dp_iter_construct(dbms);
-  dp_typle *typle = dp_iter_get(iter);
-  while (typle) {
-    // print_database_typle(typle);
-    dp_iter_next(iter);
-    typle = dp_iter_get(iter);
-  }
-  dp_iter_destruct(&iter);
+  print_database_tables(dbms);
 
   dto_table_destruct(&table);
   dbms_close(&dbms);
