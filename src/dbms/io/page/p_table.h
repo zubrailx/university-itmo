@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base.h"
-#include "column.h"
+#include "p_base.h"
+#include "column_types.h"
 #include "sso.h"
 
 // NOTE: currently without indexes

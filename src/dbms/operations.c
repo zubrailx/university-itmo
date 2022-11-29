@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "converters/table.h"
+#include "converters/table_typle.h"
 #include "core/meta.h"
 #include "page.h"
-#include "sso.h"
+#include "op_sso.h"
 
 // Just insert table, no checks for existance
 void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   // Convert dto to entity
   dpt_header header = {};
   header.cols = dto_table_columns(dto_table);
-  header.fileoff = dbms_tp_create_close(dbms, get_pageoff_t(0), get_fileoff_t(0));
+  header.first = dbms_tp_create_close(dbms, get_pageoff_t(0), get_fileoff_t(0));
   dbms_insert_sso(&header.sso, dto_table->name, dbms);
 
   // construct dptyple
@@ -39,7 +39,7 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
     dp_destruct(&page);
 
     pageoff_t size =
-        dp_bodyoff_to_pageoff(get_bodyoff_t(typle_size + sizeof(page_index)));
+        dp_body_page(get_bodyoff_t(typle_size + sizeof(page_index)));
     page_loc = dbms_dp_create(dbms, size, &page);
 
     assert(dp_insert_typle(page, typle).bytes > 0);

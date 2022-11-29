@@ -3,7 +3,7 @@
 #include "util/printers.hpp"
 
 extern "C" {
-#include "../src/dbms/dto/table.h"
+#include "../src/dbms/dto/dto_table.h"
 #include "../src/table.h"
 #include "database.h"
 }

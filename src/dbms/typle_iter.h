@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/page/table.h"
+#include "io/page/p_table.h"
 #include <stddef.h>
 #include <util/internals.h>
 

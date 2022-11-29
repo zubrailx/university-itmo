@@ -4,9 +4,9 @@
 #include "core/dbfile.h"
 #include "core/meta.h"
 #include "core/pagepool.h"
-#include "io/data.h"
-#include "io/database.h"
-#include "io/table.h"
+#include "io/p_data.h"
+#include "io/p_database.h"
+#include "io/p_table.h"
 #include <assert.h>
 
 const pageoff_t DATABASE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
@@ -125,7 +125,7 @@ void dbms_da_insert_data(const void *data, size_t size, dbms *dbms,
   if (pageoff.bytes == 0) {
     da_destruct(&da);
     // Create new page and insert data in it
-    pageoff_t da_size = da_bodyoff_to_pageoff(get_bodyoff_t(size));
+    pageoff_t da_size = da_body_page(get_bodyoff_t(size));
     fileoff = dbms_da_create(dbms, da_size, &da);
     pageoff = da_insert_data(da, data, size);
   }

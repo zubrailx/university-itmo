@@ -39,3 +39,16 @@ Create a basic example of DBMS with rational structure which is located in singl
 
 * other than before
 * construct, destruct ...
+
+### Roadmap
+
+- [ ] Update table_typle to store pointer to last page.
+- [ ] Update table_page to work with page_holes (like indexes but points to empty holes in page to do insertion and deletion with O(1)).
+- [ ] Implement insertion and deletion of  row in table.
+- [ ] Create special linked list of pages for table to store there not-full pages where typles can be written.
+- [ ] Create module in dbms to store deleted pages (after table was deleted or table page has become empty).
+- [ ] Implement update of row in table
+- [ ] Split strings if size of page is larger
+- [ ] Implement selection using where statements
+- [ ] Implement joins
+- [ ] Implement projection

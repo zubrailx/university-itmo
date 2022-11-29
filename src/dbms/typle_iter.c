@@ -1,4 +1,4 @@
-#include "iterator.h"
+#include "typle_iter.h"
 
 #include <assert.h>
 #include <malloc.h>
@@ -132,7 +132,7 @@ static bool tp_page_iter_next(tp_page_iter *it, struct dbms *dbms) {
 static tp_page_iter *tp_page_iter_construct(struct dbms *dbms, const dp_typle *typle) {
   tp_page_iter *iter = my_malloc(tp_page_iter);
 
-  fileoff_t page_loc = typle->header.fileoff;
+  fileoff_t page_loc = typle->header.first;
   if (!fileoff_is_null(page_loc)) {
     table_page *first = dbms_tp_select(dbms, page_loc);
     *iter = (tp_page_iter){.cur = first, .cur_loc = page_loc};

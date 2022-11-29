@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/dbms.h"
-#include "io/page/data.h"
-#include "io/page/database.h"
-#include "io/page/table.h"
+#include "io/page/p_data.h"
+#include "io/page/p_database.h"
+#include "io/page/p_table.h"
 #include <util/internals.h>
 
 // DATABASE PAGE

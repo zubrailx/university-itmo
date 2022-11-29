@@ -1,4 +1,4 @@
-#include "table.h"
+#include "p_table.h"
 
 PAGE_DEFAULT_LOAD_IMPL(struct table_page, tp)
 PAGE_DEFAULT_CREATE_IMPL(struct table_page, tp)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base.h"
+#include "p_base.h"
 #include "index.h"
 #include "sso.h"
 
@@ -33,9 +33,12 @@ typedef struct database_page {
 // TYPLE
 typedef struct dpt_header {
   bool is_present;
-  fileoff_t fileoff;// first page of table
   size_t cols;
   struct page_sso sso;
+
+  fileoff_t first; /* first and last page of the table */
+  fileoff_t last;
+  fileoff_t gappy_pages; /* pointer to list of gappy pages */
 } dpt_header;
 
 typedef struct dpt_col_limits {

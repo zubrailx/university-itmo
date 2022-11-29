@@ -1,9 +1,9 @@
 #include "table.h"
 
-#include "dbms/iterator.h"
+#include "dbms/op_sso.h"
 #include "dbms/operations.h"
 #include "dbms/page.h"
-#include "dbms/sso.h"
+#include "dbms/typle_iter.h"
 #include <string.h>
 
 // return position of index

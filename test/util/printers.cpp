@@ -15,7 +15,8 @@ void print_database_typle(dp_typle *typle) {
   printf("----------------------\n");
   printf("cols: %zu\n", typle->header.cols);
   printf("is_present: %u\n", typle->header.is_present);
-  printf("fileoff: %zu\n", typle->header.fileoff.bytes);
+  printf("fileoff: %zu\n", typle->header.first.bytes);
+  printf("fileoff: %zu\n", typle->header.last.bytes);
   printf("not_inline: %d\n", (int)typle->header.sso.not_inline);
   printf("----------------------\n");
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dto/table.h"
+#include "dto/dto_table.h"
 #include <string.h>
 #include <util/internals.h>
 

@@ -4,7 +4,7 @@
 
 #include <util/internals.h>
 
-#include "page/base.h"
+#include "page/p_base.h"
 
 struct dbfile;
 

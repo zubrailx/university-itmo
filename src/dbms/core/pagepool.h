@@ -4,7 +4,7 @@
 // in RAM will be effective because strings are stored in separate sections in case of
 // their big size
 
-#include "../io/page/base.h"
+#include "../io/page/p_base.h"
 
 struct pagepool {
   // without duplicates

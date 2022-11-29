@@ -43,15 +43,15 @@ void page_destruct(struct base_page **page_ptr);
 
 // Fileoff / pageoff
 #define INLINE_BODYOFF_TO_PAGEOFF(page_type, m_body, prefix)                           \
-  inline pageoff_t prefix##_bodyoff_to_pageoff(bodyoff_t bodyoff) {                    \
+  inline pageoff_t prefix##_body_page(bodyoff_t bodyoff) {                          \
     return get_pageoff_t(bodyoff.bytes + offsetof(page_type, m_body));                 \
   }
 #define EXTERN_INLINE_BODYOFF_TO_PAGEOFF(page_type, m_body, prefix)                    \
-  extern inline pageoff_t prefix##_bodyoff_to_pageoff(bodyoff_t bodyoff);
+  extern inline pageoff_t prefix##_body_page(bodyoff_t bodyoff);
 
 #define INLINE_PAGEOFF_TO_BODYOFF(page_type, m_body, prefix)                           \
-  inline bodyoff_t prefix##_pageoff_to_bodyoff(pageoff_t pageoff) {                    \
+  inline bodyoff_t prefix##_page_body(pageoff_t pageoff) {                    \
     return get_bodyoff_t(pageoff.bytes - offsetof(page_type, m_body));                 \
   }
 #define EXTERN_INLINE_PAGEOFF_TO_BODYOFF(page_type, m_body, prefix)                    \
-  inline bodyoff_t prefix##_pageoff_to_bodyoff(pageoff_t pageoff);
+  inline bodyoff_t prefix##_page_body(pageoff_t pageoff);
