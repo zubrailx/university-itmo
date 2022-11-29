@@ -42,15 +42,15 @@ Create a basic example of DBMS with rational structure which is located in singl
 
 ### Roadmap
 
-- [x] Create dumped page container to store pages that are deleted (dumped)
+- [x] Create dumped page container to store pages that are deleted (dumped).
 - [x] Update table_typle to store pointer to last page and add gappy page.
-
-- [ ] Insert table_pages in gappy on creation and get page to write using dp_typle.guppy pointer
-- [ ] Update table_page to work with page_holes (like indexes but points to empty holes in page to do insertion and deletion with O(1)).
+- [x] Update table_page to work with page_holes (like indexes but points to empty holes in page to do insertion and deletion with O(1)).
+- [x] Insert table_pages in gappy on creation.
 
 - [ ] Implement insertion and deletion of row in table.
-- [ ] Create special linked list of pages for table to store there not-full pages where typles can be written.
-- [ ] Create module in dbms to store deleted pages (after table was deleted or table page has become empty).
+- [ ] Get page to write using dp_typle.guppy pointer and put there page where row is deleted.
+
+- [ ] Create module in dbms to store deleted pages (after table was deleted or table page has become empty) to reuse pages.
 - [ ] Implement update of row in table
 - [ ] Split strings if size of page is larger
 - [ ] Implement selection using where statements

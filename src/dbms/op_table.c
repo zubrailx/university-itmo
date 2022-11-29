@@ -37,7 +37,7 @@ static struct dp_typle *_create_typle(const struct dto_table *dto_table,
 
 // create pages needed
 static void _create_typle_init(struct dp_typle *typle, struct dbms *dbms) {
-  typle->header.first = dbms_tp_create_close(dbms, SIZE_DEFAULT, FILEOFF_NULL);
+  typle->header.first = dbms_tp_create_close(dbms, SIZE_DEFAULT, FILEOFF_NULL, typle);
   typle->header.last = typle->header.first;
   // create container and add page inside it 
   page_container *cont;

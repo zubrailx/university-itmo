@@ -1,7 +1,7 @@
 #pragma once
 
-#include "p_base.h"
 #include "column_types.h"
+#include "p_base.h"
 #include "sso.h"
 
 // NOTE: currently without indexes
@@ -12,8 +12,8 @@ Structure: table_page
   |HHHHHHH|T TTT  TTT| H - header
   |------------------| T - typles (structures for different types)
   |                  | (currently no indexes are present)
-  |------------------|
-  |                  |
+  |------------------| I - holes ()
+  |         B      HH| B - barier (max value for typle)
   |------------------|
 
 */
@@ -21,7 +21,10 @@ typedef struct table_header {
   struct base_header base;
   fileoff_t next;
   fileoff_t prev;
+
+  pageoff_t typle_limit;// if typle_limit == typle_end -> page is full
   pageoff_t typle_end;
+  pageoff_t hole_start;// inclusive
 } table_header;
 
 typedef struct table_page {
@@ -75,9 +78,11 @@ INLINE_PAGEOFF_TO_BODYOFF(table_page, body, tp)
 // Constructors/destructors
 PAGE_CONSTRUCT_DEFAULT(table_page, tp)
 PAGE_DESTRUCT_DEFAULT(table_page, tp)
-struct table_page *tp_construct_init(struct pageoff_t size, fileoff_t prev,
-                                     fileoff_t next);
+struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_t prev,
+                                     const fileoff_t next,
+                                     const struct dp_typle *typle);
 
+pageoff_t tp_get_min_size(const struct dp_typle *typle);
 size_t tp_get_typle_size(const struct dp_typle *typle);
 // Iterators
 struct tp_typle_iter *tp_typle_iter_construct(struct table_page *page,

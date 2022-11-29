@@ -19,11 +19,15 @@ static pageoff_t get_page_size(const pageoff_t min_size, const pageoff_t size) {
   return size.bytes > min_size.bytes ? size : min_size;
 }
 
+static pageoff_t _tp_page_size(const pageoff_t size, const dp_typle *typle) {
+  pageoff_t min_size = get_page_size(TABLE_PAGE_MIN_SIZE, size);
+  return get_page_size(min_size, tp_get_min_size(typle));
+}
+
 // TODO: insert page in dumped page stack
 void dbms_page_drop(dbms *dbms, fileoff_t page_start) {
   page_drop(dbms->dbfile->file, page_start);
 }
-
 
 // DATABASE PAGE
 // Create page and close it immediately
@@ -142,20 +146,21 @@ void dbms_da_insert_data(const void *data, size_t size, dbms *dbms,
 }
 
 // TABLE_PAGE
-fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos) {
+fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
+                               const dp_typle *typle) {
   table_page *page;
-  fileoff_t page_pos = dbms_tp_create(dbms, size, prev_pos, &page);
+  fileoff_t page_pos = dbms_tp_create(dbms, size, prev_pos, typle, &page);
   tp_destruct(&page);
   return page_pos;
 }
 
-fileoff_t dbms_tp_create(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
-                         table_page **tp_ptr_out) {
+fileoff_t dbms_tp_create(dbms *dbms, const pageoff_t size, const fileoff_t prev_pos,
+                         const dp_typle *typle, table_page **tp_ptr_out) {
   dbmeta *meta = dbms->meta;
   FILE *file = dbms->dbfile->file;
 
-  table_page *tp = tp_construct_init(get_page_size(TABLE_PAGE_MIN_SIZE, size), prev_pos,
-                                     get_fileoff_t(0));
+  pageoff_t page_size = _tp_page_size(size, typle);
+  table_page *tp = tp_construct_init(page_size, prev_pos, FILEOFF_NULL, typle);
   fileoff_t tp_pos = meta->pos_empty;
 
   meta->pos_empty = get_fileoff_t(tp_pos.bytes + tp->header.base.size.bytes);
