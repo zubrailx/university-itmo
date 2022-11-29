@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/dbms.h"
+#include "io/page/p_container.h"
 #include "io/page/p_data.h"
 #include "io/page/p_database.h"
 #include "io/page/p_table.h"
@@ -27,3 +28,9 @@ fileoff_t dbms_tp_create(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
                          table_page **tp_ptr_out);
 table_page *dbms_tp_select(dbms *dbms, fileoff_t page_start);
 void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms);
+
+// FREE PAGE CONTAINER
+fileoff_t dbms_container_create_close(dbms *dbms, pageoff_t size);
+fileoff_t dbms_container_create(dbms *dbms, pageoff_t size, page_container **tp_ptr_out);
+page_container *dbms_container_select(dbms *dbms, fileoff_t page_start);
+void dbms_container_close(page_container **page_ptr, fileoff_t page_start, dbms *dbms);

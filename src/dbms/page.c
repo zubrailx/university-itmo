@@ -4,6 +4,7 @@
 #include "core/dbfile.h"
 #include "core/meta.h"
 #include "core/pagepool.h"
+#include "io/p_container.h"
 #include "io/p_data.h"
 #include "io/p_database.h"
 #include "io/p_table.h"
@@ -12,6 +13,7 @@
 const pageoff_t DATABASE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 const pageoff_t DATA_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 const pageoff_t TABLE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
+const pageoff_t CONTAINER_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 
 static pageoff_t get_page_size(const pageoff_t min_size, const pageoff_t size) {
   return size.bytes > min_size.bytes ? size : min_size;
@@ -177,4 +179,53 @@ table_page *dbms_tp_select(dbms *dbms, fileoff_t page_start) {
 void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms) {
   tp_alter(*page_ptr, dbms->dbfile->file, page_start);
   tp_destruct(page_ptr);
+}
+
+// FREE PAGE CONTAINER
+fileoff_t dbms_container_create_close(dbms *dbms, pageoff_t size) {
+  page_container *page;
+  fileoff_t page_pos = dbms_container_create(dbms, size, &page);
+  container_destruct(&page);
+  return page_pos;
+}
+fileoff_t dbms_container_create(dbms *dbms, pageoff_t size,
+                                page_container **pc_ptr_out) {
+  dbmeta *meta = dbms->meta;
+  FILE *file = dbms->dbfile->file;
+
+  fileoff_t prev_pos = meta->dumped.last;
+
+  page_container *page = container_construct_init(
+      get_page_size(CONTAINER_PAGE_MIN_SIZE, size), prev_pos, FILEOFF_NULL);
+  fileoff_t page_pos = meta->pos_empty;
+
+  meta->pos_empty = get_fileoff_t(page_pos.bytes + page->header.base.size.bytes);
+  // If no pages are stored
+  if (fileoff_is_null(meta->dumped.first) && fileoff_is_null(meta->dumped.last)) {
+    meta->dumped.first = page_pos;
+  } else {
+    // There is at least one page allocated
+    page_container *prev = dbms_container_select(dbms, prev_pos);
+    prev->header.next = page_pos;
+    page->header.prev = prev_pos;
+    dbms_container_close(&prev, prev_pos, dbms);
+  }
+  meta->dumped.last = page_pos;
+
+  container_create(page, file, page_pos);
+  *pc_ptr_out = page;
+  return page_pos;
+}
+
+page_container *dbms_container_select(dbms *dbms, fileoff_t page_start) {
+  FILE *file = dbms->dbfile->file;
+  pageoff_t size;
+  page_load_size(&size, file, page_start);
+  page_container *tp = container_construct(size);
+  container_load(tp, file, page_start);
+  return tp;
+}
+void dbms_container_close(page_container **page_ptr, fileoff_t page_start, dbms *dbms) {
+  container_alter(*page_ptr, dbms->dbfile->file, page_start);
+  container_destruct(page_ptr);
 }

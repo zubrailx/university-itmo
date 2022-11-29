@@ -15,6 +15,7 @@ typedef struct base_page {
 
 enum page_types {
   PAGE_UNKNOWN = 0,
+  PAGE_CONTAINER,
   PAGE_DATABASE,
   PAGE_DATA,
   PAGE_TABLE,

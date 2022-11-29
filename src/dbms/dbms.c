@@ -31,6 +31,7 @@ dbms *dbms_create(const char *fname) {
   // create pages
   dbms_dp_create_close(dbms, get_pageoff_t(0));
   dbms_da_create_close(dbms, get_pageoff_t(0));
+  dbms_container_create_close(dbms, get_pageoff_t(0));
   // update meta
   meta_alter(dbms->meta, dbms->dbfile->file);
   return dbms;

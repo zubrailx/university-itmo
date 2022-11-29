@@ -14,6 +14,10 @@ typedef struct dbmeta {
     fileoff_t first;
     fileoff_t last;
   } da;// data_page
+  struct {
+    fileoff_t first;
+    fileoff_t last;
+  } dumped;// empty pages (page_container)
   fileoff_t pos_empty;
 } dbmeta;
 
