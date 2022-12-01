@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <malloc.h>
 
-#include "core/meta.h"
 #include "page.h"
 
 // Database Page
@@ -33,7 +32,7 @@ static bool dp_page_iter_next(dp_page_iter *it, struct dbms *dbms) {
 static dp_page_iter *dp_page_iter_construct(dbms *dbms) {
   dp_page_iter *iterator = my_malloc(dp_page_iter);
 
-  fileoff_t page_loc = dbms->meta->dp.first;
+  fileoff_t page_loc = dbms->metadp_first;
   if (!fileoff_is_null(page_loc)) {
     database_page *first = dbms_dp_select(dbms, page_loc);
     *iterator = (dp_page_iter){.cur = first, .cur_loc = page_loc};

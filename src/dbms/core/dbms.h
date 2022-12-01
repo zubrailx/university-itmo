@@ -2,5 +2,5 @@
 
 typedef struct dbms {
   struct dbfile *dbfile;
-  struct dbmeta *meta;
+  struct meta *meta;
 } dbms;

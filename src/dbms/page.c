@@ -2,8 +2,8 @@
 #include "page.h"
 
 #include "core/dbfile.h"
-#include "core/meta.h"
 #include "core/pagepool.h"
+#include "io/meta/meta.h"
 #include "io/p_container.h"
 #include "io/p_data.h"
 #include "io/p_database.h"
@@ -40,18 +40,18 @@ fileoff_t dbms_dp_create_close(dbms *dbms, pageoff_t dp_size) {
 
 // Create page and return pointer to created page
 fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_out) {
-  dbmeta *meta = dbms->meta;
+  meta *meta = dbms->meta;
   FILE *file = dbms->dbfile->file;
 
-  fileoff_t prev_pos = meta->dp.last;
+  fileoff_t prev_pos = meta->dp_last;
 
   database_page *dp = dp_construct_init(get_page_size(DATABASE_PAGE_MIN_SIZE, dp_size),
                                         prev_pos, FILEOFF_NULL);
   fileoff_t dp_pos = meta->pos_empty;
   meta->pos_empty = get_fileoff_t(dp_pos.bytes + dp->header.base.size.bytes);
   // If no pages are stored
-  if (fileoff_is_null(meta->dp.first) && fileoff_is_null(meta->dp.last)) {
-    meta->dp.first = dp_pos;
+  if (fileoff_is_null(meta->dp_first) && fileoff_is_null(meta->dp_last)) {
+    meta->dp_first = dp_pos;
   } else {
     // There is at least one page allocated
     database_page *prev = dbms_dp_select(dbms, prev_pos);
@@ -59,7 +59,7 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
     dp->header.prev = prev_pos;
     dbms_dp_close(&prev, prev_pos, dbms);
   }
-  meta->dp.last = dp_pos;
+  meta->dp_last = dp_pos;
 
   dp_create(dp, file, dp_pos);
   *dp_ptr_out = dp;
@@ -200,10 +200,10 @@ fileoff_t dbms_container_create_close(dbms *dbms, pageoff_t size) {
 }
 fileoff_t dbms_container_create(dbms *dbms, pageoff_t size,
                                 page_container **pc_ptr_out) {
-  dbmeta *meta = dbms->meta;
+  meta *meta = dbms->meta;
   FILE *file = dbms->dbfile->file;
 
-  fileoff_t prev_pos = meta->dumped.last;
+  fileoff_t prev_pos = meta->free.last;
 
   page_container *page = container_construct_init(
       get_page_size(CONTAINER_PAGE_MIN_SIZE, size), prev_pos, FILEOFF_NULL);
@@ -211,8 +211,8 @@ fileoff_t dbms_container_create(dbms *dbms, pageoff_t size,
 
   meta->pos_empty = get_fileoff_t(page_pos.bytes + page->header.base.size.bytes);
   // If no pages are stored
-  if (fileoff_is_null(meta->dumped.first) && fileoff_is_null(meta->dumped.last)) {
-    meta->dumped.first = page_pos;
+  if (fileoff_is_null(meta->free.first) && fileoff_is_null(meta->free.last)) {
+    meta->free.first = page_pos;
   } else {
     // There is at least one page allocated
     page_container *prev = dbms_container_select(dbms, prev_pos);
@@ -220,7 +220,7 @@ fileoff_t dbms_container_create(dbms *dbms, pageoff_t size,
     page->header.prev = prev_pos;
     dbms_container_close(&prev, prev_pos, dbms);
   }
-  meta->dumped.last = page_pos;
+  meta->free.last = page_pos;
 
   container_create(page, file, page_pos);
   *pc_ptr_out = page;

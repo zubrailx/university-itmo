@@ -5,21 +5,35 @@
 #include <util/define.h>
 
 #include "core/dbfile.h"
+#include "core/dbmeta.h"
 #include "core/dbms.h"
-#include "core/meta.h"
 #include "io/meta.h"
 #include "page.h"
+#include "pagealloc.h"
 
+// meta
+static size_t DATA_PAGE_SLOT_SIZES[] = {64, 128, 256, 512, 1024};
+static size_t DATA_PAGE_SLOT_COUNT[] = {32, 16, 8, 4, 2, 1};
+
+static meta *dbms_meta_construct() {
+  size_t da_len = sizeof(DATA_PAGE_SLOT_SIZES) / sizeof(size_t);
+  meta *meta = meta_construct_init(da_len, DATA_PAGE_SLOT_SIZES);
+  return meta;
+}
+
+static void dbms_meta_destruct(meta **meta_ptr) { meta_destruct(meta_ptr); }
+
+// dbms
 static dbms *dbms_construct(const char *fname, bool do_trunc) {
   dbms *db = my_malloc(dbms);
   db->dbfile = dbfile_construct(fname, do_trunc);
-  db->meta = meta_construct();
+  db->meta = dbms_meta_construct();
   return db;
 }
 
 static void dbms_destruct(dbms **dbms_ptr) {
   dbfile_destruct(&(*dbms_ptr)->dbfile);
-  meta_destruct(&(*dbms_ptr)->meta);
+  dbms_meta_destruct(&(*dbms_ptr)->meta);
   free(*dbms_ptr);
   *dbms_ptr = NULL;
 }
@@ -28,10 +42,13 @@ static void dbms_destruct(dbms **dbms_ptr) {
 dbms *dbms_create(const char *fname) {
   dbms *dbms = dbms_construct(fname, true);
   meta_create(dbms->meta, dbms->dbfile->file);
+  // create page allocator
+  dbms_pa_create_close(dbms, FILEOFF_NULL);
+  // create containers data distributer
   // create pages
-  dbms_dp_create_close(dbms, get_pageoff_t(0));
-  dbms_da_create_close(dbms, get_pageoff_t(0));
-  dbms_container_create_close(dbms, get_pageoff_t(0));
+  dbms_dp_create_close(dbms, SIZE_DEFAULT);
+  dbms_da_create_close(dbms, SIZE_DEFAULT);
+  dbms_container_create_close(dbms, SIZE_DEFAULT);
   // update meta
   meta_alter(dbms->meta, dbms->dbfile->file);
   return dbms;
