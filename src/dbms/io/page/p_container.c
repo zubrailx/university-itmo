@@ -17,8 +17,7 @@ page_container *container_construct_init(pageoff_t size, fileoff_t prev) {
 }
 
 bool container_full(const struct page_container *page) {
-  assert(page->header.start.bytes >= offsetof(page_container, body));
-  return offsetof(page_container, body) == page->header.start.bytes;
+  return offsetof(page_container, body) > page->header.start.bytes - sizeof(page_entry);
 }
 
 bool container_empty(const struct page_container *page) {

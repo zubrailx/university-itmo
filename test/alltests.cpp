@@ -2,16 +2,17 @@
 
 extern "C" {
 #include "../src/dbms/core/dbfile.h"
+#include "../src/dbms/core/dbmeta.h"
 #include "../src/dbms/core/dbms.h"
-#include "../src/dbms/core/meta.h"
 #include "../src/dbms/dto/dto_table.h"
-#include "../src/dbms/typle_iter.h"
 #include "../src/dbms/page.h"
+#include "../src/dbms/pagealloc.h"
+#include "../src/dbms/io/p_base.h"
+#include "../src/dbms/typle_iter.h"
 #include "../src/table.h"
 #include "database.h"
 #include <database.h>
 }
-
 
 int test(int argc, char **argv) {
   return 0;

@@ -79,13 +79,13 @@ target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
   $<$<CONFIG:RELEASE>:-O3>
-  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak,memory -g>
 )
 target_link_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
   $<$<CONFIG:RELEASE>:-O3>
-  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak,memory -g>
 )
 
 if (DEFINED PROGRAM_LINUX OR UNIX)

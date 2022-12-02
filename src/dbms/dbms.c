@@ -47,8 +47,6 @@ dbms *dbms_create(const char *fname) {
   // create containers data distributer
   // create pages
   dbms_dp_create_close(dbms, SIZE_DEFAULT);
-  dbms_da_create_close(dbms, SIZE_DEFAULT);
-  dbms_container_create_close(dbms, SIZE_DEFAULT);
   // update meta
   meta_alter(dbms->meta, dbms->dbfile->file);
   return dbms;

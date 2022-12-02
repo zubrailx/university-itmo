@@ -12,7 +12,7 @@ const pageoff_t PAGEPOOL_PAGE_SIZE = (pageoff_t){.bytes = 1024};
 // create last page for pagepool meta->free_last is managed automatically
 // @prev - previous page
 static fileoff_t dbms_pa_create_append(struct dbms *dbms, const fileoff_t prev,
-                                             page_container **pc_ptr) {
+                                       page_container **pc_ptr) {
   FILE *file = dbms->dbfile->file;
   meta *meta = dbms->meta;
   pageoff_t size = PAGEPOOL_PAGE_SIZE;
@@ -35,17 +35,6 @@ void dbms_pa_create_close(struct dbms *dbms, const fileoff_t prev) {
   dbms_pa_create_append(dbms, prev, &pc);
   container_destruct(&pc);
 }
-
-static page_container *dbms_pa_select(const struct dbms *dbms,
-                                            const fileoff_t pc_loc) {
-  FILE *file = dbms->dbfile->file;
-  pageoff_t size;
-  page_load_size(&size, file, pc_loc);
-  page_container *pc = container_construct(size);
-  container_load(pc, file, pc_loc);
-  return pc;
-}
-
 static page_entry dbms_pa_alloc(struct dbms *dbms, pageoff_t size) {
   base_page *page = page_construct(size, PAGE_UNKNOWN);
   page_create(page, dbms->dbfile->file, dbms->meta->pos_empty);
@@ -57,74 +46,36 @@ static page_entry dbms_pa_alloc(struct dbms *dbms, pageoff_t size) {
   return entry;
 }
 
-/*
- * @loc_out - location of pagepool page
- * @off_out - offset in page (this is location of entry inside pagepool)
- * @size - mininum required size
- * */
-static bool dbms_pa_find(const struct dbms *dbms, const pageoff_t size,
-                               fileoff_t *loc_out, pageoff_t *off_out) {
-  fileoff_t fileoff = dbms->meta->free_last;
-  page_container *pc = NULL;
-  bool found = false;
-  while (!fileoff_is_null(fileoff)) {
-    pc = dbms_pa_select(dbms, fileoff);
-    cp_entry_iter *it = cp_entry_iter_construct(pc);
-    page_entry *entry = cp_entry_iter_get(it);
-    while (entry) {
-      if (entry->size.bytes >= size.bytes) {
-        found = true;
-        // set returned values
-        *off_out = it->cur;
-        *loc_out = fileoff;
-        break;
-      }
-    }
-    cp_entry_iter_destruct(&it);
-    fileoff_t prev = pc->header.prev;
-    container_destruct(&pc);
-    if (found) {
-      break;
-    } else {
-      fileoff = prev;
-    }
-  }
-  return found;
-}
-
 // just move file ptr (go through all pages and if )
-page_entry dbms_pa_malloc(struct dbms *dbms, const pageoff_t size) {
+page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
   FILE *file = dbms->dbfile->file;
 
   const fileoff_t last_loc = dbms->meta->free_last;
-  page_container *cur = dbms_pa_select(dbms, last_loc);
+  page_container *cur = dbms_container_select(dbms, last_loc);
   pageoff_t last_size = cur->header.base.size;
 
   fileoff_t prev_loc = cur->header.prev;
-  // NOTE: insert empty page
-  // If current page is empty -> drop it (later add in dbms)
-  bool last_is_empty = container_empty(cur);
-  // just destruct this page from ram but not delete it currently
-  if (last_is_empty) {
-    if (!fileoff_is_null(prev_loc)) {
-      dbms->meta->free_last = prev_loc;
-      container_destruct(&cur);
-      cur = dbms_pa_select(dbms, prev_loc);
-    }
+
+  bool remove_last = container_empty(cur) && !fileoff_is_null(prev_loc);
+  // Destruct this page from ram but not delete it currently
+  if (remove_last) {
+    dbms->meta->free_last = prev_loc;
+    container_destruct(&cur);
+    cur = dbms_container_select(dbms, prev_loc);
   }
 
-  fileoff_t cur_loc = last_is_empty ? prev_loc : last_loc;
+  fileoff_t cur_loc = remove_last ? prev_loc : last_loc;
 
   fileoff_t sel_loc;
   pageoff_t sel_off;
 
   page_entry found_entry;
-  bool found = dbms_pa_find(dbms, size, &sel_loc, &sel_off);
+  bool found = dbms_container_find(dbms, size, &sel_loc, &sel_off);
 
   if (found) {
     page_container *page;
     if (cur_loc.bytes != sel_loc.bytes) {
-      page = dbms_pa_select(dbms, sel_loc);
+      page = dbms_container_select(dbms, sel_loc);
     } else {
       page = cur;
     }
@@ -145,9 +96,10 @@ page_entry dbms_pa_malloc(struct dbms *dbms, const pageoff_t size) {
   }
 
   // if last is empty and previous is not full -> delete last page
-  if (last_is_empty && !container_full(cur)) {
+  // if found -> cur page is not full because of container_pop
+  if (remove_last && found) {
     page_entry entry = (page_entry){.size = last_size, .start = last_loc};
-    dbms_pa_free(dbms, &entry);
+    dbms_page_free(dbms, &entry);
   } else {// return pointer in meta to normal condition
     dbms->meta->free_last = last_loc;
   }
@@ -157,16 +109,18 @@ page_entry dbms_pa_malloc(struct dbms *dbms, const pageoff_t size) {
   return found_entry;
 }
 
-void dbms_pa_free(dbms *dbms, const page_entry *entry) {
-  fileoff_t last_loc = dbms->meta->dp_last;
-  page_container *last = dbms_pa_select(dbms, last_loc);
+void dbms_page_free(dbms *dbms, const page_entry *entry) {
+  fileoff_t last_loc = dbms->meta->free_last;
+  page_container *last = dbms_container_select(dbms, last_loc);
   // allocate new page for container (in other case it can be bad)
   if (!container_push(last, entry)) {
     // destruct previous last page
     container_destruct(&last);
     // append new page and point to previous one
-    dbms_pa_create_append(dbms, last_loc, &last);
+    last_loc = dbms_pa_create_append(dbms, last_loc, &last);
     // try again
     assert(container_push(last, entry));
   }
+  container_alter(last, dbms->dbfile->file, last_loc);
+  container_destruct(&last);
 }
