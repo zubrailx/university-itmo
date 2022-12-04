@@ -16,7 +16,6 @@ pageoff_t sp_size(const size_t slot_size, const size_t slot_count) {
 }
 
 // constructors/destructors
-
 PAGE_CONSTRUCT_DEFAULT_IMPL(struct slot_page, sp, PAGE_SLOT)
 PAGE_DESTRUCT_DEFAULT_IMPL(struct slot_page, sp)
 
@@ -34,11 +33,11 @@ struct slot_page *sp_construct_slot_init(const size_t slot_size,
   return page;
 }
 
-bool sp_is_full(const slot_page *page) {
+bool sp_full(const slot_page *page) {
   return page->header.slot_start.bytes == page->header.base.size.bytes;
 }
 
-bool sp_is_empty(const slot_page *page) {
+bool sp_empty(const slot_page *page) {
   slot_header header = page->header;
   return header.slot_start.bytes ==
          header.base.size.bytes - sizeof(slot_number) * header.slot_count;
@@ -68,7 +67,7 @@ static pageoff_t sp_slot_start(const slot_page *page, const slot_number num) {
 pageoff_t sp_insert_data(struct slot_page *page, const void *data, size_t size) {
   assert(size <= page->header.slot_size);
 
-  if (sp_is_full(page)) {
+  if (sp_full(page)) {
     return get_pageoff_t(0);
   } else {
     slot_number num = sp_pop(page);
@@ -80,7 +79,7 @@ pageoff_t sp_insert_data(struct slot_page *page, const void *data, size_t size) 
 }
 
 void sp_remove_data(struct slot_page *page, const pageoff_t pageoff) {
-  assert(!sp_is_empty(page));
+  assert(!sp_empty(page));
   // just add spta slot (without zeroing memory)
   slot_number num = sp_slot_num(page, pageoff);
   sp_push(page, num);

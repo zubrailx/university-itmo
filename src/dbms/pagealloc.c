@@ -11,8 +11,8 @@ const pageoff_t PAGEPOOL_PAGE_SIZE = (pageoff_t){.bytes = 1024};
 
 // create last page for pagepool meta->free_last is managed automatically
 // @prev - previous page
-static fileoff_t dbms_pa_create_append(struct dbms *dbms, const fileoff_t prev,
-                                       page_container **pc_ptr) {
+static fileoff_t container_create_append(struct dbms *dbms, const fileoff_t prev,
+                                         page_container **pc_ptr) {
   FILE *file = dbms->dbfile->file;
   meta *meta = dbms->meta;
   pageoff_t size = PAGEPOOL_PAGE_SIZE;
@@ -32,10 +32,10 @@ static fileoff_t dbms_pa_create_append(struct dbms *dbms, const fileoff_t prev,
 // first of all create page container
 void dbms_pa_create_close(struct dbms *dbms, const fileoff_t prev) {
   page_container *pc;
-  dbms_pa_create_append(dbms, prev, &pc);
+  container_create_append(dbms, prev, &pc);
   container_destruct(&pc);
 }
-static page_entry dbms_pa_alloc(struct dbms *dbms, pageoff_t size) {
+static page_entry alloc_page_entry(struct dbms *dbms, pageoff_t size) {
   base_page *page = page_construct(size, PAGE_UNKNOWN);
   page_create(page, dbms->dbfile->file, dbms->meta->pos_empty);
   page_entry entry =
@@ -92,7 +92,7 @@ page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
       container_destruct(&page);
     }
   } else {
-    found_entry = dbms_pa_alloc(dbms, size);
+    found_entry = alloc_page_entry(dbms, size);
   }
 
   // if last is empty and previous is not full -> delete last page
@@ -117,7 +117,7 @@ void dbms_page_free(dbms *dbms, const page_entry *entry) {
     // destruct previous last page
     container_destruct(&last);
     // append new page and point to previous one
-    last_loc = dbms_pa_create_append(dbms, last_loc, &last);
+    last_loc = container_create_append(dbms, last_loc, &last);
     // try again
     assert(container_push(last, entry));
   }

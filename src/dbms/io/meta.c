@@ -8,9 +8,9 @@
 
 // preinit meta->da_len
 void meta_load(struct meta *meta, FILE *file) {
-  fseek(file, offsetof(struct meta, da_len), SEEK_SET);
+  fseek(file, offsetof(struct meta, slot_len), SEEK_SET);
   // size is calculated based on da_len
-  assert(fread(&meta->da_len, sizeof(meta->da_len), 1, file));
+  assert(fread(&meta->slot_len, sizeof(meta->slot_len), 1, file));
   size_t size = meta_size(meta);
   // read the whole
   rewind(file);
