@@ -1,6 +1,6 @@
 #pragma once
 
-// distribute data into special pages (insertion and deletion with O(n))
+// distribute data into special pages (insertion and deletion with O(1))
 // proper handling of insertions of data of different size like malloc
 //
 // it finds the best suit size and inserts string there
