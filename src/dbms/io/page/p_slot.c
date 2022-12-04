@@ -54,10 +54,12 @@ static void sp_push(slot_page *page, const slot_number num) {
   *(slot_number *)((void *)page + page->header.slot_start.bytes) = num;
 }
 
+// returns slot number
 static slot_number sp_slot_num(const slot_page *page, const pageoff_t pageoff) {
   return sp_page_body(pageoff).bytes / page->header.slot_size;
 }
 
+// returns start of slot
 static pageoff_t sp_slot_start(const slot_page *page, const slot_number num) {
   size_t slot_size = page->header.slot_size;
   return get_pageoff_t(offsetof(slot_page, body) + slot_size * num);
@@ -83,4 +85,8 @@ void sp_remove_data(struct slot_page *page, const pageoff_t pageoff) {
   // just add spta slot (without zeroing memory)
   slot_number num = sp_slot_num(page, pageoff);
   sp_push(page, num);
+}
+
+void *sp_select_data(struct slot_page *page, pageoff_t pageoff) {
+  return (void *)page + pageoff.bytes;
 }

@@ -20,7 +20,7 @@ typedef struct slot_header {
   struct base_header base;
   size_t slot_size;
   size_t slot_count;
-  pageoff_t slot_start;
+  pageoff_t slot_start; // slot number start
 } slot_header;
 
 typedef struct slot_page {
@@ -45,3 +45,5 @@ bool sp_full(const slot_page *page);
 bool sp_empty(const slot_page *page);
 
 pageoff_t sp_insert_data(struct slot_page *page, const void *data, size_t size);
+void sp_remove_data(struct slot_page *page, const pageoff_t pageoff);
+void *sp_select_data(struct slot_page *page, pageoff_t pageoff);

@@ -19,9 +19,23 @@ void dbms_dd_create_close(struct dbms *dbms) {
   }
 }
 
-// only use when entry is smaller than max
+// returns idx of element that is larger or equals or arr length if larger
 static size_t index_slot(const size_t entry_size, const size_t slot_len,
-                         const struct slot_page_entry entries[]) {}
+                         const struct slot_page_entry entries[]) {
+
+  int l = 0, r = slot_len;
+  while (l <= r) {
+    int med = (l + r) / 2;
+    if (entries[med].slot_size < entry_size) {
+      l = med + 1;
+    } else if (entries[med].slot_size > entry_size) {
+      r = med - 1;
+    } else {
+      return med;
+    }
+  }
+  return l;
+}
 
 static inline size_t max_slot_size(const size_t slot_len,
                                    const struct slot_page_entry entries[]) {
@@ -39,8 +53,9 @@ static fileoff_t slot_page_create(struct dbms *dbms, struct slot_page_entry *ent
 }
 
 // find in data distribution or malloc it using pagealloc
-static void slot_page_select_single(struct dbms *dbms, struct slot_page_entry *entry,
-                                    page_entry *pe_out, slot_page **sp_out) {
+static void slot_page_select_pop_single(struct dbms *dbms,
+                                        struct slot_page_entry *entry,
+                                        page_entry *pe_out, slot_page **sp_out) {
   FILE *file = dbms->dbfile->file;
   page_container *last = dbms_container_select(dbms, entry->last);
   page_entry last_cont = (page_entry){.start = entry->last, last->header.base.size};
@@ -76,19 +91,24 @@ static void slot_page_select_single(struct dbms *dbms, struct slot_page_entry *e
   }
 }
 
+static void force_container_push(struct dbms *dbms, struct slot_page_entry *entry,
+                                 page_entry *pe_in) {
+  page_container *last = dbms_container_select(dbms, entry->last);
+
+  if (container_full(last)) {
+    container_destruct(&last);
+    entry->last = dbms_container_create(dbms, SIZE_DEFAULT, entry->last, &last);
+  }
+  container_push(last, pe_in);
+  container_alter_destruct(&last, dbms->dbfile->file, entry->last);
+}
+
 // push page inside container if it is not full
 static void slot_page_deselect(struct dbms *dbms, struct slot_page_entry *entry,
                                page_entry *pe_in, slot_page **sp_in) {
   // if slot_page is not full
   if (!sp_full(*sp_in)) {
-    page_container *last = dbms_container_select(dbms, entry->last);
-
-    if (container_full(last)) {
-      container_destruct(&last);
-      entry->last = dbms_container_create(dbms, SIZE_DEFAULT, entry->last, &last);
-    }
-    container_push(last, pe_in);
-    container_alter_destruct(&last, dbms->dbfile->file, entry->last);
+    force_container_push(dbms, entry, pe_in);
   }
   // write and unload from ram
   sp_alter(*sp_in, dbms->dbfile->file, pe_in->start);
@@ -105,7 +125,7 @@ static po_ptr insert_once(struct dbms *dbms, const void *data, const size_t size
 
   po_ptr returned;
 
-  slot_page_select_single(dbms, slot_entry, &sp_entry, &sp);
+  slot_page_select_pop_single(dbms, slot_entry, &sp_entry, &sp);
   returned.offset = sp_insert_data(sp, data, size);
   returned.fileoff = sp_entry.start;
   slot_page_deselect(dbms, slot_entry, &sp_entry, &sp);
@@ -113,7 +133,7 @@ static po_ptr insert_once(struct dbms *dbms, const void *data, const size_t size
   return returned;
 }
 
-void dbms_dd_insert_data(struct dbms *dbms, const void *data, const size_t size) {
+void dbms_insert_data(struct dbms *dbms, const void *data, const size_t size) {
   meta *meta = dbms->meta;
 
   size_t mxs_size = max_slot_size(meta->slot_len, meta->slot_entries);
@@ -145,6 +165,87 @@ void dbms_dd_insert_data(struct dbms *dbms, const void *data, const size_t size)
 }
 
 // size - is needed to track pages with size > mx_slot_size
-void dbms_dd_remove_data(struct dbms *dbms, const po_ptr start, const size_t size) {
-  // implement later
+void dbms_remove_data(struct dbms *dbms, po_ptr po_cur, const size_t size) {
+  FILE *file = dbms->dbfile->file;
+  meta *meta = dbms->meta;
+
+  slot_page *cur = sp_construct_select(file, po_cur.fileoff);
+  // mxs is used as max size to check if data continues in another slot
+  po_ptr po_next;
+  size_t slot_size;
+
+  for (size_t cur_size = 0; cur_size < size; cur_size += slot_size) {
+    slot_size = cur->header.slot_size;
+    size_t po_slot_size = slot_size - sizeof(po_ptr);
+
+    bool has_next = (size - cur_size > slot_size);
+
+    if (has_next) {
+      pageoff_t offset = get_pageoff_t(po_cur.offset.bytes + po_slot_size);
+      po_next = *(po_ptr *)sp_select_data(cur, offset);
+    }
+
+    size_t idx = index_slot(cur->header.slot_size, meta->slot_len, meta->slot_entries);
+    struct slot_page_entry sp_entry = meta->slot_entries[idx];
+    page_entry entry =
+        (page_entry){.size = cur->header.base.size, .start = po_cur.fileoff};
+
+    // get element to next page
+    bool sp_was_full = sp_full(cur);
+    // pop
+    sp_remove_data(cur, po_cur.offset);
+    // add to datadistr
+    if (sp_was_full) {
+      force_container_push(dbms, &sp_entry, &entry);
+    }
+    // write and unload from ram
+    sp_alter_destruct(&cur, file, po_cur.fileoff);
+
+    // iterate next
+    if (has_next) {
+      cur = sp_construct_select(file, po_next.fileoff);
+      po_cur = po_next;
+    } else {
+      break;// return from loop after last element is processed
+    }
+  }
+}
+
+// also can be like iterator
+void dbms_select_data(struct dbms *dbms, po_ptr po_cur, const size_t size,
+                      void *data_out) {
+  FILE *file = dbms->dbfile->file;
+
+  slot_page *cur = sp_construct_select(file, po_cur.fileoff);
+
+  po_ptr po_next;
+  size_t slot_size;
+
+  assert(size > 0);
+  for (size_t cur_size = 0; cur_size < size; cur_size += slot_size) {
+    slot_size = cur->header.slot_size;
+    bool has_next = (size - cur_size > slot_size);
+
+    void *data = sp_select_data(cur, po_cur.offset);
+
+    if (has_next) {
+      size_t po_slot_size = slot_size - sizeof(po_ptr);
+      memcpy(data_out, data, po_slot_size);
+      // next page
+      pageoff_t offset = get_pageoff_t(po_cur.offset.bytes + po_slot_size);
+      po_next = *(po_ptr *)sp_select_data(cur, offset);
+    } else {
+      memcpy(data_out, data, slot_size);
+    }
+
+    sp_destruct(&cur);
+
+    // iterate next
+    if (has_next) {// always true unless its is last node
+      cur = sp_construct_select(file, po_next.fileoff);
+      po_cur = po_next;
+    } else {
+      break;// return from loop after last element is processed
+    }
+  }
 }
