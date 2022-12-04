@@ -5,7 +5,7 @@
 #include "core/pagepool.h"
 #include "io/meta/meta.h"
 #include "io/p_container.h"
-#include "io/p_data.h"
+#include "io/p_slot.h"
 #include "io/p_database.h"
 #include "io/p_table.h"
 #include "pagealloc.h"
@@ -145,66 +145,6 @@ void dbms_dp_close(database_page **page_ptr, fileoff_t page_start, dbms *dbms) {
   dp_alter(*page_ptr, dbms->dbfile->file, page_start);
   dp_destruct(page_ptr);
 }
-
-// DATA PAGE
-// fileoff_t dbms_da_create_close(dbms *dbms, pageoff_t dp_size) {
-// data_page *page;
-// fileoff_t page_pos = dbms_da_create(dbms, dp_size, &page);
-// da_destruct(&page);
-// return page_pos;
-// }
-
-// fileoff_t dbms_da_create(dbms *dbms, pageoff_t page_size, data_page **da_ptr_out) {
-//   meta *meta = dbms->meta;
-//   FILE *file = dbms->dbfile->file;
-
-//   data_page *da = da_construct_init(get_page_size(DATA_PAGE_MIN_SIZE, page_size));
-//   fileoff_t da_pos = meta->pos_empty;
-//   meta->pos_empty = get_fileoff_t(da_pos.bytes + da->header.base.size.bytes);
-//   // If no pages are stored
-//   if (fileoff_is_null(meta->da_first) && fileoff_is_null(meta->da.last)) {
-//     meta->da.first = da_pos;
-//   }
-//   meta->da.last = da_pos;
-
-//   da_create(da, file, da_pos);
-//   *da_ptr_out = da;
-//   return da_pos;
-// }
-
-// data_page *dbms_da_select(dbms *dbms, fileoff_t page_start) {
-//   FILE *file = dbms->dbfile->file;
-//   pageoff_t size;
-//   page_load_size(&size, file, page_start);
-//   data_page *da = da_construct(size);
-//   da_load(da, file, page_start);
-//   return da;
-// }
-
-// // Alter + destruct
-// void dbms_da_close(data_page **page_ptr, fileoff_t page_start, dbms *dbms) {
-//   da_alter(*page_ptr, dbms->dbfile->file, page_start);
-//   da_destruct(page_ptr);
-// }
-
-// void dbms_da_insert_data(const void *data, size_t size, dbms *dbms,
-//                          fileoff_t *fileoff_out, pageoff_t *pageoff_out) {
-
-//   fileoff_t fileoff = dbms->meta->da.last;
-//   data_page *da = dbms_da_select(dbms, fileoff);
-//   pageoff_t pageoff = da_insert_data(da, data, size);
-
-//   if (pageoff.bytes == 0) {
-//     da_destruct(&da);
-//     // Create new page and insert data in it
-//     pageoff_t da_size = da_body_page(get_bodyoff_t(size));
-//     fileoff = dbms_da_create(dbms, da_size, &da);
-//     pageoff = da_insert_data(da, data, size);
-//   }
-//   fileoff_out->bytes = fileoff.bytes;
-//   pageoff_out->bytes = pageoff.bytes;
-//   dbms_da_close(&da, *fileoff_out, dbms);
-// }
 
 // TABLE_PAGE
 // fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos,

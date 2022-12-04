@@ -1,0 +1,45 @@
+#pragma once
+
+#include "p_base.h"
+
+#include <stddef.h>
+
+/*
+Structure: data_page
+  |------------------|
+  |HHHHHHH|TTTT|     | header.slot - size of header slot
+  |------------------|
+  |     |TTTTT|      |
+  |------------------|
+  |     |        IIII| I - empty slots
+  |------------------|
+
+*/
+
+typedef struct slot_header {
+  struct base_header base;
+  size_t slot_size;
+  size_t slot_count;
+  pageoff_t slot_start;
+} slot_header;
+
+typedef struct slot_page {
+  struct slot_header header;
+  uint8_t body[];
+} __attribute__((packed)) slot_page;
+
+// Bodyoff/pageoff
+INLINE_BODYOFF_TO_PAGEOFF(struct slot_page, body, sp)
+INLINE_PAGEOFF_TO_BODYOFF(struct slot_page, body, sp)
+
+pageoff_t sp_size(const size_t slot_size, const size_t slot_count);
+
+PAGE_CONSTRUCT_DEFAULT(struct slot_page, sp)
+PAGE_DESTRUCT_DEFAULT(slot_page, sp)
+slot_page *sp_construct_slot(const size_t slot_size, const size_t slot_count);
+struct slot_page *sp_construct_init(const size_t slot_size, const size_t slot_count);
+
+bool sp_is_full(const slot_page *page);
+bool sp_is_empty(const slot_page *page);
+
+pageoff_t sp_insert_data(struct slot_page *page, const void *data, size_t size);

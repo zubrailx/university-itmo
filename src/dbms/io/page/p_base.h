@@ -19,7 +19,7 @@ enum page_types {
   PAGE_UNKNOWN = 0,
   PAGE_CONTAINER,
   PAGE_DATABASE,
-  PAGE_DATA,
+  PAGE_SLOT,
   PAGE_TABLE,
   PAGE_DUMPED,
 };
