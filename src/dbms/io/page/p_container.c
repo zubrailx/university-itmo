@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <util/define.h>
 
-PAGE_CONSTRUCT_DEFAULT_IMPL(page_container, container, PAGE_CONTAINER)
-PAGE_DESTRUCT_DEFAULT_IMPL(page_container, container)
+PAGE_CONSTRUCT_DEFAULT_IMPL(struct page_container, container, PAGE_CONTAINER)
+PAGE_DESTRUCT_DEFAULT_IMPL(struct page_container, container)
 
 page_container *container_construct_init(pageoff_t size, fileoff_t prev) {
   page_container *container = container_construct(size);

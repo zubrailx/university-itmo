@@ -4,14 +4,16 @@
 
 #include <util/internals.h>
 
+#define _PAGE_PREFIX page
+#define _PAGE_TYPE struct base_page
+
 typedef struct base_header {
   uint8_t type;
   struct pageoff_t size;
 } base_header;
 
-typedef struct base_page {
-  struct base_header header;
-} __attribute__((packed)) base_page;
+typedef _PAGE_TYPE { struct base_header header; }
+__attribute__((packed)) base_page;
 
 enum page_types {
   PAGE_UNKNOWN = 0,
@@ -22,8 +24,8 @@ enum page_types {
   PAGE_DUMPED,
 };
 
-base_page *page_construct(const struct pageoff_t size, enum page_types type);
-void page_destruct(struct base_page **page_ptr);
+_PAGE_TYPE *page_construct(const struct pageoff_t size, enum page_types type);
+void page_destruct(_PAGE_TYPE **page_ptr);
 
 // Constructors / destructors
 #define PAGE_CONSTRUCT_DEFAULT(page_type, prefix)                                      \
@@ -35,10 +37,10 @@ void page_destruct(struct base_page **page_ptr);
   }
 
 #define PAGE_DESTRUCT_DEFAULT(page_type, prefix)                                       \
-  void prefix##_destruct(struct page_type **page_ptr);
+  void prefix##_destruct(page_type **page_ptr);
 
 #define PAGE_DESTRUCT_DEFAULT_IMPL(page_type, prefix)                                  \
-  void prefix##_destruct(struct page_type **page_ptr) {                                \
+  void prefix##_destruct(page_type **page_ptr) {                                       \
     return page_destruct((base_page **)page_ptr);                                      \
   }
 
@@ -56,3 +58,6 @@ void page_destruct(struct base_page **page_ptr);
   }
 #define EXTERN_INLINE_PAGEOFF_TO_BODYOFF(page_type, m_body, prefix)                    \
   extern inline bodyoff_t prefix##_page_body(pageoff_t pageoff);
+
+#undef _PAGE_TYPE
+#undef _PAGE_PREFIX

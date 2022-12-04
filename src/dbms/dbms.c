@@ -7,6 +7,7 @@
 #include "core/dbfile.h"
 #include "core/dbmeta.h"
 #include "core/dbms.h"
+#include "datadistr.h"
 #include "io/meta.h"
 #include "page.h"
 #include "pagealloc.h"
@@ -17,7 +18,7 @@ static size_t DATA_PAGE_SLOT_COUNT[] = {32, 16, 8, 4, 2, 1};
 
 static meta *dbms_meta_construct() {
   size_t da_len = sizeof(DATA_PAGE_SLOT_SIZES) / sizeof(size_t);
-  meta *meta = meta_construct_init(da_len, DATA_PAGE_SLOT_SIZES);
+  meta *meta = meta_construct_init(da_len, DATA_PAGE_SLOT_SIZES, DATA_PAGE_SLOT_COUNT);
   return meta;
 }
 
@@ -45,6 +46,7 @@ dbms *dbms_create(const char *fname) {
   // create page allocator
   dbms_pa_create_close(dbms, FILEOFF_NULL);
   // create containers data distributer
+  dbms_dd_create_close(dbms);
   // create pages
   dbms_dp_create_close(dbms, SIZE_DEFAULT);
   // update meta

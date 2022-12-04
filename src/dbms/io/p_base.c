@@ -9,13 +9,13 @@
 static base_header DUMPED = (base_header){.type = PAGE_DUMPED};
 
 // Load only size of page from file
-void page_load_size(pageoff_t *size, FILE *file, const fileoff_t page_start) {
+void page_select_size(pageoff_t *size, FILE *file, const fileoff_t page_start) {
   fseek(file, page_start.bytes + offsetof(base_header, size), SEEK_SET);
   assert(fread(size, sizeof(*size), 1, file));
 }
 
 // Load page to malloced memory
-void page_load(base_page *base, FILE *file, fileoff_t page_start) {
+void page_select(base_page *base, FILE *file, fileoff_t page_start) {
   fseek(file, page_start.bytes, SEEK_SET);
   assert(fread(base, base->header.size.bytes, 1, file));
 }

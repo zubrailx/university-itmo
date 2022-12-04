@@ -29,8 +29,8 @@ typedef struct data_page {
 } __attribute__((packed)) data_page;
 
 // Bodyoff/pageoff
-INLINE_BODYOFF_TO_PAGEOFF(data_page, body, da)
-INLINE_PAGEOFF_TO_BODYOFF(data_page, body, da)
+INLINE_BODYOFF_TO_PAGEOFF(struct data_page, body, da)
+INLINE_PAGEOFF_TO_BODYOFF(struct data_page, body, da)
 
 data_page *da_construct(const size_t slot_size, const size_t slot_count);
 PAGE_DESTRUCT_DEFAULT(data_page, da)

@@ -72,12 +72,12 @@ typedef struct tp_typle_iter {
   size_t typle_size;
 } tp_typle_iter;
 
-INLINE_BODYOFF_TO_PAGEOFF(table_page, body, tp)
-INLINE_PAGEOFF_TO_BODYOFF(table_page, body, tp)
+INLINE_BODYOFF_TO_PAGEOFF(struct table_page, body, tp)
+INLINE_PAGEOFF_TO_BODYOFF(struct table_page, body, tp)
 
 // Constructors/destructors
-PAGE_CONSTRUCT_DEFAULT(table_page, tp)
-PAGE_DESTRUCT_DEFAULT(table_page, tp)
+PAGE_CONSTRUCT_DEFAULT(struct table_page, tp)
+PAGE_DESTRUCT_DEFAULT(struct table_page, tp)
 struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_t prev,
                                      const fileoff_t next,
                                      const struct dp_typle *typle);

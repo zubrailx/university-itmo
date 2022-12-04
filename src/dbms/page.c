@@ -63,11 +63,7 @@ bool dbms_container_find(const struct dbms *dbms, const pageoff_t size,
 
 page_container *dbms_container_select(const struct dbms *dbms, const fileoff_t pc_loc) {
   FILE *file = dbms->dbfile->file;
-  pageoff_t size;
-  page_load_size(&size, file, pc_loc);
-  page_container *pc = container_construct(size);
-  container_load(pc, file, pc_loc);
-  return pc;
+  return container_construct_select(file, pc_loc);
 }
 
 // uses pagealloc
@@ -83,6 +79,8 @@ fileoff_t dbms_container_create_close(dbms *dbms, const fileoff_t prev,
 fileoff_t dbms_container_create(dbms *dbms, pageoff_t size, const fileoff_t prev,
                                 page_container **pc_ptr_out) {
   FILE *file = dbms->dbfile->file;
+
+  size = size_max(CONTAINER_PAGE_MIN_SIZE, size);
 
   page_entry entry = dbms_page_malloc(dbms, size);
   page_container *cont = container_construct_init(entry.size, prev);
@@ -139,11 +137,7 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
 // Construct + load
 database_page *dbms_dp_select(dbms *dbms, fileoff_t page_start) {
   FILE *file = dbms->dbfile->file;
-  pageoff_t size;
-  page_load_size(&size, file, page_start);
-  database_page *dp = dp_construct(size);
-  dp_load(dp, file, page_start);
-  return dp;
+  return dp_construct_select(file, page_start);
 }
 
 // Alter + destruct

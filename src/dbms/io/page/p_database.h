@@ -64,12 +64,12 @@ typedef struct dp_typle_iter {
 } dp_typle_iter;
 
 // Bodyoff to pageoff
-INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
-INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
+INLINE_BODYOFF_TO_PAGEOFF(struct database_page, body, dp)
+INLINE_PAGEOFF_TO_BODYOFF(struct database_page, body, dp)
 
 // Constructors/destructors for database_page
-PAGE_CONSTRUCT_DEFAULT(database_page, dp)
-PAGE_DESTRUCT_DEFAULT(database_page, dp)
+PAGE_CONSTRUCT_DEFAULT(struct database_page, dp)
+PAGE_DESTRUCT_DEFAULT(struct database_page, dp)
 struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
                                         fileoff_t next);
 

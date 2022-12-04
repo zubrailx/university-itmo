@@ -5,8 +5,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-EXTERN_INLINE_BODYOFF_TO_PAGEOFF(table_page, body, tp)
-EXTERN_INLINE_PAGEOFF_TO_BODYOFF(table_page, body, tp)
+EXTERN_INLINE_BODYOFF_TO_PAGEOFF(struct table_page, body, tp)
+EXTERN_INLINE_PAGEOFF_TO_BODYOFF(struct table_page, body, tp)
 
 EXTERN_INLINE_TPT_COLUMN(double, COLUMN_TYPE_DOUBLE)
 EXTERN_INLINE_TPT_COLUMN(int32_t, COLUMN_TYPE_INT32)
@@ -14,8 +14,8 @@ EXTERN_INLINE_TPT_COLUMN(bool, COLUMN_TYPE_BOOL)
 EXTERN_INLINE_TPT_COLUMN(page_sso, COLUMN_TYPE_STRING)
 
 // Constructors/destructors
-PAGE_CONSTRUCT_DEFAULT_IMPL(table_page, tp, PAGE_TABLE)
-PAGE_DESTRUCT_DEFAULT_IMPL(table_page, tp)
+PAGE_CONSTRUCT_DEFAULT_IMPL(struct table_page, tp, PAGE_TABLE)
+PAGE_DESTRUCT_DEFAULT_IMPL(struct table_page, tp)
 
 static void tcur_next(struct pageoff_t *cur, size_t typle_size) {
   cur->bytes += typle_size;

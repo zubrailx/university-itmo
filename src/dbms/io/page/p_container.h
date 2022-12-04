@@ -37,8 +37,8 @@ typedef struct cp_entry_iter {
   pageoff_t end;// points after last element in list
 } cp_entry_iter;
 
-PAGE_CONSTRUCT_DEFAULT(page_container, container)
-PAGE_DESTRUCT_DEFAULT(page_container, container)
+PAGE_CONSTRUCT_DEFAULT(struct page_container, container)
+PAGE_DESTRUCT_DEFAULT(struct page_container, container)
 page_container *container_construct_init(pageoff_t size, fileoff_t prev);
 
 bool container_push(struct page_container *page, const struct page_entry *entry);

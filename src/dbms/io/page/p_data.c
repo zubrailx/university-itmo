@@ -7,20 +7,21 @@
 
 typedef uint32_t slot_number;
 
-EXTERN_INLINE_BODYOFF_TO_PAGEOFF(data_page, body, da)
-EXTERN_INLINE_PAGEOFF_TO_BODYOFF(data_page, body, da)
+EXTERN_INLINE_BODYOFF_TO_PAGEOFF(struct data_page, body, da)
+EXTERN_INLINE_PAGEOFF_TO_BODYOFF(struct data_page, body, da)
 
 static pageoff_t da_size(const size_t slot_size, const size_t slot_count) {
   size_t size = slot_count * (slot_size + sizeof(slot_number));
   return da_body_page(get_bodyoff_t(size));
 }
 
-data_page *da_construct(const size_t slot_size, const size_t slot_count) {
+data_page *da_construct_slot(const size_t slot_size, const size_t slot_count) {
   return (data_page *)page_construct(da_size(slot_size, slot_count), PAGE_DATA);
 }
 PAGE_DESTRUCT_DEFAULT_IMPL(data_page, da)
 
-struct data_page *da_construct_init(const size_t slot_size, const size_t slot_count) {
+struct data_page *da_construct_slot_init(const size_t slot_size,
+                                         const size_t slot_count) {
   data_page *page = da_construct(slot_size, slot_count);
   // init
   page->header.slot_size = slot_size;

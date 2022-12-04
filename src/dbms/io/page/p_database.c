@@ -4,12 +4,12 @@
 #include <malloc.h>
 #include <string.h>
 
-EXTERN_INLINE_BODYOFF_TO_PAGEOFF(database_page, body, dp)
-EXTERN_INLINE_PAGEOFF_TO_BODYOFF(database_page, body, dp)
+EXTERN_INLINE_BODYOFF_TO_PAGEOFF(struct database_page, body, dp)
+EXTERN_INLINE_PAGEOFF_TO_BODYOFF(struct database_page, body, dp)
 
 // Constructors/destructors
-PAGE_CONSTRUCT_DEFAULT_IMPL(database_page, dp, PAGE_DATABASE)
-PAGE_DESTRUCT_DEFAULT_IMPL(database_page, dp)
+PAGE_CONSTRUCT_DEFAULT_IMPL(struct database_page, dp, PAGE_DATABASE)
+PAGE_DESTRUCT_DEFAULT_IMPL(struct database_page, dp)
 
 struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
                                         fileoff_t next) {
@@ -30,7 +30,7 @@ size_t dp_typle_size(size_t columns) {
 }
 
 dp_typle *dp_typle_locate(const struct database_page *page,
-                                 const pageoff_t idx_pageoff) {
+                          const pageoff_t idx_pageoff) {
   assert(page->header.base.size.bytes >= idx_pageoff.bytes + sizeof(page_index));
   assert(page->header.index_start.bytes <= idx_pageoff.bytes);
 
