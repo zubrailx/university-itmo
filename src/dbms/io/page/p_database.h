@@ -8,7 +8,7 @@
 Structure: database_page
   |------------------|
   |HHHHHHH|T TTT  TTT| H - header
-  |------------------| T - typles
+  |------------------| T - tuples
   |                  | I - indexes to get typles because not fixed size
   |------------------|
   |              IIII|
@@ -22,7 +22,7 @@ typedef struct database_header {
   fileoff_t next;
   fileoff_t prev;
   pageoff_t index_start;// farthest to end of page index
-  pageoff_t typle_end;  // after the last element
+  pageoff_t tuple_end;  // after the last element
 } database_header;
 
 typedef struct database_page {
@@ -36,8 +36,8 @@ typedef struct dpt_header {
   size_t cols;
   struct page_sso sso;
 
-  fileoff_t first; /* first and last page of the table */
-  fileoff_t last;
+  fileoff_t tp_first; /* first and last page of the table */
+  fileoff_t tp_last;
   fileoff_t gappy_last; /* pointer to last elements in gappy */
 } dpt_header;
 
@@ -51,17 +51,17 @@ typedef struct dpt_column {
   struct page_sso sso;
 } dpt_column;
 
-typedef struct dp_typle {
+typedef struct dp_tuple {
   struct dpt_header header;
   struct dpt_column columns[];
-} __attribute__((packed)) dp_typle;
+} __attribute__((packed)) dp_tuple;
 
 // ITERATOR
-typedef struct dp_typle_iter {
+typedef struct dp_tuple_iter {
   struct database_page *page;
   pageoff_t icur;
   pageoff_t iend;// points after last element in list
-} dp_typle_iter;
+} dp_tuple_iter;
 
 // Bodyoff to pageoff
 INLINE_BODYOFF_TO_PAGEOFF(struct database_page, body, dp)
@@ -73,18 +73,19 @@ PAGE_DESTRUCT_DEFAULT(struct database_page, dp)
 struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
                                         fileoff_t next);
 
-// Typle
+// Tuple
 size_t dp_space_left(const struct database_page *page);
-size_t dp_typle_size(size_t columns);
+size_t dp_tuple_size(size_t columns);
 
-pageoff_t dp_insert_typle(struct database_page *page, dp_typle *typle);
-bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);
-
-dp_typle *dp_typle_locate(const struct database_page *page,
+dp_tuple *dp_tuple_locate(const struct database_page *page,
                           const pageoff_t idx_pageoff);
 
+// insert and delete tuple in page
+pageoff_t dp_insert_table(struct database_page *page, dp_tuple *typle);
+bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);
+
 // Iterators
-struct dp_typle_iter *dp_typle_iter_construct(struct database_page *page);
-bool dp_typle_iter_next(struct dp_typle_iter *it);
-struct dp_typle *dp_typle_iter_get(struct dp_typle_iter *it);
-void dp_typle_iter_destruct(struct dp_typle_iter **it_ptr);
+struct dp_tuple_iter *dp_tuple_iter_construct(struct database_page *page);
+bool dp_tuple_iter_next(struct dp_tuple_iter *it);
+struct dp_tuple *dp_tuple_iter_get(struct dp_tuple_iter *it);
+void dp_tuple_iter_destruct(struct dp_tuple_iter **it_ptr);

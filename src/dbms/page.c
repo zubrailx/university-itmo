@@ -5,8 +5,8 @@
 #include "core/pagepool.h"
 #include "io/meta/meta.h"
 #include "io/p_container.h"
-#include "io/p_slot.h"
 #include "io/p_database.h"
+#include "io/p_slot.h"
 #include "io/p_table.h"
 #include "pagealloc.h"
 #include <assert.h>
@@ -20,7 +20,7 @@ static pageoff_t size_max(const pageoff_t min_size, const pageoff_t size) {
   return size.bytes > min_size.bytes ? size : min_size;
 }
 
-static pageoff_t _tp_size_max(const pageoff_t size, const dp_typle *typle) {
+static pageoff_t tp_size_max(const pageoff_t size, const dp_tuple *typle) {
   pageoff_t min_size = size_max(TABLE_PAGE_MIN_SIZE, size);
   return size_max(min_size, tp_get_min_size(typle));
 }
@@ -37,7 +37,7 @@ bool dbms_container_find(const struct dbms *dbms, const pageoff_t size,
   page_container *pc = NULL;
   bool found = false;
   while (!fileoff_is_null(fileoff)) {
-    pc = dbms_container_select(dbms, fileoff);
+    pc = dbms_container_open(dbms, fileoff);
     cp_entry_iter *it = cp_entry_iter_construct(pc);
     page_entry *entry = cp_entry_iter_get(it);
     while (entry) {
@@ -61,9 +61,8 @@ bool dbms_container_find(const struct dbms *dbms, const pageoff_t size,
   return found;
 }
 
-page_container *dbms_container_select(const struct dbms *dbms, const fileoff_t pc_loc) {
-  FILE *file = dbms->dbfile->file;
-  return container_construct_select(file, pc_loc);
+page_container *dbms_container_open(const struct dbms *dbms, const fileoff_t pc_loc) {
+  return container_construct_select(dbms->dbfile->file, pc_loc);
 }
 
 // uses pagealloc
@@ -106,23 +105,22 @@ fileoff_t dbms_dp_create_close(dbms *dbms, pageoff_t dp_size) {
 }
 
 // Create page and return pointer to created page
-fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_out) {
+fileoff_t dbms_dp_create(dbms *dbms, const pageoff_t dp_size,
+                         database_page **dp_ptr_out) {
   meta *meta = dbms->meta;
   FILE *file = dbms->dbfile->file;
 
   fileoff_t prev_pos = meta->dp_last;
 
-  dp_size = size_max(DATABASE_PAGE_MIN_SIZE, dp_size);
-
   // create page
-  page_entry entry = dbms_page_malloc(dbms, dp_size);
+  page_entry entry = dbms_page_malloc(dbms, size_max(DATABASE_PAGE_MIN_SIZE, dp_size));
   database_page *dp = dp_construct_init(entry.size, prev_pos, FILEOFF_NULL);
   fileoff_t dp_pos = entry.start;
 
   // If no pages are stored
   if (!fileoff_is_null(meta->dp_last)) {
     // There is at least one page allocated
-    database_page *prev = dbms_dp_select(dbms, prev_pos);
+    database_page *prev = dbms_dp_open(dbms, prev_pos);
     prev->header.next = dp_pos;
     dp->header.prev = prev_pos;
     dbms_dp_close(&prev, prev_pos, dbms);
@@ -135,60 +133,50 @@ fileoff_t dbms_dp_create(dbms *dbms, pageoff_t dp_size, database_page **dp_ptr_o
 }
 
 // Construct + load
-database_page *dbms_dp_select(dbms *dbms, fileoff_t page_start) {
-  FILE *file = dbms->dbfile->file;
-  return dp_construct_select(file, page_start);
+database_page *dbms_dp_open(dbms *dbms, fileoff_t page_start) {
+  return dp_construct_select(dbms->dbfile->file, page_start);
 }
 
 // Alter + destruct
 void dbms_dp_close(database_page **page_ptr, fileoff_t page_start, dbms *dbms) {
-  dp_alter(*page_ptr, dbms->dbfile->file, page_start);
-  dp_destruct(page_ptr);
+  dp_alter_destruct(page_ptr, dbms->dbfile->file, page_start);
 }
 
 // TABLE_PAGE
-// fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
-//                                const dp_typle *typle) {
-//   table_page *page;
-//   fileoff_t page_pos = dbms_tp_create(dbms, size, prev_pos, typle, &page);
-//   tp_destruct(&page);
-//   return page_pos;
-// }
+fileoff_t dbms_tp_create_close(dbms *dbms, pageoff_t size, fileoff_t prev_pos,
+                               const dp_tuple *tuple) {
+  table_page *page;
+  fileoff_t page_pos = dbms_tp_create(dbms, size, prev_pos, tuple, &page);
+  tp_destruct(&page);
+  return page_pos;
+}
 
-// fileoff_t dbms_tp_create(dbms *dbms, const pageoff_t size, const fileoff_t prev_pos,
-//                          const dp_typle *typle, table_page **tp_ptr_out) {
-//   meta *meta = dbms->meta;
-//   FILE *file = dbms->dbfile->file;
+fileoff_t dbms_tp_create(dbms *dbms, const pageoff_t size, const fileoff_t prev_pos,
+                         const dp_tuple *tuple, table_page **tp_ptr_out) {
+  meta *meta = dbms->meta;
+  FILE *file = dbms->dbfile->file;
 
-//   pageoff_t page_size = _tp_size_max(size, typle);
-//   table_page *tp = tp_construct_init(page_size, prev_pos, FILEOFF_NULL, typle);
-//   fileoff_t tp_pos = meta->pos_empty;
+  // create page
+  page_entry entry = dbms_page_malloc(dbms, tp_size_max(size, tuple));
+  table_page *tp = tp_construct_init(entry.size, prev_pos, FILEOFF_NULL, tuple);
+  fileoff_t tp_pos = meta->pos_empty;
 
-//   meta->pos_empty = get_fileoff_t(tp_pos.bytes + tp->header.base.size.bytes);
+  if (prev_pos.bytes != 0) {
+    table_page *prev = dbms_tp_open(dbms, prev_pos);
+    prev->header.next = tp_pos;
+    tp->header.prev = prev_pos;
+    dbms_tp_close(&prev, prev_pos, dbms);
+  }
 
-//   if (prev_pos.bytes != 0) {
-//     table_page *prev = dbms_tp_select(dbms, prev_pos);
-//     prev->header.next = tp_pos;
-//     tp->header.prev = prev_pos;
-//     dbms_tp_close(&prev, prev_pos, dbms);
-//   }
+  tp_create(tp, file, tp_pos);
+  *tp_ptr_out = tp;
+  return tp_pos;
+}
 
-//   tp_create(tp, file, tp_pos);
-//   *tp_ptr_out = tp;
-//   return tp_pos;
-// }
+table_page *dbms_tp_open(dbms *dbms, fileoff_t page_start) {
+  return tp_construct_select(dbms->dbfile->file, page_start);
+}
 
-// table_page *dbms_tp_select(dbms *dbms, fileoff_t page_start) {
-//   FILE *file = dbms->dbfile->file;
-//   pageoff_t size;
-//   page_load_size(&size, file, page_start);
-//   table_page *tp = tp_construct(size);
-//   tp_load(tp, file, page_start);
-//   return tp;
-// }
-
-// void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms) {
-//   tp_alter(*page_ptr, dbms->dbfile->file, page_start);
-//   tp_destruct(page_ptr);
-// }
-//
+void dbms_tp_close(table_page **page_ptr, fileoff_t page_start, dbms *dbms) {
+  tp_alter_destruct(page_ptr, dbms->dbfile->file, page_start);
+}

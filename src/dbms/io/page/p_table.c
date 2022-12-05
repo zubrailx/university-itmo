@@ -1,6 +1,5 @@
 #include "p_table.h"
 
-#include "hole.h"
 #include "p_database.h"
 #include <assert.h>
 #include <stdlib.h>
@@ -17,25 +16,28 @@ EXTERN_INLINE_TPT_COLUMN(page_sso, COLUMN_TYPE_STRING)
 PAGE_CONSTRUCT_DEFAULT_IMPL(struct table_page, tp, PAGE_TABLE)
 PAGE_DESTRUCT_DEFAULT_IMPL(struct table_page, tp)
 
-static void tcur_next(struct pageoff_t *cur, size_t typle_size) {
-  cur->bytes += typle_size;
+static void tcur_next(struct pageoff_t *cur, size_t tuple_size) {
+  cur->bytes += tuple_size;
 }
 
 static pageoff_t tcur_end(const struct table_page *page) {
-  return page->header.typle_end;
+  return page->header.tuple_barrier;
 }
 
-static tp_typle *tp_typle_locate(const struct table_page *page, pageoff_t cur) {
+static tp_tuple *tp_tuple_locate(const struct table_page *page, pageoff_t cur) {
   return (void *)page + cur.bytes;
 }
 
-static pageoff_t tp_typle_limit(const pageoff_t page_size, const size_t typle_size) {
-  size_t cnt = tp_page_body(page_size).bytes / (typle_size + sizeof(page_hole));
-  return get_pageoff_t(offsetof(table_page, body) + cnt * typle_size);
+static size_t tp_tuple_slot_count(const pageoff_t page_size, const size_t tuple_size) {
+  return tp_page_body(page_size).bytes / (tuple_size + sizeof(empty_slot));
 }
 
-static bool tp_typle_is_full(const struct table_page *page) {
-  return page->header.typle_end.bytes == page->header.typle_limit.bytes;
+static bool tp_tuple_full(const struct table_page *page) {
+  return page->header.empty_start.bytes == page->header.base.size.bytes;
+}
+
+static bool tp_tuple_empty(const struct table_page *page) {
+  return page->header.empty_start.bytes == page->header.slot_barrier.bytes;
 }
 
 // Currently calculate size using switch case
@@ -54,81 +56,84 @@ static size_t tpt_column_size(uint8_t type) {
   }
 }
 
-pageoff_t tp_get_min_size(const struct dp_typle *typle) {
-  size_t typle_size = tp_get_typle_size(typle);
-  return get_pageoff_t(offsetof(table_page, body) + typle_size + sizeof(page_hole));
+pageoff_t tp_get_min_size(const struct dp_tuple *tuple) {
+  size_t tuple_size = tp_get_tuple_size(tuple);
+  return get_pageoff_t(offsetof(table_page, body) + tuple_size + sizeof(empty_slot));
 }
 
-size_t tp_get_typle_size(const struct dp_typle *typle) {
-  size_t cols = typle->header.cols;
-  size_t size = offsetof(struct tp_typle, columns);
+size_t tp_get_tuple_size(const struct dp_tuple *tuple) {
+  size_t cols = tuple->header.cols;
+  size_t size = offsetof(struct tp_tuple, columns);
   for (size_t i = 0; i < cols; ++i) {
-    size += tpt_column_size(typle->columns[i].type);
+    size += tpt_column_size(tuple->columns[i].type);
   }
   return size;
 }
 
 struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_t prev,
-                                     const fileoff_t next, const dp_typle *typle) {
+                                     const fileoff_t next, const dp_tuple *tuple) {
   // check if at least one row can be inserted
-  const pageoff_t min_size = tp_get_min_size(typle);
+  const pageoff_t min_size = tp_get_min_size(tuple);
   assert(size.bytes >= min_size.bytes && min_size.bytes && "Too small size of page");
 
   table_page *page = tp_construct(size);
   page->header.next = next;
   page->header.prev = prev;
 
-  page->header.typle_end = get_pageoff_t(offsetof(table_page, body));
-  page->header.typle_limit = tp_typle_limit(size, tp_get_typle_size(typle));
-  page->header.hole_start = size;
+  size_t tuple_size = tp_get_tuple_size(tuple);
+  size_t slots = tp_tuple_slot_count(size, tuple_size);
+
+  page->header.slot_barrier = get_pageoff_t(size.bytes - sizeof(empty_slot) * slots);
+  page->header.tuple_barrier = tp_body_page(get_bodyoff_t(tuple_size * slots));
+  page->header.empty_start = size;
 
   return page;
 }
 
 // Iterators
-static pageoff_t tp_get_next_typle(const struct table_page *page, pageoff_t cur,
-                                   size_t typle_size) {
-  tcur_next(&cur, typle_size);
-  for (; cur.bytes < tcur_end(page).bytes; tcur_next(&cur, typle_size)) {
-    tp_typle *typle = tp_typle_locate(page, cur);
-    if (typle->header.is_present) {
+static pageoff_t tp_next_tuple(const struct table_page *page, pageoff_t cur,
+                               size_t tuple_size) {
+  tcur_next(&cur, tuple_size);
+  for (; cur.bytes < tcur_end(page).bytes; tcur_next(&cur, tuple_size)) {
+    tp_tuple *tuple = tp_tuple_locate(page, cur);
+    if (tuple->header.is_present) {
       return cur;
     }
   }
   return tcur_end(page);
 }
 
-static inline bool tp_iter_is_end(tp_typle_iter *it) {
+static inline bool tp_iter_is_end(tp_tuple_iter *it) {
   return it->tcur.bytes == it->tend.bytes;
 }
 
-struct tp_typle_iter *tp_typle_iter_construct(struct table_page *page,
-                                              size_t typle_size) {
-  tp_typle_iter *iter = my_malloc(tp_typle_iter);
+struct tp_tuple_iter *tp_tuple_iter_construct(struct table_page *page,
+                                              size_t tuple_size) {
+  tp_tuple_iter *iter = my_malloc(tp_tuple_iter);
   if (page != NULL) {
-    *iter = (tp_typle_iter){.page = page,
+    *iter = (tp_tuple_iter){.page = page,
                             .tcur = get_pageoff_t(offsetof(table_page, body)),
-                            .tend = page->header.typle_end,
-                            .typle_size = typle_size};
+                            .tend = tcur_end(page),
+                            .tuple_size = tuple_size};
   } else {
-    *iter = (tp_typle_iter){
+    *iter = (tp_tuple_iter){
         .page = page, .tcur = get_pageoff_t(0), .tend = get_pageoff_t(0)};
   }
   return iter;
 }
 
-void tp_typle_iter_destruct(struct tp_typle_iter **it_ptr) {
+void tp_tuple_iter_destruct(struct tp_tuple_iter **it_ptr) {
   if (*it_ptr) {
     free(*it_ptr);
   }
 }
 
-bool tp_typle_iter_next(struct tp_typle_iter *it) {
-  it->tcur = tp_get_next_typle(it->page, it->tcur, it->typle_size);
+bool tp_tuple_iter_next(struct tp_tuple_iter *it) {
+  it->tcur = tp_next_tuple(it->page, it->tcur, it->tuple_size);
   return !tp_iter_is_end(it);
 }
-struct tp_typle *tp_typle_iter_get(struct tp_typle_iter *it) {
+struct tp_tuple *tp_tuple_iter_get(struct tp_tuple_iter *it) {
   if (tp_iter_is_end(it))
     return NULL;
-  return tp_typle_locate(it->page, it->tcur);
+  return tp_tuple_locate(it->page, it->tcur);
 }

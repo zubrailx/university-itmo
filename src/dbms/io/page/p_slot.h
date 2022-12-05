@@ -20,7 +20,7 @@ typedef struct slot_header {
   struct base_header base;
   size_t slot_size;
   size_t slot_count;
-  pageoff_t slot_start; // slot number start
+  pageoff_t slot_start;// slot number start
 } slot_header;
 
 typedef struct slot_page {

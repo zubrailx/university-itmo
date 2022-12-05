@@ -27,7 +27,7 @@ typedef struct page_sso {
     struct _STR_NOT_IN;
     char name[SSO_MXLEN];
   };
-  bool not_inline; // should be 0 if inline because string is null terminated
+  bool not_inline;// should be 0 if inline because string is null terminated
 } __attribute__((packed)) page_sso;
 
 size_t sso_to_size(const char *ssize);

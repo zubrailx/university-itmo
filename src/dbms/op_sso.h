@@ -6,4 +6,7 @@ struct dbms;
 
 // struct data_page *dbms_construct_select_sso(char **input_ptr, page_sso *sso,
 //                                       struct dbms *dbms);
-// void dbms_insert_sso(page_sso *sso_out, const char *name, struct dbms *dbms);
+
+void *dbms_sso_construct_select(page_sso *sso, struct dbms *dbms);
+page_sso dbms_sso_insert(size_t size, void *data, struct dbms *dbms);
+void dbms_sso_remove(page_sso *sso, struct dbms *dbms);

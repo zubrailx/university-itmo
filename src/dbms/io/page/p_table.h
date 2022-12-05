@@ -5,26 +5,30 @@
 #include "sso.h"
 
 // NOTE: currently without indexes
-struct dp_typle;
+struct dp_tuple;
 /*
 Structure: table_page
   |------------------|
   |HHHHHHH|T TTT  TTT| H - header
-  |------------------| T - typles (structures for different types)
+  |------------------| T - tuples (structures for different types)
   |                  | (currently no indexes are present)
-  |------------------| I - holes ()
-  |         B      HH| B - barier (max value for typle)
+  |------------------| I - empty slots
+  |         B      II| B - barier (max value for typle)
   |------------------|
 
 */
+typedef struct empty_slot {
+  pageoff_t start;
+} empty_slot;
+
 typedef struct table_header {
   struct base_header base;
   fileoff_t next;
   fileoff_t prev;
 
-  pageoff_t typle_limit;// if typle_limit == typle_end -> page is full
-  pageoff_t typle_end;
-  pageoff_t hole_start;// inclusive
+  pageoff_t tuple_barrier; // exclusive
+  pageoff_t slot_barrier; // inclusive
+  pageoff_t empty_start;// if empty_start == barrier then page is empty
 } table_header;
 
 typedef struct table_page {
@@ -59,18 +63,18 @@ typedef struct tpt_header {
   bool is_present;
 } tpt_header;
 
-typedef struct tp_typle {
+typedef struct tp_tuple {
   struct tpt_header header;
   struct tpt_column_base columns[];// just the pointer to the first entry start
-} __attribute__((packed)) tp_typle;
+} __attribute__((packed)) tp_tuple;
 
 // Iterators
-typedef struct tp_typle_iter {
+typedef struct tp_tuple_iter {
   struct table_page *page;
   pageoff_t tcur;
   pageoff_t tend;
-  size_t typle_size;
-} tp_typle_iter;
+  size_t tuple_size;
+} tp_tuple_iter;
 
 INLINE_BODYOFF_TO_PAGEOFF(struct table_page, body, tp)
 INLINE_PAGEOFF_TO_BODYOFF(struct table_page, body, tp)
@@ -80,14 +84,13 @@ PAGE_CONSTRUCT_DEFAULT(struct table_page, tp)
 PAGE_DESTRUCT_DEFAULT(struct table_page, tp)
 struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_t prev,
                                      const fileoff_t next,
-                                     const struct dp_typle *typle);
+                                     const struct dp_tuple *tuple);
 
-pageoff_t tp_get_min_size(const struct dp_typle *typle);
-size_t tp_get_typle_size(const struct dp_typle *typle);
+pageoff_t tp_get_min_size(const struct dp_tuple *tuple);
+size_t tp_get_tuple_size(const struct dp_tuple *tuple);
 // Iterators
-struct tp_typle_iter *tp_typle_iter_construct(struct table_page *page,
+struct tp_tuple_iter *tp_tuple_iter_construct(struct table_page *page,
                                               size_t typle_size);
-bool tp_typle_iter_next(struct tp_typle_iter *it);
-struct tp_typle *tp_typle_iter_get(struct tp_typle_iter *it);
-void tp_typle_iter_destruct(struct tp_typle_iter **it_ptr);
-// TODO: ITERATORS(for tpt_entry_base)
+bool tp_tuple_iter_next(struct tp_tuple_iter *it);
+struct tp_tuple *tp_tuple_iter_get(struct tp_tuple_iter *it);
+void tp_tuple_iter_destruct(struct tp_tuple_iter **it_ptr);

@@ -4,8 +4,7 @@
 #include <malloc.h>
 #include <string.h>
 
-// TODO: implement after i can get the idea of usage
-void *dbms_construct_select_sso(page_sso *sso, struct dbms *dbms) {
+void *dbms_sso_construct_select(page_sso *sso, struct dbms *dbms) {
   void *data;
   if (sso->not_inline) {
     size_t size = sso_to_size(sso->ssize);
@@ -18,9 +17,22 @@ void *dbms_construct_select_sso(page_sso *sso, struct dbms *dbms) {
   return data;
 }
 
-// insert sso string in data page or only store in page_sso
-// void dbms_insert_sso(page_sso *sso_out, const void *data, struct dbms *dbms) {
-//   dbms_insert_data(dbms, data, )
-// }
+// @size - size of data + null terminator
+page_sso dbms_sso_insert(size_t size, void *data, struct dbms *dbms) {
+  page_sso res = {};
+  res.not_inline = size > SSO_MXLEN;
 
-// void dbms_remove_sso(page_sso *sso_out, const char)
+  if (res.not_inline) {
+    size_to_sso(size, res.ssize);
+    res.po_ptr = dbms_insert_data(dbms, data, size);
+  } else {
+    memcpy(res.name, data, size);
+  }
+  return res;
+}
+
+void dbms_sso_remove(page_sso *sso, struct dbms *dbms) {
+  if (sso->not_inline) {
+    dbms_remove_data(dbms, sso->po_ptr, sso_to_size(sso->ssize));
+  }
+}

@@ -4,7 +4,8 @@
 #include <malloc.h>
 
 static size_t meta_size_col(const size_t slot_len) {
-  return offsetof(struct meta, slot_entries) + sizeof(struct slot_page_entry) * slot_len;
+  return offsetof(struct meta, slot_entries) +
+         sizeof(struct slot_page_entry) * slot_len;
 }
 size_t meta_size(const struct meta *meta) { return meta_size_col(meta->slot_len); }
 

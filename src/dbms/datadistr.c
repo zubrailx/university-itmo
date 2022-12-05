@@ -57,7 +57,7 @@ static void slot_page_select_pop_single(struct dbms *dbms,
                                         struct slot_page_entry *entry,
                                         page_entry *pe_out, slot_page **sp_out) {
   FILE *file = dbms->dbfile->file;
-  page_container *last = dbms_container_select(dbms, entry->last);
+  page_container *last = dbms_container_open(dbms, entry->last);
   page_entry last_cont = (page_entry){.start = entry->last, last->header.base.size};
 
   const fileoff_t prev_loc = last->header.prev;
@@ -69,7 +69,7 @@ static void slot_page_select_pop_single(struct dbms *dbms,
     if (!fileoff_is_null(prev_loc)) {
       // set last page pos to previous
       entry->last = prev_loc;
-      page_container *prev = dbms_container_select(dbms, prev_loc);
+      page_container *prev = dbms_container_open(dbms, prev_loc);
 
       *pe_out = *container_pop(prev);
       *sp_out = sp_construct(pe_out->size);
@@ -93,7 +93,7 @@ static void slot_page_select_pop_single(struct dbms *dbms,
 
 static void force_container_push(struct dbms *dbms, struct slot_page_entry *entry,
                                  page_entry *pe_in) {
-  page_container *last = dbms_container_select(dbms, entry->last);
+  page_container *last = dbms_container_open(dbms, entry->last);
 
   if (container_full(last)) {
     container_destruct(&last);
@@ -133,7 +133,8 @@ static po_ptr insert_once(struct dbms *dbms, const void *data, const size_t size
   return returned;
 }
 
-void dbms_insert_data(struct dbms *dbms, const void *data, const size_t size) {
+po_ptr dbms_insert_data(struct dbms *dbms, const void *data, const size_t size) {
+  po_ptr po_start;
   meta *meta = dbms->meta;
 
   size_t mxs_size = max_slot_size(meta->slot_len, meta->slot_entries);
@@ -148,6 +149,7 @@ void dbms_insert_data(struct dbms *dbms, const void *data, const size_t size) {
   size_t cur_size_ptr = size - mxs_sub * slots_with_ptr;
 
   po_ptr next = insert_once(dbms, cur_data_ptr, cur_size_ptr);
+  po_start = next;
 
   // [-------A]->[-------A]->[---------]
   if (slots_with_ptr > 0) {
@@ -162,6 +164,7 @@ void dbms_insert_data(struct dbms *dbms, const void *data, const size_t size) {
     }
     free(buffer);
   }
+  return po_start;
 }
 
 // size - is needed to track pages with size > mx_slot_size

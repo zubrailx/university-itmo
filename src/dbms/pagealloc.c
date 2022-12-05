@@ -51,7 +51,7 @@ page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
   FILE *file = dbms->dbfile->file;
 
   const fileoff_t last_loc = dbms->meta->free_last;
-  page_container *cur = dbms_container_select(dbms, last_loc);
+  page_container *cur = dbms_container_open(dbms, last_loc);
   pageoff_t last_size = cur->header.base.size;
 
   fileoff_t prev_loc = cur->header.prev;
@@ -61,7 +61,7 @@ page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
   if (remove_last) {
     dbms->meta->free_last = prev_loc;
     container_destruct(&cur);
-    cur = dbms_container_select(dbms, prev_loc);
+    cur = dbms_container_open(dbms, prev_loc);
   }
 
   fileoff_t cur_loc = remove_last ? prev_loc : last_loc;
@@ -75,7 +75,7 @@ page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
   if (found) {
     page_container *page;
     if (cur_loc.bytes != sel_loc.bytes) {
-      page = dbms_container_select(dbms, sel_loc);
+      page = dbms_container_open(dbms, sel_loc);
     } else {
       page = cur;
     }
@@ -111,7 +111,7 @@ page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
 
 void dbms_page_free(dbms *dbms, const page_entry *entry) {
   fileoff_t last_loc = dbms->meta->free_last;
-  page_container *last = dbms_container_select(dbms, last_loc);
+  page_container *last = dbms_container_open(dbms, last_loc);
   // allocate new page for container (in other case it can be bad)
   if (!container_push(last, entry)) {
     // destruct previous last page
