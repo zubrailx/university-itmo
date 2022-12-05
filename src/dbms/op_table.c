@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "converters/table_typle.h"
+#include "converters/table_tuple.h"
 #include "core/dbmeta.h"
 #include "op_sso.h"
 #include "page.h"
@@ -105,17 +105,17 @@ static void drop_table_pages(const dp_tuple *tuple, struct dbms *dbms) {
 static dp_tuple *select_tuple(const fileoff_t fileoff, const pageoff_t idx_pageoff,
                               struct dbms *dbms, database_page **page_out) {
   database_page *page = dbms_dp_open(dbms, fileoff);
-  dp_tuple *typle = dp_tuple_locate(page, idx_pageoff);
+  dp_tuple *tuple = dp_tuple_locate(page, idx_pageoff);
   *page_out = page;
-  return typle;
+  return tuple;
 }
 
 bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t idx_pageoff,
                      struct dbms *dbms) {
   database_page *page;
-  dp_tuple *typle = select_tuple(fileoff, idx_pageoff, dbms, &page);
+  dp_tuple *tuple = select_tuple(fileoff, idx_pageoff, dbms, &page);
 
-  drop_table_pages(typle, dbms);
+  drop_table_pages(tuple, dbms);
   bool res = dp_drop_table(page, idx_pageoff);
 
   dbms_dp_close(&page, fileoff, dbms);

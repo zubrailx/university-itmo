@@ -24,21 +24,17 @@ void print_database_typle(dp_tuple *typle) {
   printf("----------------------\n");
 }
 
-// void print_database_tables(dbms *dbms) {
-//   dp_iter *iter = dp_iter_construct(dbms);
-//   dp_typle *typle = dp_iter_get(iter);
-//   while (typle) {
-//     print_database_typle(typle);
-//
-//     table_page *tp = dbms_tp_select(dbms, typle->header.first);
-//     print_table_page(tp);
-//     tp_destruct(&tp);
+void print_database_tables(dbms *dbms) {
+  dp_iter *iter = dp_iter_construct(dbms);
+  dp_tuple *tuple = dp_iter_get(iter);
+  while (tuple) {
+    print_database_typle(tuple);
 
-//     dp_iter_next(iter);
-//     typle = dp_iter_get(iter);
-//   }
-//   dp_iter_destruct(&iter);
-// }
+    dp_iter_next(iter);
+    tuple = dp_iter_get(iter);
+  }
+  dp_iter_destruct(&iter);
+}
 
 // void print_table_page(table_page *page) {
 //   printf("----------------------\n");

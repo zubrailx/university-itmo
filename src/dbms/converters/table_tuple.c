@@ -1,4 +1,4 @@
-#include "table_typle.h"
+#include "table_tuple.h"
 
 enum table_column_type
 table_column_type_to_page(const enum dto_table_column_type from) {

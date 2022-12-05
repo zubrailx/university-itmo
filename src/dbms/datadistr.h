@@ -15,7 +15,7 @@ struct dbms;
 
 void dbms_dd_create_close(struct dbms *dbms);
 
-po_ptr dbms_insert_data(struct dbms *dbms, const void *data, const size_t size);
-void dbms_remove_data(struct dbms *dbms, po_ptr po_cur, const size_t size);
-void dbms_select_data(struct dbms *dbms, po_ptr po_cur, const size_t size,
+po_ptr dbms_dd_insert_data(struct dbms *dbms, const void *data, const size_t size);
+void dbms_dd_remove_data(struct dbms *dbms, po_ptr po_cur, const size_t size);
+void dbms_dd_select_data(struct dbms *dbms, po_ptr po_cur, const size_t size,
                       void *data_out);

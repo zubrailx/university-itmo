@@ -9,7 +9,7 @@ void *dbms_sso_construct_select(page_sso *sso, struct dbms *dbms) {
   if (sso->not_inline) {
     size_t size = sso_to_size(sso->ssize);
     data = malloc(size);
-    dbms_select_data(dbms, sso->po_ptr, size, data);
+    dbms_dd_select_data(dbms, sso->po_ptr, size, data);
     return data;
   } else {
     data = strdup(sso->name);
@@ -24,7 +24,7 @@ page_sso dbms_sso_insert(size_t size, void *data, struct dbms *dbms) {
 
   if (res.not_inline) {
     size_to_sso(size, res.ssize);
-    res.po_ptr = dbms_insert_data(dbms, data, size);
+    res.po_ptr = dbms_dd_insert_data(dbms, data, size);
   } else {
     memcpy(res.name, data, size);
   }
@@ -33,6 +33,6 @@ page_sso dbms_sso_insert(size_t size, void *data, struct dbms *dbms) {
 
 void dbms_sso_remove(page_sso *sso, struct dbms *dbms) {
   if (sso->not_inline) {
-    dbms_remove_data(dbms, sso->po_ptr, sso_to_size(sso->ssize));
+    dbms_dd_remove_data(dbms, sso->po_ptr, sso_to_size(sso->ssize));
   }
 }

@@ -4,6 +4,7 @@
 #include "dbms/op_table.h"
 #include "dbms/page.h"
 #include "dbms/tuple_iter.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

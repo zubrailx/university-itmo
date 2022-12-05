@@ -1,4 +1,5 @@
 #include "datadistr.h"
+#include "../util/print_page.h"
 #include "core/dbfile.h"
 #include "core/dbmeta.h"
 #include "core/dbms.h"
@@ -128,47 +129,48 @@ static po_ptr insert_once(struct dbms *dbms, const void *data, const size_t size
   slot_page_select_pop_single(dbms, slot_entry, &sp_entry, &sp);
   returned.offset = sp_insert_data(sp, data, size);
   returned.fileoff = sp_entry.start;
+  // print_page_full(sp, sp_entry.start);
   slot_page_deselect(dbms, slot_entry, &sp_entry, &sp);
 
   return returned;
 }
 
-po_ptr dbms_insert_data(struct dbms *dbms, const void *data, const size_t size) {
-  po_ptr po_start;
+po_ptr dbms_dd_insert_data(struct dbms *dbms, const void *data, const size_t size) {
   meta *meta = dbms->meta;
 
   size_t mxs_size = max_slot_size(meta->slot_len, meta->slot_entries);
   assert(mxs_size > sizeof(po_ptr));
 
-  const size_t slots_with_ptr =
-      (size - sizeof(po_ptr) - 1) / (mxs_size - sizeof(po_ptr));
+  size_t slots_with_ptr =
+      ((long)size - (long)sizeof(po_ptr) - 1) / (long)(mxs_size - sizeof(po_ptr));
 
   const size_t mxs_sub = mxs_size - sizeof(po_ptr);
 
-  void *cur_data_ptr = (void *)data + mxs_sub * slots_with_ptr;
-  size_t cur_size_ptr = size - mxs_sub * slots_with_ptr;
+  size_t cur_idx = mxs_sub * slots_with_ptr;
+  void *cur_ptr = &((char *)data)[cur_idx];
+  size_t cur_size = size - mxs_sub * slots_with_ptr;
 
-  po_ptr next = insert_once(dbms, cur_data_ptr, cur_size_ptr);
-  po_start = next;
+  po_ptr next = insert_once(dbms, cur_ptr, cur_size);
 
   // [-------A]->[-------A]->[---------]
   if (slots_with_ptr > 0) {
     void *buffer = malloc(mxs_size);
-    while (cur_size_ptr < size) {
-      cur_size_ptr += mxs_sub;
-      cur_data_ptr += mxs_sub;
+    while (slots_with_ptr--) {
+      cur_size = mxs_sub;
+      cur_idx -= mxs_sub;
+      cur_ptr = &((char *)data)[cur_idx];
 
-      memcpy(buffer, cur_data_ptr, mxs_size - sizeof(po_ptr));
+      memcpy(buffer, cur_ptr, cur_size);
       memcpy(buffer + mxs_sub, &next, sizeof(po_ptr));
-      next = insert_once(dbms, cur_data_ptr, mxs_size);
+      next = insert_once(dbms, buffer, mxs_size);
     }
     free(buffer);
   }
-  return po_start;
+  return next;
 }
 
 // size - is needed to track pages with size > mx_slot_size
-void dbms_remove_data(struct dbms *dbms, po_ptr po_cur, const size_t size) {
+void dbms_dd_remove_data(struct dbms *dbms, po_ptr po_cur, const size_t size) {
   FILE *file = dbms->dbfile->file;
   meta *meta = dbms->meta;
 
@@ -215,30 +217,33 @@ void dbms_remove_data(struct dbms *dbms, po_ptr po_cur, const size_t size) {
 }
 
 // also can be like iterator
-void dbms_select_data(struct dbms *dbms, po_ptr po_cur, const size_t size,
-                      void *data_out) {
-  FILE *file = dbms->dbfile->file;
+void dbms_dd_select_data(struct dbms *dbms, po_ptr po_cur, const size_t size,
+                         void *data_out) {
+  assert(size > 0);
 
+  FILE *file = dbms->dbfile->file;
   slot_page *cur = sp_construct_select(file, po_cur.fileoff);
 
   po_ptr po_next;
-  size_t slot_size;
 
-  assert(size > 0);
-  for (size_t cur_size = 0; cur_size < size; cur_size += slot_size) {
-    slot_size = cur->header.slot_size;
-    bool has_next = (size - cur_size > slot_size);
+  size_t subslot_size;
+
+  for (size_t cur_idx = 0; cur_idx < size; cur_idx += subslot_size) {
+    size_t slot_size = cur->header.slot_size;
+    subslot_size = slot_size - sizeof(po_ptr);
+
+    bool has_next = (size - cur_idx > slot_size);
 
     void *data = sp_select_data(cur, po_cur.offset);
+    void *data_cur_ptr = &((char *)data_out)[cur_idx];
 
     if (has_next) {
-      size_t po_slot_size = slot_size - sizeof(po_ptr);
-      memcpy(data_out, data, po_slot_size);
+      memcpy(data_cur_ptr, data, subslot_size);
       // next page
-      pageoff_t offset = get_pageoff_t(po_cur.offset.bytes + po_slot_size);
+      pageoff_t offset = get_pageoff_t(po_cur.offset.bytes + subslot_size);
       po_next = *(po_ptr *)sp_select_data(cur, offset);
     } else {
-      memcpy(data_out, data, slot_size);
+      memcpy(data_cur_ptr, data, size - cur_idx);
     }
 
     sp_destruct(&cur);

@@ -1,10 +1,11 @@
 {
   "configurations": [
     {
-      "name": "[json]: Launch main.c",
+      "name": "[json]: Compile & Launch main.c",
       "type": "cppdbg",
       "request": "launch",
-      "program": "./build/debug/bin/dbms_exec",
+      "preLaunchTask": "./cmake.sh debug",
+      "program": "build/debug/bin/dbms_exec",
       "cwd":"${workspaceFolder}",
       "stopOnEntry": false
     },

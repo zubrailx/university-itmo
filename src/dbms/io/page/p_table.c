@@ -87,6 +87,7 @@ struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_
   page->header.tuple_barrier = tp_body_page(get_bodyoff_t(tuple_size * slots));
   page->header.empty_start = size;
 
+  // TODO: push all empty slots
   return page;
 }
 

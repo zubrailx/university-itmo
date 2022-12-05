@@ -79,13 +79,13 @@ target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
   $<$<CONFIG:RELEASE>:-O3>
-  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak,memory -g>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 target_link_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
   $<$<CONFIG:RELEASE>:-O3>
-  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak,memory -g>
+  $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 
 if (DEFINED PROGRAM_LINUX OR UNIX)
@@ -112,29 +112,20 @@ FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
 )
-FetchContent_MakeAvailable(googletest)
-
 # -----------------------------------------------------------------------------
 # Executable main.c
 # -----------------------------------------------------------------------------
-# if (EXISTS "${PROJECT_SOURCE_DIR}/app/main.c")
-#   add_executable(${PROJECT_EXEC_NAME} app/main.c)
-  # Add sanitizer
-  # target_compile_options(${PROJECT_EXEC_NAME} PUBLIC
-  #   -g
-  #   $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
-  # )
-  # target_link_options(${PROJECT_EXEC_NAME} PUBLIC
-  #   -g
-  #   $<$<CONFIG:SANITIZED>:-fsanitize=address,leak>
-  # )
-#   target_include_directories(${PROJECT_EXEC_NAME} PUBLIC)
-#   target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
-# endif()
+if (EXISTS "${PROJECT_SOURCE_DIR}/app/main.c")
+  add_executable(${PROJECT_EXEC_NAME} app/main.c)
+  # target_include_directories(${PROJECT_EXEC_NAME} PUBLIC)
+  target_link_libraries(${PROJECT_EXEC_NAME} ${PROJECT_LIB_NAME})
+endif()
 # -----------------------------------------------------------------------------
 # Executable tests
 # -----------------------------------------------------------------------------
 if (DEFINED TSTS)
+	FetchContent_MakeAvailable(googletest)
+
   message(STATUS "TESTS: ${TSTS}")
   add_executable(${PROJECT_TEST_NAME} ${TSTS})
   target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_LIB_NAME} gtest_main)
@@ -143,6 +134,7 @@ if (DEFINED TSTS)
   add_test(NAME ${PROJECT_TEST_NAME} COMMAND $<TARGET_FILE:${PROJECT_TEST_NAME}> 
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
+
 # include(GoogleTest)
 # gtest_discover_tests(${PROJECT_TEST_NAME})
 # -----------------------------------------------------------------------------
