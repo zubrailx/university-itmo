@@ -4,7 +4,7 @@
 
 extern "C" {
 #include "../src/dbms/dto/dto_table.h"
-#include "../src/table.h"
+#include "../src/schema.h"
 #include "database.h"
 }
 

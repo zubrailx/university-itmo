@@ -1,6 +1,6 @@
-#include "op_sso.h"
+#include "sso.h"
 
-#include "datadistr.h"
+#include "data_dist.h"
 #include <malloc.h>
 #include <string.h>
 

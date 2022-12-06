@@ -7,7 +7,7 @@
 #include "core/dbfile.h"
 #include "core/dbmeta.h"
 #include "core/dbms.h"
-#include "datadistr.h"
+#include "data_dist.h"
 #include "io/meta.h"
 #include "page.h"
 #include "pagealloc.h"
