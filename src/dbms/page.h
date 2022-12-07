@@ -7,6 +7,11 @@
 #include "io/page/p_table.h"
 #include <util/internals.h>
 
+extern const pageoff_t DATABASE_PAGE_MIN_SIZE;
+extern const pageoff_t DATA_PAGE_MIN_SIZE;
+extern const pageoff_t TABLE_PAGE_MIN_SIZE;
+extern const pageoff_t CONTAINER_PAGE_MIN_SIZE;
+
 // PAGE CONTAINER
 fileoff_t dbms_container_create_close(struct dbms *dbms, const fileoff_t prev,
                                       pageoff_t size);

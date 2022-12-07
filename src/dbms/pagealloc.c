@@ -35,6 +35,7 @@ void dbms_pa_create_close(struct dbms *dbms, const fileoff_t prev) {
   container_create_append(dbms, prev, &pc);
   container_destruct(&pc);
 }
+// another implementation not write to file
 static page_entry alloc_page_entry(struct dbms *dbms, pageoff_t size) {
   base_page *page = page_construct(size, PAGE_UNKNOWN);
   page_create(page, dbms->dbfile->file, dbms->meta->pos_empty);

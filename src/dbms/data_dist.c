@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// TODO: rewrite data_dist like table_dist
+
 void dbms_dd_create_close(struct dbms *dbms) {
   meta *meta = dbms->meta;
   for (size_t i = 0; i < meta->slot_len; ++i) {
@@ -76,7 +78,7 @@ static void slot_page_select_pop_single(struct dbms *dbms,
       *sp_out = sp_construct(pe_out->size);
       sp_select(*sp_out, file, pe_out->start);
       // write and close resources
-      container_alter_destruct(&prev, file, prev_loc);
+      dbms_container_close(&prev, prev_loc, dbms);
       // free last page
       dbms_page_free(dbms, &last_cont);
     } else {
@@ -88,7 +90,7 @@ static void slot_page_select_pop_single(struct dbms *dbms,
     *sp_out = sp_construct(pe_out->size);
     sp_select(*sp_out, file, pe_out->start);
 
-    container_alter_destruct(&last, file, last_cont.start);
+    dbms_container_close(&last, last_cont.start, dbms);
   }
 }
 

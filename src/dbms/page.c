@@ -91,8 +91,7 @@ fileoff_t dbms_container_create(dbms *dbms, pageoff_t size, const fileoff_t prev
 }
 
 void dbms_container_close(page_container **page_ptr, fileoff_t page_start, dbms *dbms) {
-  container_alter(*page_ptr, dbms->dbfile->file, page_start);
-  container_destruct(page_ptr);
+  container_alter_destruct(page_ptr, dbms->dbfile->file, page_start);
 }
 
 // DATABASE PAGE

@@ -38,7 +38,8 @@ typedef struct dpt_header {
 
   fileoff_t tp_first; /* first and last page of the table */
   fileoff_t tp_last;
-  fileoff_t gappy_last; /* pointer to last elements in gappy */
+
+  fileoff_t td_last; /* pointer to last elements in gappy */
 } dpt_header;
 
 typedef struct dpt_col_limits {

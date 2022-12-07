@@ -19,7 +19,7 @@ void print_database_typle(dp_tuple *typle) {
   printf("is_present: %u\n", typle->header.is_present);
   printf("first_page: %zu\n", typle->header.tp_first.bytes);
   printf("last_page: %zu\n", typle->header.tp_last.bytes);
-  printf("gappy_page: %zu\n", typle->header.gappy_last.bytes);
+  printf("gappy_page: %zu\n", typle->header.td_last.bytes);
   printf("not_inline: %d\n", (int)typle->header.sso.not_inline);
   printf("----------------------\n");
 }

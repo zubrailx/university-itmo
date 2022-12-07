@@ -9,6 +9,7 @@
 #include "page.h"
 #include "pagealloc.h"
 #include "sso.h"
+#include "table_dist.h"
 
 // create typle and insert sso strings
 static struct dp_tuple *create_tuple_and_sso(const struct dto_table *dto_table,
@@ -44,21 +45,12 @@ static struct dp_tuple *create_tuple_and_sso(const struct dto_table *dto_table,
   return tuple;
 }
 
-// create pages needed
-static void create_tuple_pages(struct dp_tuple *tuple, struct dbms *dbms) {
-  tuple->header.tp_first =
-      dbms_tp_create_close(dbms, SIZE_DEFAULT, FILEOFF_NULL, tuple);
-  tuple->header.tp_last = tuple->header.tp_first;
-  // create container and add page inside it
-  tuple->header.gappy_last =
-      dbms_container_create_close(dbms, FILEOFF_NULL, SIZE_DEFAULT);
-}
-
 // Just insert table, no checks for existance
 void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   size_t typle_size;
+
   dp_tuple *tuple = create_tuple_and_sso(dto_table, dbms, &typle_size);
-  create_tuple_pages(tuple, dbms);
+  tuple->header.td_last = dbms_td_create_close(dbms);
 
   // select last page and insert there or create new page
   fileoff_t page_loc = dbms->meta->dp_last;
@@ -77,7 +69,7 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   free(tuple);
 }
 
-static void drop_table_pages(const dp_tuple *tuple, struct dbms *dbms) {
+static void drop_table_pages(dp_tuple *tuple, struct dbms *dbms) {
   page_entry current;
   // drop table pages
   current.start = tuple->header.tp_first;
@@ -90,17 +82,12 @@ static void drop_table_pages(const dp_tuple *tuple, struct dbms *dbms) {
     current.start = page->header.next;
     tp_destruct(&page);
   }
+  tuple->header.tp_first = FILEOFF_NULL;
+  tuple->header.tp_last = FILEOFF_NULL;
+
   // drop gappy pages
-  current.start = tuple->header.gappy_last;
-  while (!fileoff_is_null(current.start)) {
-    page_container *page = dbms_container_open(dbms, current.start);
-    current.size = page->header.base.size;
-
-    dbms_page_free(dbms, &current);
-
-    current.start = page->header.prev;
-    container_destruct(&page);
-  }
+  dbms_td_drop(dbms, tuple->header.td_last);
+  tuple->header.td_last = FILEOFF_NULL;
 }
 
 // return typle inside database_page
@@ -118,7 +105,9 @@ bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t idx_pageoff,
   dp_tuple *tuple = select_tuple(fileoff, idx_pageoff, dbms, &page);
 
   drop_table_pages(tuple, dbms);
+
   bool res = dp_drop_table(page, idx_pageoff);
+  tuple->header.is_present = false;
 
   dbms_dp_close(&page, fileoff, dbms);
   return res;
