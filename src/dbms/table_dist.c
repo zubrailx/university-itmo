@@ -39,7 +39,7 @@ void dbms_td_drop(struct dbms *dbms, const fileoff_t last) {
   }
 }
 
-// pop last entry or malloc it
+// pop not full page or malloc it
 // @return - bool == false if malloc else true
 bool dbms_td_pop_single(struct dbms *dbms, const dp_tuple *tuple, fileoff_t *gappy_last,
                        page_entry *pe_out) {

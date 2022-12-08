@@ -12,23 +12,24 @@ Structure: table_page
   |HHHHHHH|T TTT  TTT| H - header
   |------------------| T - tuples (structures for different types)
   |                  | (currently no indexes are present)
-  |------------------| I - empty slots
+  |------------------| I - indexes of empty slots (slot_index)
   |         B      II| B - barier (max value for typle)
   |------------------|
 
 */
-typedef struct empty_slot {
+typedef struct slot_index {
   pageoff_t start;
-} empty_slot;
+} slot_index;
 
 typedef struct table_header {
   struct base_header base;
   fileoff_t next;
   fileoff_t prev;
 
-  pageoff_t tuple_barrier; // exclusive
-  pageoff_t slot_barrier; // inclusive
-  pageoff_t empty_start;// if empty_start == barrier then page is empty
+  pageoff_t tuple_barrier;// exclusive
+  //
+  pageoff_t index_barrier;// inclusive
+  pageoff_t index_start;  // if index_start == barrier then page is empty
 } table_header;
 
 typedef struct table_page {
@@ -88,6 +89,13 @@ struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_
 
 pageoff_t tp_get_min_size(const struct dp_tuple *tuple);
 size_t tp_get_tuple_size(const struct dp_tuple *tuple);
+
+// Push and pop
+pageoff_t tp_insert_row(struct table_page *page, const tp_tuple *tuple,
+                        size_t tuple_size);
+void tp_remove_row(struct table_page *page, const tp_tuple *tuple, size_t tuple_size);
+void tp_update_row(struct table_page *page, const tp_tuple *tuple, size_t tuple_size);
+
 // Iterators
 struct tp_tuple_iter *tp_tuple_iter_construct(struct table_page *page,
                                               size_t typle_size);

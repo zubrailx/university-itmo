@@ -4,17 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "converters/table_tuple.h"
+#include "converters/table.h"
 #include "core/dbmeta.h"
+#include "iter.h"
 #include "page.h"
 #include "pagealloc.h"
 #include "sso.h"
 #include "table_dist.h"
 
 // create typle and insert sso strings
-static struct dp_tuple *create_tuple_and_sso(const struct dto_table *dto_table,
-                                             struct dbms *dbms,
-                                             size_t *typle_size_out) {
+static struct dp_tuple *to_tuple_with_sso(const struct dto_table *dto_table,
+                                          struct dbms *dbms, size_t *typle_size_out) {
   // Convert dto to entity
   dpt_header header = {};
   {
@@ -34,8 +34,8 @@ static struct dp_tuple *create_tuple_and_sso(const struct dto_table *dto_table,
   dpt_column col = {};
   for (size_t i = 0; i < tuple->header.cols; ++i) {
     // convert dto column to entity
-    table_column_limits_to_page(&dto_col->lims, &col.limits);
-    col.type = table_column_type_to_page(dto_col->type);
+    column_limits_to_page(&dto_col->lims, &col.limits);
+    col.type = column_type_to_page(dto_col->type);
     dbms_sso_insert(strlen(dto_col->name) + 1, dto_col->name, dbms);
 
     tuple->columns[i] = col;
@@ -49,7 +49,7 @@ static struct dp_tuple *create_tuple_and_sso(const struct dto_table *dto_table,
 void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
   size_t typle_size;
 
-  dp_tuple *tuple = create_tuple_and_sso(dto_table, dbms, &typle_size);
+  dp_tuple *tuple = to_tuple_with_sso(dto_table, dbms, &typle_size);
   tuple->header.td_last = dbms_td_create_close(dbms);
 
   // select last page and insert there or create new page
@@ -91,8 +91,8 @@ static void drop_table_pages(dp_tuple *tuple, struct dbms *dbms) {
 }
 
 // return typle inside database_page
-static dp_tuple *select_tuple(const fileoff_t fileoff, const pageoff_t idx_pageoff,
-                              struct dbms *dbms, database_page **page_out) {
+dp_tuple *dbms_select_tuple(const fileoff_t fileoff, const pageoff_t idx_pageoff,
+                                   struct dbms *dbms, database_page **page_out) {
   database_page *page = dbms_dp_open(dbms, fileoff);
   dp_tuple *tuple = dp_tuple_locate(page, idx_pageoff);
   *page_out = page;
@@ -102,7 +102,7 @@ static dp_tuple *select_tuple(const fileoff_t fileoff, const pageoff_t idx_pageo
 bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t idx_pageoff,
                      struct dbms *dbms) {
   database_page *page;
-  dp_tuple *tuple = select_tuple(fileoff, idx_pageoff, dbms, &page);
+  dp_tuple *tuple = dbms_select_tuple(fileoff, idx_pageoff, dbms, &page);
 
   drop_table_pages(tuple, dbms);
 
@@ -111,4 +111,28 @@ bool dbms_drop_table(const fileoff_t fileoff, const pageoff_t idx_pageoff,
 
   dbms_dp_close(&page, fileoff, dbms);
   return res;
+}
+
+// returns location of table in file
+bool dbms_find_table(const char *table_name, struct dbms *dbms, fileoff_t *fileoff_out,
+                     pageoff_t *pageoff_out) {
+  dp_iter *iter = dp_iter_construct(dbms);
+  dp_tuple *tuple = dp_iter_get(iter);
+
+  bool found = false;
+  while (!found && tuple) {
+    char *name = dbms_sso_construct_select(&tuple->header.sso, dbms);
+    if (!strcmp(name, table_name)) {
+      *fileoff_out = dp_iter_cur_page(iter);
+      *pageoff_out = dp_iter_cur_index(iter);
+      found = true;
+    }
+    // free data
+    free(name);
+    // iterate next
+    dp_iter_next(iter);
+    tuple = dp_iter_get(iter);
+  }
+  dp_iter_destruct(&iter);
+  return found;
 }

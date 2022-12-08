@@ -2,6 +2,7 @@
 
 #include "p_database.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 EXTERN_INLINE_BODYOFF_TO_PAGEOFF(struct table_page, body, tp)
@@ -29,15 +30,15 @@ static tp_tuple *tp_tuple_locate(const struct table_page *page, pageoff_t cur) {
 }
 
 static size_t tp_tuple_slot_count(const pageoff_t page_size, const size_t tuple_size) {
-  return tp_page_body(page_size).bytes / (tuple_size + sizeof(empty_slot));
+  return tp_page_body(page_size).bytes / (tuple_size + sizeof(slot_index));
 }
 
 static bool tp_tuple_full(const struct table_page *page) {
-  return page->header.empty_start.bytes == page->header.base.size.bytes;
+  return page->header.index_start.bytes == page->header.base.size.bytes;
 }
 
 static bool tp_tuple_empty(const struct table_page *page) {
-  return page->header.empty_start.bytes == page->header.slot_barrier.bytes;
+  return page->header.index_start.bytes == page->header.index_barrier.bytes;
 }
 
 // Currently calculate size using switch case
@@ -58,7 +59,7 @@ static size_t tpt_column_size(uint8_t type) {
 
 pageoff_t tp_get_min_size(const struct dp_tuple *tuple) {
   size_t tuple_size = tp_get_tuple_size(tuple);
-  return get_pageoff_t(offsetof(table_page, body) + tuple_size + sizeof(empty_slot));
+  return get_pageoff_t(offsetof(table_page, body) + tuple_size + sizeof(slot_index));
 }
 
 size_t tp_get_tuple_size(const struct dp_tuple *tuple) {
@@ -70,6 +71,19 @@ size_t tp_get_tuple_size(const struct dp_tuple *tuple) {
   return size;
 }
 
+// Push and pop slots
+static void tp_slot_push(table_page *page, const slot_index slot) {
+  page->header.index_start.bytes -= sizeof(slot_index);
+  *(slot_index *)((void *)page + page->header.index_start.bytes) = slot;
+}
+
+static slot_index tp_slot_pop(table_page *page) {
+  slot_index slot = *(slot_index *)((void *)page + page->header.index_start.bytes);
+  page->header.index_start.bytes += sizeof(slot_index);
+  return slot;
+}
+
+// Constructor implementations
 struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_t prev,
                                      const fileoff_t next, const dp_tuple *tuple) {
   // check if at least one row can be inserted
@@ -80,17 +94,29 @@ struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_
   page->header.next = next;
   page->header.prev = prev;
 
-  size_t tuple_size = tp_get_tuple_size(tuple);
-  size_t slots = tp_tuple_slot_count(size, tuple_size);
+  const size_t tuple_size = tp_get_tuple_size(tuple);
+  const size_t slots = tp_tuple_slot_count(size, tuple_size);
 
-  page->header.slot_barrier = get_pageoff_t(size.bytes - sizeof(empty_slot) * slots);
+  page->header.index_barrier = get_pageoff_t(size.bytes - sizeof(slot_index) * slots);
   page->header.tuple_barrier = tp_body_page(get_bodyoff_t(tuple_size * slots));
-  page->header.empty_start = size;
+  page->header.index_start = size;
 
-  // TODO: push all empty slots
+  // push all empty slots
+  slot_index cur_slot = {get_pageoff_t(page->header.tuple_barrier.bytes - tuple_size)};
+
+  for (size_t i = 0; i < slots; ++i) {
+    tp_slot_push(page, cur_slot);
+    cur_slot.start.bytes -= tuple_size;
+  }
+  printf("%u : ", page->header.index_barrier.bytes);
+  printf("%u", page->header.index_start.bytes);
   return page;
 }
 
+pageoff_t tp_insert_row(struct table_page *page, const tp_tuple *tuple,
+                        size_t tuple_size);
+void tp_remove_row(struct table_page *page, const tp_tuple *tuple, size_t tuple_size);
+void tp_update_row(struct table_page *page, const tp_tuple *tuple, size_t tuple_size);
 // Iterators
 static pageoff_t tp_next_tuple(const struct table_page *page, pageoff_t cur,
                                size_t tuple_size) {
