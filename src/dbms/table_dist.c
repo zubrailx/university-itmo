@@ -48,7 +48,7 @@ bool dbms_td_pop_single(struct dbms *dbms, const dp_tuple *tuple, fileoff_t *gap
   const page_entry last_entry = {.size = last->header.base.size, .start = *gappy_last};
   const fileoff_t prev_loc = last->header.prev;
 
-  if (container_empty(last)) {
+  if (container_is_empty(last)) {
 
     container_destruct(&last);
 
@@ -77,7 +77,7 @@ void dbms_td_push_single(struct dbms *dbms, fileoff_t *gappy_last,
                         const page_entry *entry) {
   page_container *last = dbms_container_open(dbms, *gappy_last);
 
-  if (container_full(last)) {
+  if (container_is_full(last)) {
     container_destruct(&last);
     *gappy_last = dbms_container_create(dbms, SIZE_DEFAULT, *gappy_last, &last);
   }

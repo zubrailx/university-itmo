@@ -35,30 +35,32 @@ typedef struct table_header {
 typedef struct table_page {
   struct table_header header;
   uint8_t body[];
-} __attribute__((packed)) table_page;
+} table_page;
 
 // Typle
 #define _TPT_COLUMN_BASE                                                               \
   { bool is_null; }
 
+// pointer to the first element garanteed to be 0 padded
 typedef struct tpt_column_base _TPT_COLUMN_BASE tpt_column_base;
 
-#define TPT_COLUMN(type, enum)                                                         \
-  typedef struct tpt_column_##type {                                                   \
+// NOTE: struct is packed inside tp_tuple that is why we need to add packed (else add
+// columns not packed)
+#define TPT_COLUMN(type, enum_name)                                                    \
+  struct tpt_column_##enum_name {                                                      \
     struct _TPT_COLUMN_BASE;                                                           \
-    char entry[sizeof(type)];                                                          \
-  } tpt_entry_##type;                                                                  \
-                                                                                       \
-  inline size_t tpt_column_##enum##_size() { return sizeof(struct tpt_column_##type); }
+    type entry;                                                                        \
+  } __attribute__((packed));
 
-#define EXTERN_INLINE_TPT_COLUMN(type, enum) extern size_t tpt_column_##enum##_size();
+// helpers
+#define TPT_COLUMN_SIZE(enum_name) sizeof(struct tpt_column_##enum_name)
+#define TPT_COL_TYPE(enum_name) tpt_column_##enum_name
 
-#define _TPT_COLUMN_SIZE(enum) tpt_column_##enum##_size()
-
-TPT_COLUMN(double, COLUMN_TYPE_DOUBLE)
-TPT_COLUMN(int32_t, COLUMN_TYPE_INT32)
+// define columns
 TPT_COLUMN(bool, COLUMN_TYPE_BOOL)
-TPT_COLUMN(page_sso, COLUMN_TYPE_STRING)
+TPT_COLUMN(int32_t, COLUMN_TYPE_INT32)
+TPT_COLUMN(double, COLUMN_TYPE_DOUBLE)
+TPT_COLUMN(struct page_sso, COLUMN_TYPE_STRING)
 
 typedef struct tpt_header {
   bool is_present;
@@ -66,8 +68,13 @@ typedef struct tpt_header {
 
 typedef struct tp_tuple {
   struct tpt_header header;
-  struct tpt_column_base columns[];// just the pointer to the first entry start
-} __attribute__((packed)) tp_tuple;
+  struct tpt_column_base columns[];// just the pointer to the first entry start (packed)
+} tp_tuple;
+
+// To create tp_tuple from dto
+typedef struct tpt_col_info {
+  size_t start;
+} tpt_col_info;
 
 // Iterators
 typedef struct tp_tuple_iter {
@@ -89,12 +96,16 @@ struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_
 
 pageoff_t tp_get_min_size(const struct dp_tuple *tuple);
 size_t tp_get_tuple_size(const struct dp_tuple *tuple);
+tpt_col_info *tp_constuct_col_info_arr(const struct dp_tuple *tuple);
 
-// Push and pop
+bool tp_is_full(const struct table_page *page);
+bool tp_is_empty(const struct table_page *page);
+
 pageoff_t tp_insert_row(struct table_page *page, const tp_tuple *tuple,
                         size_t tuple_size);
-void tp_remove_row(struct table_page *page, const tp_tuple *tuple, size_t tuple_size);
-void tp_update_row(struct table_page *page, const tp_tuple *tuple, size_t tuple_size);
+// void tp_remove_row(struct table_page *page, const tp_tuple *tuple, size_t
+// tuple_size); void tp_update_row(struct table_page *page, const tp_tuple *tuple,
+// size_t tuple_size);
 
 // Iterators
 struct tp_tuple_iter *tp_tuple_iter_construct(struct table_page *page,

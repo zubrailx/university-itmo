@@ -26,7 +26,7 @@ typedef struct tp_iter {
   size_t typle_size;
   struct dbms *dbms;
   struct tp_page_iter *page_iter;
-  struct tp_tuple_iter *typle_iter;
+  struct tp_tuple_iter *tuple_iter;
 } tp_iter;
 
 struct tp_iter *tp_iter_construct(struct dbms *dbms, const struct dp_tuple *typle);

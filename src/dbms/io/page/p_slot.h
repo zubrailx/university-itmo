@@ -26,7 +26,7 @@ typedef struct slot_header {
 typedef struct slot_page {
   struct slot_header header;
   uint8_t body[];
-} __attribute__((packed)) slot_page;
+} slot_page;
 
 // Bodyoff/pageoff
 INLINE_BODYOFF_TO_PAGEOFF(struct slot_page, body, sp)

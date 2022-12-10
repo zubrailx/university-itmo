@@ -24,7 +24,7 @@ typedef struct container_header {
 typedef struct page_container {
   struct container_header header;
   uint8_t body[];
-} __attribute__((packed)) page_container;
+} page_container;
 
 typedef struct page_entry {
   fileoff_t start;
@@ -41,11 +41,11 @@ PAGE_CONSTRUCT_DEFAULT(struct page_container, container)
 PAGE_DESTRUCT_DEFAULT(struct page_container, container)
 page_container *container_construct_init(pageoff_t size, fileoff_t prev);
 
-bool container_push(struct page_container *page, const struct page_entry *entry);
+void container_push(struct page_container *page, const struct page_entry *entry);
 struct page_entry *container_pop(struct page_container *page);
 struct page_entry *container_top(const struct page_container *page);
-bool container_full(const struct page_container *page);
-bool container_empty(const struct page_container *page);
+bool container_is_full(const struct page_container *page);
+bool container_is_empty(const struct page_container *page);
 
 inline page_entry page_entry_construct(fileoff_t fileoff) {
   return (page_entry){.start = fileoff};

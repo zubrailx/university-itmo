@@ -8,5 +8,5 @@ struct dbms;
 //                                       struct dbms *dbms);
 
 void *dbms_sso_construct_select(page_sso *sso, struct dbms *dbms);
-page_sso dbms_sso_insert(size_t size, void *data, struct dbms *dbms);
+page_sso dbms_sso_insert(const size_t size, const void *data, struct dbms *dbms);
 void dbms_sso_remove(page_sso *sso, struct dbms *dbms);

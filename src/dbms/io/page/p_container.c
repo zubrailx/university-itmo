@@ -16,39 +16,27 @@ page_container *container_construct_init(pageoff_t size, fileoff_t prev) {
   return container;
 }
 
-bool container_full(const struct page_container *page) {
+bool container_is_full(const struct page_container *page) {
   return offsetof(page_container, body) > page->header.start.bytes - sizeof(page_entry);
 }
 
-bool container_empty(const struct page_container *page) {
+bool container_is_empty(const struct page_container *page) {
   return page->header.start.bytes == page->header.base.size.bytes;
 }
 
-bool container_push(struct page_container *page, const struct page_entry *entry) {
-  if (!container_full(page)) {
-    page->header.start.bytes -= sizeof(page_entry);
-    page_entry *ptr = (void *)page + page->header.start.bytes;
-    *ptr = *entry;
-    return true;
-  }
-  return false;
+void container_push(struct page_container *page, const struct page_entry *entry) {
+  page->header.start.bytes -= sizeof(page_entry);
+  page_entry *ptr = (void *)page + page->header.start.bytes;
+  *ptr = *entry;
 }
 
 struct page_entry *container_pop(struct page_container *page) {
-  if (container_empty(page)) {
-    return NULL;
-  } else {
-    page_entry *entry = (void *)page + page->header.start.bytes;
-    page->header.start.bytes += sizeof(struct page_entry);
-    return entry;
-  }
+  page_entry *entry = (void *)page + page->header.start.bytes;
+  page->header.start.bytes += sizeof(struct page_entry);
+  return entry;
 }
 struct page_entry *container_top(const struct page_container *page) {
-  if (container_empty(page)) {
-    return NULL;
-  } else {
-    return (void *)page + page->header.start.bytes;
-  }
+  return (void *)page + page->header.start.bytes;
 }
 
 extern inline page_entry page_entry_construct(fileoff_t fileoff);

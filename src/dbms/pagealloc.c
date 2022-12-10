@@ -57,7 +57,7 @@ page_entry dbms_page_malloc(struct dbms *dbms, const pageoff_t size) {
 
   fileoff_t prev_loc = cur->header.prev;
 
-  bool remove_last = container_empty(cur) && !fileoff_is_null(prev_loc);
+  bool remove_last = container_is_empty(cur) && !fileoff_is_null(prev_loc);
   // Destruct this page from ram but not delete it currently
   if (remove_last) {
     dbms->meta->free_last = prev_loc;
@@ -114,14 +114,13 @@ void dbms_page_free(dbms *dbms, const page_entry *entry) {
   fileoff_t last_loc = dbms->meta->free_last;
   page_container *last = dbms_container_open(dbms, last_loc);
   // allocate new page for container (in other case it can be bad)
-  if (!container_push(last, entry)) {
+  if (container_is_full(last)) {
     // destruct previous last page
     container_destruct(&last);
     // append new page and point to previous one
     last_loc = container_create_append(dbms, last_loc, &last);
-    // try again
-    assert(container_push(last, entry));
   }
+  container_push(last, entry);
   container_alter(last, dbms->dbfile->file, last_loc);
   container_destruct(&last);
 }

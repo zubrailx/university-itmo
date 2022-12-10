@@ -65,7 +65,7 @@ static void slot_page_select_pop_single(struct dbms *dbms,
 
   const fileoff_t prev_loc = last->header.prev;
 
-  if (container_empty(last)) {
+  if (container_is_empty(last)) {
     // unload last page
     container_destruct(&last);
 
@@ -98,7 +98,7 @@ static void force_container_push(struct dbms *dbms, struct slot_page_entry *entr
                                  page_entry *pe_in) {
   page_container *last = dbms_container_open(dbms, entry->last);
 
-  if (container_full(last)) {
+  if (container_is_full(last)) {
     container_destruct(&last);
     entry->last = dbms_container_create(dbms, SIZE_DEFAULT, entry->last, &last);
   }

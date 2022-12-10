@@ -78,13 +78,13 @@ target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/incl
 target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
-  $<$<CONFIG:RELEASE>:-O3>
+  $<$<CONFIG:RELEASE>: -O0>
   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 target_link_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
-  $<$<CONFIG:RELEASE>:-O3>
+  $<$<CONFIG:RELEASE>: -O0>
   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 

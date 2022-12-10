@@ -151,15 +151,15 @@ static void tp_page_iter_destruct(tp_page_iter **iter_ptr) {
 static table_page *tp_page_iter_get(tp_page_iter *it) { return it->cur; }
 
 // Typle iterator
-struct tp_iter *tp_iter_construct(struct dbms *dbms, const dp_tuple *typle) {
+struct tp_iter *tp_iter_construct(struct dbms *dbms, const dp_tuple *tuple) {
   tp_iter *iter = my_malloc(tp_iter);
   *iter = (tp_iter){
       .dbms = dbms,
-      .page_iter = tp_page_iter_construct(dbms, typle),
-      .typle_size = tp_get_tuple_size(typle),
+      .page_iter = tp_page_iter_construct(dbms, tuple),
+      .typle_size = tp_get_tuple_size(tuple),
   };
   table_page *page = tp_page_iter_get(iter->page_iter);
-  iter->typle_iter = tp_tuple_iter_construct(page, iter->typle_size);
+  iter->tuple_iter = tp_tuple_iter_construct(page, iter->typle_size);
   return iter;
 }
 
@@ -167,32 +167,32 @@ void tp_iter_destruct(struct tp_iter **iter_ptr) {
   tp_iter *iter = *iter_ptr;
   if (iter == NULL)
     return;
-  tp_tuple_iter_destruct(&iter->typle_iter);
+  tp_tuple_iter_destruct(&iter->tuple_iter);
   tp_page_iter_destruct(&iter->page_iter);
   free(iter);
   *iter_ptr = NULL;
 }
 
 bool tp_iter_next(struct tp_iter *it) {
-  if (!tp_tuple_iter_next(it->typle_iter)) {
-    tp_tuple_iter_destruct(&it->typle_iter);
+  if (!tp_tuple_iter_next(it->tuple_iter)) {
+    tp_tuple_iter_destruct(&it->tuple_iter);
 
     while (tp_page_iter_next(it->page_iter, it->dbms)) {
       table_page *page = tp_page_iter_get(it->page_iter);
-      it->typle_iter = tp_tuple_iter_construct(page, it->typle_size);
+      it->tuple_iter = tp_tuple_iter_construct(page, it->typle_size);
 
-      if (tp_tuple_iter_get(it->typle_iter) != NULL) {
+      if (tp_tuple_iter_get(it->tuple_iter) != NULL) {
         return true;
       }
     }
-    it->typle_iter = tp_tuple_iter_construct(NULL, it->typle_size);
+    it->tuple_iter = tp_tuple_iter_construct(NULL, it->typle_size);
   }
   return false;
 }
 
 struct tp_tuple *tp_iter_get(struct tp_iter *iter) {
-  return tp_tuple_iter_get(iter->typle_iter);
+  return tp_tuple_iter_get(iter->tuple_iter);
 }
 
 fileoff_t tp_iter_cur_page(struct tp_iter *iter) { return iter->page_iter->cur_loc; }
-pageoff_t tp_iter_cur_typle(struct tp_iter *iter) { return iter->typle_iter->tcur; }
+pageoff_t tp_iter_cur_typle(struct tp_iter *iter) { return iter->tuple_iter->tcur; }

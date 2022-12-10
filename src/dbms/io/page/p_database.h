@@ -28,7 +28,7 @@ typedef struct database_header {
 typedef struct database_page {
   struct database_header header;
   uint8_t body[];
-} __attribute__((packed)) database_page;
+} database_page;
 
 // TYPLE
 typedef struct dpt_header {

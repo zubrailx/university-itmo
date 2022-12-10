@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 enum dto_table_column_type {
-  DTO_COLUMN_INT = 0,
-  DTO_COLUMN_FLOAT,
+  DTO_COLUMN_INT32 = 0,
+  DTO_COLUMN_DOUBLE,
   DTO_COLUMN_STRING,
   DTO_COLUMN_BOOL
 };
