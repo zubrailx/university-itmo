@@ -60,7 +60,7 @@ for arg; do
     --help|-h|help)    echo -e $USAGE; exit 0;;
     -v|--verbose) VERBOSE='-v'  ;;
     debug)        TYPE=Debug;   BUILD_DIR=$BUILD/debug ;;
-    release)      TYPE=Release; BUILD_DIR=$BUILD/release ;;
+    released)      TYPE=Released; BUILD_DIR=$BUILD/released ;;
     sanitized)    TYPE=Sanitized; BUILD_DIR=$BUILD/sanitized ;;
     clean)        TARGET_CLEAN=1  ;;
     reset)        TARGET_RESET=1 ;;

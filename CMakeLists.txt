@@ -18,19 +18,7 @@ project(${PROJECT_NAME} LANGUAGES C CXX)
 set(CMAKE_CXX_FLAGS "-std=c++2b ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "-std=c2x ${CMAKE_C_FLAGS}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CONFIGURATION_TYPES Debug Release Sanitized)
-
-# add_compile_options(
-#   -Wall
-#   # -Wextra
-#   # -Wconversion
-#   # -Wsign-conversion
-#   $<$<CONFIG:DEBUG>:-g>
-#   $<$<CONFIG:DEBUG>:-Og>
-#   $<$<CONFIG:RELEASE>:-O3>
-#   # - sanitizer
-#   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak>
-# )
+set(CMAKE_CONFIGURATION_TYPES Debug Released Sanitized)
 
 # add_link_options()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -78,13 +66,13 @@ target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/incl
 target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
-  $<$<CONFIG:RELEASE>: -O0>
+  $<$<CONFIG:RELEASED>:-O3>
   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 target_link_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
   $<$<CONFIG:DEBUG>:-g -O0>
-  $<$<CONFIG:RELEASE>: -O0>
+  $<$<CONFIG:RELEASED>:-O3>
   $<$<CONFIG:SANITIZED>:-fsanitize=address,undefined,leak -g>
 )
 
@@ -123,7 +111,7 @@ endif()
 # -----------------------------------------------------------------------------
 # Executable tests
 # -----------------------------------------------------------------------------
-if (NOT DEFINED TSTS)
+if (DEFINED TSTS)
 	FetchContent_MakeAvailable(googletest)
 
   message(STATUS "TESTS: ${TSTS}")
