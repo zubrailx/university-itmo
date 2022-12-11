@@ -35,4 +35,4 @@ bool tp_iter_next(struct tp_iter *iter);
 struct tp_tuple *tp_iter_get(struct tp_iter *iter);
 
 fileoff_t tp_iter_cur_page(struct tp_iter *iter);
-pageoff_t tp_iter_cur_typle(struct tp_iter *iter);
+pageoff_t tp_iter_cur_tuple(struct tp_iter *iter);

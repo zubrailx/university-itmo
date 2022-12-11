@@ -11,28 +11,21 @@
 #define VIRT_OVERRIDE(self, base, method) self.base.method = self.method
 #define VIRT_INHERIT(self, base, method) self.method = self.base.method
 
-// base plan
-static const struct plan_row_info *plan_get_info(void *self) {
-  return ((struct plan *)self)->info_arr;
-}
-static struct tp_tuple **plan_get(void *self) { return NULL; }
-
-static bool plan_next(void *self) { return false; }
-
-static bool plan_end(void *self) { return true; }
-
-static void plan_destruct(void *self_void) {
-  struct plan *self = self_void;
+// plan {{{
+static void plan_destruct(struct plan *self) {
   self->type = PLAN_TYPE_DELETED;
   // free row info
-  if (self->info_arr) {
+  if (self->pti_arr) {
     for (int i = 0; i < self->arr_size; ++i) {
-      struct plan_row_info *ie = self->info_arr + i;
+      struct plan_table_info *ie = self->pti_arr + i;
       if (ie->table_name) {
         free((void *)ie->table_name);
       }
-      if (ie->info) {
-        free(ie->info);
+      if (ie->col_info) {
+        free(ie->col_info);
+      }
+      if (ie->dpt) {
+        free(ie->dpt);
       }
     }
   }
@@ -42,52 +35,61 @@ static void plan_destruct(void *self_void) {
   }
 }
 
+static const struct plan_table_info *plan_get_info(void *self) {
+  return ((struct plan *)self)->pti_arr;
+}
+static struct tp_tuple **plan_get(void *self) {
+  return ((struct plan *)self)->tuple_arr;
+}
+
+static bool plan_next(void *self) { return false; }
+
+static bool plan_end(void *self) { return true; }
+
+static void plan_destruct_void(void *self) { plan_destruct(self); }
+
+static bool plan_locate(void *self, fileoff_t *fileoff, pageoff_t *pageoff) {
+  return false;
+}
+
 struct plan plan_construct(enum plan_type type) {
-  return (struct plan){
-      .type = type,
-      .arr_size = 0,
-      .info_arr = NULL,
-      .tuple_arr = NULL,
-      .get_info = plan_get_info,
-      .get = plan_get,
-      .next = plan_next,
-      .end = plan_end,
-      .destruct = plan_destruct,
-  };
+  return (struct plan){.type = type,
+                       .arr_size = 0,
+                       .pti_arr = NULL,
+                       .tuple_arr = NULL,
+                       // methods
+                       .get_info = plan_get_info,
+                       .get = plan_get,
+                       .next = plan_next,
+                       .end = plan_end,
+                       .destruct = plan_destruct_void,
+                       .locate = plan_locate};
 }
 
 struct plan plan_construct_with_row_info(enum plan_type type, const size_t size,
-                                         struct plan_row_info arr[]) {
+                                         struct plan_table_info arr[]) {
   struct plan plan = plan_construct(type);
 
   plan.arr_size = size;
 
-  size_t info_size = sizeof(struct plan_row_info) * size;
-  plan.info_arr = malloc(info_size);
-  memcpy(plan.info_arr, arr, info_size);
+  size_t info_size = sizeof(struct plan_table_info) * size;
+  plan.pti_arr = malloc(info_size);
+  memcpy(plan.pti_arr, arr, info_size);
 
   plan.tuple_arr = malloc(sizeof(tp_tuple *) * size);
 
   return plan;
 }
+// }}}
 
-// plan_source
+// plan_source {{{
 static void plan_source_destruct(void *self_void) {
   struct plan_source *self = self_void;
   if (self->iter) {
     tp_iter_destruct(&self->iter);
   }
-  if (self->dp) {
-    dbms_dp_close(&self->dp, self->dp_loc, self->dbms);
-  }
   // call base destructor
   plan_destruct(&self->base);
-}
-
-static tp_tuple **plan_source_get(void *self_void) {
-  struct plan_source *self = self_void;
-  // tuple_arr is net in next
-  return self->base.tuple_arr;
 }
 
 static bool plan_source_next(void *self_void) {
@@ -102,39 +104,64 @@ static bool plan_source_end(void *self_void) {
   return tp_iter_get(self->iter) == NULL;
 }
 
+static bool plan_source_locate(void *self_void, fileoff_t *loc, pageoff_t *off) {
+  *loc = tp_iter_cur_page(((struct plan_source *)self_void)->iter);
+  *off = tp_iter_cur_tuple(((struct plan_source *)self_void)->iter);
+  return true;
+}
+
 struct plan_source plan_source_construct(const void *table_name, struct dbms *dbms) {
   struct plan_source self = {};
   // specific for source
   self.dbms = dbms;
-  {// dpt, dp
-    pageoff_t off;
-    if (!dbms_find_table(table_name, dbms, &self.dp_loc, &off)) {
-      printf("plan_source_construct: Table not found.\n");
-      self.dp_loc = FILEOFF_NULL;
-      goto err;
-    }
-    self.dpt = dbms_select_tuple(self.dp_loc, off, dbms, &self.dp);
+  pageoff_t dpt_off;
+  fileoff_t dpt_loc;
+  if (!dbms_find_table(table_name, dbms, &dpt_loc, &dpt_off)) {
+    printf("plan_source_construct: Table not found.\n");
+    goto err;
   }
-  self.iter = tp_iter_construct(dbms, self.dpt);
+
+  struct dp_tuple *plan_dpt;
+
+  {
+    database_page *dp;
+    const struct dp_tuple *dpt = dbms_select_tuple(dpt_loc, dpt_off, dbms, &dp);
+
+    size_t dpt_size = dp_tuple_size(dpt->header.cols);
+    plan_dpt = malloc(dpt_size);
+    memcpy(plan_dpt, dpt, dpt_size);
+
+    dp_destruct(&dp);
+  }
+
+  self.iter = tp_iter_construct(dbms, plan_dpt);
 
   {// set base structure field
-    struct plan_row_info row_info = {.table_name = strdup(table_name),
-                                     .info = tp_construct_col_info_arr(self.dpt)};
-    self.base = plan_construct_with_row_info(PLAN_TYPE_SOURCE, 1, &row_info);
+    struct plan_table_info table_nfo = {
+        .table_name = strdup(table_name),
+        .dpt = plan_dpt,
+        .tpt_size = dp_tuple_size(plan_dpt->header.cols),
+        .col_info = tp_construct_col_info_arr(plan_dpt)};
+
+    self.base = plan_construct_with_row_info(PLAN_TYPE_SOURCE, 1, &table_nfo);
     self.base.tuple_arr[0] = tp_iter_get(self.iter);
   }
-  {
-    // set methods
-    VIRT_INHERIT(self, base, get_info);
-    self.next = plan_source_next;
-    self.end = plan_source_end;
-    self.destruct = plan_source_destruct;
-    self.get = plan_source_get;
 
-    VIRT_OVERRIDE(self, base, get);
+  {
+    VIRT_INHERIT(self, base, get_info);
+    VIRT_INHERIT(self, base, get);
+
+    self.next = plan_source_next;
     VIRT_OVERRIDE(self, base, next);
+
+    self.end = plan_source_end;
     VIRT_OVERRIDE(self, base, end);
+
+    self.destruct = plan_source_destruct;
     VIRT_OVERRIDE(self, base, destruct);
+
+    self.locate = plan_source_locate;
+    VIRT_OVERRIDE(self, base, locate);
   }
 
   return self;
@@ -143,5 +170,132 @@ err:
   plan_source_destruct(&self);
   return self;
 }
+// }}}
+
+// plan_select {{{
+static void plan_select_destruct(void *self_void) {
+  struct plan_select *self = self_void;
+  // free parent node
+  if (self->parent) {
+    self->parent->destruct(self->parent);
+  }
+  // call base destructor
+  plan_destruct(&self->base);
+}
+
+// TODO: implement
+static bool plan_select_next(void *self_void) {
+  struct plan_select *self = self_void;
+  const struct plan *parent = self->parent;
+
+  bool res = parent->next(self->parent);
+  if (!res) {
+    return false;
+  }
+
+  struct tp_tuple **tuple_src = parent->get(self->parent);
+  struct tp_tuple **tuple_dest = &self->base.tuple_arr[0];
+
+  if (parent->arr_size == 1) {
+    *tuple_dest = tuple_src[0];
+
+  } else {// copy from sources to flattened tuple
+    (*tuple_dest)->header.is_present = false;
+
+    size_t cur_col = 0;
+    for (size_t i = 0; i < parent->arr_size; ++i) {
+      size_t icol_size = parent->pti_arr[i].tpt_size - offsetof(tp_tuple, columns);
+      memcpy((*tuple_dest)->columns + cur_col, tuple_src[i]->columns, icol_size);
+      // ptr to next column
+      cur_col += parent->pti_arr[i].dpt->header.cols;
+    }
+  }
+  return res;
+}
+
+static bool plan_select_end(void *self_void) {
+  struct plan_select *self = self_void;
+  return self->parent->end(self->parent);
+}
+
+// @return - malloced dpt_column array
+static void plan_select_get_header(void *self_void, dpt_column **out,
+                                   size_t *arr_size_out) {
+  struct plan_select *self = self_void;
+  const dp_tuple *dpt = self->base.pti_arr[0].dpt;
+  *arr_size_out = dpt->header.cols;
+  *out = malloc(sizeof(dpt_column) * *arr_size_out);
+  for (size_t i = 0; i < *arr_size_out; ++i) {
+    (*out)[i] = dpt->columns[i];
+  }
+}
+
+static dp_tuple *dpt_flatten(size_t size, const struct plan_table_info *src) {
+  struct dp_tuple *dest;
+
+  size_t total_cols = 0;
+  for (size_t i = 0; i < size; ++i) {
+    // calculate total amount of columns to create dp_tuple
+    total_cols += src[i].dpt->header.cols;
+  }
+
+  {
+    dest = malloc(dp_tuple_size(total_cols));
+    // header
+    // zero everything until columns
+    memset(dest, 0, offsetof(struct dp_tuple, columns));
+    dest->header.cols = total_cols;
+    dest->header.is_present = false;
+    // Columns
+    size_t cur_col = 0;
+    for (size_t i = 0; i < size; ++i) {
+      const size_t icol_size = src[i].tpt_size - offsetof(struct dp_tuple, columns);
+      memcpy(dest->columns + cur_col, src[i].dpt->columns, icol_size);
+
+      cur_col += src[i].dpt->header.cols;
+    }
+  }
+  return dest;
+}
+
+// cut version
+struct plan_select plan_select_construct(void *parent_void, const char *table_name) {
+  struct plan_select self = {};
+
+  struct plan *parent = parent_void;
+
+  {// base
+    const struct plan_table_info *parent_info = parent->get_info(parent);
+
+    struct dp_tuple *dpt = dpt_flatten(parent->arr_size, parent_info);
+
+    struct plan_table_info table_info = {.table_name = table_name,
+                                         .dpt = dpt,
+                                         .tpt_size = dp_tuple_size(dpt->header.cols),
+                                         .col_info = tp_construct_col_info_arr(dpt)};
+
+    self.base = plan_construct_with_row_info(PLAN_TYPE_SELECT, 1, &table_info);
+  }
+
+  {
+    self.get_header = plan_select_get_header;
+
+    VIRT_INHERIT(self, base, get);
+    VIRT_INHERIT(self, base, locate);
+
+    self.next = plan_select_next;
+    VIRT_OVERRIDE(self, base, next);
+
+    self.end = plan_select_end;
+    VIRT_OVERRIDE(self, base, end);
+
+    self.destruct = plan_select_destruct;
+    VIRT_OVERRIDE(self, base, destruct);
+  }
+
+  return self;
+}
+
+// }}}
 
 #undef VIRT_OVERRIDE

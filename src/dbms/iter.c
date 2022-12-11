@@ -195,4 +195,4 @@ struct tp_tuple *tp_iter_get(struct tp_iter *iter) {
 }
 
 fileoff_t tp_iter_cur_page(struct tp_iter *iter) { return iter->page_iter->cur_loc; }
-pageoff_t tp_iter_cur_typle(struct tp_iter *iter) { return iter->tuple_iter->tcur; }
+pageoff_t tp_iter_cur_tuple(struct tp_iter *iter) { return iter->tuple_iter->tcur; }
