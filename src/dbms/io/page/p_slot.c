@@ -1,7 +1,6 @@
 #include "p_slot.h"
 
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
 #include <util/internals.h>
 
@@ -10,7 +9,7 @@ typedef uint32_t slot_number;
 EXTERN_INLINE_BODYOFF_TO_PAGEOFF(struct slot_page, body, sp)
 EXTERN_INLINE_PAGEOFF_TO_BODYOFF(struct slot_page, body, sp)
 
-static void sp_num_push(slot_page *page, const slot_number num);
+static void sp_num_push(slot_page *page, slot_number num);
 
 pageoff_t sp_size(const size_t slot_size, const size_t slot_count) {
   size_t size = slot_count * (slot_size + sizeof(slot_number));
@@ -33,7 +32,7 @@ struct slot_page *sp_construct_slot_init(const size_t slot_size,
   page->header.slot_count = slot_count;
   page->header.slot_start = page->header.base.size;
   // in loop insert all slots
-  for (int i = slot_count - 1; i >= 0; --i) {
+  for (int i = (int)slot_count - 1; i >= 0; --i) {
     sp_num_push(page, i);
   }
   return page;

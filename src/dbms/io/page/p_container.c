@@ -1,6 +1,5 @@
 #include "p_container.h"
 
-#include <assert.h>
 #include <malloc.h>
 #include <stddef.h>
 #include <util/define.h>

@@ -11,7 +11,7 @@ struct tp_tuple;
 struct dp_tuple;
 
 fileoff_t dbms_td_create_close(struct dbms *dbms);
-void dbms_td_drop(struct dbms *dbms, const fileoff_t last);
+void dbms_td_drop(struct dbms *dbms, fileoff_t last);
 
 bool dbms_td_pop_single(struct dbms *dbms, const struct dp_tuple *tuple,
                         fileoff_t *gappy_last, page_entry *pe_out);

@@ -3,7 +3,6 @@
 #include <assert.h>
 
 // Meta is stored in file for proper loading
-#include "meta.h"
 #include "meta/meta.h"
 
 // preinit meta->da_len

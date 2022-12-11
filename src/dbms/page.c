@@ -2,17 +2,13 @@
 #include "page.h"
 
 #include "core/dbfile.h"
-#include "core/pagepool.h"
 #include "io/meta/meta.h"
 #include "io/p_container.h"
 #include "io/p_database.h"
-#include "io/p_slot.h"
 #include "io/p_table.h"
 #include "pagealloc.h"
-#include <assert.h>
 
 const pageoff_t DATABASE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
-const pageoff_t DATA_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 const pageoff_t TABLE_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 const pageoff_t CONTAINER_PAGE_MIN_SIZE = (pageoff_t){.bytes = 1024};
 

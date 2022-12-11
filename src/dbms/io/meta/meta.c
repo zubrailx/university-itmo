@@ -18,7 +18,7 @@ struct meta *meta_construct_init(const size_t slot_len, const size_t slot_sizes[
                                  const size_t slot_counts[]) {
   struct meta *meta = meta_construct(slot_len);
   // init
-  meta->pos_empty.bytes = meta_size_col(slot_len);
+  meta->pos_empty.bytes = (long)meta_size_col(slot_len);
   meta->slot_len = slot_len;
   for (size_t i = 0; i < slot_len; ++i) {
     assert(slot_sizes[i] > 0);

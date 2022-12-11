@@ -5,7 +5,6 @@
 #include "io/meta/meta.h"
 #include "io/p_container.h"
 #include "page.h"
-#include <assert.h>
 
 const pageoff_t PAGEPOOL_PAGE_SIZE = (pageoff_t){.bytes = 1024};
 

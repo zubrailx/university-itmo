@@ -78,12 +78,11 @@ struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
 size_t dp_space_left(const struct database_page *page);
 size_t dp_tuple_size(size_t columns);
 
-dp_tuple *dp_tuple_locate(const struct database_page *page,
-                          const pageoff_t idx_pageoff);
+dp_tuple *dp_tuple_locate(const struct database_page *page, pageoff_t idx_pageoff);
 
 // insert and delete tuple in page
 pageoff_t dp_insert_table(struct database_page *page, dp_tuple *typle);
-bool dp_drop_table(struct database_page *page, const pageoff_t pageoff);
+bool dp_drop_table(struct database_page *page, pageoff_t pageoff);
 
 // Iterators
 struct dp_tuple_iter *dp_tuple_iter_construct(struct database_page *page);

@@ -1,12 +1,7 @@
 #include "schema.h"
 
-#include "dbms/iter.h"
 #include "dbms/op_schema.h"
 #include "dbms/page.h"
-#include "dbms/sso.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 bool table_exists(struct dbms *dbms, const char *table_name) {
   fileoff_t fileoff;

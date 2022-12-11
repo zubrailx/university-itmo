@@ -39,7 +39,7 @@ void print_database_tables(dbms *dbms) {
 
 #define DECLARE_ASSIGN_VAR(var_name, assigned, type) type var_name = (type)assigned
 
-static void print_table_tuple_specific(const void *src, const uint8_t col_type) {
+static void print_table_column_specific(const void *src, const uint8_t col_type) {
   printf("entry: ");
 
   switch (col_type) {
@@ -69,20 +69,22 @@ static void print_table_tuple_specific(const void *src, const uint8_t col_type) 
     }
     break;
   }
+  default:
+    printf("unknown");
   }
   printf("\n");
 }
 
 #undef DECLARE_ASSIGN_VAR
 
-static void print_table_tuple(const tp_tuple *tuple, const dp_tuple *dpt,
-                              const tpt_col_info *col_info) {
+void print_table_tuple(const tp_tuple *tuple, const dp_tuple *dpt,
+                       const tpt_col_info *col_info) {
   printf("----------------------\n");
   printf("table_tuple\n");
   printf("is_present: %s\n", tuple->header.is_present ? "true" : "false");
   for (int i = 0; i < dpt->header.cols; ++i) {
     void *src = (uint8_t *)tuple + col_info[i].start;
-    print_table_tuple_specific(src, dpt->columns[i].type);
+    print_table_column_specific(src, dpt->columns[i].type);
   }
   printf("----------------------\n");
 }

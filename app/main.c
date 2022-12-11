@@ -30,19 +30,36 @@ int main() {
   const void *row[] = {row1_1, &row1_2, &row1_3, &row1_4};
   dto_row_list list = dto_row_list_construct();
 
-  int cnt = 20000;
+  int cnt = 200;
   for (int i = 0; i < cnt; ++i) {
     dto_row_list_append(&list, row);
   }
   row_list_insert(dbms, "table1", &list);
 
-  struct plan_source table1 = plan_source_construct("table1", dbms);
-  while (!table1.end(&table1)) {
-    table1.next(&table1);
-  }
+  // TEST source (passed)
+  // struct plan_source tsource = plan_source_construct("table1", dbms);
+  // const struct plan_table_info *info = tsource.get_info(&tsource);
+  // while (!tsource.end(&tsource)) {
+  //   tp_tuple **tuple_list = tsource.get(&tsource);
+  //   print_table_tuple(tuple_list[0], info[0].dpt, info[0].col_info);
+  //   tsource.next(&tsource);
+  // }
+  // tsource.destruct(&tsource);
 
-  table1.destruct(&table1);
-  // print_table_rows(dbms, "table1");
+  // TEST select (failed)
+  struct plan_select *select_table1 =
+      plan_select_construct_move(plan_source_construct("table1", dbms), "temp-table1");
+
+  const struct plan_table_info *table_info = select_table1->get_info(select_table1);
+
+  while (!select_table1->end(select_table1)) {
+    tp_tuple **tpt = select_table1->get(select_table1);
+    print_table_tuple(tpt[0], table_info[0].dpt, table_info[0].col_info);
+    select_table1->next(select_table1);
+  }
+  select_table1->destruct(select_table1);
+
+  print_table_rows(dbms, "table1");
 
   dto_row_list_destruct(&list);
   dto_table_destruct(&table);

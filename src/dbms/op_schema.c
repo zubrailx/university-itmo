@@ -92,7 +92,7 @@ static void drop_table_pages(dp_tuple *tuple, struct dbms *dbms) {
 
 // return typle inside database_page
 dp_tuple *dbms_select_tuple(const fileoff_t fileoff, const pageoff_t idx_pageoff,
-                                   struct dbms *dbms, database_page **page_out) {
+                            struct dbms *dbms, database_page **page_out) {
   database_page *page = dbms_dp_open(dbms, fileoff);
   dp_tuple *tuple = dp_tuple_locate(page, idx_pageoff);
   *page_out = page;

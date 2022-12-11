@@ -42,7 +42,7 @@ void dbms_td_drop(struct dbms *dbms, const fileoff_t last) {
 // pop not full page or malloc it
 // @return - bool == false if malloc else true
 bool dbms_td_pop_single(struct dbms *dbms, const dp_tuple *tuple, fileoff_t *gappy_last,
-                       page_entry *pe_out) {
+                        page_entry *pe_out) {
   page_container *last = dbms_container_open(dbms, *gappy_last);
 
   const page_entry last_entry = {.size = last->header.base.size, .start = *gappy_last};
@@ -74,7 +74,7 @@ bool dbms_td_pop_single(struct dbms *dbms, const dp_tuple *tuple, fileoff_t *gap
 }
 
 void dbms_td_push_single(struct dbms *dbms, fileoff_t *gappy_last,
-                        const page_entry *entry) {
+                         const page_entry *entry) {
   page_container *last = dbms_container_open(dbms, *gappy_last);
 
   if (container_is_full(last)) {

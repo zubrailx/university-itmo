@@ -14,4 +14,6 @@ void print_database_tables(dbms *dbms);
 void print_table_page(table_page *page);
 void print_free_pages(dbms *dbms);
 
+void print_table_tuple(const tp_tuple *tuple, const dp_tuple *dpt,
+                       const tpt_col_info *col_info);
 void print_table_rows(dbms *dbms, const char *table_name);

@@ -39,7 +39,7 @@ struct plan {
   bool (*next)(void *self);
   // Check if this element is last
   bool (*end)(void *self);
-  void (*destruct)(void *self);
+  void (*destruct)(void *self_ptr);
   // returns true if page if can row be located in db (if not virtual) else false
   bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
@@ -56,7 +56,7 @@ struct plan_source {
 
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
-  OVERRIDE void (*destruct)(void *self);
+  OVERRIDE void (*destruct)(void *self_ptr);
   OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
@@ -72,8 +72,7 @@ struct plan_select {
   struct plan *parent;
 
   // methods
-  void (*get_header)(void *self, struct dpt_column **out, size_t *arr_size_out);
-
+  INHERIT const struct plan_table_info *(*get_info)(void *self);
   INHERIT struct tp_tuple **(*get)(void *self);
   INHERIT bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 
@@ -84,7 +83,9 @@ struct plan_select {
 struct plan_update {};
 struct plan_delete {};
 
-struct plan_source plan_source_construct(const void *table_name, struct dbms *dbms);
+struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms);
+struct plan_select *plan_select_construct_move(void *parent_void,
+                                               const char *table_name);
 
 #undef OVERRIDE
 #undef INHERIT

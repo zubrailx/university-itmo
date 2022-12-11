@@ -1,5 +1,4 @@
 #include "data_dist.h"
-#include "../util/print_page.h"
 #include "core/dbfile.h"
 #include "core/dbmeta.h"
 #include "core/dbms.h"
@@ -26,7 +25,7 @@ void dbms_dd_create_close(struct dbms *dbms) {
 static size_t index_slot(const size_t entry_size, const size_t slot_len,
                          const struct slot_page_entry entries[]) {
 
-  int l = 0, r = slot_len;
+  int l = 0, r = (int)slot_len;
   while (l <= r) {
     int med = (l + r) / 2;
     if (entries[med].slot_size < entry_size) {

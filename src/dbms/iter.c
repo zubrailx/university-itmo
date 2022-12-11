@@ -1,6 +1,5 @@
 #include "iter.h"
 
-#include <assert.h>
 #include <malloc.h>
 
 #include "core/dbmeta.h"

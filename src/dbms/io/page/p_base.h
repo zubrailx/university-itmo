@@ -22,7 +22,7 @@ enum page_types {
   PAGE_DUMPED,
 };
 
-struct base_page *page_construct(const struct pageoff_t size, enum page_types type);
+struct base_page *page_construct(struct pageoff_t size, enum page_types type);
 void page_destruct(struct base_page **page_ptr);
 
 // Constructors / destructors

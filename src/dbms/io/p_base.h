@@ -6,9 +6,6 @@
 
 #include "page/p_base.h"
 
-#define _PAGE_PREFIX page
-#define _PAGE_TYPE struct base_page
-
 struct dbfile;
 
 void page_select_size(struct pageoff_t *size, FILE *file, fileoff_t page_start);
@@ -74,6 +71,3 @@ void page_select(struct base_page *base, FILE *file, fileoff_t page_start);
 PAGE_DEFAULT_CREATE(struct base_page, page)
 PAGE_DEFAULT_ALTER(struct base_page, page)
 PAGE_DEFAULT_DROP(struct base_page, page)
-
-#undef _PAGE_PREFIX
-#undef _PAGE_TYPE

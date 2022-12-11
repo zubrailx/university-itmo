@@ -1,6 +1,6 @@
 #include "sso.h"
 
-size_t sso_to_size(const char *ssize) {
+size_t sso_to_size(const unsigned char *ssize) {
   size_t res = 0;
   size_t mask = 0xff;
   for (size_t i = 0; i != SSO_SSIZE_SIZE; ++i) {
@@ -9,9 +9,9 @@ size_t sso_to_size(const char *ssize) {
   return res;
 }
 
-void size_to_sso(const size_t size, char *ssize) {
-  char mask = 0xff;
+void size_to_sso(const size_t size, unsigned char *ssize) {
+  size_t mask = 0xff;
   for (size_t i = 0; i != SSO_SSIZE_SIZE; ++i) {
-    ssize[i] = (size >> 8 * i) & mask;
+    ssize[i] = (unsigned char)((size >> 8 * i) & mask);
   }
 }

@@ -2,7 +2,7 @@
 
 void print_page(base_page *page) {
   int width = 30;
-  int cols = page->header.size.bytes / width;
+  int cols = (int)page->header.size.bytes / width;
   for (int i = 0; i < cols; ++i) {
     for (int j = 0; j < width; ++j) {
       printf("%02X", ((unsigned char *)page)[i * width + j]);
