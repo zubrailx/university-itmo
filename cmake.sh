@@ -8,7 +8,7 @@ set -o nounset
 USAGE="
 1) Build with cmake:\n
       \t[-v | --verbose]\n       
-      \t[debug | release]\n
+      \t[debug | released]\n
       \t[reset]                  \t\t-- remove build dir\n
       \t[generate]               \t\t-- generate buildtree from CMakeLists.txt\n
       \t[target=value]\n            
@@ -17,7 +17,7 @@ USAGE="
 \n
 2) Test with cmake ctest:\n
       \t[-v | --verbose]\n
-      \t[debug | release]\n
+      \t[debug | released]\n
       \ttest\n
       \t[sep] \n                 \t\t-- tests are printed separately
 "

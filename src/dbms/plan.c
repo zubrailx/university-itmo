@@ -36,6 +36,12 @@ static void plan_destruct(struct plan *self) {
   }
   // free tuple_arr
   if (self->tuple_arr) {
+    for (int i = 0; i < self->arr_size; ++i) {
+      if (self->tuple_arr[i]) {
+        free(self->tuple_arr[i]);
+        self->tuple_arr[i] = NULL;
+      }
+    }
     free(self->tuple_arr);
     self->tuple_arr = NULL;
   }
@@ -190,26 +196,20 @@ static void plan_select_destruct(void *self_void) {
   plan_destruct(&self->base);
 }
 
-static void tpt_flatten(struct tp_tuple **dest, struct tp_tuple **src,
+static void tpt_flatten(struct tp_tuple *dest, struct tp_tuple **src,
                         const struct plan *parent) {
-  if (parent->arr_size == 1) {
-    dest[0] = src[0];
-  } else {// copy from sources to flattened tuple
-    dest[0]->header.is_present = false;
+  dest->header.is_present = false;
 
-    size_t cur_col = 0;
-    for (size_t i = 0; i < parent->arr_size; ++i) {
-      size_t icol_size = parent->pti_arr[i].tpt_size - offsetof(tp_tuple, columns);
-      if (src[i] != NULL) {
-        memcpy(dest[0]->columns + cur_col, src[i]->columns, icol_size);
-      }
-      // ptr to next column
-      cur_col += parent->pti_arr[i].dpt->header.cols;
+  size_t cur_off = offsetof(tp_tuple, columns);
+  for (size_t i = 0; i < parent->arr_size; ++i) {
+    size_t icol_size = parent->pti_arr[i].tpt_size - offsetof(tp_tuple, columns);
+    if (src[i] != NULL) {
+      memcpy((void *)dest + cur_off, src[i]->columns, icol_size);
     }
+    cur_off += icol_size;
   }
 }
 
-// TODO: implement
 static bool plan_select_next(void *self_void) {
   struct plan_select *self = self_void;
   const struct plan *parent = self->parent;
@@ -219,7 +219,7 @@ static bool plan_select_next(void *self_void) {
     return false;
   }
   struct tp_tuple **tuple_src = parent->get(self->parent);
-  struct tp_tuple **tuple_dest = &self->base.tuple_arr[0];
+  struct tp_tuple *tuple_dest = self->base.tuple_arr[0];
 
   tpt_flatten(tuple_dest, tuple_src, parent);
 
@@ -280,8 +280,10 @@ struct plan_select *plan_select_construct_move(void *parent_void,
                                          .col_info = tp_construct_col_info_arr(dpt)};
 
     self->base = plan_construct_with_row_info(PLAN_TYPE_SELECT, 1, &table_info);
-    // set typle_arr first value
-    tpt_flatten(self->base.tuple_arr, parent->get(parent), parent);
+
+    // allocate tuple_arr[0] and set to initial value
+    self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
+    tpt_flatten(self->base.tuple_arr[0], parent->get(parent), parent);
   }
 
   {
