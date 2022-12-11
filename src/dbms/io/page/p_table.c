@@ -67,7 +67,7 @@ size_t tp_get_tuple_size(const struct dp_tuple *tuple) {
   return size;
 }
 
-tpt_col_info *tp_constuct_col_info_arr(const dp_tuple *tuple) {
+tpt_col_info *tp_construct_col_info_arr(const dp_tuple *tuple) {
   size_t cols = tuple->header.cols;
 
   tpt_col_info *col_info = malloc(sizeof(tpt_col_info) * cols);
@@ -163,7 +163,7 @@ static pageoff_t next_tuple(const struct table_page *page, pageoff_t cur,
   return tcur_end(page);
 }
 
-static inline bool iter_is_end(tp_tuple_iter *it) {
+static bool tp_tuple_iter_is_end(tp_tuple_iter *it) {
   return it->tcur.bytes == it->tend.bytes;
 }
 
@@ -190,10 +190,10 @@ void tp_tuple_iter_destruct(struct tp_tuple_iter **it_ptr) {
 
 bool tp_tuple_iter_next(struct tp_tuple_iter *it) {
   it->tcur = next_tuple(it->page, it->tcur, it->tuple_size);
-  return !iter_is_end(it);
+  return !tp_tuple_iter_is_end(it);
 }
 struct tp_tuple *tp_tuple_iter_get(struct tp_tuple_iter *it) {
-  if (iter_is_end(it))
+  if (tp_tuple_iter_is_end(it))
     return NULL;
   return tuple_locate(it->page, it->tcur);
 }

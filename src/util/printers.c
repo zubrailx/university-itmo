@@ -96,7 +96,7 @@ void print_table_rows(dbms *dbms, const char *table_name) {
   struct database_page *page;
   struct dp_tuple *dpt = dbms_select_tuple(dp_loc, dp_off, dbms, &page);
 
-  const tpt_col_info *info = tp_constuct_col_info_arr(dpt);
+  const tpt_col_info *info = tp_construct_col_info_arr(dpt);
 
   tp_iter *iter = tp_iter_construct(dbms, dpt);
   tp_tuple *tuple = tp_iter_get(iter);

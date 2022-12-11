@@ -1,6 +1,7 @@
 #include "../src/dbms/dto/dto_row.h"
 #include "../src/dbms/dto/dto_table.h"
 #include "../src/dbms/op_dbms.c"
+#include "../src/dbms/plan.h"
 #include "../src/schema.h"
 #include "../src/table.h"
 #include "../src/util/printers.h"
@@ -21,25 +22,29 @@ int main() {
 
   table_create(dbms, table);
 
-  const char *row1_1 = "hello, this is it ksdjfk,asj jskfj kasjf jasfj safjsajf a";
+  const char *row1_1 = "hello";
   bool row1_2 = true;
   double row1_4 = 31.1F;
   int32_t row1_3 = 5;
 
   const void *row[] = {row1_1, &row1_2, &row1_3, &row1_4};
   dto_row_list list = dto_row_list_construct();
+
   int cnt = 20000;
   for (int i = 0; i < cnt; ++i) {
-    if (i % (cnt / 100) == 0) {
-      printf("Progress: %d%%\n", i / (cnt / 100));
-    }
     dto_row_list_append(&list, row);
   }
   row_list_insert(dbms, "table1", &list);
 
-  // print_table_rows(dbms, "table1");
-  dto_row_list_destruct(&list);
+  struct plan_source table1 = plan_source_construct("table1", dbms);
+  while (!table1.end(&table1)) {
+    table1.next(&table1);
+  }
 
+  table1.destruct(&table1);
+  // print_table_rows(dbms, "table1");
+
+  dto_row_list_destruct(&list);
   dto_table_destruct(&table);
   dbms_close(&dbms);
 }

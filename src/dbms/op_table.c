@@ -100,7 +100,7 @@ int dbms_insert_row_list(dp_tuple *dpt, const struct dto_row_list *list,
   fileoff_t page_loc = td_page_open(dpt, dbms, &page);
   size_t tpt_size = tp_get_tuple_size(dpt);
 
-  tpt_col_info *tpt_info_arr = tp_constuct_col_info_arr(dpt);
+  tpt_col_info *tpt_info_arr = tp_construct_col_info_arr(dpt);
 
   // Insert rows
   tp_tuple *tpt = calloc(tpt_size, 1);

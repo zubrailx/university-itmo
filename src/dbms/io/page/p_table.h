@@ -96,7 +96,7 @@ struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_
 
 pageoff_t tp_get_min_size(const struct dp_tuple *tuple);
 size_t tp_get_tuple_size(const struct dp_tuple *tuple);
-tpt_col_info *tp_constuct_col_info_arr(const struct dp_tuple *tuple);
+tpt_col_info *tp_construct_col_info_arr(const struct dp_tuple *tuple);
 
 bool tp_is_full(const struct table_page *page);
 bool tp_is_empty(const struct table_page *page);

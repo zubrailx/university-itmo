@@ -123,7 +123,7 @@ endif()
 # -----------------------------------------------------------------------------
 # Executable tests
 # -----------------------------------------------------------------------------
-if (DEFINED TSTS)
+if (NOT DEFINED TSTS)
 	FetchContent_MakeAvailable(googletest)
 
   message(STATUS "TESTS: ${TSTS}")

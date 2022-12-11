@@ -33,7 +33,7 @@ TEST(table, insert_list) {
 
   const void *row[] = {&row1_1, &row1_2, &row1_3, &row1_4};
   dto_row_list list = dto_row_list_construct();
-  for (int i = 0; i < 2000000; ++i) {
+  for (int i = 0; i < 200; ++i) {
     dto_row_list_append(&list, row);
   }
   row_list_insert(dbms, "table1", &list);
