@@ -2,7 +2,9 @@
 #include "io/page/p_table.h"
 #include "iter.h"
 #include "op_schema.h"
+#include "op_table.h"
 #include "page.h"
+#include "table.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -374,15 +376,19 @@ static void plan_update_set(void *self_void) {
   struct plan_update *self = self_void;
   struct plan *parent = self->parent;
 
-  table_page *page;
+  table_page *tp;
   struct dbms *dbms;
-  bool is_virt = !parent->get_page(parent, &page);
+  bool is_virt = !parent->get_page(parent, &tp);
   bool is_virt2 = !parent->get_dbms(parent, &dbms);
   assert(!(is_virt || is_virt2));
 
   for (size_t i = 0; i < self->base.arr_size; ++i) {
-    memcpy(parent->tuple_arr[i], self->base.tuple_arr[i],
-           self->base.pti_arr[i].tpt_size);
+    const tp_tuple *tpt_new = self->base.tuple_arr[i];
+    tp_tuple *tpt_old = parent->tuple_arr[i];
+    const struct plan_table_info pti = self->base.pti_arr[i];
+
+    dbms_update_row_pre(tpt_old, tpt_new, pti.dpt, pti.col_info, dbms);
+    tp_update_row_ptr(tp, tpt_new, pti.tpt_size, tpt_old);
   }
 }
 
