@@ -212,7 +212,6 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
     self->base.get_page = plan_source_get_page;
     self->base.get_dbms = plan_source_get_dbms;
   }
-
   return self;
 err:
   printf("plan_source_construct: Failed.\n");
@@ -309,8 +308,8 @@ static dp_tuple *dpt_flatten_malloc(size_t size, const struct plan_table_info *s
     // Header
     // zero everything until columns
     memset(dest, 0, offsetof(struct dp_tuple, columns));
-    dest->header.cols = total_cols;
     dest->header.is_present = false;
+    dest->header.cols = total_cols;
     // Columns
     size_t cur_col = 0;
     for (size_t i = 0; i < size; ++i) {

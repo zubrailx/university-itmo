@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 
 struct dbms;
@@ -19,4 +20,3 @@ bool dbms_update_row(const struct tp_tuple *new, struct tp_tuple *old,
 bool dbms_remove_row(struct tp_tuple *old, struct table_page *page,
                      struct dp_tuple *dpt, struct tpt_col_info *col_info,
                      struct dbms *dbms);
-

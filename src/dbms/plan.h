@@ -29,7 +29,7 @@ enum plan_type {
 
 struct plan_table_info {
   const char *table_name;
-  struct dp_tuple *dpt;
+  struct dp_tuple *dpt;// only valid for current plan node
   size_t tpt_size;
   struct tpt_col_info *col_info;
 };
@@ -104,7 +104,7 @@ struct plan_update {
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   // returns NEW values
   INHERIT struct tp_tuple **(*get)(void *self);
-  
+
   // Get OLD value
   const tp_tuple **(*old)(void *self);
   // Perform update (NEW -> OLD)

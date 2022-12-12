@@ -8,7 +8,6 @@ struct dbms;
 
 // Database Page
 typedef struct dp_iter {
-  struct dbms *dbms;
   struct dp_page_iter *page_iter;
   struct dp_tuple_iter *typle_iter;
 } dp_iter;
@@ -23,13 +22,9 @@ pageoff_t dp_iter_cur_index(struct dp_iter *iter);
 
 // Table Page
 typedef struct tp_iter {
-  struct dbms *dbms;
-
-  size_t typle_size;
-  bool do_write;
-
   struct tp_page_iter *page_iter;
   struct tp_tuple_iter *tuple_iter;
+  size_t tuple_size;
 } tp_iter;
 
 struct tp_iter *tp_iter_construct(struct dbms *dbms, struct dp_tuple *dpt,
