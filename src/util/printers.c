@@ -100,7 +100,7 @@ void print_table_rows(dbms *dbms, const char *table_name) {
 
   const tpt_col_info *info = tp_construct_col_info_arr(dpt);
 
-  tp_iter *iter = tp_iter_construct(dbms, dpt);
+  tp_iter *iter = tp_iter_construct(dbms, dpt, false);
   tp_tuple *tuple = tp_iter_get(iter);
   while (tuple) {
     print_table_tuple(tuple, dpt, info);

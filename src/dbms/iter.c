@@ -2,10 +2,12 @@
 
 #include <malloc.h>
 
+#include "core/dbfile.h"
 #include "core/dbmeta.h"
+#include "io/p_table.h"
 #include "page.h"
 
-// DATABASE PAGE
+// DATABASE PAGE {{{
 typedef struct dp_page_iter {
   struct database_page *cur;
   fileoff_t cur_loc;
@@ -23,7 +25,7 @@ static bool dp_page_iter_next(dp_page_iter *it, struct dbms *dbms) {
   }
   return false;
 }
-// NOTE: NO NEED TO FREE PAGES, THEY ARE MANAGED BY ITERATOR
+
 static dp_page_iter *dp_page_iter_construct(dbms *dbms) {
   dp_page_iter *iterator = my_malloc(dp_page_iter);
 
@@ -100,8 +102,10 @@ struct dp_tuple *dp_iter_get(struct dp_iter *it) {
 fileoff_t dp_iter_cur_page(struct dp_iter *iter) { return iter->page_iter->cur_loc; }
 // Return current iterator page offset
 pageoff_t dp_iter_cur_index(struct dp_iter *iter) { return iter->typle_iter->icur; }
+// }}}
 
-// TABLE PAGE
+// TABLE PAGE {{{
+// tp_page_iter {{{
 typedef struct tp_page_iter {
   struct table_page *cur;
   fileoff_t cur_loc;
@@ -112,8 +116,13 @@ static void tp_page_iter_set(tp_page_iter *iter, table_page *cur) {
   iter->cur_loc = cur->header.next;
 }
 
-static bool tp_page_iter_next(tp_page_iter *it, struct dbms *dbms) {
+static bool tp_page_iter_next(tp_page_iter *it, struct dbms *dbms, bool do_write) {
+  if (do_write) {
+    tp_alter(it->cur, dbms->dbfile->file, it->cur_loc);
+  }
+
   fileoff_t next_loc = it->cur->header.next;
+
   tp_destruct(&it->cur);
 
   if (!fileoff_is_null(next_loc)) {
@@ -136,11 +145,16 @@ static tp_page_iter *tp_page_iter_construct(struct dbms *dbms, const dp_tuple *t
   return iter;
 }
 
-static void tp_page_iter_destruct(tp_page_iter **iter_ptr) {
+// @dbms - used if do_write == true
+static void tp_page_iter_destruct(tp_page_iter **iter_ptr, bool do_write,
+                                  struct dbms *dbms) {
   if (*iter_ptr == NULL)
     return;
   tp_page_iter *iter = *iter_ptr;
   if (iter->cur != NULL) {
+    if (do_write) {
+      tp_alter(iter->cur, dbms->dbfile->file, iter->cur_loc);
+    }
     tp_destruct(&iter->cur);
   }
   free(iter);
@@ -148,13 +162,16 @@ static void tp_page_iter_destruct(tp_page_iter **iter_ptr) {
 }
 
 static table_page *tp_page_iter_get(tp_page_iter *it) { return it->cur; }
+//}}}
 
-// Typle iterator
-struct tp_iter *tp_iter_construct(struct dbms *dbms, const dp_tuple *tuple) {
+// tp_iter {{{
+struct tp_iter *tp_iter_construct(struct dbms *dbms, const dp_tuple *tuple,
+                                  bool do_write) {
   tp_iter *iter = my_malloc(tp_iter);
   *iter = (tp_iter){
       .dbms = dbms,
       .page_iter = tp_page_iter_construct(dbms, tuple),
+      .do_write = do_write,
       .typle_size = tp_get_tuple_size(tuple),
   };
   table_page *page = tp_page_iter_get(iter->page_iter);
@@ -167,7 +184,9 @@ void tp_iter_destruct(struct tp_iter **iter_ptr) {
   if (iter == NULL)
     return;
   tp_tuple_iter_destruct(&iter->tuple_iter);
-  tp_page_iter_destruct(&iter->page_iter);
+
+  tp_page_iter_destruct(&iter->page_iter, iter->do_write, iter->dbms);
+
   free(iter);
   *iter_ptr = NULL;
 }
@@ -176,7 +195,7 @@ bool tp_iter_next(struct tp_iter *it) {
   if (!tp_tuple_iter_next(it->tuple_iter)) {
     tp_tuple_iter_destruct(&it->tuple_iter);
 
-    while (tp_page_iter_next(it->page_iter, it->dbms)) {
+    while (tp_page_iter_next(it->page_iter, it->dbms, it->do_write)) {
       table_page *page = tp_page_iter_get(it->page_iter);
       it->tuple_iter = tp_tuple_iter_construct(page, it->typle_size);
 
@@ -189,9 +208,12 @@ bool tp_iter_next(struct tp_iter *it) {
   return false;
 }
 
+// @return original tuple that that if we wan't to update
 struct tp_tuple *tp_iter_get(struct tp_iter *iter) {
   return tp_tuple_iter_get(iter->tuple_iter);
 }
 
 fileoff_t tp_iter_cur_page(struct tp_iter *iter) { return iter->page_iter->cur_loc; }
 pageoff_t tp_iter_cur_tuple(struct tp_iter *iter) { return iter->tuple_iter->tcur; }
+//}}}
+// }}}

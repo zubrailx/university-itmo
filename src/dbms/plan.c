@@ -123,7 +123,9 @@ static bool plan_source_locate(void *self_void, fileoff_t *loc, pageoff_t *off) 
   return true;
 }
 
-struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms) {
+// @do_write - do open on write
+struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms,
+                                          bool do_write) {
   struct plan_source *self = my_malloc(struct plan_source);
   // specific for source
   self->dbms = dbms;
@@ -147,7 +149,7 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
     dp_destruct(&dp);
   }
 
-  self->iter = tp_iter_construct(dbms, plan_dpt);
+  self->iter = tp_iter_construct(dbms, plan_dpt, do_write);
 
   {// set base structure field
     struct plan_table_info table_nfo = {
@@ -185,9 +187,9 @@ err:
 }
 // }}}
 
-// plan_select {{{
-static void plan_select_destruct(void *self_void) {
-  struct plan_select *self = self_void;
+// plan_parent {{{
+static void plan_parent_destruct(void *self_void) {
+  struct plan_parent *self = self_void;
   // free parent node
   if (self->parent) {
     self->parent->destruct(self->parent);
@@ -195,6 +197,24 @@ static void plan_select_destruct(void *self_void) {
   // call base destructor
   plan_destruct(&self->base);
 }
+
+static bool plan_parent_next(void *self_void) {
+  struct plan_parent *self = self_void;
+  return self->parent->next(self->parent);
+}
+
+static bool plan_parent_end(void *self_void) {
+  struct plan_parent *self = self_void;
+  return self->parent->end(self->parent);
+}
+
+static bool plan_parent_locate(void *self_void, fileoff_t *fileoff,
+                               pageoff_t *pageoff) {
+  struct plan_select *self = self_void;
+  return self->parent->locate(self->parent, fileoff, pageoff);
+}
+
+// }}}
 
 static void tpt_flatten(struct tp_tuple *dest, struct tp_tuple **src,
                         const struct plan *parent) {
@@ -214,7 +234,7 @@ static bool plan_select_next(void *self_void) {
   struct plan_select *self = self_void;
   const struct plan *parent = self->parent;
 
-  bool res = parent->next(self->parent);
+  bool res = plan_parent_next(self);
   if (!res) {
     return false;
   }
@@ -224,11 +244,6 @@ static bool plan_select_next(void *self_void) {
   tpt_flatten(tuple_dest, tuple_src, parent);
 
   return true;
-}
-
-static bool plan_select_end(void *self_void) {
-  struct plan_select *self = self_void;
-  return self->parent->end(self->parent);
 }
 
 static dp_tuple *dpt_flatten(size_t size, const struct plan_table_info *src) {
@@ -285,25 +300,28 @@ struct plan_select *plan_select_construct_move(void *parent_void,
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
     tpt_flatten(self->base.tuple_arr[0], parent->get(parent), parent);
   }
-
   {
     VIRT_INHERIT((*self), base, get);
     VIRT_INHERIT((*self), base, get_info);
-    VIRT_INHERIT((*self), base, locate);
 
     self->next = plan_select_next;
     VIRT_OVERRIDE((*self), base, next);
 
-    self->end = plan_select_end;
+    self->end = plan_parent_end;
     VIRT_OVERRIDE((*self), base, end);
 
-    self->destruct = plan_select_destruct;
+    self->destruct = plan_parent_destruct;
     VIRT_OVERRIDE((*self), base, destruct);
-  }
 
+    self->locate = plan_parent_locate;
+    VIRT_OVERRIDE((*self), base, locate);
+  }
   return self;
 }
+// }}}
 
+// plan_update {{{
+static void plan_update_destruct(void *self_void) { struct plan_select *self; }
 // }}}
 
 #undef VIRT_OVERRIDE

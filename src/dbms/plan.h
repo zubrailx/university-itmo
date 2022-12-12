@@ -40,6 +40,7 @@ struct plan {
   // Check if this element is last
   bool (*end)(void *self);
   void (*destruct)(void *self_ptr);
+
   // returns true if page if can row be located in db (if not virtual) else false
   bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
@@ -60,32 +61,66 @@ struct plan_source {
   OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
-struct plan_projection {};
+#define PLAN_PARENT                                                                \
+  {                                                                                    \
+    struct plan base;                                                                  \
+    struct plan *parent;                                                               \
+  }
 
-struct plan_predicate {};
+struct plan_parent {
+  struct PLAN_PARENT;
+};
+
+struct plan_projection {};
 
 // returns data like it is received from plan_source (smth like virtual table)
 // but don't write data
-struct plan_select {
-  struct plan base;
 
-  struct plan *parent;
+struct plan_select {
+  struct PLAN_PARENT;
 
   // methods
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   INHERIT struct tp_tuple **(*get)(void *self);
-  INHERIT bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
   OVERRIDE void (*destruct)(void *self);
+  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
-struct plan_update {};
-struct plan_delete {};
 
-struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms);
+struct plan_update {
+  struct PLAN_PARENT;
+
+  INHERIT const struct plan_table_info *(*get_info)(void *self);
+  INHERIT struct tp_tuple **(*get)(void *self);
+
+  OVERRIDE bool (*next)(void *self);
+  OVERRIDE bool (*end)(void *self);
+  OVERRIDE void (*destruct)(void *self);
+  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
+};
+
+struct plan_delete {
+  struct PLAN_PARENT;
+
+  INHERIT const struct plan_table_info *(*get_info)(void *self);
+  INHERIT struct tp_tuple **(*get)(void *self);
+
+  OVERRIDE bool (*next)(void *self);
+  OVERRIDE bool (*end)(void *self);
+  OVERRIDE void (*destruct)(void *self);
+  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
+};
+
+struct plan_predicate {};
+
+struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms,
+                                          bool do_write);
 struct plan_select *plan_select_construct_move(void *parent_void,
                                                const char *table_name);
 
+
+#undef PLAN_PARENT                                                                
 #undef OVERRIDE
 #undef INHERIT

@@ -25,11 +25,15 @@ pageoff_t dp_iter_cur_index(struct dp_iter *iter);
 typedef struct tp_iter {
   size_t typle_size;
   struct dbms *dbms;
+
   struct tp_page_iter *page_iter;
+  bool do_write;
+
   struct tp_tuple_iter *tuple_iter;
 } tp_iter;
 
-struct tp_iter *tp_iter_construct(struct dbms *dbms, const struct dp_tuple *typle);
+struct tp_iter *tp_iter_construct(struct dbms *dbms, const struct dp_tuple *tuple,
+                                  bool do_write);
 void tp_iter_destruct(struct tp_iter **iter_ptr);
 bool tp_iter_next(struct tp_iter *iter);
 struct tp_tuple *tp_iter_get(struct tp_iter *iter);

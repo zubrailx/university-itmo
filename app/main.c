@@ -48,7 +48,7 @@ int main() {
 
   // TEST select (failed)
   struct plan_select *select_table1 =
-      plan_select_construct_move(plan_source_construct("table1", dbms), "temp-table1");
+      plan_select_construct_move(plan_source_construct("table1", dbms, false), "temp-table1");
 
   const struct plan_table_info *table_info = select_table1->get_info(select_table1);
 
