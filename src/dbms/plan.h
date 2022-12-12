@@ -5,6 +5,8 @@
 #include "io/page/p_database.h"
 #include "io/page/p_table.h"
 
+struct dbms;
+
 enum plan_type {
   PLAN_TYPE_SOURCE,
 
@@ -22,6 +24,8 @@ enum plan_type {
 
 #define OVERRIDE
 #define INHERIT
+#define PRIVATE
+#define VIRTUAL
 
 struct plan_table_info {
   const char *table_name;
@@ -37,16 +41,18 @@ struct plan {
   struct plan_table_info *pti_arr;
   struct tp_tuple **tuple_arr;
 
-  const struct plan_table_info *(*get_info)(void *self);
+  VIRTUAL const struct plan_table_info *(*get_info)(void *self);
   // get row with structure of plan_row_info arr
-  struct tp_tuple **(*get)(void *self);
-  bool (*next)(void *self);
+  VIRTUAL struct tp_tuple **(*get)(void *self);
+  VIRTUAL bool (*next)(void *self);
   // Check if this element is last
-  bool (*end)(void *self);
-  void (*destruct)(void *self_ptr);
+  VIRTUAL bool (*end)(void *self);
+  VIRTUAL void (*destruct)(void *self_ptr);
 
   // returns true if page if can row be located in db (if not virtual) else false
-  bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
+  VIRTUAL PRIVATE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
+  VIRTUAL PRIVATE bool (*get_page)(void *self, table_page **page_out);
+  VIRTUAL PRIVATE bool (*get_dbms)(void *self, struct dbms **dmbs_out);
 };
 
 struct plan_source {
@@ -62,7 +68,6 @@ struct plan_source {
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
   OVERRIDE void (*destruct)(void *self_ptr);
-  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
 #define PLAN_PARENT                                                                    \
@@ -82,7 +87,6 @@ struct plan_projection {};
 
 struct plan_select {
   struct PLAN_PARENT;
-
   // methods
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   INHERIT struct tp_tuple **(*get)(void *self);
@@ -90,12 +94,12 @@ struct plan_select {
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
   OVERRIDE void (*destruct)(void *self);
-  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
 struct plan_update {
   struct PLAN_PARENT;
   // tuple_arr is used to store new rows (maybe for postprocessing)
+  struct dbms *dbms;
 
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   // returns NEW values
@@ -109,20 +113,19 @@ struct plan_update {
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
   OVERRIDE void (*destruct)(void *self);
-  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
 struct plan_delete {
   struct PLAN_PARENT;
-  // tuple_arr contains NULLs
 
+  struct dbms *dbms;
+  // tuple_arr contains NULLs
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   INHERIT struct tp_tuple **(*get)(void *self);
 
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
   OVERRIDE void (*destruct)(void *self);
-  OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
 struct plan_predicate {};
@@ -133,5 +136,7 @@ struct plan_select *plan_select_construct_move(void *parent_void,
                                                const char *table_name);
 
 #undef PLAN_PARENT
+#undef VIRTUAL
+#undef PRIVATE
 #undef OVERRIDE
 #undef INHERIT

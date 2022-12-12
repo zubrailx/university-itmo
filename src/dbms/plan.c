@@ -3,6 +3,7 @@
 #include "iter.h"
 #include "op_schema.h"
 #include "page.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,6 +66,10 @@ static bool plan_locate(void *self, fileoff_t *fileoff, pageoff_t *pageoff) {
   return false;
 }
 
+static bool plan_get_page(void *self, table_page **page_out) { return false; }
+
+static bool plan_get_dbms(void *self, struct dbms **dbms_out) { return false; }
+
 struct plan plan_construct(enum plan_type type, size_t arr_size) {
   return (struct plan){.type = type,
                        .arr_size = arr_size,
@@ -73,10 +78,14 @@ struct plan plan_construct(enum plan_type type, size_t arr_size) {
                        // methods
                        .get_info = plan_get_info,
                        .get = plan_get,
+
                        .next = plan_next,
                        .end = plan_end,
                        .destruct = plan_destruct_void,
-                       .locate = plan_locate};
+
+                       .locate = plan_locate,
+                       .get_page = plan_get_page,
+                       .get_dbms = plan_get_dbms};
 }
 
 // for tuple_arr only allocated array of pointers
@@ -134,6 +143,18 @@ static bool plan_source_locate(void *self_void, fileoff_t *loc, pageoff_t *off) 
   return true;
 }
 
+static bool plan_source_get_page(void *self_void, table_page **page_out) {
+  struct plan_source *self = self_void;
+  *page_out = tp_iter_get_page(self->iter);
+  return true;
+}
+
+static bool plan_source_get_dbms(void *self_void, struct dbms **dbms_out) {
+  struct plan_source *self = self_void;
+  *dbms_out = self->dbms;
+  return true;
+}
+
 // @do_write - do open on write
 struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms,
                                           bool do_write) {
@@ -187,8 +208,9 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
     (*self).destruct = plan_source_destruct;
     VIRT_OVERRIDE((*self), base, destruct);
 
-    (*self).locate = plan_source_locate;
-    VIRT_OVERRIDE((*self), base, locate);
+    self->base.locate = plan_source_locate;
+    self->base.get_page = plan_source_get_page;
+    self->base.get_dbms = plan_source_get_dbms;
   }
 
   return self;
@@ -222,8 +244,18 @@ static bool plan_parent_end(void *self_void) {
 
 static bool plan_parent_locate(void *self_void, fileoff_t *fileoff,
                                pageoff_t *pageoff) {
-  struct plan_select *self = self_void;
+  struct plan_parent *self = self_void;
   return self->parent->locate(self->parent, fileoff, pageoff);
+}
+
+static bool plan_parent_get_dbms(void *self_void, struct dbms **dbms_out) {
+  struct plan_parent *self = self_void;
+  return self->parent->get_dbms(self->parent, dbms_out);
+}
+
+static bool plan_parent_get_page(void *self_void, table_page **page_out) {
+  struct plan_parent *self = self_void;
+  return self->parent->get_page(self->parent, page_out);
 }
 
 static const tp_tuple **plan_parent_old(void *self_void) {
@@ -330,8 +362,9 @@ struct plan_select *plan_select_construct_move(void *parent_void,
     self->destruct = plan_parent_destruct;
     VIRT_OVERRIDE((*self), base, destruct);
 
-    self->locate = plan_parent_locate;
-    VIRT_OVERRIDE((*self), base, locate);
+    self->base.locate = plan_parent_locate;
+    self->base.get_page = plan_parent_get_page;
+    self->base.get_dbms = plan_parent_get_dbms;
   }
   return self;
 }
@@ -341,12 +374,24 @@ struct plan_select *plan_select_construct_move(void *parent_void,
 static void plan_update_set(void *self_void) {
   struct plan_update *self = self_void;
   struct plan *parent = self->parent;
+
+  table_page *page;
+  struct dbms *dbms;
+  bool is_virt = !parent->get_page(parent, &page);
+  bool is_virt2 = !parent->get_dbms(parent, &dbms);
+  assert(!(is_virt || is_virt2));
+
   for (size_t i = 0; i < self->base.arr_size; ++i) {
     memcpy(parent->tuple_arr[i], self->base.tuple_arr[i],
            self->base.pti_arr[i].tpt_size);
   }
 }
 
+static bool plan_update_get_dbms(void *self_void, struct dbms **dbms_out) {
+  struct plan_update *self = self_void;
+  *dbms_out = self->dbms;
+  return true;
+}
 
 struct plan_update *plan_update_construct_move(void *parent_void,
                                                const char *table_name) {
@@ -365,6 +410,13 @@ struct plan_update *plan_update_construct_move(void *parent_void,
     }
 
     self->base = plan_construct(PLAN_TYPE_UPDATE, 1);
+
+    bool res = parent->get_dbms(parent, &self->dbms);
+    if (!res) {
+      printf("plan_update_construct: Doesn't have access to file.\n");
+      goto err;
+    }
+
     plan_set_pti_deep(&self->base, parent_info);
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
   }
@@ -381,11 +433,12 @@ struct plan_update *plan_update_construct_move(void *parent_void,
     self->destruct = plan_parent_destruct;
     VIRT_OVERRIDE((*self), base, destruct);
 
-    self->locate = plan_parent_locate;
-    VIRT_OVERRIDE((*self), base, locate);
-
     self->set = plan_update_set;
     self->old = plan_parent_old;
+
+    self->base.locate = plan_parent_locate;
+    self->base.get_page = plan_parent_get_page;
+    self->base.get_dbms = plan_update_get_dbms;
   }
   return self;
 

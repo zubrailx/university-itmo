@@ -31,7 +31,7 @@ page_sso dbms_sso_insert(const size_t size, const void *data, struct dbms *dbms)
   return res;
 }
 
-void dbms_sso_remove(page_sso *sso, struct dbms *dbms) {
+void dbms_sso_remove(const page_sso *sso, struct dbms *dbms) {
   if (sso->not_inline) {
     dbms_dd_remove_data(dbms, sso->po_ptr, sso_to_size(sso->ssize));
   }

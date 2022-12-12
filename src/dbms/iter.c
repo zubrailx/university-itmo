@@ -6,6 +6,7 @@
 #include "core/dbmeta.h"
 #include "io/p_table.h"
 #include "page.h"
+#include "table_dist.h"
 
 // DATABASE PAGE {{{
 typedef struct dp_page_iter {
@@ -108,17 +109,31 @@ pageoff_t dp_iter_cur_index(struct dp_iter *iter) { return iter->typle_iter->icu
 // tp_page_iter {{{
 typedef struct tp_page_iter {
   struct table_page *cur;
+  struct dp_tuple *dpt;
+  bool was_full;// if was_full and not page is not full then add it in table_dist
   fileoff_t cur_loc;
 } tp_page_iter;
+
+static void tp_page_td_post(tp_page_iter *iter, struct dbms *dbms) {
+  if (iter->was_full && !tp_is_full(iter->cur)) {
+    page_entry entry = {.size = iter->cur->header.base.size, .start = iter->cur_loc};
+
+    fileoff_t td_last = iter->dpt->header.td_last;
+    dbms_td_push_single(dbms, &td_last, &entry);
+    iter->dpt->header.td_last = td_last;
+  }
+}
 
 static void tp_page_iter_set(tp_page_iter *iter, table_page *cur) {
   iter->cur = cur;
   iter->cur_loc = cur->header.next;
+  iter->was_full = tp_is_full(cur);
 }
 
 static bool tp_page_iter_next(tp_page_iter *it, struct dbms *dbms, bool do_write) {
   if (do_write) {
     tp_alter(it->cur, dbms->dbfile->file, it->cur_loc);
+    tp_page_td_post(it, dbms);
   }
 
   fileoff_t next_loc = it->cur->header.next;
@@ -132,15 +147,17 @@ static bool tp_page_iter_next(tp_page_iter *it, struct dbms *dbms, bool do_write
   return false;
 }
 
-static tp_page_iter *tp_page_iter_construct(struct dbms *dbms, const dp_tuple *tuple) {
+// @dpt - is modified when is writable
+static tp_page_iter *tp_page_iter_construct(struct dbms *dbms, dp_tuple *dpt) {
   tp_page_iter *iter = my_malloc(tp_page_iter);
 
-  fileoff_t page_loc = tuple->header.tp_first;
+  fileoff_t page_loc = dpt->header.tp_first;
   if (!fileoff_is_null(page_loc)) {
     table_page *first = dbms_tp_open(dbms, page_loc);
-    *iter = (tp_page_iter){.cur = first, .cur_loc = page_loc};
+    *iter = (tp_page_iter){
+        .cur = first, .cur_loc = page_loc, .was_full = tp_is_full(first), .dpt = dpt};
   } else {
-    *iter = (tp_page_iter){.cur = NULL, .cur_loc = get_fileoff_t(0)};
+    *iter = (tp_page_iter){.cur = NULL, .cur_loc = get_fileoff_t(0), .was_full = false};
   }
   return iter;
 }
@@ -154,6 +171,7 @@ static void tp_page_iter_destruct(tp_page_iter **iter_ptr, bool do_write,
   if (iter->cur != NULL) {
     if (do_write) {
       tp_alter(iter->cur, dbms->dbfile->file, iter->cur_loc);
+      tp_page_td_post(iter, dbms);
     }
     tp_destruct(&iter->cur);
   }
@@ -165,14 +183,13 @@ static table_page *tp_page_iter_get(tp_page_iter *it) { return it->cur; }
 //}}}
 
 // tp_iter {{{
-struct tp_iter *tp_iter_construct(struct dbms *dbms, const dp_tuple *tuple,
-                                  bool do_write) {
+struct tp_iter *tp_iter_construct(struct dbms *dbms, dp_tuple *dpt, bool do_write) {
   tp_iter *iter = my_malloc(tp_iter);
   *iter = (tp_iter){
       .dbms = dbms,
-      .page_iter = tp_page_iter_construct(dbms, tuple),
+      .typle_size = tp_get_tuple_size(dpt),
       .do_write = do_write,
-      .typle_size = tp_get_tuple_size(tuple),
+      .page_iter = tp_page_iter_construct(dbms, dpt),
   };
   table_page *page = tp_page_iter_get(iter->page_iter);
   iter->tuple_iter = tp_tuple_iter_construct(page, iter->typle_size);
@@ -184,7 +201,6 @@ void tp_iter_destruct(struct tp_iter **iter_ptr) {
   if (iter == NULL)
     return;
   tp_tuple_iter_destruct(&iter->tuple_iter);
-
   tp_page_iter_destruct(&iter->page_iter, iter->do_write, iter->dbms);
 
   free(iter);
@@ -213,7 +229,11 @@ struct tp_tuple *tp_iter_get(struct tp_iter *iter) {
   return tp_tuple_iter_get(iter->tuple_iter);
 }
 
+struct table_page *tp_iter_get_page(struct tp_iter *iter) {
+  return tp_page_iter_get(iter->page_iter);
+}
+
 fileoff_t tp_iter_cur_page(struct tp_iter *iter) { return iter->page_iter->cur_loc; }
 pageoff_t tp_iter_cur_tuple(struct tp_iter *iter) { return iter->tuple_iter->tcur; }
 //}}}
-// }}}
+//}}}
