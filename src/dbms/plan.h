@@ -7,13 +7,17 @@
 
 enum plan_type {
   PLAN_TYPE_SOURCE,
-  PLAN_TYPE_TERMINAL,
-  PLAN_TYPE_UNOP,
-  PLAN_TYPE_BINOP,
 
   PLAN_TYPE_DELETED,
   PLAN_TYPE_ERROR,
-  PLAN_TYPE_SELECT
+
+  PLAN_TYPE_SELECT,
+  PLAN_TYPE_UPDATE,
+  PLAN_TYPE_DELETE
+
+  // PLAN_TYPE_TERMINAL,
+  // PLAN_TYPE_UNOP,
+  // PLAN_TYPE_BINOP,
 };
 
 #define OVERRIDE
@@ -61,7 +65,7 @@ struct plan_source {
   OVERRIDE bool (*locate)(void *self, fileoff_t *fileoff, pageoff_t *pageoff);
 };
 
-#define PLAN_PARENT                                                                \
+#define PLAN_PARENT                                                                    \
   {                                                                                    \
     struct plan base;                                                                  \
     struct plan *parent;                                                               \
@@ -91,9 +95,16 @@ struct plan_select {
 
 struct plan_update {
   struct PLAN_PARENT;
+  // tuple_arr is used to store new rows (maybe for postprocessing)
 
   INHERIT const struct plan_table_info *(*get_info)(void *self);
+  // returns NEW values
   INHERIT struct tp_tuple **(*get)(void *self);
+  
+  // Get OLD value
+  const tp_tuple **(*old)(void *self);
+  // Perform update (NEW -> OLD)
+  void (*set)(void *self);
 
   OVERRIDE bool (*next)(void *self);
   OVERRIDE bool (*end)(void *self);
@@ -103,6 +114,7 @@ struct plan_update {
 
 struct plan_delete {
   struct PLAN_PARENT;
+  // tuple_arr contains NULLs
 
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   INHERIT struct tp_tuple **(*get)(void *self);
@@ -120,7 +132,6 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
 struct plan_select *plan_select_construct_move(void *parent_void,
                                                const char *table_name);
 
-
-#undef PLAN_PARENT                                                                
+#undef PLAN_PARENT
 #undef OVERRIDE
 #undef INHERIT

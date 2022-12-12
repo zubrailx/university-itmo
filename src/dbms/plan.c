@@ -65,11 +65,11 @@ static bool plan_locate(void *self, fileoff_t *fileoff, pageoff_t *pageoff) {
   return false;
 }
 
-struct plan plan_construct(enum plan_type type) {
+struct plan plan_construct(enum plan_type type, size_t arr_size) {
   return (struct plan){.type = type,
-                       .arr_size = 0,
-                       .pti_arr = NULL,
-                       .tuple_arr = NULL,
+                       .arr_size = arr_size,
+                       .pti_arr = malloc(sizeof(struct plan_table_info) * arr_size),
+                       .tuple_arr = malloc(sizeof(struct tp_tuple *) * arr_size),
                        // methods
                        .get_info = plan_get_info,
                        .get = plan_get,
@@ -79,19 +79,30 @@ struct plan plan_construct(enum plan_type type) {
                        .locate = plan_locate};
 }
 
-struct plan plan_construct_with_row_info(enum plan_type type, const size_t size,
-                                         struct plan_table_info arr[]) {
-  struct plan plan = plan_construct(type);
+// for tuple_arr only allocated array of pointers
+static void plan_set_pti_shallow(struct plan *plan,
+                                 const struct plan_table_info arr[]) {
+  size_t info_size = sizeof(struct plan_table_info) * plan->arr_size;
+  memcpy(plan->pti_arr, arr, info_size);
+}
 
-  plan.arr_size = size;
+void plan_set_pti_deep(struct plan *plan, const struct plan_table_info arr[]) {
 
-  size_t info_size = sizeof(struct plan_table_info) * size;
-  plan.pti_arr = malloc(info_size);
-  memcpy(plan.pti_arr, arr, info_size);
+  plan_set_pti_shallow(plan, arr);
 
-  plan.tuple_arr = malloc(sizeof(tp_tuple *) * size);
+  for (size_t i = 0; i < plan->arr_size; ++i) {
+    struct plan_table_info *pti = plan->pti_arr + i;
 
-  return plan;
+    size_t cols = arr[i].dpt->header.cols;
+    size_t dpt_size = dp_tuple_size(cols);
+
+    pti->dpt = malloc(dpt_size);
+    memcpy(pti->dpt, arr[i].dpt, dpt_size);
+
+    pti->table_name = strdup(arr[i].table_name);
+
+    memcpy(pti->col_info, arr[i].col_info, sizeof(tpt_col_info) * cols);
+  }
 }
 // }}}
 
@@ -152,13 +163,14 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
   self->iter = tp_iter_construct(dbms, plan_dpt, do_write);
 
   {// set base structure field
-    struct plan_table_info table_nfo = {
-        .table_name = strdup(table_name),
-        .dpt = plan_dpt,
-        .tpt_size = dp_tuple_size(plan_dpt->header.cols),
-        .col_info = tp_construct_col_info_arr(plan_dpt)};
+    struct plan_table_info table_info = {.table_name = strdup(table_name),
+                                         .dpt = plan_dpt,
+                                         .tpt_size = tp_get_tuple_size(plan_dpt),
+                                         .col_info =
+                                             tp_construct_col_info_arr(plan_dpt)};
 
-    self->base = plan_construct_with_row_info(PLAN_TYPE_SOURCE, 1, &table_nfo);
+    self->base = plan_construct(PLAN_TYPE_SOURCE, 1);
+    plan_set_pti_shallow(&self->base, &table_info);
     self->base.tuple_arr[0] = tp_iter_get(self->iter);
   }
 
@@ -182,7 +194,7 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
   return self;
 err:
   printf("plan_source_construct: Failed.\n");
-  plan_source_destruct((void **)&self);
+  plan_source_destruct(self);
   return self;
 }
 // }}}
@@ -214,8 +226,13 @@ static bool plan_parent_locate(void *self_void, fileoff_t *fileoff,
   return self->parent->locate(self->parent, fileoff, pageoff);
 }
 
+static const tp_tuple **plan_parent_old(void *self_void) {
+  struct plan_parent *self = self_void;
+  return (const tp_tuple **)self->parent->get(self->parent);
+}
 // }}}
 
+// plan_select{{{
 static void tpt_flatten(struct tp_tuple *dest, struct tp_tuple **src,
                         const struct plan *parent) {
   dest->header.is_present = false;
@@ -246,7 +263,7 @@ static bool plan_select_next(void *self_void) {
   return true;
 }
 
-static dp_tuple *dpt_flatten(size_t size, const struct plan_table_info *src) {
+static dp_tuple *dpt_flatten_malloc(size_t size, const struct plan_table_info *src) {
   struct dp_tuple *dest;
 
   size_t total_cols = 0;
@@ -257,7 +274,7 @@ static dp_tuple *dpt_flatten(size_t size, const struct plan_table_info *src) {
 
   {
     dest = malloc(dp_tuple_size(total_cols));
-    // header
+    // Header
     // zero everything until columns
     memset(dest, 0, offsetof(struct dp_tuple, columns));
     dest->header.cols = total_cols;
@@ -265,10 +282,11 @@ static dp_tuple *dpt_flatten(size_t size, const struct plan_table_info *src) {
     // Columns
     size_t cur_col = 0;
     for (size_t i = 0; i < size; ++i) {
-      const size_t icol_size = src[i].tpt_size - offsetof(struct dp_tuple, columns);
-      memcpy(dest->columns + cur_col, src[i].dpt->columns, icol_size);
+      const size_t icols = src[i].dpt->header.cols;
+      const size_t icol_size = dp_tuple_size(icols) - offsetof(dp_tuple, columns);
 
-      cur_col += src[i].dpt->header.cols;
+      memcpy(dest->columns + cur_col, src[i].dpt->columns, icol_size);
+      cur_col += icols;
     }
   }
   return dest;
@@ -280,22 +298,21 @@ struct plan_select *plan_select_construct_move(void *parent_void,
   struct plan_select *self = my_malloc(struct plan_select);
 
   struct plan *parent = parent_void;
-  parent_void = NULL;
-
   self->parent = parent;
+  parent_void = NULL;
 
   {// base
     const struct plan_table_info *parent_info = parent->get_info(parent);
 
-    struct dp_tuple *dpt = dpt_flatten(parent->arr_size, parent_info);
+    struct dp_tuple *dpt = dpt_flatten_malloc(parent->arr_size, parent_info);
 
     struct plan_table_info table_info = {.table_name = strdup(table_name),
                                          .dpt = dpt,
-                                         .tpt_size = dp_tuple_size(dpt->header.cols),
+                                         .tpt_size = tp_get_tuple_size(dpt),
                                          .col_info = tp_construct_col_info_arr(dpt)};
 
-    self->base = plan_construct_with_row_info(PLAN_TYPE_SELECT, 1, &table_info);
-
+    self->base = plan_construct(PLAN_TYPE_SELECT, 1);
+    plan_set_pti_shallow(&self->base, &table_info);
     // allocate tuple_arr[0] and set to initial value
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
     tpt_flatten(self->base.tuple_arr[0], parent->get(parent), parent);
@@ -321,7 +338,64 @@ struct plan_select *plan_select_construct_move(void *parent_void,
 // }}}
 
 // plan_update {{{
-static void plan_update_destruct(void *self_void) { struct plan_select *self; }
+static void plan_update_set(void *self_void) {
+  struct plan_update *self = self_void;
+  struct plan *parent = self->parent;
+  for (size_t i = 0; i < self->base.arr_size; ++i) {
+    memcpy(parent->tuple_arr[i], self->base.tuple_arr[i],
+           self->base.pti_arr[i].tpt_size);
+  }
+}
+
+
+struct plan_update *plan_update_construct_move(void *parent_void,
+                                               const char *table_name) {
+  struct plan_update *self = my_malloc(struct plan_update);
+
+  struct plan *parent = parent_void;
+  self->parent = parent;
+  parent_void = NULL;
+
+  {
+    const struct plan_table_info *parent_info = parent->get_info(parent);
+
+    if (parent->arr_size != 1 || !parent_info[0].dpt->header.is_present) {
+      printf("plan_update_construct: Parent iterates over virtual table.\n");
+      goto err;
+    }
+
+    self->base = plan_construct(PLAN_TYPE_UPDATE, 1);
+    plan_set_pti_deep(&self->base, parent_info);
+    self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
+  }
+  {
+    VIRT_INHERIT((*self), base, get_info);
+    VIRT_INHERIT((*self), base, get);
+
+    self->next = plan_parent_next;
+    VIRT_OVERRIDE((*self), base, next);
+
+    self->end = plan_parent_end;
+    VIRT_OVERRIDE((*self), base, end);
+
+    self->destruct = plan_parent_destruct;
+    VIRT_OVERRIDE((*self), base, destruct);
+
+    self->locate = plan_parent_locate;
+    VIRT_OVERRIDE((*self), base, locate);
+
+    self->set = plan_update_set;
+    self->old = plan_parent_old;
+  }
+  return self;
+
+err:
+  printf("plan_update_construct: Failed.\n");
+  plan_parent_destruct(self);
+  return self;
+}
 // }}}
+
+// plan_delete
 
 #undef VIRT_OVERRIDE

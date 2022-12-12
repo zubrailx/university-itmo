@@ -130,23 +130,17 @@ pageoff_t tp_insert_row(struct table_page *page, const tp_tuple *tuple,
   memcpy(dest_ptr, tuple, tuple_size);
   return off;
 }
-tp_tuple *tp_remove_row(struct table_page *page, const pageoff_t start) {
+void tp_remove_row(struct table_page *page, const pageoff_t start) {
   tp_tuple *tuple = (void *)page + start.bytes;
   tuple->header.is_present = false;
   slot_push(page, (slot_index){.start = start});
-  return tuple;
 }
 
 // returns malloced old row
-tp_tuple *tp_update_row(struct table_page *page, const tp_tuple *tuple,
+void tp_update_row(struct table_page *page, const tp_tuple *new,
                         size_t tuple_size, const pageoff_t start) {
   tp_tuple *old = (void *)page + start.bytes;
-
-  tp_tuple *old_mlc = malloc(tuple_size);
-  memcpy(old_mlc, old, tuple_size);
-
-  memcpy(old, tuple, tuple_size);
-  return old_mlc;
+  memcpy(old, new, tuple_size);
 }
 
 // Iterators

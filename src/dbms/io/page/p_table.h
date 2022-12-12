@@ -102,9 +102,9 @@ bool tp_is_empty(const struct table_page *page);
 
 pageoff_t tp_insert_row(struct table_page *page, const tp_tuple *tuple,
                         size_t tuple_size);
-tp_tuple *tp_remove_row(struct table_page *page, pageoff_t start);
-tp_tuple *tp_update_row(struct table_page *page, const tp_tuple *tuple,
-                        size_t tuple_size, pageoff_t start);
+void tp_remove_row(struct table_page *page, const pageoff_t start);
+void tp_update_row(struct table_page *page, const tp_tuple *new, size_t tuple_size,
+                   const pageoff_t start);
 
 // Iterators
 struct tp_tuple_iter *tp_tuple_iter_construct(struct table_page *page,

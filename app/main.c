@@ -37,29 +37,30 @@ int main() {
   row_list_insert(dbms, "table1", &list);
 
   // TEST source (passed)
-  // struct plan_source tsource = plan_source_construct("table1", dbms);
-  // const struct plan_table_info *info = tsource.get_info(&tsource);
-  // while (!tsource.end(&tsource)) {
-  //   tp_tuple **tuple_list = tsource.get(&tsource);
-  //   print_table_tuple(tuple_list[0], info[0].dpt, info[0].col_info);
-  //   tsource.next(&tsource);
-  // }
-  // tsource.destruct(&tsource);
-
-  // TEST select (failed)
-  struct plan_select *select_table1 =
-      plan_select_construct_move(plan_source_construct("table1", dbms, false), "temp-table1");
-
-  const struct plan_table_info *table_info = select_table1->get_info(select_table1);
-
-  while (!select_table1->end(select_table1)) {
-    tp_tuple **tpt = select_table1->get(select_table1);
-    print_table_tuple(tpt[0], table_info[0].dpt, table_info[0].col_info);
-    select_table1->next(select_table1);
+  struct plan_source *tsource = plan_source_construct("table1", dbms, false);
+  const struct plan_table_info *info = tsource->get_info(tsource);
+  while (!tsource->end(tsource)) {
+    tp_tuple **tuple_list = tsource->get(tsource);
+    print_table_tuple(tuple_list[0], info[0].dpt, info[0].col_info);
+    tsource->next(tsource);
   }
-  select_table1->destruct(select_table1);
+  tsource->destruct(tsource);
 
-  print_table_rows(dbms, "table1");
+  // TEST select (accepted)
+  // struct plan_select *select_table1 =
+  //     plan_select_construct_move(plan_source_construct("table1", dbms, false),
+  //     "temp-table1");
+
+  // const struct plan_table_info *table_info = select_table1->get_info(select_table1);
+
+  // while (!select_table1->end(select_table1)) {
+  //   tp_tuple **tpt = select_table1->get(select_table1);
+  //   print_table_tuple(tpt[0], table_info[0].dpt, table_info[0].col_info);
+  //   select_table1->next(select_table1);
+  // }
+  // select_table1->destruct(select_table1);
+
+  // print_table_rows(dbms, "table1");
 
   dto_row_list_destruct(&list);
   dto_table_destruct(&table);
