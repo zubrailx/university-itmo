@@ -15,7 +15,8 @@
 #define VIRT_INHERIT(self, base, method) self.method = self.base.method
 
 // plan {{{
-static const struct plan_table_info *plan_get_info(void *self) {
+static const struct plan_table_info *plan_get_info(void *self, size_t *size_out) {
+  *size_out = ((struct plan *)self)->arr_size;
   return ((struct plan *)self)->pti_arr;
 }
 static struct tp_tuple **plan_get(void *self) {
@@ -27,11 +28,11 @@ static bool plan_next(void *self) { return false; }
 static bool plan_end(void *self_void) {
   struct plan *self = self_void;
   for (size_t i = 0; i < self->arr_size; ++i) {
-    if (self->tuple_arr[i] != NULL) {
-      return false;
+    if (self->tuple_arr[i] == NULL) {
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 static void plan_destruct(struct plan *self) {
@@ -101,30 +102,48 @@ struct plan plan_construct(enum plan_type type, size_t arr_size) {
 }
 
 // for tuple_arr only allocated array of pointers
+static void plan_set_pti_shallow_idx(struct plan *plan,
+                                     const struct plan_table_info *pti, size_t idx) {
+  memcpy(plan->pti_arr + idx, pti, sizeof(struct plan_table_info));
+}
+
 static void plan_set_pti_shallow(struct plan *plan,
                                  const struct plan_table_info arr[]) {
-  size_t info_size = sizeof(struct plan_table_info) * plan->arr_size;
-  memcpy(plan->pti_arr, arr, info_size);
+  for (size_t idx = 0; idx < plan->arr_size; ++idx) {
+    plan_set_pti_shallow_idx(plan, &arr[idx], idx);
+  }
+}
+
+void plan_set_pti_deep_idx(struct plan *plan, const struct plan_table_info *pti,
+                           size_t idx) {
+  // copy shallow
+  plan_set_pti_shallow_idx(plan, pti, idx);
+
+  size_t cols = pti->dpt->header.cols;
+  size_t dpt_size = dp_tuple_size(cols);
+
+  struct plan_table_info *p_pti = plan->pti_arr + idx;
+
+  p_pti->dpt = malloc(dpt_size);
+  memcpy(p_pti->dpt, pti->dpt, dpt_size);
+
+  p_pti->table_name = strdup(pti->table_name);
+
+  size_t col_info_size = sizeof(struct tpt_col_info) * cols;
+  p_pti->col_info = malloc(col_info_size);
+  memcpy(p_pti->col_info, pti->col_info, col_info_size);
 }
 
 void plan_set_pti_deep(struct plan *plan, const struct plan_table_info arr[]) {
+  for (size_t idx = 0; idx < plan->arr_size; ++idx) {
+    plan_set_pti_deep_idx(plan, &arr[idx], idx);
+  }
+}
 
-  plan_set_pti_shallow(plan, arr);
-
-  for (size_t i = 0; i < plan->arr_size; ++i) {
-    struct plan_table_info *pti = plan->pti_arr + i;
-
-    size_t cols = arr[i].dpt->header.cols;
-    size_t dpt_size = dp_tuple_size(cols);
-
-    pti->dpt = malloc(dpt_size);
-    memcpy(pti->dpt, arr[i].dpt, dpt_size);
-
-    pti->table_name = strdup(arr[i].table_name);
-
-    size_t col_info_size = sizeof(struct tpt_col_info) * cols;
-    pti->col_info = malloc(col_info_size);
-    memcpy(pti->col_info, arr[i].col_info, col_info_size);
+static void plan_zero_tp_tuple(void *self_void) {
+  struct plan *self = self_void;
+  for (size_t i = 0; i < self->arr_size; ++i) {
+    self->tuple_arr[i] = NULL;
   }
 }
 // }}}
@@ -142,7 +161,7 @@ static void plan_source_destruct(void *self_void) {
   if (self->iter) {
     tp_iter_destruct(&self->iter);
   }
-  self->base.tuple_arr[0] = NULL;
+  plan_zero_tp_tuple(self);
   // call base destructor
   plan_destruct(&self->base);
 }
@@ -242,9 +261,7 @@ static bool plan_parent_next(void *self_void) {
       self->base.tuple_arr[i] = p_tuple[i];
     }
   } else {
-    for (size_t i = 0; i < self->base.arr_size; ++i) {
-      self->base.tuple_arr[i] = NULL;
-    }
+    plan_zero_tp_tuple(self);
   }
   return res;
 }
@@ -370,9 +387,10 @@ struct plan_select *plan_select_construct_move(void *parent_void,
   parent_void = NULL;
 
   {// base
-    const struct plan_table_info *parent_info = parent->get_info(parent);
+    size_t arr_size;
+    const struct plan_table_info *parent_info = parent->get_info(parent, &arr_size);
 
-    struct dp_tuple *dpt = dpt_flatten_malloc(parent->arr_size, parent_info);
+    struct dp_tuple *dpt = dpt_flatten_malloc(arr_size, parent_info);
 
     struct plan_table_info table_info = {.table_name = strdup(table_name),
                                          .dpt = dpt,
@@ -479,7 +497,7 @@ static void plan_update_start(void *self_void, bool do_write) {
 
   // Set tuple_arr (new are stored)
   if (self->parent->end(self->parent)) {
-    self->base.tuple_arr[0] = NULL;
+    plan_zero_tp_tuple(self);
   } else {
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
     plan_update_update(self);
@@ -505,7 +523,8 @@ struct plan_update *plan_update_construct_move(void *parent_void, size_t cv_size
     // construct
     self->base = plan_construct(PLAN_TYPE_UPDATE, 1);
     // Checks
-    const struct plan_table_info *parent_info = parent->get_info(parent);
+    size_t arr_size;
+    const struct plan_table_info *parent_info = parent->get_info(parent, &arr_size);
     if (parent->arr_size != 1 || !parent_info[0].dpt->header.is_present) {
       printf("plan_update_construct: Parent iterates over virtual table.\n");
       goto err;
@@ -625,8 +644,9 @@ struct plan_delete *plan_delete_construct_move(void *parent_void) {
   {
     self->base = plan_construct(PLAN_TYPE_DELETE, 1);
     // Checks
-    const struct plan_table_info *parent_info = parent->get_info(parent);
-    if (parent->arr_size != 1 || !parent_info[0].dpt->header.is_present) {
+    size_t arr_size;
+    const struct plan_table_info *parent_info = parent->get_info(parent, &arr_size);
+    if (arr_size != 1 || !parent_info[0].dpt->header.is_present) {
       printf("plan_delete_construct: Parent iterates over virtual table.\n");
       goto err;
     }
@@ -665,6 +685,112 @@ struct plan_delete *plan_delete_construct_move(void *parent_void) {
 err:
   printf("plan_delete_construct: Failed.\n");
   plan_update_destruct(self);
+  return self;
+}
+// }}}
+
+// plan_cross_join {{{
+static bool plan_cross_join_next(void *self_void) {
+  struct plan_cross_join *self = self_void;
+  bool res_r = self->p_right->next(self->p_right);
+  if (res_r) {
+    tp_tuple **tpt_right = self->p_right->get(self->p_right);
+    size_t r_start = self->p_left->arr_size;
+    for (size_t r = 0; r < self->p_right->arr_size; ++r) {
+      self->base.tuple_arr[r_start + r] = tpt_right[r];
+    }
+    return true;
+  }
+
+  bool res_l = self->p_left->next(self->p_left);
+  if (!res_l) {
+    plan_zero_tp_tuple(self);
+    return false;
+  } else {
+    tp_tuple **tpt_left = self->p_left->get(self->p_left);
+    for (size_t l = 0; l < self->p_left->arr_size; ++l) {
+      self->base.tuple_arr[l] = tpt_left[l];
+    }
+    // get first entry of left
+    self->p_right->start(self->p_right, self->do_write);
+    // if right is empty
+    if (self->p_right->end(self->p_right)) {
+      plan_zero_tp_tuple(self);
+      return false;
+    } else {
+      tp_tuple **tpt_right = self->p_right->get(self->p_right);
+      size_t r_start = self->p_left->arr_size;
+      for (size_t r = 0; r < self->p_right->arr_size; ++r) {
+        self->base.tuple_arr[r_start + r] = tpt_right[r];
+      }
+      return true;
+    }
+  }
+}
+
+static void plan_cross_join_destruct(void *self_void) {
+  struct plan_cross_join *self = self_void;
+
+  self->p_left->destruct(self->p_left);
+  self->p_right->destruct(self->p_right);
+  plan_destruct(&self->base);
+}
+
+static void plan_cross_join_start(void *self_void, bool do_write) {
+  struct plan_cross_join *self = self_void;
+
+  self->do_write = do_write;
+  self->p_left->start(self->p_left, do_write);
+  self->p_right->start(self->p_right, do_write);
+
+  // Set pointers as from parents
+  size_t cur = 0;
+  tp_tuple **tpt_left = self->p_left->get(self->p_left);
+  for (size_t l = 0; l < self->p_left->arr_size; ++l, ++cur) {
+    self->base.tuple_arr[cur] = tpt_left[l];
+  }
+  tp_tuple **tpt_right = self->p_right->get(self->p_right);
+  for (size_t r = 0; r < self->p_right->arr_size; ++r, ++cur) {
+    self->base.tuple_arr[cur] = tpt_right[r];
+  }
+}
+
+struct plan_cross_join *plan_cross_join_construct_move(void *parent_left,
+                                                       void *parent_right) {
+
+  struct plan_cross_join *self = my_malloc(struct plan_cross_join);
+  *self = (struct plan_cross_join){};
+  // Set parents
+  self->p_left = parent_left;
+  self->p_right = parent_right;
+
+  {
+    // Construct
+    size_t arr_size = self->p_left->arr_size + self->p_right->arr_size;
+    self->base = plan_construct(PLAN_TYPE_CROSS_JOIN, arr_size);
+
+    // Set pti
+    size_t cur = 0;
+    for (size_t l = 0; l < self->p_left->arr_size; ++l, ++cur) {
+      plan_set_pti_deep_idx(&self->base, self->p_left->pti_arr + l, cur);
+    }
+    for (size_t r = 0; r < self->p_right->arr_size; ++r, ++cur) {
+      plan_set_pti_deep_idx(&self->base, self->p_right->pti_arr + r, cur);
+    }
+  }
+  {
+    VIRT_INHERIT((*self), base, get_info);
+    VIRT_INHERIT((*self), base, get);
+    VIRT_INHERIT((*self), base, end);
+
+    self->next = plan_cross_join_next;
+    VIRT_OVERRIDE((*self), base, next);
+
+    self->destruct = plan_cross_join_destruct;
+    VIRT_OVERRIDE((*self), base, destruct);
+
+    self->base.start = plan_cross_join_start;
+  }
   return self;
 }
 // }}}

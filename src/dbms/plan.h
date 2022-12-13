@@ -16,7 +16,9 @@ enum plan_type {
 
   PLAN_TYPE_SELECT,
   PLAN_TYPE_UPDATE,
-  PLAN_TYPE_DELETE
+  PLAN_TYPE_DELETE,
+
+  PLAN_TYPE_CROSS_JOIN
 
   // PLAN_TYPE_TERMINAL,
   // PLAN_TYPE_UNOP,
@@ -43,7 +45,7 @@ struct plan {
   struct plan_table_info *pti_arr;
   struct tp_tuple **tuple_arr;
 
-  VIRTUAL const struct plan_table_info *(*get_info)(void *self);
+  VIRTUAL const struct plan_table_info *(*get_info)(void *self, size_t *size);
   // get row with structure of plan_row_info arr
   VIRTUAL struct tp_tuple **(*get)(void *self);
   VIRTUAL bool (*next)(void *self);
@@ -66,7 +68,7 @@ struct plan_source {
   // iterator
   struct tp_iter *iter;
 
-  INHERIT const struct plan_table_info *(*get_info)(void *self);
+  INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
   INHERIT struct tp_tuple **(*get)(void *self);
   INHERIT bool (*end)(void *self);
 
@@ -93,7 +95,7 @@ struct plan_parent {
 struct plan_select {
   struct PLAN_PARENT;
   // methods
-  INHERIT const struct plan_table_info *(*get_info)(void *self);
+  INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
   INHERIT struct tp_tuple **(*get)(void *self);
   INHERIT bool (*end)(void *self);
 
@@ -119,7 +121,7 @@ struct plan_update {
   size_t *col_idxs;     // array
   const void **col_vals;// array
 
-  INHERIT const struct plan_table_info *(*get_info)(void *self);
+  INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
   INHERIT struct tp_tuple **(*get)(void *self);
   INHERIT bool (*end)(void *self);
 
@@ -146,7 +148,7 @@ struct plan_delete {
   struct dbms *dbms;
   struct tp_iter *iter;
   // tuple_arr contains NULLs
-  INHERIT const struct plan_table_info *(*get_info)(void *self);
+  INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
   INHERIT struct tp_tuple **(*get)(void *self);
   INHERIT bool (*end)(void *self);
 
@@ -159,9 +161,30 @@ struct plan_delete {
 struct plan_delete *plan_delete_construct_move(void *parent_void);
 // }}}
 
-struct plan_filter {};
+// plan_cross_join {{{
+struct plan_cross_join {
+  struct plan base;
 
-struct plan_projection {};
+  struct plan *p_left;
+  struct plan *p_right;
+
+  bool do_write;
+
+  INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
+  INHERIT struct tp_tuple **(*get)(void *self);
+  INHERIT bool (*end)(void *self);
+
+  OVERRIDE bool (*next)(void *self);
+  OVERRIDE void (*destruct)(void *self);
+
+  void (*start)(void *self);// only present in terminal plan_nodes
+};
+
+struct plan_cross_join *plan_cross_join_construct_move(void *parent_left,
+                                                       void *parent_right);
+// }}}
+
+struct plan_filter {};
 
 #undef PLAN_PARENT
 #undef VIRTUAL

@@ -79,14 +79,13 @@ static void print_table_column_specific(const void *src, const uint8_t col_type)
 
 void print_table_tuple(const tp_tuple *tuple, const dp_tuple *dpt,
                        const tpt_col_info *col_info) {
-  printf("----------------------\n");
+  printf("\n");
   printf("table_tuple\n");
   printf("is_present: %s\n", tuple->header.is_present ? "true" : "false");
   for (int i = 0; i < dpt->header.cols; ++i) {
     void *src = (uint8_t *)tuple + col_info[i].start;
     print_table_column_specific(src, dpt->columns[i].type);
   }
-  printf("----------------------\n");
 }
 
 void print_table_rows(dbms *dbms, const char *table_name) {
@@ -100,6 +99,8 @@ void print_table_rows(dbms *dbms, const char *table_name) {
 
   const tpt_col_info *info = tp_construct_col_info_arr(dpt);
 
+  printf("----------------------\n");
+  printf("table: '%s'\n", table_name);
   tp_iter *iter = tp_iter_construct(dbms, dpt, false);
   tp_tuple *tuple = tp_iter_get(iter);
   while (tuple) {
@@ -112,4 +113,5 @@ void print_table_rows(dbms *dbms, const char *table_name) {
 
   free((void *)info);
   dp_destruct(&page);
+  printf("----------------------\n");
 }
