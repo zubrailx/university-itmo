@@ -556,6 +556,102 @@ err:
 }
 // }}}
 
-// plan_delete
+// plan_delete {{{
+static void plan_delete_delete(void *self_void) {
+  struct plan_delete *self = self_void;
+  tp_iter_remove(self->iter, self->base.pti_arr[0].col_info);
+}
+
+static bool plan_delete_next(void *self_void) {
+  struct plan_delete *self = self_void;
+  struct plan *parent = self->parent;
+
+  bool res = parent->next(parent);
+  if (res) {
+    plan_delete_delete(self);
+  }
+  return res;
+}
+
+static bool plan_delete_get_dbms(void *self_void, struct dbms **dbms_out) {
+  struct plan_delete *self = self_void;
+  *dbms_out = self->dbms;
+  return true;
+}
+
+static bool plan_delete_get_iter(void *self_void, struct tp_iter **iter_out) {
+  struct plan_delete *self = self_void;
+  *iter_out = self->iter;
+  return true;
+}
+
+static void plan_delete_start(void *self_void, bool do_write) {
+  struct plan_delete *self = self_void;
+  self->parent->start(self->parent, do_write);
+
+  self->parent->get_iter(self->parent, &self->iter);
+
+  if (!self->parent->end(self->parent)) {
+    plan_delete_delete(self);
+  }
+}
+
+static void plan_delete_start_public(void *self_void) {
+  struct plan_delete *self = self_void;
+  self->base.start(self, true);
+}
+
+struct plan_delete *plan_delete_construct_move(void *parent_void) {
+  struct plan_delete *self = my_malloc(struct plan_delete);
+  *self = (struct plan_delete){};
+  // move
+  struct plan *parent = parent_void;
+  self->parent = parent;
+  parent_void = NULL;
+
+  {
+    self->base = plan_construct(PLAN_TYPE_DELETE, 1);
+    // Checks
+    const struct plan_table_info *parent_info = parent->get_info(parent);
+    if (parent->arr_size != 1 || !parent_info[0].dpt->header.is_present) {
+      printf("plan_delete_construct: Parent iterates over virtual table.\n");
+      goto err;
+    }
+    // Set dbms and check
+    bool res = parent->get_dbms(parent, &self->dbms);
+    if (!res) {
+      printf("plan_delete_construct: Doesn't have access to file.\n");
+      goto err;
+    }
+    // Set iter
+    self->iter = NULL;
+    // Set pti
+    plan_set_pti_deep(&self->base, parent_info);
+  }
+  {
+    VIRT_INHERIT((*self), base, get_info);
+    VIRT_INHERIT((*self), base, get);
+    VIRT_INHERIT((*self), base, end);
+
+    self->next = plan_delete_next;
+    VIRT_OVERRIDE((*self), base, next);
+
+    self->destruct = plan_parent_destruct;
+    VIRT_OVERRIDE((*self), base, destruct);
+
+    self->base.get_iter = plan_delete_get_iter;
+    self->base.get_dbms = plan_delete_get_dbms;
+    self->base.start = plan_delete_start;
+
+    self->start = plan_delete_start_public;
+  }
+  return self;
+
+err:
+  printf("plan_delete_construct: Failed.\n");
+  plan_update_destruct(self);
+  return self;
+}
+// }}}
 
 #undef VIRT_OVERRIDE

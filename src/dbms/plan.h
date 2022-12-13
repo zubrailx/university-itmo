@@ -144,21 +144,24 @@ struct plan_delete {
   struct PLAN_PARENT;
 
   struct dbms *dbms;
+  struct tp_iter *iter;
   // tuple_arr contains NULLs
   INHERIT const struct plan_table_info *(*get_info)(void *self);
   INHERIT struct tp_tuple **(*get)(void *self);
+  INHERIT bool (*end)(void *self);
 
   OVERRIDE bool (*next)(void *self);
-  OVERRIDE bool (*end)(void *self);
   OVERRIDE void (*destruct)(void *self);
 
   void (*start)(void *self);// only present in terminal plan_nodes
 };
-// }}}
 
-struct plan_filter {};
+struct plan_delete *plan_delete_construct_move(void *parent_void);
+  // }}}
 
-struct plan_projection {};
+  struct plan_filter {};
+
+  struct plan_projection {};
 
 #undef PLAN_PARENT
 #undef VIRTUAL
