@@ -4,8 +4,8 @@
 #include <malloc.h>
 #include <string.h>
 
-void *dbms_sso_construct_select(page_sso *sso, struct dbms *dbms) {
-  void *data;
+void *dbms_sso_construct_select(const page_sso *sso, struct dbms *dbms) {
+  char *data;
   if (sso->not_inline) {
     size_t size = sso_to_size(sso->ssize);
     data = malloc(size);

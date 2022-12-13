@@ -10,6 +10,7 @@
 #include "op_schema.h"
 #include "page.h"
 #include "sso.h"
+#include "table.h"
 #include "table_dist.h"
 
 // DATABASE PAGE {{{
@@ -271,13 +272,31 @@ bool tp_iter_next(struct tp_iter *iter) {
       }
     }
     iter->tuple_iter = tp_tuple_iter_construct(NULL, iter->tuple_size);
+    return false;
   }
-  return false;
+  return true;
 }
 
 // @return original tuple in case we want to update
 struct tp_tuple *tp_iter_get(struct tp_iter *iter) {
   return tp_tuple_iter_get(iter->tuple_iter);
+}
+
+void tp_iter_update(struct tp_iter *iter, tp_tuple *tpt_new, tpt_col_info *info) {
+  tp_tuple *tpt_old = tp_iter_get(iter);
+  tpt_update(tpt_old, tpt_new, iter->page_iter->dpt, info, iter->page_iter->dbms);
+}
+
+void tp_iter_update_columns(struct tp_iter *iter, tp_tuple *tpt_new, tpt_col_info *info,
+                            size_t arr_size, size_t *idxs) {
+  tp_tuple *tpt_old = tp_iter_get(iter);
+  tpt_update_columns(tpt_old, tpt_new, iter->page_iter->dpt, info, arr_size, idxs,
+                     iter->page_iter->dbms);
+}
+
+void tp_iter_remove(struct tp_iter *iter, tpt_col_info *info) { 
+  tp_tuple *tpt_old = tp_iter_get(iter);
+  tpt_remove(tpt_old, iter->page_iter->dpt, info, iter->page_iter->dbms);
 }
 
 struct table_page *tp_iter_get_page(struct tp_iter *iter) {

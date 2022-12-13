@@ -5,8 +5,10 @@
 #include "io/page/p_database.h"
 #include "page.h"
 #include "sso.h"
+#include "table.h"
 #include "table_dist.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,37 +52,8 @@ static void td_page_close(table_page **page_ptr, fileoff_t page_loc, dp_tuple *t
   dbms_tp_close(page_ptr, page_loc, dbms);
 }
 
-// @dest - aka tpt_column_ENUM_TYPE (depends on col_type)
-static void tpt_memcpy_specific(void *dest, const void *src, const uint8_t col_type,
-                                dbms *dbms) {
-  switch (col_type) {
-  case COLUMN_TYPE_BOOL: {
-    struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *col = dest;
-    col->entry = *(bool *)src;
-    break;
-  }
-  case COLUMN_TYPE_DOUBLE: {
-    struct TPT_COL_TYPE(COLUMN_TYPE_DOUBLE) *col = dest;
-    col->entry = *(double *)src;
-    break;
-  }
-  case COLUMN_TYPE_INT32: {
-    struct TPT_COL_TYPE(COLUMN_TYPE_INT32) *col = dest;
-    col->entry = *(int32_t *)src;
-    break;
-  }
-  case COLUMN_TYPE_STRING: {
-    struct TPT_COL_TYPE(COLUMN_TYPE_STRING) *col = dest;
-    col->entry = dbms_sso_insert(strlen(src) + 1, src, dbms);
-    break;
-  }
-  default:
-    assert(0 && "ERROR: unknown column type in entry inside p_database.\n");
-  }
-}
-
 static void to_tuple_with_sso(tp_tuple *dest, const void **src, const dp_tuple *dpt,
-                              tpt_col_info col_info_arr[], dbms *dbms) {
+                              tpt_col_info col_info_arr[], struct dbms *dbms) {
   for (size_t i = 0; i < dpt->header.cols; ++i) {
     tpt_column_base *colh = (void *)dest + col_info_arr[i].start;
     // General
@@ -128,4 +101,17 @@ int dbms_insert_row_list(dp_tuple *dpt, const struct dto_row_list *list,
   td_page_close(&page, page_loc, dpt, dbms);
 
   return cnt_inserted;
+}
+
+int dbms_find_column_idx(const dp_tuple *dpt, const char *column_name,
+                         struct dbms *dbms) {
+  for (size_t i = 0; i < dpt->header.cols; ++i) {
+    char *name = dbms_sso_construct_select(&dpt->columns[i].sso, dbms);
+    if (strcmp(column_name, name) == 0) {
+      free(name);
+      return i;
+    }
+    free(name);
+  }
+  return -1;
 }

@@ -31,8 +31,17 @@ struct tp_iter *tp_iter_construct(struct dbms *dbms, struct dp_tuple *dpt,
                                   bool do_write);
 void tp_iter_destruct(struct tp_iter **iter_ptr);
 bool tp_iter_next(struct tp_iter *iter);
+
+// get/update/remove
 struct tp_tuple *tp_iter_get(struct tp_iter *iter);
 struct table_page *tp_iter_get_page(struct tp_iter *iter);
 
+void tp_iter_update(struct tp_iter *iter, tp_tuple *tpt_new, tpt_col_info *info);
+void tp_iter_update_columns(struct tp_iter *iter, tp_tuple *tpt_new, tpt_col_info *info,
+                            size_t arr_size, size_t *idxs);
+
+void tp_iter_remove(struct tp_iter *iter, tpt_col_info *info);
+
+// offsets
 fileoff_t tp_iter_cur_page(struct tp_iter *iter);
 pageoff_t tp_iter_cur_tuple(struct tp_iter *iter);

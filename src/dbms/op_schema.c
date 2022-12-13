@@ -36,7 +36,7 @@ static struct dp_tuple *to_tuple_with_sso(const struct dto_table *dto_table,
     // convert dto column to entity
     column_limits_to_page(&dto_col->lims, &col.limits);
     col.type = column_type_to_page(dto_col->type);
-    dbms_sso_insert(strlen(dto_col->name) + 1, dto_col->name, dbms);
+    col.sso = dbms_sso_insert(strlen(dto_col->name) + 1, dto_col->name, dbms);
 
     tuple->columns[i] = col;
     dto_col = dto_col->next;
