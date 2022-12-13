@@ -138,9 +138,10 @@ void tp_update_row(struct table_page *page, const tp_tuple *tpt_new, size_t tupl
   memcpy(tpt_old, tpt_new, tuple_size);
 }
 
-void tp_update_row_ptr(struct table_page *page, const tp_tuple *tpt_new, size_t tuple_size,
-                       tp_tuple *tpt_old) {
-  tp_update_row(page, tpt_new, tuple_size, get_pageoff_t((void *)tpt_old - (void *)page));
+void tp_update_row_ptr(struct table_page *page, const tp_tuple *tpt_new,
+                       size_t tuple_size, tp_tuple *tpt_old) {
+  tp_update_row(page, tpt_new, tuple_size,
+                get_pageoff_t((void *)tpt_old - (void *)page));
 }
 
 void tp_remove_row(struct table_page *page, const pageoff_t start) {
@@ -173,9 +174,10 @@ static bool tp_tuple_iter_is_end(tp_tuple_iter *it) {
 struct tp_tuple_iter *tp_tuple_iter_construct(struct table_page *page,
                                               size_t tuple_size) {
   tp_tuple_iter *iter = my_malloc(tp_tuple_iter);
+  pageoff_t before_first = get_pageoff_t(offsetof(table_page, body) - tuple_size);
   if (page != NULL) {
     *iter = (tp_tuple_iter){.page = page,
-                            .tcur = get_pageoff_t(offsetof(table_page, body)),
+                            .tcur = next_tuple(page, before_first, tuple_size),
                             .tend = tcur_end(page),
                             .tuple_size = tuple_size};
   } else {

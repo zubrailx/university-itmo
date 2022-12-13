@@ -284,19 +284,22 @@ struct tp_tuple *tp_iter_get(struct tp_iter *iter) {
 
 void tp_iter_update(struct tp_iter *iter, tp_tuple *tpt_new, tpt_col_info *info) {
   tp_tuple *tpt_old = tp_iter_get(iter);
-  tpt_update(tpt_old, tpt_new, iter->page_iter->dpt, info, iter->page_iter->dbms);
+  tpt_erase(tpt_old, tpt_new, iter->page_iter->dpt, info, iter->page_iter->dbms);
+  tp_update_row_ptr(iter->page_iter->cur, tpt_new, iter->tuple_size, tpt_old);
 }
 
 void tp_iter_update_columns(struct tp_iter *iter, tp_tuple *tpt_new, tpt_col_info *info,
                             size_t arr_size, size_t *idxs) {
   tp_tuple *tpt_old = tp_iter_get(iter);
-  tpt_update_columns(tpt_old, tpt_new, iter->page_iter->dpt, info, arr_size, idxs,
-                     iter->page_iter->dbms);
+  tpt_erase_columns(tpt_old, tpt_new, iter->page_iter->dpt, info, arr_size, idxs,
+                    iter->page_iter->dbms);
+  tp_update_row_ptr(iter->page_iter->cur, tpt_new, iter->tuple_size, tpt_old);
 }
 
-void tp_iter_remove(struct tp_iter *iter, tpt_col_info *info) { 
+void tp_iter_remove(struct tp_iter *iter, tpt_col_info *info) {
   tp_tuple *tpt_old = tp_iter_get(iter);
-  tpt_remove(tpt_old, iter->page_iter->dpt, info, iter->page_iter->dbms);
+  tpt_erase(tpt_old, NULL, iter->page_iter->dpt, info, iter->page_iter->dbms);
+  tp_remove_row_ptr(iter->page_iter->cur, tpt_old);
 }
 
 struct table_page *tp_iter_get_page(struct tp_iter *iter) {

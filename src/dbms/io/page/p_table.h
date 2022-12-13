@@ -104,8 +104,8 @@ pageoff_t tp_insert_row(struct table_page *page, const tp_tuple *tuple,
                         size_t tuple_size);
 void tp_update_row(struct table_page *page, const tp_tuple *tpt_new, size_t tuple_size,
                    const pageoff_t start);
-void tp_update_row_ptr(struct table_page *page, const tp_tuple *tpt_new, size_t tuple_size,
-                       tp_tuple *tpt_old);
+void tp_update_row_ptr(struct table_page *page, const tp_tuple *tpt_new,
+                       size_t tuple_size, tp_tuple *tpt_old);
 void tp_remove_row(struct table_page *page, const pageoff_t start);
 void tp_remove_row_ptr(struct table_page *page, tp_tuple *tpt_old);
 

@@ -167,10 +167,6 @@ static void plan_source_start(void *self_void, bool do_write) {
   self->base.tuple_arr[0] = tp_iter_get(self->iter);
 }
 
-static void plan_source_start_public(void *self_void) {
-  plan_source_start(self_void, false);
-}
-
 // @do_write - do open on write
 struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms) {
   struct plan_source *self = my_malloc(struct plan_source);
@@ -230,6 +226,12 @@ err:
 // }}}
 
 // plan_parent {{{
+
+static tp_tuple **plan_parent_get(void *self_void) {
+  struct plan_parent *self = self_void;
+  return self->parent->get(self->parent);
+}
+
 static bool plan_parent_next(void *self_void) {
   struct plan_parent *self = self_void;
   bool res = self->parent->next(self->parent);
@@ -345,10 +347,15 @@ static void plan_select_start(void *self_void, bool do_write) {
   if (self->base.tuple_arr[0]) {
     free(self->base.tuple_arr[0]);
   }
-  self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
 
   parent->start(parent, do_write);
-  tpt_flatten(self->base.tuple_arr[0], parent->get(parent), parent);
+
+  if (parent->get(parent)[0] != NULL) {
+    self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
+    tpt_flatten(self->base.tuple_arr[0], parent->get(parent), parent);
+  } else {
+    self->base.tuple_arr[0] = NULL;
+  }
 }
 
 static void plan_select_start_public(void *self) { plan_select_start(self, false); }
@@ -461,17 +468,18 @@ static bool plan_update_get_iter(void *self_void, struct tp_iter **iter_out) {
 
 static void plan_update_start(void *self_void, bool do_write) {
   struct plan_update *self = self_void;
-  self->parent->start(self->parent, do_write);
-
-  // update iterator
-  self->parent->get_iter(self->parent, &self->iter);
 
   if (self->base.tuple_arr[0]) {
     free(self->base.tuple_arr[0]);
   }
+
+  self->parent->start(self->parent, do_write);
+  // update iterator
+  self->parent->get_iter(self->parent, &self->iter);
+
   // Set tuple_arr (new are stored)
   if (self->parent->end(self->parent)) {
-    self->base.tuple_arr = NULL;
+    self->base.tuple_arr[0] = NULL;
   } else {
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
     plan_update_update(self);
@@ -573,6 +581,11 @@ static bool plan_delete_next(void *self_void) {
   return res;
 }
 
+static bool plan_delete_end(void *self_void) {
+  struct plan_delete *self = self_void;
+  return tp_iter_get(self->iter) == NULL;
+}
+
 static bool plan_delete_get_dbms(void *self_void, struct dbms **dbms_out) {
   struct plan_delete *self = self_void;
   *dbms_out = self->dbms;
@@ -631,7 +644,9 @@ struct plan_delete *plan_delete_construct_move(void *parent_void) {
   {
     VIRT_INHERIT((*self), base, get_info);
     VIRT_INHERIT((*self), base, get);
-    VIRT_INHERIT((*self), base, end);
+
+    self->end = plan_delete_end;
+    VIRT_OVERRIDE((*self), base, end);
 
     self->next = plan_delete_next;
     VIRT_OVERRIDE((*self), base, next);

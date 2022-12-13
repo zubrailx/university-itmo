@@ -1,3 +1,4 @@
+#include "table.h"
 #include "io/page/p_database.h"
 #include "plan.h"
 #include "sso.h"
@@ -6,7 +7,7 @@
 
 // @dest - aka tpt_column_ENUM_TYPE (depends on col_type)
 void tpt_memcpy_specific(void *dest, const void *src, const uint8_t col_type,
-                                struct dbms *dbms) {
+                         struct dbms *dbms) {
   switch (col_type) {
   case COLUMN_TYPE_BOOL: {
     struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *col = dest;
@@ -33,94 +34,79 @@ void tpt_memcpy_specific(void *dest, const void *src, const uint8_t col_type,
   }
 }
 
-static bool dbms_sso_do_update(const page_sso *lsv, const page_sso *rsv) {
-  if (lsv->not_inline != rsv->not_inline) {
+static bool type_can_not_inline(uint8_t type) { return type == COLUMN_TYPE_STRING; }
+
+static bool tpt_should_erase_column(const tpt_column_base *old_base,
+                                    const tpt_column_base *new_base,
+                                    const uint8_t type) {
+  if (!type_can_not_inline(type) || old_base == NULL) {
+    return false;
+  }
+  if (new_base == NULL) {
     return true;
   }
 
-  if (lsv->not_inline && rsv->not_inline) {
-    return lsv->po_ptr.fileoff.bytes != rsv->po_ptr.fileoff.bytes ||
-           lsv->po_ptr.offset.bytes != rsv->po_ptr.offset.bytes;
-  } else {
-    return strcmp(lsv->name, rsv->name);
+  switch (type) {
+  case COLUMN_TYPE_STRING: {
+    struct TPT_COL_TYPE(COLUMN_TYPE_STRING) * cold, *cnew;
+    cold = (void *)old_base;
+    cnew = (void *)new_base;
+    // if stored differently
+    if (cold->entry.not_inline != cnew->entry.not_inline) {
+      return true;
+    }
+    // if are not equals
+    if (cold->entry.not_inline && cnew->entry.not_inline) {
+      return cold->entry.po_ptr.fileoff.bytes != cnew->entry.po_ptr.fileoff.bytes ||
+             cold->entry.po_ptr.offset.bytes != cnew->entry.po_ptr.offset.bytes;
+    } else {
+      return strcmp(cold->entry.name, cnew->entry.name);
+    }
+    break;
+  }
+  default:
+    return true;
   }
 }
 
-static bool type_can_not_inline(uint8_t type) { return type == COLUMN_TYPE_STRING; }
+static void tpt_erase_column(const struct tp_tuple *tpt_old,
+                             const struct tp_tuple *tpt_new,
+                             const struct dpt_column *dptc, size_t col_off,
+                             struct dbms *dbms) {
+  void *col_old = (void *)tpt_old + col_off;
+  void *col_new = tpt_new ? (void *)tpt_new + col_off : NULL;
 
-static void tpt_update_column(const struct tp_tuple *tpt_old,
-                              const struct tp_tuple *tpt_new,
-                              const struct dpt_column *dptc, size_t col_off,
-                              struct dbms *dbms) {
-  if (type_can_not_inline(dptc->type)) {
-    void *col_old_p = (void *)tpt_old + col_off;
-    void *col_new_p = (void *)tpt_new + col_off;
+  if (tpt_should_erase_column(col_old, col_new, dptc->type)) {
     switch (dptc->type) {
+
     case COLUMN_TYPE_STRING: {
-      struct TPT_COL_TYPE(COLUMN_TYPE_STRING) * col_old, *col_new;
-      col_old = col_old_p;
-      col_new = col_new_p;
-      if (dbms_sso_do_update(&col_old->entry, &col_new->entry)) {
-        dbms_sso_remove(&col_old->entry, dbms);
-      }
+      struct TPT_COL_TYPE(COLUMN_TYPE_STRING) * cold;
+      cold = col_old;
+      dbms_sso_remove(&cold->entry, dbms);
       break;
     }
-    default:
+
+    default: {
       assert(false && "tpt_update_column: Unknown inlined type.\n");
       break;
     }
-  }
-}
-
-static void tpt_remove_column(const struct tp_tuple *tpt_old,
-                              const struct dpt_column *dptc, size_t col_off,
-                              struct dbms *dbms) {
-  if (type_can_not_inline(dptc->type)) {
-    void *col_old_p = (void *)tpt_old + col_off;
-    switch (dptc->type) {
-    case COLUMN_TYPE_STRING: {
-      struct TPT_COL_TYPE(COLUMN_TYPE_STRING) * col_old;
-      col_old = col_old_p;
-      dbms_sso_remove(&col_old->entry, dbms);
-      break;
-    }
-    default:
-      assert(false && "tpt_update_column: Unknown inlined type.\n");
-      break;
     }
   }
 }
 
-void tpt_update(struct tp_tuple *tpt_old, const struct tp_tuple *tpt_new,
-                const struct dp_tuple *dpt, struct tpt_col_info *col_info,
-                struct dbms *dbms) {
+void tpt_erase(const struct tp_tuple *tpt_old, const struct tp_tuple *tpt_new,
+               const struct dp_tuple *dpt, const struct tpt_col_info *col_info,
+               struct dbms *dbms) {
   for (size_t i = 0; i < dpt->header.cols; ++i) {
-    tpt_update_column(tpt_old, tpt_new, &dpt->columns[i], col_info[i].start, dbms);
+    tpt_erase_column(tpt_old, tpt_new, &dpt->columns[i], col_info[i].start, dbms);
   }
 }
 
-void tpt_update_columns(struct tp_tuple *tpt_old, const struct tp_tuple *tpt_new,
-                        const struct dp_tuple *dpt, const struct tpt_col_info *col_info,
-                        size_t arr_size, size_t *idxs, struct dbms *dbms) {
+void tpt_erase_columns(struct tp_tuple *tpt_old, struct tp_tuple *tpt_new,
+                       const struct dp_tuple *dpt, const struct tpt_col_info *col_info,
+                       size_t arr_size, size_t *idxs, struct dbms *dbms) {
   for (size_t i = 0; i < arr_size; ++i) {
-    size_t col_idx = idxs[i];
-    tpt_update_column(tpt_old, tpt_new, &dpt->columns[col_idx], col_info[col_idx].start,
-                      dbms);
-  }
-}
-
-void tpt_remove(const struct tp_tuple *tpt_old, const struct dp_tuple *dpt,
-                const struct tpt_col_info *col_info, struct dbms *dbms) {
-  for (size_t i = 0; i < dpt->header.cols; ++i) {
-    tpt_remove_column(tpt_old, &dpt->columns[i], col_info[i].start, dbms);
-  }
-}
-
-void tpt_remove_columns(struct tp_tuple *tpt_old, const struct dp_tuple *dpt,
-                        const struct tpt_col_info *col_info, size_t arr_size,
-                        size_t *idxs, struct dbms *dbms) {
-  for (size_t i = 0; i < arr_size; ++i) {
-    size_t col_idx = idxs[i];
-    tpt_remove_column(tpt_old, &dpt->columns[col_idx], col_info[col_idx].start, dbms);
+    size_t idx = idxs[i];
+    tpt_erase_column(tpt_old, tpt_new, &dpt->columns[idx], col_info[idx].start, dbms);
   }
 }

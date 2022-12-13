@@ -157,11 +157,11 @@ struct plan_delete {
 };
 
 struct plan_delete *plan_delete_construct_move(void *parent_void);
-  // }}}
+// }}}
 
-  struct plan_filter {};
+struct plan_filter {};
 
-  struct plan_projection {};
+struct plan_projection {};
 
 #undef PLAN_PARENT
 #undef VIRTUAL
