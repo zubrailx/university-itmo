@@ -18,11 +18,9 @@ enum plan_type {
   PLAN_TYPE_UPDATE,
   PLAN_TYPE_DELETE,
 
-  PLAN_TYPE_CROSS_JOIN
+  PLAN_TYPE_CROSS_JOIN,
 
-  // PLAN_TYPE_TERMINAL,
-  // PLAN_TYPE_UNOP,
-  // PLAN_TYPE_BINOP,
+  PLAN_TYPE_FILTER,
 };
 
 #define OVERRIDE
@@ -176,15 +174,24 @@ struct plan_cross_join {
 
   OVERRIDE bool (*next)(void *self);
   OVERRIDE void (*destruct)(void *self);
-
-  void (*start)(void *self);// only present in terminal plan_nodes
 };
 
 struct plan_cross_join *plan_cross_join_construct_move(void *parent_left,
                                                        void *parent_right);
 // }}}
 
-struct plan_filter {};
+struct plan_filter {
+  struct PLAN_PARENT;
+
+  struct filter_ast *filt;
+
+  INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
+  INHERIT struct tp_tuple **(*get)(void *self);
+  INHERIT bool (*end)(void *self);
+
+  OVERRIDE bool (*next)(void *self);
+  OVERRIDE void (*destruct)(void *self);
+};
 
 #undef PLAN_PARENT
 #undef VIRTUAL

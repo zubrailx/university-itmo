@@ -4,6 +4,7 @@
 #include "op_schema.h"
 #include "op_table.h"
 #include "page.h"
+#include "plan_filter.h"
 #include "table.h"
 #include <assert.h>
 #include <stdio.h>
@@ -795,4 +796,83 @@ struct plan_cross_join *plan_cross_join_construct_move(void *parent_left,
 }
 // }}}
 
+// plan_filter {{{
+static bool plan_filter_next(void *self_void) {
+  struct plan_filter *self = self_void;
+
+  while (self->parent->next(self->parent)) {
+    tp_tuple **tpt_arr = self->parent->get(self->parent);
+
+    if (self->filt->pass(self->filt, (const tp_tuple **)tpt_arr)) {
+      for (size_t i = 0; i < self->parent->arr_size; ++i) {
+        self->base.tuple_arr[i] = tpt_arr[i];
+      }
+      return true;
+    }
+  }
+  plan_zero_tp_tuple(self);
+  return false;
+}
+
+static void plan_filter_destruct(void *self_void) {
+  struct plan_filter *self = self_void;
+
+  self->filt->destruct(self->filt);
+  plan_parent_destruct(&self->base);
+}
+
+static void plan_filter_start(void *self_void, bool do_write) {
+  struct plan_filter *self = self_void;
+
+  self->parent->start(self->parent, do_write);
+
+  // find first passed row
+  while (!self->parent->end(self->parent)) {
+    tp_tuple **tpt_arr = self->parent->get(self->parent);
+    // if passed then return
+    if (self->filt->pass(self->filt, (const tp_tuple **)tpt_arr)) {
+      for (size_t i = 0; i < self->parent->arr_size; ++i) {
+        self->base.tuple_arr[i] = tpt_arr[i];
+      }
+      return;// found
+    }
+    self->parent->next(self->parent);
+  }
+  plan_zero_tp_tuple(self);
+}
+
+struct plan_filter *plan_filter_construct_move(void *parent, struct filter_ast *filt) {
+  struct plan_filter *self = my_malloc(struct plan_filter);
+  *self = (struct plan_filter){};
+
+  self->parent = parent;
+  {// Construct
+    size_t arr_size = self->parent->arr_size;
+    self->base = plan_construct(PLAN_TYPE_FILTER, arr_size);
+    self->base.arr_size = arr_size;
+    // Set pti
+    plan_set_pti_deep(&self->base, self->parent->pti_arr);
+    // Add filter and compile it
+    self->filt = filt;
+    filt->compile(filt, self->base.pti_arr);
+  }
+  {
+    VIRT_INHERIT((*self), base, get_info);
+    VIRT_INHERIT((*self), base, get);
+    VIRT_INHERIT((*self), base, end);
+
+    self->next = plan_filter_next;
+    VIRT_OVERRIDE((*self), base, next);
+
+    self->destruct = plan_filter_destruct;
+    VIRT_OVERRIDE((*self), base, destruct);
+
+    self->base.start = plan_filter_start;
+  }
+  return self;
+}
+
+// }}}
+
+#undef VIRT_INHERIT
 #undef VIRT_OVERRIDE
