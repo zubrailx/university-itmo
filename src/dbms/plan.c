@@ -247,25 +247,25 @@ err:
 
 // plan_parent {{{
 
-static tp_tuple **plan_parent_get(void *self_void) {
-  struct plan_parent *self = self_void;
-  return self->parent->get(self->parent);
-}
+// static tp_tuple **plan_parent_get(void *self_void) {
+//   struct plan_parent *self = self_void;
+//   return self->parent->get(self->parent);
+// }
 
-static bool plan_parent_next(void *self_void) {
-  struct plan_parent *self = self_void;
-  bool res = self->parent->next(self->parent);
+// static bool plan_parent_next(void *self_void) {
+//   struct plan_parent *self = self_void;
+//   bool res = self->parent->next(self->parent);
 
-  if (res) {
-    struct tp_tuple **p_tuple = self->parent->get(self->parent);
-    for (size_t i = 0; i < self->base.arr_size; ++i) {
-      self->base.tuple_arr[i] = p_tuple[i];
-    }
-  } else {
-    plan_zero_tp_tuple(self);
-  }
-  return res;
-}
+//   if (res) {
+//     struct tp_tuple **p_tuple = self->parent->get(self->parent);
+//     for (size_t i = 0; i < self->base.arr_size; ++i) {
+//       self->base.tuple_arr[i] = p_tuple[i];
+//     }
+//   } else {
+//     plan_zero_tp_tuple(self);
+//   }
+//   return res;
+// }
 
 static void plan_parent_destruct(void *self_void) {
   struct plan_parent *self = self_void;
@@ -287,15 +287,15 @@ static bool plan_parent_get_dbms(void *self_void, struct dbms **dbms_out) {
   return self->parent->get_dbms(self->parent, dbms_out);
 }
 
-static void plan_parent_start(void *self_void, bool do_write) {
-  struct plan_parent *self = self_void;
-  self->parent->start(self->parent, do_write);
-}
+// static void plan_parent_start(void *self_void, bool do_write) {
+//   struct plan_parent *self = self_void;
+//   self->parent->start(self->parent, do_write);
+// }
 
-static void plan_parent_start_public(void *self_void) {
-  struct plan_parent *self = self_void;
-  self->parent->start(self->parent, false);
-}
+// static void plan_parent_start_public(void *self_void) {
+//   struct plan_parent *self = self_void;
+//   self->parent->start(self->parent, false);
+// }
 // }}}
 
 // plan_select{{{
