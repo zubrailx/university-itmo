@@ -3,6 +3,7 @@
 #include "../src/dbms/op_dbms.c"
 #include "../src/dbms/plan.h"
 #include "../src/dbms/plan_filter.h"
+#include "../src/dbms/plan_funcs.h"
 #include "../src/schema.h"
 #include "../src/table.h"
 #include "../src/util/printers.h"
@@ -40,7 +41,7 @@ int main() {
   bool e41 = false;
   const char *e5 = "from table2";
   bool e6 = false;
-  double e61 = 11.1F;
+  double e61 = 21.1F;
   const char *e7 = "row 4";
   bool e8 = true;
   double e81 = 01.1F;
@@ -74,11 +75,11 @@ int main() {
     struct plan_cross_join *j1 = plan_cross_join_construct_move(so1, so2);
     // struct plan_cross_join *j2 = plan_cross_join_construct_move(j1, so3);
 
-    bool fast_val = true;
-    struct fast_const *f1 = fast_const_construct(DTO_COLUMN_BOOL, &fast_val);
-    // struct fast_column *f2 = fast_column_construct("table1", "column3", dbms);
+    struct fast_column *fc1 = fast_column_construct("table1", "column2", dbms);
+    struct fast_column *fc2 = fast_column_construct("table2", "column3", dbms);
+    struct fast_binop *fb1 = fast_binop_construct(fc1, fc2, &DOUBLE_EQUALS, dbms);
 
-    struct plan_filter *f = plan_filter_construct_move(j1, f1);
+    struct plan_filter *f = plan_filter_construct_move(j1, fb1);
     struct plan_select *se = plan_select_construct_move(f, "virt-joined");
 
     size_t t1_size;

@@ -3,6 +3,7 @@
 #include "io/page/p_table.h"
 #include "op_table.h"
 #include "plan.h"
+#include "plan_funcs.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,9 +16,9 @@ struct fast fast_construct(enum fast_type type) { return (struct fast){.type = t
 void fast_destruct(void *self_void) {
   struct fast *self = self_void;
   self->type = FAST_FREED;
-  if (self->tptc) {
-    free(self->tptc);
-    self->tptc = NULL;
+  if (self->res) {
+    free(self->res);
+    self->res = NULL;
   }
   free(self);
 }
@@ -29,7 +30,7 @@ static void fast_const_compile(void *self_void, size_t pti_size,
 
 static void *fast_const_calc(void *self_void) {
   struct fast *self = self_void;
-  return self->tptc;
+  return self->res;
 }
 
 static void fast_const_pass(void *self, const struct tp_tuple **tuple_arr) {}
@@ -40,16 +41,16 @@ struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
   *self = (struct fast_const){};
 
   self->base = fast_construct(FAST_CONST);
-  self->base.tptc_type = column_type_to_page(col_type);
+  self->base.res_type = column_type_to_page(col_type);
 
   // Set tpt_col
   size_t col_size = tp_column_size(col_type);
   size_t entry_size = tp_entry_size(col_type);
-  self->base.tptc = calloc(col_size, 1);
+  self->base.res = calloc(col_size, 1);
   if (value == NULL) {
-    self->base.tptc->is_null = true;
+    ((struct tpt_column_base *)self->base.res)->is_null = true;
   } else {
-    memcpy((void *)self->base.tptc + (col_size - entry_size), value, entry_size);
+    memcpy((void *)self->base.res + (col_size - entry_size), value, entry_size);
   }
 
   self->base.compile = fast_const_compile;
@@ -77,19 +78,19 @@ static void fast_column_compile(void *self_void, size_t pti_size,
       self->tbl_idx = ti;
 
       tpt_col_info *col_info = tp_construct_col_info_arr(pti->dpt);
-      self->tptc_off = col_info[ci].start;
+      self->resc_off = col_info[ci].start;
       free(col_info);
 
-      self->base.tptc_type = pti->dpt->columns[ci].type;
-      self->tptc_size = tp_column_size(self->base.tptc_type);
+      self->base.res_type = pti->dpt->columns[ci].type;
+      self->resc_size = tp_column_size(self->base.res_type);
 
-      if (self->base.tptc) {
-        free(self->base.tptc);
+      if (self->base.res) {
+        free(self->base.res);
       }
-      self->base.tptc = malloc(self->tptc_size);
+      self->base.res = malloc(self->resc_size);
     }
   }
-  if (self->tptc_size == 0) {
+  if (self->resc_size == 0) {
     assert(0 && "fast_column: Table or column not found.\n");
     return;
   }
@@ -104,14 +105,14 @@ static void fast_column_destruct(void *self_void) {
 
 static void *fast_column_calc(void *self_void) {
   struct fast_column *self = self_void;
-  return self->base.tptc;
+  return self->base.res;
 }
 
 static void fast_column_pass(void *self_void, const struct tp_tuple **tuple_arr) {
   struct fast_column *self = self_void;
 
-  void *tptc_addr = (void *)tuple_arr[self->tbl_idx] + self->tptc_off;
-  memcpy(self->base.tptc, tptc_addr, self->tptc_size);
+  void *tptc_addr = (void *)tuple_arr[self->tbl_idx] + self->resc_off;
+  memcpy(self->base.res, tptc_addr, self->resc_size);
 }
 
 struct fast_column *fast_column_construct(const char *table_name,
@@ -149,7 +150,7 @@ static void *fast_unop_calc(void *self_void) {
   struct fast_unop *self = self_void;
   void *arg = self->parent->calc(self->parent);
   self->func(self, arg);
-  return self->base.tptc;
+  return self->base.res;
 }
 
 static void fast_unop_pass(void *self_void, const struct tp_tuple **tuple_arr) {
@@ -162,11 +163,12 @@ struct fast_unop *fast_unop_construct(void *parent, struct fast_unop_func *fuf,
   struct fast_unop *self = my_malloc(struct fast_unop);
   *self = (struct fast_unop){
       .base = fast_construct(FAST_UNOP),
+      .parent = parent,
       .dbms = dbms,
   };
 
-  self->base.tptc_type = fuf->ret_type;
-  self->base.tptc = calloc(tp_column_size(fuf->ret_type), 1);
+  self->base.res_type = fuf->ret_type;
+  self->base.res = calloc(tp_column_size(fuf->ret_type), 1);
 
   self->base.compile = fast_unop_compile;
   self->base.destruct = fast_unop_destruct;
@@ -198,7 +200,7 @@ static void *fast_binop_calc(void *self_void) {
   void *arg1 = self->left->calc(self->left);
   void *arg2 = self->right->calc(self->right);
   self->func(self, arg1, arg2);
-  return self->base.tptc;
+  return self->base.res;
 }
 
 static void fast_binop_pass(void *self_void, const struct tp_tuple **tuple_arr) {
@@ -213,13 +215,14 @@ struct fast_binop *fast_binop_construct(void *p_left, void *p_right,
                                         struct dbms *dbms) {
   struct fast_binop *self = my_malloc(struct fast_binop);
   *self = (struct fast_binop){
+      .base = fast_construct(FAST_BINOP),
       .left = p_left,
       .right = p_right,
       .dbms = dbms,
   };
 
-  self->base.tptc_type = fbf->ret_type;
-  self->base.tptc = calloc(tp_column_size(fbf->ret_type), 1);
+  self->base.res_type = fbf->ret_type;
+  self->base.res = calloc(tp_column_size(fbf->ret_type), 1);
 
   self->base.compile = fast_binop_compile;
   self->base.destruct = fast_binop_destruct;

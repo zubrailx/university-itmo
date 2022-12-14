@@ -8,14 +8,17 @@
 struct tp_tuple;
 struct plan_table_info;
 
+struct fast_binop_func;
+struct fast_unop_func;
+
 enum fast_type { FAST_UNOP, FAST_BINOP, FAST_CONST, FAST_COLUMN, FAST_FREED };
 
 // fast {{{
 struct fast {
   enum fast_type type;
   // result of calc
-  struct tpt_column_base *tptc;
-  enum table_column_type tptc_type;
+  void *res;
+  enum table_column_type res_type;
 
   void (*compile)(void *self, size_t pti_size, struct plan_table_info *info_arr);
   void (*destruct)(void *self);
@@ -43,19 +46,14 @@ struct fast_column {
   char *column_name;
   // where column is stored
   size_t tbl_idx;
-  size_t tptc_off;
-  size_t tptc_size;// column size
+  size_t resc_off;
+  size_t resc_size;// column size of result
 };
 struct fast_column *fast_column_construct(const char *table_name,
                                           const char *column_name, struct dbms *dbms);
 // }}}
 
 // fast_unop {{{
-struct fast_unop_func {
-  void (*func)(void *self, void *arg);
-  enum table_column_type ret_type;
-};
-
 struct fast_unop {
   struct fast base;
 
@@ -63,18 +61,13 @@ struct fast_unop {
 
   struct dbms *dbms;// to manipulate with data that is not inlined
 
-  void (*func)(void *self, void *arg);// result is written res variable
+  void (*func)(struct fast_unop *self, void *arg);// result is written res variable
 };
 struct fast_unop *fast_unop_construct(void *parent, struct fast_unop_func *fuf,
                                       struct dbms *dbms);
 // }}}
 
 // fast_binop {{{
-struct fast_binop_func {
-  void (*func)(void *self, void *arg1, void *arg2);
-  enum table_column_type ret_type;
-};
-
 struct fast_binop {
   struct fast base;
 
@@ -83,7 +76,7 @@ struct fast_binop {
 
   struct dbms *dbms;// to manipulate with data that is not inlined
 
-  void (*func)(void *self, void *arg1, void *arg2);
+  void (*func)(struct fast_binop *self, void *arg1, void *arg2);
 };
 struct fast_binop *fast_binop_construct(void *p_left, void *p_right,
                                         struct fast_binop_func *fbf, struct dbms *dbms);
