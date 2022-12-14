@@ -10,6 +10,7 @@ struct plan_table_info;
 
 enum fast_type { FAST_UNOP, FAST_BINOP, FAST_CONST, FAST_COLUMN, FAST_FREED };
 
+// fast {{{
 struct fast {
   enum fast_type type;
   // result of calc
@@ -22,13 +23,17 @@ struct fast {
   void *(*calc)(void *self);// void * - returned result
   void (*pass)(void *self, const struct tp_tuple **tuple_arr);
 };
+// }}}
 
+// fast_const {{{
 struct fast_const {
   struct fast base;
 };
 struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
                                         void *value);
+// }}}
 
+// fast_column {{{
 struct fast_column {
   struct fast base;
 
@@ -43,6 +48,13 @@ struct fast_column {
 };
 struct fast_column *fast_column_construct(const char *table_name,
                                           const char *column_name, struct dbms *dbms);
+// }}}
+
+// fast_unop {{{
+struct fast_unop_func {
+  void (*func)(void *self, void *arg);
+  enum table_column_type ret_type;
+};
 
 struct fast_unop {
   struct fast base;
@@ -53,8 +65,15 @@ struct fast_unop {
 
   void (*func)(void *self, void *arg);// result is written res variable
 };
-struct fast_unop *fast_unop_construct(void *parent, void (*func)(void *, void *),
-                                      enum table_column_type type, struct dbms *dbms);
+struct fast_unop *fast_unop_construct(void *parent, struct fast_unop_func *fuf,
+                                      struct dbms *dbms);
+// }}}
+
+// fast_binop {{{
+struct fast_binop_func {
+  void (*func)(void *self, void *arg1, void *arg2);
+  enum table_column_type ret_type;
+};
 
 struct fast_binop {
   struct fast base;
@@ -67,5 +86,5 @@ struct fast_binop {
   void (*func)(void *self, void *arg1, void *arg2);
 };
 struct fast_binop *fast_binop_construct(void *p_left, void *p_right,
-                                        void (*func)(void *, void *, void *),
-                                        enum table_column_type type, struct dbms *dbms);
+                                        struct fast_binop_func *fbf, struct dbms *dbms);
+// }}}

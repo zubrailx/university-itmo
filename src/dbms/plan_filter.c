@@ -157,23 +157,23 @@ static void fast_unop_pass(void *self_void, const struct tp_tuple **tuple_arr) {
   self->parent->pass(self->parent, tuple_arr);
 }
 
-struct fast_unop *fast_unop_construct(void *parent, void (*func)(void *, void *),
-                                      enum table_column_type type, struct dbms *dbms) {
+struct fast_unop *fast_unop_construct(void *parent, struct fast_unop_func *fuf,
+                                      struct dbms *dbms) {
   struct fast_unop *self = my_malloc(struct fast_unop);
   *self = (struct fast_unop){
       .base = fast_construct(FAST_UNOP),
       .dbms = dbms,
   };
 
-  self->base.tptc_type = type;
-  self->base.tptc = calloc(tp_column_size(type), 1);
+  self->base.tptc_type = fuf->ret_type;
+  self->base.tptc = calloc(tp_column_size(fuf->ret_type), 1);
 
   self->base.compile = fast_unop_compile;
   self->base.destruct = fast_unop_destruct;
   self->base.calc = fast_unop_calc;
   self->base.pass = fast_unop_pass;
 
-  self->func = func;
+  self->func = fuf->func;
   return self;
 }
 //}}}
@@ -209,8 +209,7 @@ static void fast_binop_pass(void *self_void, const struct tp_tuple **tuple_arr) 
 }
 
 struct fast_binop *fast_binop_construct(void *p_left, void *p_right,
-                                        void (*func)(void *, void *, void *),
-                                        enum table_column_type type,
+                                        struct fast_binop_func *fbf,
                                         struct dbms *dbms) {
   struct fast_binop *self = my_malloc(struct fast_binop);
   *self = (struct fast_binop){
@@ -219,15 +218,15 @@ struct fast_binop *fast_binop_construct(void *p_left, void *p_right,
       .dbms = dbms,
   };
 
-  self->base.tptc_type = type;
-  self->base.tptc = calloc(tp_column_size(type), 1);
+  self->base.tptc_type = fbf->ret_type;
+  self->base.tptc = calloc(tp_column_size(fbf->ret_type), 1);
 
   self->base.compile = fast_binop_compile;
   self->base.destruct = fast_binop_destruct;
   self->base.calc = fast_binop_calc;
   self->base.pass = fast_binop_pass;
 
-  self->func = func;
+  self->func = fbf->func;
   return self;
 }
 //}}}
