@@ -4,6 +4,7 @@
 #include "op_table.h"
 #include "plan.h"
 #include "plan_funcs.h"
+#include "table.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,21 +37,22 @@ static void *fast_const_calc(void *self_void) {
 static void fast_const_pass(void *self, const struct tp_tuple **tuple_arr) {}
 
 struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
-                                        void *value) {
+                                        const void *value, struct dbms *dbms) {
   struct fast_const *self = my_malloc(struct fast_const);
-  *self = (struct fast_const){};
+  *self = (struct fast_const){
+      .dbms = dbms,
+  };
 
   self->base = fast_construct(FAST_CONST);
   self->base.res_type = column_type_to_page(col_type);
 
   // Set tpt_col
   size_t col_size = tp_column_size(col_type);
-  size_t entry_size = tp_entry_size(col_type);
   self->base.res = calloc(col_size, 1);
   if (value == NULL) {
     ((struct tpt_column_base *)self->base.res)->is_null = true;
   } else {
-    memcpy((void *)self->base.res + (col_size - entry_size), value, entry_size);
+    tpt_memcpy_specific(self->base.res, value, self->base.res_type, self->dbms);
   }
 
   self->base.compile = fast_const_compile;

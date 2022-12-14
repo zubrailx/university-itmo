@@ -31,9 +31,11 @@ struct fast {
 // fast_const {{{
 struct fast_const {
   struct fast base;
+
+  struct dbms *dbms;
 };
 struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
-                                        void *value);
+                                        const void *value, struct dbms *dbms);
 // }}}
 
 // fast_column {{{

@@ -874,6 +874,8 @@ struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
     self->destruct = plan_filter_destruct;
     VIRT_OVERRIDE((*self), base, destruct);
 
+    self->base.get_dbms = plan_parent_get_dbms;
+    self->base.get_iter = plan_parent_get_iter;
     self->base.start = plan_filter_start;
   }
   return self;
