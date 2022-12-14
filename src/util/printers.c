@@ -1,8 +1,14 @@
 #include "printers.h"
+
+#include "../dbms/io/page/p_database.h"
+#include "../dbms/iter.h"
+#include "../dbms/op_schema.h"
 #include "../dbms/sso.h"
+
+#include <stdio.h>
 #include <stdlib.h>
 
-void print_database_page(database_page *page) {
+void print_database_page(struct database_page *page) {
   printf("----------------------\n");
   printf("database_page\n");
   printf("size: %u\n", page->header.base.size.bytes);
@@ -14,7 +20,7 @@ void print_database_page(database_page *page) {
   printf("----------------------\n");
 }
 
-void print_database_tuple(dp_tuple *typle) {
+void print_database_tuple(struct dp_tuple *typle) {
   printf("----------------------\n");
   printf("database_tuple\n");
   printf("cols: %zu\n", typle->header.cols);
@@ -26,7 +32,7 @@ void print_database_tuple(dp_tuple *typle) {
   printf("----------------------\n");
 }
 
-void print_database_tables(dbms *dbms) {
+void print_database_tables(struct dbms *dbms) {
   dp_iter *iter = dp_iter_construct(dbms);
   dp_tuple *tuple = dp_iter_get(iter);
   while (tuple) {
@@ -96,7 +102,7 @@ void print_table_tuple(const tp_tuple *tuple, const dp_tuple *dpt,
   free(columns);
 }
 
-void print_table_rows(dbms *dbms, const char *table_name) {
+void print_table_rows(struct dbms *dbms, const char *table_name) {
   fileoff_t dp_loc;
   pageoff_t dp_off;
   bool found = dbms_find_table(table_name, dbms, &dp_loc, &dp_off);

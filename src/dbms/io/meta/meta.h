@@ -27,9 +27,9 @@ typedef struct meta {
 
 size_t meta_size(const struct meta *meta);
 
-struct meta *meta_construct(const size_t slot_len);
+struct meta *meta_construct(size_t slot_len);
 
-struct meta *meta_construct_init(const size_t slot_len, const size_t slot_size[],
+struct meta *meta_construct_init(size_t slot_len, const size_t slot_size[],
                                  const size_t slot_counts[]);
 
 void meta_destruct(struct meta **meta_ptr);

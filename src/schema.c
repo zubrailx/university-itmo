@@ -1,4 +1,4 @@
-#include "schema.h"
+#include <schema.h>
 
 #include "dbms/op_schema.h"
 #include "dbms/page.h"

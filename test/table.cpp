@@ -2,10 +2,12 @@
 
 extern "C" {
 #include "../src/dbms/dto/dto_row.h"
-#include "../src/schema.h"
-#include "../src/table.h"
 #include "../src/util/printers.h"
 #include <database.h>
+#include <dto_row.h>
+#include <dto_table.h>
+#include <schema.h>
+#include <table.h>
 }
 
 TEST(table, insert_list) {
@@ -15,13 +17,13 @@ TEST(table, insert_list) {
   // dto_table_add_column(table, (char *)"column1", DTO_COLUMN_STRING,
   //                      (dto_table_column_limits){.is_null = true, .is_unique =
   //                      false});
-  dto_table_add_column(table, (char *)"column1", DTO_COLUMN_BOOL,
+  dto_table_add_column(table, (char *)"column1", COLUMN_TYPE_BOOL,
                        (dto_table_column_limits){.is_null = true, .is_unique = false});
-  dto_table_add_column(table, (char *)"column2", DTO_COLUMN_BOOL,
+  dto_table_add_column(table, (char *)"column2", COLUMN_TYPE_BOOL,
                        (dto_table_column_limits){.is_null = false, .is_unique = true});
-  dto_table_add_column(table, (char *)"column3", DTO_COLUMN_INT32,
+  dto_table_add_column(table, (char *)"column3", COLUMN_TYPE_INT32,
                        (dto_table_column_limits){.is_null = false, .is_unique = true});
-  dto_table_add_column(table, (char *)"column4", DTO_COLUMN_DOUBLE,
+  dto_table_add_column(table, (char *)"column4", COLUMN_TYPE_DOUBLE,
                        (dto_table_column_limits){.is_null = false, .is_unique = true});
 
   table_create(dbms, table);

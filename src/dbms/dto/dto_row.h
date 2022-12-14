@@ -9,7 +9,3 @@ typedef struct dto_row_list {
 
 struct dto_row_node *dto_row_node_next(struct dto_row_node *cur);
 const void **dto_row_node_get(struct dto_row_node *cur);
-
-struct dto_row_list dto_row_list_construct();
-void dto_row_list_destruct(struct dto_row_list *lst);
-void dto_row_list_append(dto_row_list *lst, const void *row[]);

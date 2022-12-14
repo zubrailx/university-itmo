@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/page/column_types.h"
+#include "util/column_types.h"
 
 #define EXT_UNOP(name) extern struct fast_unop_func name
 #define EXT_BINOP(name) extern struct fast_binop_func name
@@ -35,4 +35,5 @@ EXT_BINOP(BOOL_AND);
 EXT_BINOP(STRING_EQUALS);
 // }}}
 
-// FUNCS
+#undef EXT_BINOP
+#undef EXT_UNOP

@@ -1,15 +1,15 @@
 #include "plan_filter.h"
-#include "converters/table.h"
-#include "io/page/p_table.h"
-#include "op_table.h"
-#include "plan.h"
-#include "plan_funcs.h"
-#include "table.h"
+#include "dbms/io/page/p_database.h"
+#include "dbms/io/page/p_table.h"
+#include "dbms/op_table.h"
+#include "dbms/table.h"
+
 #include <assert.h>
+#include <plan.h>
+#include <plan_funcs.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <util/define.h>
 
 // fast {{{
 struct fast fast_construct(enum fast_type type) { return (struct fast){.type = type}; }
@@ -36,7 +36,7 @@ static void *fast_const_calc(void *self_void) {
 
 static void fast_const_pass(void *self, const struct tp_tuple **tuple_arr) {}
 
-struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
+struct fast_const *fast_const_construct(enum table_column_type col_type,
                                         const void *value, struct dbms *dbms) {
   struct fast_const *self = my_malloc(struct fast_const);
   *self = (struct fast_const){
@@ -44,7 +44,7 @@ struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
   };
 
   self->base = fast_construct(FAST_CONST);
-  self->base.res_type = column_type_to_page(col_type);
+  self->base.res_type = col_type;
 
   // Set tpt_col
   size_t col_size = tp_column_size(col_type);

@@ -17,7 +17,10 @@ Create a basic example of DBMS with rational structure which is located in singl
 ./cmake.sh gen sanitized && ./cmake.sh sanitized test
 
 # Run executable (if app/main.c is present):
-./build/(debug|release|sanitized)/bin/dbms_exec
+./build/(debug|released|sanitized)/bin/dbms_exec
+
+# Crossdev
+./cmake.sh released gen reset -v -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++
 ```
 
 ### Uniformed operations for function naming

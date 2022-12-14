@@ -9,7 +9,6 @@ extern "C" {
 #include "../src/dbms/iter.h"
 #include "../src/dbms/page.h"
 #include "../src/dbms/pagealloc.h"
-#include "../src/table.h"
 #include "database.h"
 #include <database.h>
 }

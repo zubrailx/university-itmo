@@ -18,7 +18,7 @@ static struct dp_tuple *to_tuple_with_sso(const struct dto_table *dto_table,
   // Convert dto to entity
   dpt_header header = {};
   {
-    header.cols = dto_table_columns(dto_table);
+    header.cols = dto_table_column_cnt(dto_table);
     header.sso = dbms_sso_insert(strlen(dto_table->name) + 1, dto_table->name, dbms);
     header.is_present = true;
     header.tp_first = FILEOFF_NULL;
@@ -35,7 +35,7 @@ static struct dp_tuple *to_tuple_with_sso(const struct dto_table *dto_table,
   for (size_t i = 0; i < tuple->header.cols; ++i) {
     // convert dto column to entity
     column_limits_to_page(&dto_col->lims, &col.limits);
-    col.type = column_type_to_page(dto_col->type);
+    col.type = dto_col->type;
     col.sso = dbms_sso_insert(strlen(dto_col->name) + 1, dto_col->name, dbms);
 
     tuple->columns[i] = col;

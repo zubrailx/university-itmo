@@ -1,6 +1,6 @@
 #include "table.h"
 #include "io/page/p_database.h"
-#include "plan.h"
+#include "io/page/p_table.h"
 #include "sso.h"
 #include <assert.h>
 #include <string.h>

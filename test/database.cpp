@@ -4,7 +4,6 @@
 
 extern "C" {
 #include "../src/dbms/core/dbfile.h"
-#include "../src/dbms/core/dbmeta.h"
 #include "../src/dbms/core/dbms.h"
 #include <database.h>
 }

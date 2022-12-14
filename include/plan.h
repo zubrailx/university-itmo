@@ -1,9 +1,11 @@
 #pragma once
 
-#include <stdint.h>
+#include <stddef.h>
 
-#include "io/page/p_database.h"
-#include "io/page/p_table.h"
+#define OVERRIDE
+#define INHERIT
+#define PRIVATE
+#define VIRTUAL
 
 struct dbms;
 struct tp_iter;
@@ -12,7 +14,6 @@ enum plan_type {
   PLAN_TYPE_SOURCE,
 
   PLAN_TYPE_DELETED,
-  PLAN_TYPE_ERROR,
 
   PLAN_TYPE_SELECT,
   PLAN_TYPE_UPDATE,
@@ -23,12 +24,6 @@ enum plan_type {
   PLAN_TYPE_FILTER,
 };
 
-#define OVERRIDE
-#define INHERIT
-#define PRIVATE
-#define VIRTUAL
-
-// plan {{{
 struct plan_table_info {
   const char *table_name;
   struct dp_tuple *dpt;// only valid for current plan node
@@ -36,6 +31,7 @@ struct plan_table_info {
   struct tpt_col_info *col_info;
 };
 
+// plan {{{
 struct plan {
   enum plan_type type;
   // info about what get returns
@@ -77,6 +73,7 @@ struct plan_source {
 struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms);
 // }}}
 
+// plan_parent {{{
 #define PLAN_PARENT                                                                    \
   {                                                                                    \
     struct plan base;                                                                  \
@@ -86,6 +83,7 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
 struct plan_parent {
   struct PLAN_PARENT;
 };
+// }}}
 
 // plan_select{{{
 // returns data like it is received from plan_source (smth like virtual table)
@@ -106,6 +104,7 @@ struct plan_select {
 struct plan_select *plan_select_construct_move(void *parent_void,
                                                const char *table_name);
 // }}}
+
 // plan_update {{{
 struct plan_update {
   // in tuple_arr stores new values (pointers to parent values because they are updated)

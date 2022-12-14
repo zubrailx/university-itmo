@@ -1,6 +1,8 @@
-#include "plan_funcs.h"
+#include <plan_funcs.h>
+
+#include "dbms/io/page/p_table.h"
+#include "dbms/sso.h"
 #include "plan_filter.h"
-#include "sso.h"
 #include <stdlib.h>
 #include <string.h>
 
