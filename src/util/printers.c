@@ -1,4 +1,5 @@
 #include "printers.h"
+#include "../dbms/sso.h"
 #include <stdlib.h>
 
 void print_database_page(database_page *page) {
@@ -40,8 +41,6 @@ void print_database_tables(dbms *dbms) {
 #define DECLARE_ASSIGN_VAR(var_name, assigned, type) type var_name = (type)assigned
 
 static void print_table_column_specific(const void *src, const uint8_t col_type) {
-  printf("entry: ");
-
   switch (col_type) {
   case COLUMN_TYPE_BOOL: {
     const DECLARE_ASSIGN_VAR(col, src, struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *);
@@ -72,20 +71,29 @@ static void print_table_column_specific(const void *src, const uint8_t col_type)
   default:
     printf("unknown");
   }
-  printf("\n");
 }
 
 #undef DECLARE_ASSIGN_VAR
 
 void print_table_tuple(const tp_tuple *tuple, const dp_tuple *dpt,
-                       const tpt_col_info *col_info) {
+                       const tpt_col_info *col_info, struct dbms *dbms) {
   printf("\n");
   printf("table_tuple\n");
   printf("is_present: %s\n", tuple->header.is_present ? "true" : "false");
+  char **columns = malloc(sizeof(char *) * dpt->header.cols);
+  for (size_t i = 0; i < dpt->header.cols; ++i) {
+    columns[i] = dbms_sso_construct_select(&dpt->columns[i].sso, dbms);
+  }
   for (int i = 0; i < dpt->header.cols; ++i) {
     void *src = (uint8_t *)tuple + col_info[i].start;
+    printf("%s: ", columns[i]);
     print_table_column_specific(src, dpt->columns[i].type);
+    printf("\n");
   }
+  for (size_t i = 0; i < dpt->header.cols; ++i) {
+    free(columns[i]);
+  }
+  free(columns);
 }
 
 void print_table_rows(dbms *dbms, const char *table_name) {
@@ -104,7 +112,7 @@ void print_table_rows(dbms *dbms, const char *table_name) {
   tp_iter *iter = tp_iter_construct(dbms, dpt, false);
   tp_tuple *tuple = tp_iter_get(iter);
   while (tuple) {
-    print_table_tuple(tuple, dpt, info);
+    print_table_tuple(tuple, dpt, info, dbms);
 
     tp_iter_next(iter);
     tuple = tp_iter_get(iter);

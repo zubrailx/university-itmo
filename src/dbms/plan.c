@@ -861,7 +861,7 @@ struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
     plan_set_pti_deep(&self->base, self->parent->pti_arr);
     // Add filter and compile it
     self->filt = filt;
-    filt->compile(filt, self->base.pti_arr);
+    filt->compile(filt, self->base.arr_size, self->base.pti_arr);
   }
   {
     VIRT_INHERIT((*self), base, get_info);

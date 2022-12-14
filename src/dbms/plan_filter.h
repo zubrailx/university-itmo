@@ -14,7 +14,7 @@ struct fast {
 
   enum fast_type type;
 
-  void (*compile)(void *self, struct plan_table_info *info_arr);
+  void (*compile)(void *self, size_t pti_size, struct plan_table_info *info_arr);
   void (*destruct)(void *self);
 
   void *(*calc)(void *self);// void * - returned result
@@ -33,28 +33,39 @@ struct fast_const *fast_const_construct(enum dto_table_column_type col_type,
 struct fast_column {
   struct fast base;
 
-  // where required array is stored
-  size_t pti_idx;
-  size_t dpt_col;
+  struct dbms *dbms;// to manipulate with data that is not inlined
 
-  enum table_column_type tpt_type;
-  struct tpt_column_base *tpt_col;
+  char *table_name;
+  char *column_name;
+
+  struct tpt_column_base *tptc;
+  // where column is stored
+  size_t tbl_idx;
+  size_t tptc_off;
+  size_t tptc_size;// column size
+  enum table_column_type tptc_type;
 };
+struct fast_column *fast_column_construct(const char *table_name,
+                                          const char *column_name, struct dbms *dbms);
 
 struct fast_unop {
   struct fast base;
 
+  struct dbms *dbms;// to manipulate with data that is not inlined
+
   enum table_column_type res_type;
   struct tpt_column_base *res;// result of operation
 
-  void (*func)(void *arg);
+  void (*func)(void *self, void *arg);
 };
 
 struct fast_binop {
   struct fast base;
 
+  struct dbms *dbms;// to manipulate with data that is not inlined
+
   enum table_column_type res_type;
   struct tpt_column_base *res;// result of operation
 
-  void (*func)(void *arg1, void *arg2);
+  void (*func)(void *self, void *arg1, void *arg2);
 };
