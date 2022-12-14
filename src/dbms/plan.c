@@ -802,8 +802,11 @@ static bool plan_filter_next(void *self_void) {
 
   while (self->parent->next(self->parent)) {
     tp_tuple **tpt_arr = self->parent->get(self->parent);
-
-    if (self->filt->pass(self->filt, (const tp_tuple **)tpt_arr)) {
+    // pass values to filter
+    self->filt->pass(self->filt, (const tp_tuple **)tpt_arr);
+    // calculate result
+    struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *res = self->filt->calc(self->filt);
+    if (!res->is_null && res->entry == true) {
       for (size_t i = 0; i < self->parent->arr_size; ++i) {
         self->base.tuple_arr[i] = tpt_arr[i];
       }
@@ -829,8 +832,11 @@ static void plan_filter_start(void *self_void, bool do_write) {
   // find first passed row
   while (!self->parent->end(self->parent)) {
     tp_tuple **tpt_arr = self->parent->get(self->parent);
-    // if passed then return
-    if (self->filt->pass(self->filt, (const tp_tuple **)tpt_arr)) {
+    // pass values to filter
+    self->filt->pass(self->filt, (const tp_tuple **)tpt_arr);
+    // calculate result
+    struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *res = self->filt->calc(self->filt);
+    if (!res->is_null && res->entry == true) {
       for (size_t i = 0; i < self->parent->arr_size; ++i) {
         self->base.tuple_arr[i] = tpt_arr[i];
       }
@@ -841,8 +847,9 @@ static void plan_filter_start(void *self_void, bool do_write) {
   plan_zero_tp_tuple(self);
 }
 
-struct plan_filter *plan_filter_construct_move(void *parent, struct filter_ast *filt) {
+struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
   struct plan_filter *self = my_malloc(struct plan_filter);
+  struct fast *filt = filt_void;
   *self = (struct plan_filter){};
 
   self->parent = parent;

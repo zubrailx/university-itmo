@@ -3,6 +3,7 @@
 #include "../src/dbms/op_dbms.c"
 #include "../src/dbms/plan.h"
 #include "../src/schema.h"
+#include "../src/dbms/plan_filter.h"
 #include "../src/table.h"
 #include "../src/util/printers.h"
 #include <database.h>
@@ -63,7 +64,12 @@ int main() {
     struct plan_source *so3 = plan_source_construct("table1", dbms);
     struct plan_cross_join *j1 = plan_cross_join_construct_move(so1, so2);
     struct plan_cross_join *j2 = plan_cross_join_construct_move(j1, so3);
-    struct plan_select *se = plan_select_construct_move(j2, "virt-joined");
+
+    bool fast_val = true;
+    struct fast_const *fc = fast_const_construct(DTO_COLUMN_BOOL, &fast_val);
+    struct plan_filter *f = plan_filter_construct_move(j2, fc);
+    struct plan_select *se = plan_select_construct_move(f, "virt-joined");
+
 
     size_t t1_size;
     const struct plan_table_info ti = se->get_info(se, &t1_size)[0];

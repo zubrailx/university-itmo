@@ -55,6 +55,8 @@ typedef struct tpt_column_base TPT_COLUMN_BASE tpt_column_base;
 // helpers
 #define TPT_COLUMN_SIZE(enum_name) sizeof(struct tpt_column_##enum_name)
 #define TPT_COL_TYPE(enum_name) tpt_column_##enum_name
+#define TPT_ENTRY_SIZE(enum_name)                                                      \
+  (TPT_COLUMN_SIZE(enum_name) - offsetof(struct tpt_column_##enum_name, entry))
 
 // define columns
 TPT_COLUMN(bool, COLUMN_TYPE_BOOL)
@@ -83,6 +85,9 @@ typedef struct tp_tuple_iter {
   pageoff_t tend;
   size_t tuple_size;
 } tp_tuple_iter;
+
+size_t tp_column_size(uint8_t type);
+size_t tp_entry_size(uint8_t type);
 
 INLINE_BODYOFF_TO_PAGEOFF(struct table_page, body, tp)
 INLINE_PAGEOFF_TO_BODYOFF(struct table_page, body, tp)

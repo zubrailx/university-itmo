@@ -25,7 +25,7 @@ static size_t tuple_count_slot(const pageoff_t page_size, const size_t tuple_siz
 }
 
 // Currently calculate size using switch case
-static size_t get_column_size(uint8_t type) {
+size_t tp_column_size(uint8_t type) {
   switch (type) {
   case COLUMN_TYPE_DOUBLE:
     return TPT_COLUMN_SIZE(COLUMN_TYPE_DOUBLE);
@@ -35,6 +35,21 @@ static size_t get_column_size(uint8_t type) {
     return TPT_COLUMN_SIZE(COLUMN_TYPE_BOOL);
   case COLUMN_TYPE_STRING:
     return TPT_COLUMN_SIZE(COLUMN_TYPE_STRING);
+  default:
+    assert(0 && "ERROR: Unknown column type");
+  }
+}
+
+size_t tp_entry_size(uint8_t type) {
+  switch (type) {
+  case COLUMN_TYPE_DOUBLE:
+    return TPT_ENTRY_SIZE(COLUMN_TYPE_DOUBLE);
+  case COLUMN_TYPE_INT32:
+    return TPT_ENTRY_SIZE(COLUMN_TYPE_INT32);
+  case COLUMN_TYPE_BOOL:
+    return TPT_ENTRY_SIZE(COLUMN_TYPE_BOOL);
+  case COLUMN_TYPE_STRING:
+    return TPT_ENTRY_SIZE(COLUMN_TYPE_STRING);
   default:
     assert(0 && "ERROR: Unknown column type");
   }
@@ -61,7 +76,7 @@ size_t tp_get_tuple_size(const struct dp_tuple *tuple) {
   size_t cols = tuple->header.cols;
   size_t size = offsetof(struct tp_tuple, columns);
   for (size_t i = 0; i < cols; ++i) {
-    size += get_column_size(tuple->columns[i].type);
+    size += tp_column_size(tuple->columns[i].type);
   }
   return size;
 }
@@ -74,7 +89,7 @@ tpt_col_info *tp_construct_col_info_arr(const dp_tuple *tuple) {
   size_t off_cur = offsetof(struct tp_tuple, columns);
   for (size_t i = 0; i < cols; ++i) {
     col_info[i] = (tpt_col_info){.start = off_cur};
-    off_cur += get_column_size(tuple->columns[i].type);
+    off_cur += tp_column_size(tuple->columns[i].type);
   }
   return col_info;
 }

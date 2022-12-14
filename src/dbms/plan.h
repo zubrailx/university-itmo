@@ -180,10 +180,11 @@ struct plan_cross_join *plan_cross_join_construct_move(void *parent_left,
                                                        void *parent_right);
 // }}}
 
+// plan_filter {{{
 struct plan_filter {
   struct PLAN_PARENT;
 
-  struct filter_ast *filt;
+  struct fast *filt;
 
   INHERIT const struct plan_table_info *(*get_info)(void *self, size_t *size);
   INHERIT struct tp_tuple **(*get)(void *self);
@@ -192,6 +193,9 @@ struct plan_filter {
   OVERRIDE bool (*next)(void *self);
   OVERRIDE void (*destruct)(void *self);
 };
+
+struct plan_filter *plan_filter_construct_move(void *parent, void *filt);
+// }}}
 
 #undef PLAN_PARENT
 #undef VIRTUAL
