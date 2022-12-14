@@ -74,12 +74,11 @@ int main() {
     struct plan_cross_join *j1 = plan_cross_join_construct_move(so1, so2);
     // struct plan_cross_join *j2 = plan_cross_join_construct_move(j1, so3);
 
-    // bool fast_val = true;
-    // struct fast_const *fc = fast_const_construct(DTO_COLUMN_BOOL, &fast_val);
+    bool fast_val = true;
+    struct fast_const *f1 = fast_const_construct(DTO_COLUMN_BOOL, &fast_val);
+    // struct fast_column *f2 = fast_column_construct("table1", "column3", dbms);
 
-    struct fast_column *fcc = fast_column_construct("table1", "column3", dbms);
-
-    struct plan_filter *f = plan_filter_construct_move(j1, fcc);
+    struct plan_filter *f = plan_filter_construct_move(j1, f1);
     struct plan_select *se = plan_select_construct_move(f, "virt-joined");
 
     size_t t1_size;

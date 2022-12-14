@@ -878,7 +878,6 @@ struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
   }
   return self;
 }
-
 // }}}
 
 #undef VIRT_INHERIT
