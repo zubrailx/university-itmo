@@ -55,7 +55,7 @@ typedef struct dpt_column {
 typedef struct dp_tuple {
   struct dpt_header header;
   struct dpt_column columns[];
-} __attribute__((packed)) dp_tuple;
+} dp_tuple;
 
 // ITERATOR
 typedef struct dp_tuple_iter {
