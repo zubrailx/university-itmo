@@ -23,15 +23,9 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Test-example
+      - name: Test
         run: |
-          cd src/example
-            coverage run -m pytest --verbose
-            find . -type f -name "*.py" | xargs -t python3 -m coverage report
-            find . -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
-            find . -type f -name "*.py" | xargs -t python3 -m pylint
-            pwd
-
-      - name: Test-pwd
-        run: pwd
-
+          coverage run -m pytest --verbose
+          find . -type f -name "*.py" | xargs -t python3 -m coverage report
+          find . -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
+          find . -type f -name "*.py" | xargs -t python3 -m pylint
