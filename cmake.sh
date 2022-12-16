@@ -19,7 +19,7 @@ USAGE="
       \t[-v | --verbose]\n
       \t[debug | released]\n
       \ttest\n
-      \t[sep] \n                 \t\t-- tests are printed separately
+      \t[sep]                    \t\t-- tests are printed separately
 "
 
 CMAKE=cmake
