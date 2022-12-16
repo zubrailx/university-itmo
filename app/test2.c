@@ -46,15 +46,15 @@ int main() {
   double e8 = 70;
 
   const void *r1[] = {e1, &e2, &o1, &o2};
-  const void *r2[] = {e3, &e4, &o3, &o4};
-  const void *r3[] = {e5, &e6, &o5, &o6};
-  const void *r4[] = {e7, &e8, &o7, &o8};
+  // const void *r2[] = {e3, &e4, &o3, &o4};
+  // const void *r3[] = {e5, &e6, &o5, &o6};
+  // const void *r4[] = {e7, &e8, &o7, &o8};
 
   dto_row_list l1 = dto_row_list_construct();
   dto_row_list_append(&l1, r1);
-  dto_row_list_append(&l1, r2);
-  dto_row_list_append(&l1, r3);
-  dto_row_list_append(&l1, r4);
+  // dto_row_list_append(&l1, r2);
+  // dto_row_list_append(&l1, r3);
+  // dto_row_list_append(&l1, r4);
   row_list_insert(dbms, "table1", &l1);
   dto_row_list_destruct(&l1);
 

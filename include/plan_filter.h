@@ -3,7 +3,6 @@
 #include "util/column_types.h"
 
 struct dbms;
-enum dto_table_column_type;
 struct fast_binop_func;
 struct fast_unop_func;
 
