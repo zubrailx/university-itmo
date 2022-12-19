@@ -4,8 +4,7 @@ lab3:
     name: python-tools
     entrypoint: [""]
   script:
-    - cd src/
     - python3-coverage run -m pytest --verbose
-    - find . -type f -name "*.py" | xargs -t python3-coverage report
-    - find . -type f -name "*.py" | xargs -t pep8 --ignore=E501
-    - find . -type f -name "*.py" | xargs -t pylint
+    - find src test -type f -name "*.py" | xargs -t python3-coverage report
+    - find src test -type f -name "*.py" | xargs -t pep8 --ignore=E501
+    - find src test -type f -name "*.py" | xargs -t pylint

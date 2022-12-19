@@ -4,28 +4,31 @@ on:
   push:
     branches:
       - 'main'
+    
 
 jobs:
-  test:
-    name: Run tests & display coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: '1'
+  # test:
+  #   name: Run tests & display coverage
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: '1'
 
-      - name: Setup python
-        uses: actions/setup-python@master
-        with:
-          python-version: '3.10'
+  #     - name: Setup python
+  #       uses: actions/setup-python@master
+  #       with:
+  #         python-version: '3.10'
 
-      - name: Pip install
-        run: |
-          pip install -r requirements.txt
+  #     - name: Pip install
+  #       run: |
+  #         pip install -r requirements.txt
 
-      - name: Test
-        run: |
-          coverage run -m pytest --verbose
-          find . -type f -name "*.py" | xargs -t python3 -m coverage report
-          find . -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
-          find . -type f -name "*.py" | xargs -t python3 -m pylint
+  #     - name: Test
+  #       run: |
+  #         ./test-run.sh
+  docker-test:
+    name: Run tests & display coverage on Docker
+    runs:
+      using: 'docker'
+      image: 'Dockerfile'
