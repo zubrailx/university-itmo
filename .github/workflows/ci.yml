@@ -11,9 +11,9 @@ jobs:
   #   name: Run tests & display coverage
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: '1'
+      # - uses: actions/checkout@v3
+      #   with:
+      #     fetch-depth: '1'
 
   #     - name: Setup python
   #       uses: actions/setup-python@master
@@ -29,6 +29,13 @@ jobs:
   #         ./test-run.sh
   docker-test:
     name: Run tests & display coverage on Docker
-    runs:
-      using: 'docker'
-      image: 'Dockerfile'
+    runs-on: ubuntu-latest
+    container: zubrailx/ca-lab3:first
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '1'
+
+      - name: Test
+        run: |
+          ./test-run.sh
