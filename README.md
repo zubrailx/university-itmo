@@ -5,37 +5,40 @@
 
 ## Язык программирования
 
-EBNF:
-``` ebnf
-newline = <unicode code point U+000A>;
-ascii_char = <arbitrary ASCII character except newline>;
+<!-- EBNF: -->
+<!-- ``` ebnf -->
+<!-- newline = <unicode code point U+000A>; -->
+<!-- ascii_char = <arbitrary ASCII character except newline>; -->
 
-letter = ascii_char;
-digit = "0" ... "9";
+<!-- letter = ascii_char; -->
+<!-- digit = "0" ... "9"; -->
 
-line_comment = ";", { ascii_char }, newline;
+<!-- line_comment = ";", { ascii_char }, newline; -->
 
-int_lit = [ "+", "-" ], { digit };
-char_lit = "'", ascii_char, "'";
+<!-- int_lit = [ "+", "-" ], { digit }; -->
+<!-- char_lit = "'", ascii_char, "'"; -->
 
-program = { { newline }, line, { newline } };
+<!-- program = { { newline }, line, { newline } }; -->
 
-line = [ label_decl ], [ instruction ], [ line_comment ];
+<!-- line = [ label_decl ], [ instruction ], [ line_comment ]; -->
 
-label_decl = label ":";
-label = identifier;
+<!-- label_decl = label ":"; -->
+<!-- label = identifier; -->
 
-identifier = letter, { letter | digit };
+<!-- identifier = letter, { letter | digit }; -->
 
-instruction = operator, [ operand ];
-operator = identifier;
+<!-- instruction = operator, [ operand ]; -->
+<!-- operator = no_arg_op | one_arg_op; -->
 
-operand = direct_operand | indirect_operand;
-direct_operand = label | immediate;
-indirent_operand = "[", direct_operand, "]";
+<!-- no_arg_op = "inc" | "dec" | "itoc" | "ctoi";  -->
+<!-- one_arg_op = "add" | "sub" | "div" | "mod" | "mul" | "ld" | "st" | "cmp" | "je" | "jne" | "js" | "jmp" } "in" | "out"; -->
 
-immediate = int_lit | char_lit;
-```
+<!-- operand = direct_operand | indirect_operand; -->
+<!-- direct_operand = label | immediate; -->
+<!-- indirent_operand = "[", direct_operand, "]"; -->
+
+<!-- immediate = int_lit | char_lit; -->
+<!-- ``` -->
 
 BNF:
 
@@ -51,9 +54,8 @@ BNF:
 <comment> ::= ";" <char_not_eol_list>
 
 <instruction> ::= <no_arg_instr> | <one_arg_instr>
-<no_arg_instr> ::= <operator>
-<one_arg_instr> ::= <operator> <operand>
-<operator> ::= <identifier>
+<no_arg_instr> ::= <no_arg_op>
+<one_arg_instr> ::= <one_arg_op> <operand>
 <operand> ::= <indirect_operand> | <direct_operand>
 <direct_operand> ::= <label> | <immediate>
 <indirect_operand> ::= "[" <direct_operand> "]"
@@ -72,6 +74,9 @@ BNF:
 <digit> ::= [0-9]
 <EOF> ::= "1A"
 <EOL> ::= "\n"
+
+<no_arg_op> ::= "inc" | "dec" | "itoc" | "ctoi" 
+<one_arg_op> ::= "add" | "sub" | "div" | "mod" | "mul" | "ld" | "st" | "cmp" | "je" | "jne" | "js" | "jmp" | "in" | "out"
 ```
 
 ### Метки
@@ -181,7 +186,19 @@ BNF:
 
 |Instruction|Description|
 |-----------|-----------|
-|`jmp imm24` |           |
+|`jmp imm8` |           |
+
+* `in` - считать байт с порта в младший байт аккумулятора.
+
+|Instruction|Description|
+|-----------|-----------|
+|`in imm8` | `imm8` - номер порта |
+
+* `out` - записать младший байт аккумулятора на порт.
+
+|Instruction|Description|
+|-----------|-----------|
+|`out imm8` | `imm8` - номер порта |
 
 #### Примечание
 * `m24` - адрес в памяти, из которого мы берем значение. Здесь также можно использовать метки, поскольку в отличие от обычного `asm`, в данной ЛР они имеют абсолютный адрес. Синтаксически на asm:
