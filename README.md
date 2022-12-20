@@ -6,7 +6,156 @@
 ## Язык программирования
 
 ``` ebnf
+newline = <unicode code point U+000A>;
+ascii_char = <arbitrary ASCII character except newline>;
+
+letter = ascii_char;
+digit = "0" ... "9";
+
+line_comment = ";", { ascii_char }, newline;
+
+int_lit = [ "+", "-" ], { digit };
+char_lit = "'", ascii_char, "'";
+
+program = { { newline }, line, { newline } };
+
+line = [ label_decl ], [ instruction ], [ line_comment ];
+
+label_decl = label ":";
+label = identifier;
+
+identifier = letter, { letter | digit };
+
+instruction = operator, [ operand ];
+operator = identifier;
+
+operand = direct_operand | indirect_operand;
+direct_operand = label | immediate;
+indirent_operand = "[", direct_operand, "]";
+
+immediate = int_lit | char_lit;
 ```
+
+## Операции
+
+### Метки
+- `label: immediate` - создание метки на данные
+- `label:` - создание метки (для выполнения иструкций перехода)
+
+### Команды
+
+* `inc` - инкрементировать значения в аккумуляторе.
+
+|Instruction|Description |
+|-----------|------------|
+|`inc`      |AC := AC + 1|
+
+* `dec` - декрементировать значение в аккумуляторе.
+
+|Instruction|Description |
+|-----------|------------|
+|`dec`      |AC := AC - 1|
+
+* `itoc` - перевести integer в код символа ASCII.
+
+|Instruction|Description        |
+|-----------|-------------------|
+|`itoc`     |AC := AC + ord('0')|
+
+* `ctoi` - перевести код символа ASCII в integer.
+
+|Instruction|Description        |
+|-----------|-------------------|
+|`itoc`     |AC := AC - ord('0')|
+
+* `add` - сложить значение в аккумуляторе с операндом.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`add m24`  |AC := AC + m24|
+|`add imm24`|AC := AC + imm24|
+
+* `sub` - вычесть значение в аккумуляторе с операндом.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`sub m24`  |AC := AC - m24|
+|`sub imm24`|AC := AC - imm24|
+
+* `div` - беззнаковое деление.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`div m24`  |AC := AC / m24|
+|`div imm24`|AC := AC / imm24|
+
+* `mod` - остаток от беззнакового деления.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`mod m24`  |AC := AC % m24|
+|`mod imm24`|AC := AC % imm24|
+
+* `mul` - беззнаковое умножение.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`mul m24`  |AC := AC * m24|
+|`mul imm24`|AC := AC * imm24|
+
+* `ld` - загрузить значение в аккумулятор (флаги не выставляются).
+
+|Instruction|Description|
+|-----------|-----------|
+|`ld m24`   |AC := m24  |
+|`ld imm24` |AC := imm24|
+
+* `st` - загрузить значение в ячейку из аккумулятора.
+
+|Instruction|Description  |
+|-----------|-------------|
+|`st imm24` |\*imm24 := AC|
+
+* `cmp` - сравнить числа. Работает как `sub`, однако значение в аккумуляторе не модифицируется.
+
+|Instruction|Description|
+|-----------|-----------|
+|`cmp m24`  |AC - m24   |
+|`cmp imm24`|AC - imm24 |
+
+* `je` - переход, если равно.
+
+|Instruction|Description   |
+|-----------|--------------|
+|`je imm24` |Jump if equals|
+
+* `jne` - переход, если не равно.
+
+|Instruction|Description|
+|-----------|-----------|
+|`jne imm24`|           |
+
+* `js` - переход, если знак (отрицательное число).
+
+|Instruction|Description|
+|-----------|-----------|
+|`js imm24`|           |
+
+* `jmp` - безусловный переход.
+
+|Instruction|Description|
+|-----------|-----------|
+|`jmp imm24` |           |
+
+
+#### Примечание
+* `m24` - адрес в памяти, из которого мы берем значение. Здесь также можно использовать метки, поскольку в отличие от обычного `asm`, в данной ЛР они имеют абсолютный адрес. Синтаксически на asm:
+
+```asm
+op [label]
+op [addr]
+```
+* op - operation
 
 ## Организация памяти
 
