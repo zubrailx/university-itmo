@@ -1,5 +1,5 @@
 ; infinite program
-.start:
+_start:
   ld 0
 
 .loop:

@@ -10,28 +10,28 @@ class Opcode(str, Enum):
     ITOC = "integer_to_char"
     CTOI = "char_to_integer"
 
-    ADD_M = "add_m24"
-    ADD_IMM = "add_imm24"
+    ADD_M = "add_m32"
+    ADD_IMM = "add_imm32"
 
-    SUB_M = "sub_m24"
-    SUM_IMM = "sub_imm24"
+    SUB_M = "sub_m32"
+    SUM_IMM = "sub_imm32"
 
-    DIV_M= "div_m24"
-    DIV_IMM = "div_imm24"
+    DIV_M= "div_m32"
+    DIV_IMM = "div_imm32"
 
-    MOD_M = "mod_m24"
-    MOD_IMM = "mod_imm24"
+    MOD_M = "mod_m32"
+    MOD_IMM = "mod_imm32"
 
-    MUL_M = "mul_m24"
-    MUL_IMM = "mul_imm24"
+    MUL_M = "mul_m32"
+    MUL_IMM = "mul_imm32"
 
-    LD_M = "ld_m24"
-    LD_IMM = "ld_imm24"
+    LD_M = "ld_m32"
+    LD_IMM = "ld_imm32"
 
-    ST_IMM = "st_imm24"
+    ST_IMM = "st_imm32"
 
-    CMP_M = "cmp_m24"
-    CMP_IMM = "cmp_imm24"
+    CMP_M = "cmp_m32"
+    CMP_IMM = "cmp_imm32"
 
     JE_IMM = "jmp_if_eq"
     JNE_IMM = "jmp_if_neq"
@@ -43,8 +43,8 @@ class Opcode(str, Enum):
 
     HALT = "halt"
 
-# class Term(namedtuple('Term', 'line pos symbol')):
-#     pass
+class Term(namedtuple('Term', 'line pos symbol')):
+    pass
 
 
 def write_code(fname, code):
@@ -61,8 +61,8 @@ def read_code(filename):
         instr['opcode'] = Opcode(instr['opcode'])
 
         # Конвертация списка из term в класс Term
-        # if 'term' in instr:
-        #     instr['term'] = Term(
-        #         instr['term'][0], instr['term'][1], instr['term'][2])
+        if 'term' in instr:
+            instr['term'] = Term(
+                instr['term'][0], instr['term'][1], instr['term'][2])
 
     return code

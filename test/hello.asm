@@ -1,4 +1,4 @@
-.start:
+_start:
   ld 'h'
   out 1
   ld 'e'

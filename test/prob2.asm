@@ -1,5 +1,4 @@
-; starting point
-.loop:
+_start:
   ld 0
   in 0 ; read fibonacci number from port 0
   cmp '\n' ; cmp with line separator
@@ -10,7 +9,7 @@
   mul 10
   add tmp
   st input
-  jmp .loop
+  jmp _start
 
 
 input_end:
