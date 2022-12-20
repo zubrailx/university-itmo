@@ -5,6 +5,7 @@
 
 ## Язык программирования
 
+EBNF:
 ``` ebnf
 newline = <unicode code point U+000A>;
 ascii_char = <arbitrary ASCII character except newline>;
@@ -34,6 +35,43 @@ direct_operand = label | immediate;
 indirent_operand = "[", direct_operand, "]";
 
 immediate = int_lit | char_lit;
+```
+
+BNF:
+
+```ebnf
+<program> ::= <EOF> | <line_list> <EOF>
+<line_list> ::= <line> <line_list> | <line>
+<line> ::= <line_not_empty> | <line_not_empty> <EOL> | <EOL>
+<line_not_empty> ::= <line_instruction> <comment> | <line_instruction> | <comment>
+<line_instruction> ::= <label_decl> <instruction> | <label_decl> | <instruction>
+<label_decl> ::= <label> ":"
+<label> ::= <identifier>
+<identifier> ::= <letter> | <letter> <letter_or_digit_list>
+<comment> ::= ";" <char_not_eol_list>
+
+<instruction> ::= <no_reg_instr> | <one_reg_instr>
+<no_reg_instr> ::= <operator>
+<one_reg_instr> ::= <operator> <operand>
+<operator> ::= <identifier>
+<operand> ::= <indirect_operand> | <direct_operand>
+<direct_operand> ::= <label> | <immediate>
+<indirect_operand> ::= "[" <direct_operand> "]"
+<immediate> ::= <int_lit> | <char_lit>
+
+<int_lit> ::= <digit_list> | "-" <digit_list>
+<digit_list> ::= <digit> <digit_list> | <digit>
+<char_lit> ::= "'" <letter> "'" | "'" <digit> "'"
+
+<letter_or_digit_list> ::= <letter_or_digit> | <letter_or_digit> <letter_or_digit_list>
+<letter_or_digit> ::= <letter> | <digit>
+<char_not_eol_list> ::= <letter_digit_space> | <letter_digit_space> <char_not_eol_list>
+<letter_digit_space> ::= <letter> | <space>
+<space> ::= " " | "\t"
+<letter> ::= [a-z] | [A-Z]
+<digit> ::= [0-9]
+<EOF> ::= "1A"
+<EOL> ::= "\n"
 ```
 
 ## Операции
@@ -215,37 +253,26 @@ op [addr]
 CI (Github):
 
 ``` yaml
-name: CI
+# ./github/workflows/ci.yml
+docker-test:
+  name: Run tests & display coverage on Docker
+  runs-on: ubuntu-latest
+  container: zubrailx/ca-lab3:first
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: '1'
 
-on:
-  push:
-    branches:
-      - 'main'
+    - name: Test
+      run: |
+        ./test-run.sh
 
-jobs:
-  test:
-    name: Run tests & display coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: '1'
 
-      - name: Setup python
-        uses: actions/setup-python@master
-        with:
-          python-version: '3.10'
-
-      - name: Pip install
-        run: |
-          pip install -r requirements.txt
-
-      - name: Test
-        run: |
-          coverage run -m pytest --verbose
-          find . -type f -name "*.py" | xargs -t python3 -m coverage report
-          find . -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
-          find . -type f -name "*.py" | xargs -t python3 -m pylint
+# ./test-run.sh
+coverage run -m pytest --verbose
+find src test -type f -name "*.py" | xargs -t python3 -m coverage report
+find src test -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
+find src test -type f -name "*.py" | xargs -t python3 -m pylint
 ```
 
 где:
