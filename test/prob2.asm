@@ -59,8 +59,8 @@ out_sum:
   ld [sum]
   div 10
   jz halt
-  st [sum]
-  jmp .loop3:
+  st sum
+  jmp .loop3
 
 
 halt:
