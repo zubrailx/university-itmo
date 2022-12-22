@@ -4,6 +4,7 @@ import sys
 from collections import namedtuple
 from enum import Enum
 import re
+import json
 
 from isa import write_code
 
@@ -112,77 +113,75 @@ class ParserTypes(Enum):
 class Parser:
     # Error handling
     @staticmethod
-    def err_leaf(msg, lexem):
+    def err_leaf(context: str, msg: str, lexem: LexerNode) -> dict:
         return {
             "type": "Error",
+            "context": context,
             "message": msg,
             "lexem": lexem
         }
 
     @staticmethod
-    def err_path(childs):
+    def err_path(context: str, childs: list) -> dict:
         return {
             "type": "Error",
+            "context": context,
             "childs": childs
         }
 
     @staticmethod
-    def is_err(node):
+    def is_err(node: dict) -> bool:
         return node["type"] == "Error"
 
     @staticmethod
-    def val_from_int(node):
+    def val_from_label(node: dict) -> str:
+        return node["value"]
+
+    @staticmethod
+    def val_from_int(node: dict) -> int:
         return int(node["lexem"].raw)
 
     @staticmethod
-    def val_from_char(node):
+    def val_from_char(node: dict) -> int:
         return ord(node["lexem"].raw[1])
 
     def __init__(self) -> None:
         self.lexem_list = []
         self.cur = 0
 
-    def get_lex(self):
+    def get_lex(self) -> LexerNode:
         return self.lexem_list[self.cur]
 
-    def next_lex(self):
+    def next_lex(self) -> LexerNode:
         self.cur += 1
         return self.lexem_list[self.cur]
 
-    def prev_lex(self):
-        self.cur -= 1
-        return self.lexem_list[self.cur]
-
-    def skip_eol(self):
+    def skip_eol(self) -> None:
         while self.lexem_list[self.cur].type == "EOL":
             self.cur += 1
 
-    def next_skip_eol(self):
+    def next_skip_eol(self) -> LexerNode:
         self.next_lex()
         self.skip_eol()
         return self.get_lex()
 
     # Ast builder
     # Always return pointer to there error created
-    def parse(self, lexem_list):
+    def parse(self, lexem_list: list):
         self.lexem_list = lexem_list
         self.cur = 0
         return self.program()
 
     def program(self):
-        start = self.cur
         sect_list = []
-
+        # point to first section
         self.skip_eol()
-        lcur = self.get_lex()
-        while lcur["type"] != "EOF":
+        sect = self.section()
+        while not self.is_err(sect):
+            sect_list.append(sect)
+            # go to next section
+            self.next_skip_eol()
             sect = self.section()
-            if self.is_err(sect):
-                self.cur = start  # return pointer where no errors
-                return self.err_path(sect)
-            else:
-                lcur = self.next_skip_eol()
-                sect_list.append(sect)
         return {
             "type": "Program",
             "body": sect_list,
@@ -197,13 +196,13 @@ class Parser:
         }
         kwd = self.keyword("section")
         if self.is_err(kwd):
-            return self.err_path([kwd])
+            return self.err_path("Section", [kwd])
 
         self.next_lex()
         name = self.identifier()
         if self.is_err(name):
             self.cur = start
-            return self.err_path([name])
+            return self.err_path("Section", [kwd, name])
         else:
             root["value"] = name["lexem"].raw
 
@@ -213,6 +212,7 @@ class Parser:
             root["inst"].append(inst)
             self.next_skip_eol()
             inst = self.instruction()
+        self.cur -= 1 # point to the last node of section
         return root
 
     def instruction(self):
@@ -228,7 +228,7 @@ class Parser:
 
         # error
         self.cur = start
-        return self.err_path([cmd, var])
+        return self.err_path("Instruction", [cmd, var])
 
     def instr_command(self):
         start = self.cur
@@ -241,18 +241,18 @@ class Parser:
         # parse labels
         label = self.instr_label()
         while not self.is_err(label):
-            root["labels"].append(label)
+            root["labels"].append(self.val_from_label(label))
             self.next_skip_eol()
             label = self.instr_label()
         # parse identifier
         cmd = self.identifier()
         if self.is_err(cmd):
             self.cur = start
-            return self.err_path([cmd])
+            return self.err_path("Command", [cmd])
 
         root["cmd"] = cmd["lexem"].raw
         # parse arguments
-        self.next_skip_eol()
+        self.next_lex()
         arg = self.argument()
         while not self.is_err(arg):
             root["args"].append(arg)
@@ -269,7 +269,9 @@ class Parser:
         }
         label = self.instr_label()
         if self.is_err(label):
-            return self.err_path([label])
+            return self.err_path("Variable", [label])
+        else:
+            root["label"] = self.val_from_label(label)
 
         self.next_skip_eol()
         int_lit = self.int_lit()
@@ -282,7 +284,7 @@ class Parser:
             return root
         # error
         self.cur = start
-        return self.err_path([int_lit, char_lit])
+        return self.err_path("Variable", [int_lit, char_lit])
 
     def argument(self):
         ind_arg = self.indirect_argument()
@@ -292,7 +294,7 @@ class Parser:
         if not self.is_err(dir_arg):
             return dir_arg
         else:
-            return self.err_path([ind_arg, dir_arg])
+            return self.err_path("Argument", [ind_arg, dir_arg])
 
     def direct_argument(self):
         ident = self.identifier()
@@ -313,11 +315,11 @@ class Parser:
                 "type": "DirectArgument",
                 "value": self.val_from_char(char_lit)
             }
-        return self.err_path([ident, int_lit, char_lit])
+        return self.err_path("DirectArgument", [ident, int_lit, char_lit])
 
     def indirect_argument(self):
         start = self.cur
-        brl = self.keyword("[")
+        brl = self.syntax("[")
         if not self.is_err(brl):
             self.next_lex()
             # identifier
@@ -325,18 +327,18 @@ class Parser:
             if not self.is_err(iden):
                 self.next_lex()
                 # right bracket
-                brr = self.keyword("]")
+                brr = self.syntax("]")
                 if not self.is_err(brr):
                     return {
                         "type": "IndirectArgument",
                         "value": iden["lexem"].raw
                     }
                 else:
-                    err = self.err_path([brl, iden, brr])
+                    err = self.err_path("IndirectArgument", [brl, iden, brr])
             else:
-                err = self.err_path([brl, iden])
+                err = self.err_path("IndirectArgument", [brl, iden])
         else:
-            err = self.err_path([brl])
+            err = self.err_path("IndirectArgument", [brl])
         # error
         self.cur = start
         return err
@@ -346,38 +348,47 @@ class Parser:
 
         llabel = self.identifier()
         if self.is_err(llabel):
-            return self.err_path([llabel])
+            return self.err_path("Label", [llabel])
 
-        llabel = self.get_lex()
-        if llabel.type != "Identifier":
-            return self.err_leaf("Lexem doesn't match Identifier", llabel)
-
-        lsyn = self.next_lex()
-        if lsyn.type != "Syntax" or lsyn.raw != ":":
+        self.next_lex()
+        lsyn = self.syntax(":")
+        if self.is_err(lsyn):
             self.cur = start
-            return self.err_leaf("Lexem doesn't match ':'", lsyn)
+            return self.err_path("Label", [llabel, lsyn]) 
 
         return {
             "type": "Label",
-            "value": llabel,
+            "value": llabel["lexem"].raw,
         }
 
     def keyword(self, value):
         kwd = self.get_lex()
         if kwd.type != "Keyword":
-            return self.err_leaf("Lexem doesn't match Keyword", kwd)
+            return self.err_leaf("Keyword", "Not match", kwd)
         elif kwd.raw != value:
-            return self.err_leaf(f"Lexem doesn't equals '{value}'", kwd)
+            return self.err_leaf("Keyword", f"Not equals '{value}'", kwd)
         else:
             return {
                 "type": "Keyword",
                 "lexem": kwd
             }
 
+    def syntax(self, value):
+        kwd = self.get_lex()
+        if kwd.type != "Syntax":
+            return self.err_leaf("Syntax", "", kwd)
+        elif kwd.raw != value:
+            return self.err_leaf("Syntax", f"Not equals '{value}'", kwd)
+        else:
+            return {
+                "type": "Syntax",
+                "lexem": kwd
+            }
+
     def identifier(self):
         lid = self.get_lex()
         if lid.type != "Identifier":
-            return self.err_leaf("Lexem doesn't match Identifier", lid)
+            return self.err_leaf("Identifier", "Not match", lid)
         else:
             return {
                 "type": "Identifier",
@@ -386,18 +397,18 @@ class Parser:
 
     def int_lit(self):
         cur = self.get_lex()
-        if cur.type != "IntLiteral":
-            return self.err_leaf("Lexem doesn't match IntLiteral", cur)
+        if cur.type != "NumericLiteral":
+            return self.err_leaf("IntLiteral", "Not match", cur)
         else:
             return {
-                "type": "IntLiteral",
+                "type": "NumericLiteral",
                 "lexem": cur
             }
 
     def char_lit(self):
         cur = self.get_lex()
         if cur.type != "CharLiteral":
-            return self.err_leaf("Lexem doesn't match CharLiteral", cur)
+            return self.err_leaf("CharLiteral", "Not match", cur)
         else:
             return {
                 "type": "CharLiteral",
@@ -407,7 +418,10 @@ class Parser:
 
 def parse(lexem_list):
     parser = Parser()
-    return parser.parse(lexem_list)
+    ast = parser.parse(lexem_list)
+    if ast["type"] == "Error":
+        print("\nERROR WHILE PARSING:")
+    print(json.dumps(ast, indent=2))
 
 
 def generate_code(ast):
@@ -426,9 +440,10 @@ def main(args):
         source = f.read()
 
     lexem_list = lexer_process(source)
+    print(lexem_list)
     ast = parse(lexem_list)
     code = generate_code(ast)
-    write_code(target, code)
+    # write_code(target, code)
 
 
 if __name__ == '__main__':
