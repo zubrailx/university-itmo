@@ -1,5 +1,7 @@
-_start:
-  ld 'h'
+section .text
+; this is comment
+_start:; this is also comment
+  ld 'h' ; and this is also comment
   out 1
   ld 'e'
   out 1

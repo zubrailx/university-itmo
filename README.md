@@ -46,12 +46,13 @@ BNF:
 <program> ::= <EOF> | <line_list> <EOF>
 <line_list> ::= <line> <line_list> | <line>
 <line> ::= <line_not_empty> | <line_not_empty> <EOL> | <EOL>
-<line_not_empty> ::= <line_instruction> <comment> | <line_instruction> | <comment>
+<line_not_empty> ::= <line_instruction> <comment> | <line_instruction> | <comment> | <section>
 <line_instruction> ::= <label_decl> <instruction> | <label_decl> | <instruction>
 <label_decl> ::= <label> ":"
 <label> ::= <identifier>
 <identifier> ::= <letter> | <letter> <letter_or_digit_list>
 <comment> ::= ";" <char_not_eol_list>
+<section> ::= "section" <identifier>
 
 <instruction> ::= <no_arg_instr> | <one_arg_instr>
 <no_arg_instr> ::= <no_arg_op>
@@ -78,6 +79,12 @@ BNF:
 <no_arg_op> ::= "inc" | "dec" | "itoc" | "ctoi" | "halt"
 <one_arg_op> ::= "add" | "sub" | "div" | "mod" | "mul" | "ld" | "st" | "cmp" | "je" | "jne" | "js" | "jmp" | "in" | "out"
 ```
+
+### Секции
+
+- `section <name>` - создать секцию с именем `<name>`. Данные внутри секций идут последовательно.
+- `.text` - секция для кода
+- `.data` - секция для данных
 
 ### Метки
 - `label: immediate` - создание метки на данные

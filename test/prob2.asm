@@ -1,3 +1,4 @@
+section .text
 _start:
   ld 0
   in 0 ; read fibonacci number from port 0
@@ -66,6 +67,7 @@ halt:
   halt
   
 
+section .data
 ; program variables
 cur: 2
 nth: 0
