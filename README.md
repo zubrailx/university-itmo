@@ -260,6 +260,19 @@ op [label]
 
 ## Модель процессора
 
+### DataPath and ControlUnit
+
+* IR - Instruction Register
+* TC - Tick Counter
+* PC - Program Counter
+* IMUX - Inverse Multiplexor
+* MUX - Multiplexor
+* ACC - Accumulator
+* MEM - main memory
+* cdev(in/out) - character device
+* FLAGS - (N - negative, Z - zero)
+
+
 #### Без сигналов latch, wr, oe
 ``` text                                                        
                                                                     +------------+    
@@ -300,18 +313,6 @@ op [label]
  |                                                                                                      |
  +------------------------------------------------------------------------------------------------------+
 ```
-
-### DataPath and ControlUnit
-
-* IR - Instruction Register
-* TC - Tick Counter
-* PC - Program Counter
-* IMUX - Inverse Multiplexor
-* MUX - Multiplexor
-* ACC - Accumulator
-* MEM - main memory
-* cdev(in/out) - character device
-* FLAGS - (N - negative, Z - zero)
 
 #### Полная
 ``` text                                                        
