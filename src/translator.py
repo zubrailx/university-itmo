@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
+import json
+import re
 import sys
 from collections import namedtuple
-from enum import Enum
-import re
-import json
 
-from isa import write_code
+from isa import ArgumentTypes, ISACommands, write_code
 
 
 # Line and offset starts with 0
@@ -61,8 +60,7 @@ def lexer_process(source):
 
         if not found:
             line, off = get_line_off(source, cur_pos)
-            print(f"ERROR[lexer]: Unknown lexem near line:{line + 1},off:{off + 1}.")
-            return None
+            raise Exception(f"Lexer\nUnknown lexem near line:{line + 1},off:{off + 1}.")
 
     lexem_list.append(LexerNode('EOF', cur_pos, None))
     return lexem_list
@@ -135,7 +133,7 @@ class Parser:
 
     def program(self):
         sect_list = []
-        last_err = None # last error generated below
+        last_err = None  # last error generated below
         # point to first section
         self.skip_eol()
 
@@ -154,7 +152,7 @@ class Parser:
             self.next_skip_eol()
         return {
             "type": "Program",
-            "body": sect_list,
+            "sections": sect_list,
         }
 
     def section(self):
@@ -162,7 +160,7 @@ class Parser:
         root = {
             "type": "Section",
             "value": None,  # section name
-            "inst": [],
+            "instructions": [],
             "last_err": None
         }
         kwd = self.keyword("section")
@@ -180,13 +178,13 @@ class Parser:
         self.next_skip_eol()
         inst = self.instruction()
         while not self.is_err(inst):
-            root["inst"].append(inst)
+            root["instructions"].append(inst)
             # next should be eol
             self.next_skip_eol()
             inst = self.instruction()
         self.cur -= 1  # point to the last node of section
 
-        root["last_err"] = inst # inst - last error generated
+        root["last_err"] = inst  # inst - last error generated
         return root
 
     def instruction(self):
@@ -295,22 +293,22 @@ class Parser:
         ident = self.identifier()
         if not self.is_err(ident):
             return {
-                "type": "DirectArgument",
+                "type": ArgumentTypes.Direct,
                 "value": ident["lexem"].raw
             }
         int_lit = self.int_lit()
         if not self.is_err(int_lit):
             return {
-                "type": "DirectArgument",
+                "type": ArgumentTypes.Direct,
                 "value": self.val_from_int(int_lit)
             }
         char_lit = self.char_lit()
         if not self.is_err(char_lit):
             return {
-                "type": "DirectArgument",
+                "type": ArgumentTypes.Direct,
                 "value": self.val_from_char(char_lit)
             }
-        return self.err_path("DirectArgument", [ident, int_lit, char_lit])
+        return self.err_path(ArgumentTypes.Direct, [ident, int_lit, char_lit])
 
     def indirect_argument(self):
         start = self.cur
@@ -325,15 +323,15 @@ class Parser:
                 brr = self.syntax("]")
                 if not self.is_err(brr):
                     return {
-                        "type": "IndirectArgument",
+                        "type": ArgumentTypes.Indirect,
                         "value": iden["lexem"].raw
                     }
                 else:
-                    err = self.err_path("IndirectArgument", [brl, iden, brr])
+                    err = self.err_path(ArgumentTypes.Indirect, [brl, iden, brr])
             else:
-                err = self.err_path("IndirectArgument", [brl, iden])
+                err = self.err_path(ArgumentTypes.Indirect, [brl, iden])
         else:
-            err = self.err_path("IndirectArgument", [brl])
+            err = self.err_path(ArgumentTypes.Indirect, [brl])
         # error
         self.cur = start
         return err
@@ -415,23 +413,93 @@ class Parser:
         return cur.type == "EOL"
 
 
-
 def parse(lexem_list):
     parser = Parser()
     ast = parser.parse(lexem_list)
+
     if ast["type"] == "Error":
-        print("\nERROR WHILE PARSING:")
-    print(json.dumps(ast, indent=2))
+        raise Exception(f"Parser\n{json.dumps(ast, indent=2)}")
+    return ast
 
 
-def generate_code(ast):
-    return "CODE GENERATION IS NOT IMPLEMENTED"
+# ----------------------------------------------------------
+# Code generator
+# ----------------------------------------------------------
+# Valid instructions in sections
+SectionInstrTypes = {
+    ".data": ["Variable"],
+    ".text": ["Command"],
+}
+
+# Check semantics and generate code
+def check_section_instructions(ast):
+    for sect in ast["sections"]:
+        sect_name = sect["value"]
+        if sect_name not in SectionInstrTypes.keys():
+            raise Exception(f"Section '{sect_name}' not in permitted")
+
+        for inst in sect["instructions"]:
+            if inst["type"] not in SectionInstrTypes[sect_name]:
+                raise Exception(f"Instruction type of {inst} in '{sect_name}' is not permitted")
 
 
+def inst_to_isa(inst) -> dict:
+    if inst["type"] == "Command":
+        name = inst["cmd"]
+        isa_args = [arg["type"] for arg in inst["args"]] 
+
+        cmd = ISACommands.get_command(name)
+        if cmd is None:
+            raise Exception(f"Command '{name}' is not present in isa")
+        opcode = cmd.get_opcode(isa_args)
+        if opcode is None:
+            raise Exception(f"Command '{name}' doesn't support {isa_args}.\n" 
+                            f"List of supported: {cmd.get_command_vars()}")
+        return {
+            "address": None,
+            "opcode": opcode,
+            "args": [arg["value"] for arg in inst["args"]]
+        }
+    else:  # If Variable
+        return {
+            "address": None,
+            "value": inst["value"]
+        }
+
+def generate_code(ast, start_pos=0):
+    check_section_instructions(ast)
+    inst_list = []
+    labels = {}
+    # copy all data but without sections
+    for sect in ast["sections"]:
+        for inst in sect["instructions"]:
+            # convert to isa
+            isa = inst_to_isa(inst)
+            isa["address"] = start_pos
+            inst_list.append(isa)
+            # add labels
+            if inst["type"] == "Variable":
+                labels[inst["label"]] = isa["address"]
+            else:
+                for label in inst["labels"]:
+                    labels[label] = isa["address"]
+            # goto next insruction
+            start_pos += 32 # each instruction is 32 bits size
+                
+    # replace instruction addresses 
+    for inst in inst_list:
+        if "args" in inst:
+            for idx, arg in enumerate(inst["args"]):
+                if arg in labels:
+                    inst["args"][idx] = labels[arg]
+                    
+    return inst_list
+
+
+# ----------------------------------------------------------
+# Main
+# ----------------------------------------------------------
 def main(args):
-    args = []
-    args.extend(['../test/prob2.asm', '../test/hello'])
-
     assert len(args) == 2, \
         "Wrong arguments: translator.py <input_file> <target_file>"
     source, target = args
@@ -440,10 +508,9 @@ def main(args):
         source = f.read()
 
     lexem_list = lexer_process(source)
-    print(lexem_list)
     ast = parse(lexem_list)
     code = generate_code(ast)
-    # write_code(target, code)
+    write_code(target, code)
 
 
 if __name__ == '__main__':

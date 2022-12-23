@@ -1,1 +1,189 @@
-"CODE GENERATION IS NOT IMPLEMENTED"
+[
+  {
+    "address": 0,
+    "opcode": "ld_imm",
+    "args": [
+      104
+    ]
+  },
+  {
+    "address": 32,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 64,
+    "opcode": "ld_imm",
+    "args": [
+      101
+    ]
+  },
+  {
+    "address": 96,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 128,
+    "opcode": "ld_imm",
+    "args": [
+      108
+    ]
+  },
+  {
+    "address": 160,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 192,
+    "opcode": "ld_imm",
+    "args": [
+      108
+    ]
+  },
+  {
+    "address": 224,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 256,
+    "opcode": "ld_imm",
+    "args": [
+      111
+    ]
+  },
+  {
+    "address": 288,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 320,
+    "opcode": "ld_imm",
+    "args": [
+      32
+    ]
+  },
+  {
+    "address": 352,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 384,
+    "opcode": "ld_imm",
+    "args": [
+      119
+    ]
+  },
+  {
+    "address": 416,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 448,
+    "opcode": "ld_imm",
+    "args": [
+      111
+    ]
+  },
+  {
+    "address": 480,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 512,
+    "opcode": "ld_imm",
+    "args": [
+      114
+    ]
+  },
+  {
+    "address": 544,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 576,
+    "opcode": "ld_imm",
+    "args": [
+      108
+    ]
+  },
+  {
+    "address": 608,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 640,
+    "opcode": "ld_imm",
+    "args": [
+      100
+    ]
+  },
+  {
+    "address": 672,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 704,
+    "opcode": "ld_imm",
+    "args": [
+      46
+    ]
+  },
+  {
+    "address": 736,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 768,
+    "opcode": "ld_imm",
+    "args": [
+      92
+    ]
+  },
+  {
+    "address": 800,
+    "opcode": "out_imm",
+    "args": [
+      1
+    ]
+  },
+  {
+    "address": 832,
+    "opcode": "halt",
+    "args": []
+  }
+]

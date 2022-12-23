@@ -18,7 +18,7 @@ input_end:
   cmp 0
   js out_sum
   cmp 1
-  je out_sum fdksafkaf
+  je out_sum
 
   ; else value is at least 2
 calc:
@@ -58,7 +58,7 @@ out_sum:
   out 1
   ld [sum]
   div 10
-  jz halt
+  js halt
   st sum
   jmp .loop3
 
