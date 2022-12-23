@@ -194,4 +194,4 @@ def read_code(fname):
         if "opcode" in inst:
             inst["opcode"] = Opcode(inst['opcode'])
 
-    return code, code["start_pos"]
+    return code["instructions"], code["start_pos"]

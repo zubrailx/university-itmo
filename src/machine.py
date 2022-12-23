@@ -13,8 +13,8 @@ def main(args):
     code_file, input_file = args
 
     input_token = []
-    memory = read_code(code_file)
-    print(memory)
+    memory, start_pos = read_code(code_file)
+    print(memory, start_pos)
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
