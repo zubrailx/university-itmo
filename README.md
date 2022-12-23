@@ -43,7 +43,10 @@
 BNF:
 
 ```ebnf
-<program> ::= <EOF> | <line_list> <EOF>
+<program> ::= <EOF> | <section_list> <EOF>
+
+<section_list> ::= <section> <section_list> | <section>
+<section> ::= "section" <identifier> <line_list>
 <line_list> ::= <line> <line_list> | <line>
 <line> ::= <line_not_empty> | <line_not_empty> <EOL> | <EOL>
 <line_not_empty> ::= <line_instruction> <comment> | <line_instruction> | <comment> | <section>
@@ -52,7 +55,6 @@ BNF:
 <label> ::= <identifier>
 <identifier> ::= <letter> | <letter> <letter_or_digit_list>
 <comment> ::= ";" <char_not_eol_list>
-<section> ::= "section" <identifier>
 
 <instruction> ::= <no_arg_instr> | <one_arg_instr>
 <no_arg_instr> ::= <no_arg_op>
