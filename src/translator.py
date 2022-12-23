@@ -30,7 +30,7 @@ class LexerNode(namedtuple('LexerNode', 'type off raw')):
 LexemSpec = {
     "Keyword": ["Keyword", r'section'],
     "Identifier": ["Identifier", r'[a-zA-Z_\.][\w]*'],
-    "Syntax": ["Syntax", r'\[|\]|:'],
+    "Syntax": ["Syntax", r'\[|\]|:|,'],
 
     "NumericLiteral": ["NumericLiteral", r'[-+]?\d+'],
     "StringLiteral": ["StringLiteral", r'".*"'],
@@ -174,14 +174,23 @@ class Parser:
 
     def program(self):
         sect_list = []
+        last_err = None # last error generated below
         # point to first section
         self.skip_eol()
-        sect = self.section()
-        while not self.is_err(sect):
-            sect_list.append(sect)
-            # go to next section
-            self.next_skip_eol()
+
+        while self.cur != len(self.lexem_list) - 1:
             sect = self.section()
+            # properly handle errors from last section
+            if self.is_err(sect):
+                if last_err is not None:
+                    return self.err_path("Program", [last_err, sect])
+                return self.err_path("Program", [sect])
+            # store last error
+            last_err = sect["last_err"]
+            sect.pop("last_err", None)
+            # append
+            sect_list.append(sect)
+            self.next_skip_eol()
         return {
             "type": "Program",
             "body": sect_list,
@@ -192,7 +201,8 @@ class Parser:
         root = {
             "type": "Section",
             "value": None,  # section name
-            "inst": []
+            "inst": [],
+            "last_err": None
         }
         kwd = self.keyword("section")
         if self.is_err(kwd):
@@ -210,9 +220,12 @@ class Parser:
         inst = self.instruction()
         while not self.is_err(inst):
             root["inst"].append(inst)
+            # next should be eol
             self.next_skip_eol()
             inst = self.instruction()
-        self.cur -= 1 # point to the last node of section
+        self.cur -= 1  # point to the last node of section
+
+        root["last_err"] = inst # inst - last error generated
         return root
 
     def instruction(self):
@@ -238,26 +251,46 @@ class Parser:
             "cmd": None,
             "args": []
         }
-        # parse labels
+        # Parse labels
         label = self.instr_label()
         while not self.is_err(label):
             root["labels"].append(self.val_from_label(label))
             self.next_skip_eol()
             label = self.instr_label()
-        # parse identifier
+        # Parse identifier
         cmd = self.identifier()
         if self.is_err(cmd):
             self.cur = start
             return self.err_path("Command", [cmd])
 
         root["cmd"] = cmd["lexem"].raw
-        # parse arguments
+        # Parse arguments
         self.next_lex()
-        arg = self.argument()
-        while not self.is_err(arg):
-            root["args"].append(arg)
+        if self.is_eol():
+            return root
+        else:
+            arg = self.argument()
+            if self.is_err(arg):
+                self.cur = start
+                return self.err_leaf("Command", "Expected argument", arg["lexem"])
+            else:
+                root["args"].append(arg)
+        # if 1 or more
+        self.next_lex()
+        while not self.is_eol():
+            com = self.syntax(",")
             self.next_lex()
             arg = self.argument()
+
+            if self.is_err(com):
+                self.cur = start
+                return self.err_leaf("Command", "Expected ','", com["lexem"])
+            elif self.is_err(arg):
+                self.cur = start
+                return self.err_leaf("Command", "Expected argument", arg["lexem"])
+
+            root["args"].append(arg)
+            self.next_lex()
         return root
 
     def instr_variable(self):
@@ -267,12 +300,13 @@ class Parser:
             "label": None,
             "value": None
         }
+        # parse label
         label = self.instr_label()
         if self.is_err(label):
             return self.err_path("Variable", [label])
         else:
             root["label"] = self.val_from_label(label)
-
+        # parse value
         self.next_skip_eol()
         int_lit = self.int_lit()
         if not self.is_err(int_lit):
@@ -354,7 +388,7 @@ class Parser:
         lsyn = self.syntax(":")
         if self.is_err(lsyn):
             self.cur = start
-            return self.err_path("Label", [llabel, lsyn]) 
+            return self.err_path("Label", [llabel, lsyn])
 
         return {
             "type": "Label",
@@ -364,7 +398,7 @@ class Parser:
     def keyword(self, value):
         kwd = self.get_lex()
         if kwd.type != "Keyword":
-            return self.err_leaf("Keyword", "Not match", kwd)
+            return self.err_leaf("Keyword", f"Got {kwd.type}", kwd)
         elif kwd.raw != value:
             return self.err_leaf("Keyword", f"Not equals '{value}'", kwd)
         else:
@@ -376,7 +410,7 @@ class Parser:
     def syntax(self, value):
         kwd = self.get_lex()
         if kwd.type != "Syntax":
-            return self.err_leaf("Syntax", "", kwd)
+            return self.err_leaf("Syntax", f"Got {kwd.type}", kwd)
         elif kwd.raw != value:
             return self.err_leaf("Syntax", f"Not equals '{value}'", kwd)
         else:
@@ -386,19 +420,19 @@ class Parser:
             }
 
     def identifier(self):
-        lid = self.get_lex()
-        if lid.type != "Identifier":
-            return self.err_leaf("Identifier", "Not match", lid)
+        cur = self.get_lex()
+        if cur.type != "Identifier":
+            return self.err_leaf("Identifier", f"Got {cur.type}", cur)
         else:
             return {
                 "type": "Identifier",
-                "lexem": lid
+                "lexem": cur
             }
 
     def int_lit(self):
         cur = self.get_lex()
         if cur.type != "NumericLiteral":
-            return self.err_leaf("IntLiteral", "Not match", cur)
+            return self.err_leaf("IntLiteral", f"Got {cur.type}", cur)
         else:
             return {
                 "type": "NumericLiteral",
@@ -408,12 +442,17 @@ class Parser:
     def char_lit(self):
         cur = self.get_lex()
         if cur.type != "CharLiteral":
-            return self.err_leaf("CharLiteral", "Not match", cur)
+            return self.err_leaf("CharLiteral", f"Got {cur.type}", cur)
         else:
             return {
                 "type": "CharLiteral",
                 "lexem": cur
             }
+
+    def is_eol(self):
+        cur = self.get_lex()
+        return cur.type == "EOL"
+
 
 
 def parse(lexem_list):

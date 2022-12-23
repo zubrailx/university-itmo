@@ -18,7 +18,7 @@ input_end:
   cmp 0
   js out_sum
   cmp 1
-  je out_sum
+  je out_sum fdksafkaf
 
   ; else value is at least 2
 calc:
