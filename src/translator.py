@@ -71,45 +71,6 @@ def lexer_process(source):
 # ----------------------------------------------------------
 # Parser
 # ----------------------------------------------------------
-# lexem - is present only for terminals
-# childs - list or children
-class ParserNode(namedtuple('ParserNode', 'lexem type childs')):
-    pass
-
-
-# program ::= {section}
-# section ::= keyword(section) identifier { instruction }
-# label ::= identifier, ":"
-# terminal
-# instruction ::= {label} identifier {operand}
-
-# indirect_op ::= keyword([) identifier keyword(])
-# direct_op ::= identifier | int_lit | char_lit
-
-# identifier
-
-# int_lit ::= terminal
-# char_lit :: = terminal
-# keyword ::= terminal
-class ParserTypes(Enum):
-    Program = 0,
-
-    Section = 1,
-
-    Label = 2,
-    Identifier = 3
-    Instruction = 3,
-
-    IndirectOperand = 41,
-    DirectOperand = 42,
-
-    NumericLiteral = 5,
-    CharLiteral = 6,
-    StringLiteral = 7,
-
-    Keyword = 8,
-
-
 class Parser:
     # Error handling
     @staticmethod
