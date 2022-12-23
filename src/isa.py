@@ -188,5 +188,5 @@ def read_code(fname):
     for inst in code:
         # Конвертация строки в Opcode
         if "opcode" in inst:
-         inst["opcode"] = Opcode(inst['opcode'])
+            inst["opcode"] = Opcode(inst['opcode'])
     return code

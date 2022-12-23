@@ -431,6 +431,7 @@ SectionInstrTypes = {
     ".text": ["Command"],
 }
 
+
 # Check semantics and generate code
 def check_section_instructions(ast):
     for sect in ast["sections"]:
@@ -446,14 +447,14 @@ def check_section_instructions(ast):
 def inst_to_isa(inst) -> dict:
     if inst["type"] == "Command":
         name = inst["cmd"]
-        isa_args = [arg["type"] for arg in inst["args"]] 
+        isa_args = [arg["type"] for arg in inst["args"]]
 
         cmd = ISACommands.get_command(name)
         if cmd is None:
             raise Exception(f"Command '{name}' is not present in isa")
         opcode = cmd.get_opcode(isa_args)
         if opcode is None:
-            raise Exception(f"Command '{name}' doesn't support {isa_args}.\n" 
+            raise Exception(f"Command '{name}' doesn't support {isa_args}.\n"
                             f"List of supported: {cmd.get_command_vars()}")
         return {
             "address": None,
@@ -465,6 +466,7 @@ def inst_to_isa(inst) -> dict:
             "address": None,
             "value": inst["value"]
         }
+
 
 def generate_code(ast, start_pos=0):
     check_section_instructions(ast)
@@ -479,21 +481,29 @@ def generate_code(ast, start_pos=0):
             inst_list.append(isa)
             # add labels
             if inst["type"] == "Variable":
-                labels[inst["label"]] = isa["address"]
+                inst_labels = [inst["label"]]
             else:
-                for label in inst["labels"]:
+                inst_labels = inst["labels"]
+
+            for label in inst_labels:
+                if label in labels:
+                    raise Exception(f"Label '{label}' is duplicated")
+                else:
                     labels[label] = isa["address"]
             # goto next insruction
-            start_pos += 32 # each instruction is 32 bits size
-                
+            start_pos += 32  # each instruction is 32 bits size
+
     # replace instruction addresses 
     for inst in inst_list:
         if "args" in inst:
             for idx, arg in enumerate(inst["args"]):
                 if arg in labels:
                     inst["args"][idx] = labels[arg]
-                    
-    return inst_list
+
+    return {
+        "instructions": inst_list,
+        "start_pos": labels.get("_start", 0)
+    }
 
 
 # ----------------------------------------------------------
