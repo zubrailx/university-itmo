@@ -295,10 +295,14 @@ op [addr]
  +----------------------------------------------------------------------|                         |--------------+
                                                                         +-------------------------+
 ```
-### ControlUnit
-
-``` text
-```
+* IR - Instruction Register
+* TC - Tick Counter
+* PC - Program Counter
+* IMUX - Inverse Multiplexor
+* MUX - Multiplexor
+* ACC - Accumulator
+* MEM - main memory
+* cdev(in/out) - character device
 
 ## Апробация
 
