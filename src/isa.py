@@ -176,7 +176,11 @@ init_commands(ISACommands)
 
 
 # Read and write
-def write_code(fname, code):
+def write_code(fname, instructions, start_pos):
+    code = {
+        "instructions": instructions,
+        "start_pos": start_pos
+    }
     with open(fname, "w", encoding="utf-8") as file:
         file.write(json.dumps(code, indent=2))
 
@@ -185,8 +189,9 @@ def read_code(fname):
     with open(fname, encoding="utf-8") as file:
         code = json.loads(file.read())
 
-    for inst in code:
+    for inst in code["instructions"]:
         # Конвертация строки в Opcode
         if "opcode" in inst:
             inst["opcode"] = Opcode(inst['opcode'])
-    return code
+
+    return code, code["start_pos"]

@@ -520,7 +520,7 @@ def main(args):
     lexem_list = lexer_process(source)
     ast = parse(lexem_list)
     code = generate_code(ast)
-    write_code(target, code)
+    write_code(target, code["instructions"], code["start_pos"])
 
 
 if __name__ == '__main__':
