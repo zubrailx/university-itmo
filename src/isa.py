@@ -175,6 +175,14 @@ ISACommands = CommandDict()
 init_commands(ISACommands)
 
 
+class Instruction:
+    def __init__(self, address=-1, opcode=None, args=None, value=None) -> None:
+        self.address: int = address  # address should be not None
+        self.opcode: Opcode | None = opcode
+        self.args: list = [] if args is None else args
+        self.value: int | None = value
+
+
 # Read and write
 def write_code(fname, instructions, start_pos):
     code = {
@@ -182,14 +190,15 @@ def write_code(fname, instructions, start_pos):
         "start_pos": start_pos
     }
     with open(fname, "w", encoding="utf-8") as file:
-        file.write(json.dumps(code, indent=2))
+        file.write(json.dumps(code, indent=2, sort_keys=True, default=lambda o: o.__dict__))
 
 
 def read_code(fname):
     with open(fname, encoding="utf-8") as file:
         code = json.loads(file.read())
 
-    for inst in code["instructions"]:
+    for idx, inst in enumerate(code["instructions"]):
+        code["instruction"][idx] = Instruction(inst[0], inst[1], inst[2], inst[3])
         # Конвертация строки в Opcode
         if "opcode" in inst:
             inst["opcode"] = Opcode(inst['opcode'])

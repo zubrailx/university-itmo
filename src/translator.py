@@ -5,7 +5,7 @@ import re
 import sys
 from collections import namedtuple
 
-from isa import ArgumentTypes, ISACommands, write_code
+from isa import ArgumentTypes, ISACommands, write_code, Instruction
 
 
 # Line and offset starts with 0
@@ -444,7 +444,7 @@ def check_section_instructions(ast):
                 raise Exception(f"Instruction type of {inst} in '{sect_name}' is not permitted")
 
 
-def inst_to_isa(inst) -> dict:
+def inst_to_isa_pre(inst) -> Instruction:
     if inst["type"] == "Command":
         name = inst["cmd"]
         isa_args = [arg["type"] for arg in inst["args"]]
@@ -456,28 +456,28 @@ def inst_to_isa(inst) -> dict:
         if opcode is None:
             raise Exception(f"Command '{name}' doesn't support {isa_args}.\n"
                             f"List of supported: {cmd.get_command_vars()}")
-        return {
-            "address": None,
-            "opcode": opcode,
-            "args": [arg["value"] for arg in inst["args"]]
-        }
+        return Instruction(
+            address=-1,
+            opcode=opcode,
+            args=[arg["value"] for arg in inst["args"]]
+        )
     else:  # If Variable
-        return {
-            "address": None,
-            "value": inst["value"]
-        }
+        return Instruction(
+            address=-1,
+            value=inst["value"]
+        )
 
 
 def generate_code(ast, start_pos=0):
     check_section_instructions(ast)
-    inst_list = []
+    inst_list: list[Instruction] = []
     labels = {}
     # copy all data but without sections
     for sect in ast["sections"]:
         for inst in sect["instructions"]:
             # convert to isa
-            isa = inst_to_isa(inst)
-            isa["address"] = start_pos
+            isa = inst_to_isa_pre(inst)
+            isa.address = start_pos
             inst_list.append(isa)
             # add labels
             if inst["type"] == "Variable":
@@ -489,16 +489,16 @@ def generate_code(ast, start_pos=0):
                 if label in labels:
                     raise Exception(f"Label '{label}' is duplicated")
                 else:
-                    labels[label] = isa["address"]
+                    labels[label] = isa.address
             # goto next insruction
             start_pos += 32  # each instruction is 32 bits size
 
     # replace instruction addresses 
     for inst in inst_list:
-        if "args" in inst:
-            for idx, arg in enumerate(inst["args"]):
+        if inst.args is not None:
+            for idx, arg in enumerate(inst.args):
                 if arg in labels:
-                    inst["args"][idx] = labels[arg]
+                    inst.args[idx] = labels[arg]
 
     return {
         "instructions": inst_list,
