@@ -5,14 +5,229 @@
 
 ## Язык программирования
 
-``` ebnf
+<!-- EBNF: -->
+<!-- ``` ebnf -->
+<!-- newline = <unicode code point U+000A>; -->
+<!-- ascii_char = <arbitrary ASCII character except newline>; -->
+
+<!-- letter = ascii_char; -->
+<!-- digit = "0" ... "9"; -->
+
+<!-- line_comment = ";", { ascii_char }, newline; -->
+
+<!-- int_lit = [ "+", "-" ], { digit }; -->
+<!-- char_lit = "'", ascii_char, "'"; -->
+
+<!-- program = { { newline }, line, { newline } }; -->
+
+<!-- line = [ label_decl ], [ instruction ], [ line_comment ]; -->
+
+<!-- label_decl = label ":"; -->
+<!-- label = identifier; -->
+
+<!-- identifier = letter, { letter | digit }; -->
+
+<!-- instruction = operator, [ operand ]; -->
+<!-- operator = no_arg_op | one_arg_op; -->
+
+<!-- no_arg_op = "inc" | "dec" | "itoc" | "ctoi";  -->
+<!-- one_arg_op = "add" | "sub" | "div" | "mod" | "mul" | "ld" | "st" | "cmp" | "je" | "jne" | "js" | "jmp" } "in" | "out"; -->
+
+<!-- operand = direct_operand | indirect_operand; -->
+<!-- direct_operand = label | immediate; -->
+<!-- indirent_operand = "[", direct_operand, "]"; -->
+
+<!-- immediate = int_lit | char_lit; -->
+<!-- ``` -->
+
+BNF:
+
+```ebnf
+<program> ::= <EOF> | <section_list> <EOF>
+<section_list> ::= <section> <section_list> | <section>
+<section> ::= "section" <identifier> <line_list>
+<line_list> ::= <line> <line_list> | <line>
+<line> ::= <line_not_empty> | <line_not_empty> <EOL> | <EOL>
+<line_not_empty> ::= <line_instruction> <comment> | <line_instruction> | <comment> | <section>
+<line_instruction> ::= <label_decl> <instruction> | <label_decl> | <instruction>
+<label_decl> ::= <label> ":"
+<label> ::= <identifier>
+<identifier> ::= <letter> | <letter> <letter_or_digit_list>
+<comment> ::= ";" <char_not_eol_list>
+
+<instruction> ::= <no_arg_instr> | <one_arg_instr>
+<no_arg_instr> ::= <no_arg_op>
+<one_arg_instr> ::= <one_arg_op> <operand>
+<operand> ::= <indirect_operand> | <direct_operand>
+<direct_operand> ::= <label> | <immediate>
+<indirect_operand> ::= "[" <direct_operand> "]"
+<immediate> ::= <int_lit> | <char_lit>
+
+<int_lit> ::= <digit_list> | "-" <digit_list>
+<digit_list> ::= <digit> <digit_list> | <digit>
+<char_lit> ::= "'" <letter> "'" | "'" <digit> "'"
+
+<letter_or_digit_list> ::= <letter_or_digit> | <letter_or_digit> <letter_or_digit_list>
+<letter_or_digit> ::= <letter> | <digit>
+<char_not_eol_list> ::= <letter_digit_space> | <letter_digit_space> <char_not_eol_list>
+<letter_digit_space> ::= <letter> | <space>
+<space> ::= " " | "\t"
+<letter> ::= [a-z] | [A-Z]
+<digit> ::= [0-9]
+<EOF> ::= "1A"
+<EOL> ::= "\n"
+
+<no_arg_op> ::= "inc" | "dec" | "itoc" | "ctoi" | "halt"
+<one_arg_op> ::= "add" | "sub" | "div" | "mod" | "mul" | "ld" | "st" | "cmp" | "je" | "jne" | "js" | "jmp" | "in" | "out"
 ```
+
+### Секции
+
+- `section <name>` - создать секцию с именем `<name>`. Данные внутри секций идут последовательно.
+- `.text` - секция для кода
+- `.data` - секция для данных
+
+### Метки
+- `label: immediate` - создание метки на данные
+- `label:` - создание метки (для выполнения иструкций перехода)
+- `_start:` - обязательная метка, сигнализирующая начало программы
+
+### Команды
+
+* `inc` - инкрементировать значения в аккумуляторе.
+
+| Instruction | Description  |
+|-------------|--------------|
+| `inc`       | AC := AC + 1 |
+
+* `dec` - декрементировать значение в аккумуляторе.
+
+|Instruction|Description |
+|-----------|------------|
+|`dec`      |AC := AC - 1|
+
+* `itoc` - перевести integer в код символа ASCII.
+
+|Instruction|Description        |
+|-----------|-------------------|
+|`itoc`     |AC := AC + ord('0')|
+
+* `ctoi` - перевести код символа ASCII в integer.
+
+|Instruction|Description        |
+|-----------|-------------------|
+|`itoc`     |AC := AC - ord('0')|
+
+* `add` - сложить значение в аккумуляторе с операндом.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`add m32`  |AC := AC + m32|
+|`add imm32`|AC := AC + imm32|
+
+* `sub` - вычесть значение в аккумуляторе с операндом.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`sub m32`  |AC := AC - m32|
+|`sub imm32`|AC := AC - imm32|
+
+* `div` - беззнаковое деление.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`div m32`  |AC := AC / m32|
+|`div imm32`|AC := AC / imm32|
+
+* `mod` - остаток от беззнакового деления.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`mod m32`  |AC := AC % m32|
+|`mod imm32`|AC := AC % imm32|
+
+* `mul` - беззнаковое умножение.
+
+|Instruction|Description     |
+|-----------|----------------|
+|`mul m32`  |AC := AC * m32|
+|`mul imm32`|AC := AC * imm32|
+
+* `ld` - загрузить значение в аккумулятор (флаги не выставляются).
+
+|Instruction|Description|
+|-----------|-----------|
+|`ld m32`   |AC := m32  |
+|`ld imm32` |AC := imm32|
+
+* `st` - загрузить значение в ячейку из аккумулятора.
+
+|Instruction|Description  |
+|-----------|-------------|
+|`st imm32` |\*imm32 := AC|
+
+* `cmp` - сравнить числа. Работает как `sub`, однако значение в аккумуляторе не модифицируется.
+
+| Instruction | Description |
+|-------------|-------------|
+| `cmp m32`   | AC - m32    |
+| `cmp imm32` | AC - imm32  |
+
+* `je` - переход, если равно.
+
+|Instruction|Description   |
+|-----------|--------------|
+|`je imm32` |Jump if equals|
+
+* `jne` - переход, если не равно.
+
+|Instruction|Description|
+|-----------|-----------|
+|`jne imm32`|           |
+
+* `js` - переход, если знак (отрицательное число).
+
+|Instruction|Description|
+|-----------|-----------|
+|`js imm32`|           |
+
+* `jmp` - безусловный переход.
+
+|Instruction|Description|
+|-----------|-----------|
+|`jmp imm8` |           |
+
+* `in` - считать байт с порта в младший байт аккумулятора.
+
+|Instruction|Description|
+|-----------|-----------|
+|`in imm8` | `imm8` - номер порта |
+
+* `out` - записать младший байт аккумулятора на порт.
+
+|Instruction|Description|
+|-----------|-----------|
+|`out imm8` | `imm8` - номер порта |
+
+* `halt` - остановка программы.
+
+|Instruction|Description|
+|-----------|-----------|
+|`halt`     |           |
+
+#### Примечание
+* `m32` - адрес в памяти, из которого мы берем значение. Здесь также можно использовать метки, поскольку в отличие от обычного `asm`, в данной ЛР они имеют абсолютный адрес. Синтаксически на asm:
+
+```asm
+op [label]
+```
+* op - operation
 
 ## Организация памяти
 
 Модель памяти процессора (фон-Неймана):
 
-1. Память команд и данных. Машинное слово -- 24 бит, знаковое. Линейное адресное пространство. Реализуется списком чисел.
+1. Память команд и данных. Машинное слово -- 32 бит, знаковое. Линейное адресное пространство. Реализуется списком чисел.
 ```text
      Memory (for data and instructions)
 +-----------------------------+
@@ -45,14 +260,99 @@
 
 ## Модель процессора
 
-### DataPath
+### DataPath and ControlUnit
 
-``` text
+* IR - Instruction Register
+* TC - Tick Counter
+* PC - Program Counter
+* IMUX - Inverse Multiplexor
+* MUX - Multiplexor
+* AC - Accumulator
+* MEM - main memory
+* cdev(in/out) - character device
+* FLAGS - (N - negative, Z - zero)
+
+
+#### Без latch, wr, oe
+``` text                                                        
+                                                                    +------------+    
+                                                                    |            |    
+                                                                   (+1)          v
+         +-------+                                                  |       +--------+ pc_set            
+   cdev->|       |                                                  |       |   PC   |<------------------+ 
+         |  MUX  |                                  +---------------+--+----|        |                   | 
+   cdev->|       |---------------+                  |                  |    +--------+                   | 
+         +-------+   +---------+ |                  |                  +-----------+                     | 
+             ^       |         | |                  | addr +-------------+         |                     | 
+             |       |         | v             +----+----->|             |         |                     |  
++------------+       |     +--------+          |   data_in |             |         |                     | 
+|                    |  +->|   AC   |----------|---------->|             |         |                     | 
+|        +--------+  |  |  +--------+          |           |     MEM     |         |                     | 
+|  cdev<-|        |  |  |         |            |           |             |         |                     | 
+|        |  IMUX  |<-+  |         |   +------------+       |             |         |                     | 
+|  cdev<-|        |     |         |   |     DR     |<--+   |             |       ==(0)                   | 
+|        +--------+     |         |   +------------+   |   |             |         |                     | 
+|            ^          |         |    |  ^            |   |             |         |                     | 
++--------+   |          |         |    |  |dr_set      |   +-------------+         v                     | 
+         |   |          |         |    |  +-----+      |    data_out |           +--------+              | 
+  io_wr +-----+         |         v    v        |      +-------------+           |   TC   |              | 
+    +-->| MUX |         |      +-------------+  |                    |           |        |<----+        | 
+    |   +-----+         |      |             |  |                    v           +--------+     |        | 
+    |      ^            |      | ALU + FLAGS |  |               +---------+         |           |        | 
+    |      | port_sel   |      |             |  |               |   IR    |         +----(+1)---+        | 
+    |      |            |      +-------------+  |               +---------+         |                    |
+    |      |            |           |  |        |                    |              |                    |
+    |      |            +-----------|--+        |                    |              |                    |
+    |      |                        |           |                    |              |                    |
+    |      |                        |           |                    |              |                    |
+    |      |                        | flags     |                    |              |             +------+
+    |      |                        v           |                    v              v             |
+ +------------------------------------------------------------------------------------------------------+
+ |                                                                                                      |
+ |                                           Instruction Decoder                                        |
+ |                                                                                                      |
+ +------------------------------------------------------------------------------------------------------+
 ```
 
-### ControlUnit
-
-``` text
+#### С latch, wr, oe
+``` text                                                        
+                                                                    +------------+    
+                                                                    |            |    
+                                                                   (+1)          v
+         +-------+                                                  |       +--------+ pc_set            
+   cdev->|       |                                                  |       |   PC   |<------------------+ 
+         |  MUX  |                                  +---------------+--+----|        |<----------------+ | 
+   cdev->|       |---------------+                  |                  |    +--------+ pc_latch        | | 
+         +-------+   +---------+ |                  |                  +-----------+                   | | 
+             ^       |         | |                  | addr +-------------+         |                   | | 
+             |       |         | v             +----+----->|             |         |                   | |  
++------------+       |     +--------+          |   data_in |             |         |                   | | 
+|                    |  +->|   AC   |----------|---------->|             |         |                   | | 
+|        +--------+  |  |  +--------+          |           |     MEM     | oe      |                   | | 
+|  cdev<-|        |  |  |   ^     |            |           |             |<---+    |                   | | 
+|        |  IMUX  |<-+  |   |     |   +------------+       |             | wr |    |                   | | 
+|  cdev<-|        |     |   |     |   |     DR     |<--+   |             |<-+ |  ==(0)                 | | 
+|        +--------+     |   |     |   +------------+   |   |             |  | |    |                   | | 
+|            ^          |   |     |    |  ^        ^   |   |             |  | |    |                   | | 
++--------+   |          |   |     |    |  |dr_set  |   |   +-------------+  | |    v                   | | 
+         |   |          |   |     |    |  +-----+  |   |    data_out |      | |  +--------+ tc_latch   | | 
+  io_wr +-----+         |   |     v    v        |  |   +-------------+      | |  |   TC   |<------+    | | 
+    +-->| MUX |         |   |  +-------------+  |  |                 |      | |  |        |<----+ |    | | 
+    |   +-----+         |   |  |             |  |  |                 v      | |  +--------+     | |    | | 
+    |      ^            |   |  | ALU + FLAGS |  |  |            +---------+ | |     |           | |    | | 
+    |      | port_sel   |   |  |             |  |  |            |   IR    | | |     +----(+1)---+ |    | | 
+    |      |            |   |  +-------------+  |  |            +---------+ | |     |             |    | |
+    |      |            |   |       |  |        |  |                 |      | |     |             |    | |
+    |      |            +---|-------|--+        |  | dr_latch        |      | |     |             |    | |
+    |      |                |       |           |  |                 |      | |     |       +-----+    | |
+    |      |                |       |           |  |                 |      | |     |       |  +-------+ |
+    |      |       ac_latch |       | flags     |  |                 |      | |     |       |  |  +------+
+    |      |                |       v           |  |                 v      | |     v       |  |  |
+ +------------------------------------------------------------------------------------------------------+
+ |                                                                                                      |
+ |                                           Instruction Decoder                                        |
+ |                                                                                                      |
+ +------------------------------------------------------------------------------------------------------+
 ```
 
 ## Апробация
@@ -66,37 +366,26 @@
 CI (Github):
 
 ``` yaml
-name: CI
+# ./github/workflows/ci.yml
+docker-test:
+  name: Run tests & display coverage on Docker
+  runs-on: ubuntu-latest
+  container: zubrailx/ca-lab3:first
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: '1'
 
-on:
-  push:
-    branches:
-      - 'main'
+    - name: Test
+      run: |
+        ./test-run.sh
 
-jobs:
-  test:
-    name: Run tests & display coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: '1'
 
-      - name: Setup python
-        uses: actions/setup-python@master
-        with:
-          python-version: '3.10'
-
-      - name: Pip install
-        run: |
-          pip install -r requirements.txt
-
-      - name: Test
-        run: |
-          coverage run -m pytest --verbose
-          find . -type f -name "*.py" | xargs -t python3 -m coverage report
-          find . -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
-          find . -type f -name "*.py" | xargs -t python3 -m pylint
+# ./test-run.sh
+coverage run -m pytest --verbose
+find src test -type f -name "*.py" | xargs -t python3 -m coverage report
+find src test -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
+find src test -type f -name "*.py" | xargs -t python3 -m pylint
 ```
 
 где:
@@ -110,94 +399,24 @@ jobs:
 Пример использования и журнал работы процессора на примере `cat`:
 
 ``` console
-> cd src/brainfuck
-> cat examples/foo_input.txt
-foo
-> cat examples/cat.bf 
-,[.,]
-> ./translator.py examples/cat.bf target.out
-source LoC: 1 code instr: 6
-> cat target.out 
-[
-    {
-        "opcode": "input",
-        "term": [
-            1,
-            1,
-            ","
-        ]
-    },
-    {
-        "opcode": "jz",
-        "arg": 5,
-        "term": [
-            1,
-            2,
-            "["
-        ]
-    },
-    {
-        "opcode": "print",
-        "term": [
-            1,
-            3,
-            "."
-        ]
-    },
-    {
-        "opcode": "input",
-        "term": [
-            1,
-            4,
-            ","
-        ]
-    },
-    {
-        "opcode": "jmp",
-        "arg": 1,
-        "term": [
-            1,
-            5,
-            "]"
-        ]
-    },
-    {
-        "opcode": "halt"
-    }
-]
-> ./machine.py target.out examples/foo_input.txt
-DEBUG:root:{TICK: 0, PC: 0, ADDR: 0, OUT: 0, ACC: 0} input  (',' @ 1:1)
-DEBUG:root:input: 'f'
-DEBUG:root:{TICK: 2, PC: 1, ADDR: 0, OUT: 102, ACC: 0} jz 5 ('[' @ 1:2)
-DEBUG:root:{TICK: 4, PC: 2, ADDR: 0, OUT: 102, ACC: 102} print  ('.' @ 1:3)
-DEBUG:root:output: '' << 'f'
-DEBUG:root:{TICK: 6, PC: 3, ADDR: 0, OUT: 102, ACC: 102} input  (',' @ 1:4)
-DEBUG:root:input: 'o'
-DEBUG:root:{TICK: 8, PC: 4, ADDR: 0, OUT: 111, ACC: 102} jmp 1 (']' @ 1:5)
-DEBUG:root:{TICK: 9, PC: 1, ADDR: 0, OUT: 111, ACC: 102} jz 5 ('[' @ 1:2)
-DEBUG:root:{TICK: 11, PC: 2, ADDR: 0, OUT: 111, ACC: 111} print  ('.' @ 1:3)
-DEBUG:root:output: 'f' << 'o'
-DEBUG:root:{TICK: 13, PC: 3, ADDR: 0, OUT: 111, ACC: 111} input  (',' @ 1:4)
-DEBUG:root:input: 'o'
-DEBUG:root:{TICK: 15, PC: 4, ADDR: 0, OUT: 111, ACC: 111} jmp 1 (']' @ 1:5)
-DEBUG:root:{TICK: 16, PC: 1, ADDR: 0, OUT: 111, ACC: 111} jz 5 ('[' @ 1:2)
-DEBUG:root:{TICK: 18, PC: 2, ADDR: 0, OUT: 111, ACC: 111} print  ('.' @ 1:3)
-DEBUG:root:output: 'fo' << 'o'
-DEBUG:root:{TICK: 20, PC: 3, ADDR: 0, OUT: 111, ACC: 111} input  (',' @ 1:4)
-DEBUG:root:input: '\n'
-DEBUG:root:{TICK: 22, PC: 4, ADDR: 0, OUT: 10, ACC: 111} jmp 1 (']' @ 1:5)
-DEBUG:root:{TICK: 23, PC: 1, ADDR: 0, OUT: 10, ACC: 111} jz 5 ('[' @ 1:2)
-DEBUG:root:{TICK: 25, PC: 2, ADDR: 0, OUT: 10, ACC: 10} print  ('.' @ 1:3)
-DEBUG:root:output: 'foo' << '\n'
-DEBUG:root:{TICK: 27, PC: 3, ADDR: 0, OUT: 10, ACC: 10} input  (',' @ 1:4)
-WARNING:root:Input buffer is empty!
-INFO:root:output_buffer: 'foo\n'
-foo
-
-instr_counter:  15 ticks: 28
 ```
 
 | ФИО           | алг.  | LoC       | code байт | code инстр. | инстр. | такт. | вариант |
 |---------------|-------|-----------|-----------|-------------|--------|-------|---------|
 | Преподавателя | hello | ...       | -         | ...         | ...    | ...   | ...     |
-| Преподавателя | cat   | 1         | -         | 6           | 15     | 28    | ...     |
+
+```
+add imm:
+
+1) mem[pc] -> ir, pc = pc + 1, tc = 0
+2) (ir, tick) -> decoder -> dr, tick += 1
+3)  alu(acc, dr) -> acc, tick += 1
+
+add m:
+
+1) mem[pc] -> ir, pc = pc + 1, tc = 0
+2) (ir, tick) -> decoder -> dr, tick += 1
+3) mem[dr] -> dr, tick += 1
+3)  alu(acc, dr) -> acc, tick += 1
+
+```
