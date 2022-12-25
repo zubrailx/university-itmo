@@ -1,6 +1,8 @@
 import json
 from enum import Enum
 
+WORD_WIDTH = 32
+
 
 class ArgumentTypes(str, Enum):
     Direct = "DirectArgument",
@@ -37,6 +39,9 @@ class Opcode(str, Enum):
     IN_IMM = "in_imm"
     OUT_IMM = "out_imm"
     HALT = "halt"
+    
+    def __repr__(self) -> str:
+        return super().__repr__()
 
 
 class Command:
@@ -182,6 +187,20 @@ class Instruction:
         self.args: list = [] if args is None else args
         self.value: int | None = value
 
+    def __repr__(self) -> str:
+       return self.__dict__.__repr__() 
+
+
+def _dict_to_instruction(dct: dict) -> Instruction:
+    inst: Instruction = Instruction()
+    for key, val in dct.items():
+        if val is not None:
+            if key == "opcode":
+                inst.__setattr__(key, Opcode(val))
+            else:
+                inst.__setattr__(key, val)
+    return inst
+
 
 # Read and write
 def write_code(fname, instructions, start_pos):
@@ -197,10 +216,7 @@ def read_code(fname):
     with open(fname, encoding="utf-8") as file:
         code = json.loads(file.read())
 
-    for idx, inst in enumerate(code["instructions"]):
-        code["instruction"][idx] = Instruction(inst[0], inst[1], inst[2], inst[3])
-        # Конвертация строки в Opcode
-        if "opcode" in inst:
-            inst["opcode"] = Opcode(inst['opcode'])
+    for idx, dct in enumerate(code["instructions"]):
+        code["instructions"][idx] = _dict_to_instruction(dct)
 
     return code["instructions"], code["start_pos"]

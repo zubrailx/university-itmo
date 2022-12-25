@@ -5,7 +5,7 @@ import re
 import sys
 from collections import namedtuple
 
-from isa import ArgumentTypes, ISACommands, write_code, Instruction
+from isa import ArgumentTypes, ISACommands, write_code, Instruction, WORD_WIDTH
 
 
 # Line and offset starts with 0
@@ -491,7 +491,7 @@ def generate_code(ast, start_pos=0):
                 else:
                     labels[label] = isa.address
             # goto next insruction
-            start_pos += 32  # each instruction is 32 bits size
+            start_pos += WORD_WIDTH
 
     # replace instruction addresses 
     for inst in inst_list:

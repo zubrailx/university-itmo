@@ -1,15 +1,63 @@
 #!/usr/bin/python3
 
-from isa import Opcode, read_code, Instruction
+from isa import Opcode, read_code, Instruction, WORD_WIDTH
 
 import logging
 import sys
 from enum import Enum
 
-WORD_SIZE_BITS = 32
-WORD_MAX_VALUE = 2 ** (WORD_SIZE_BITS - 1) - 1
-WORD_MIN_VALUE = 2 ** (WORD_SIZE_BITS - 1) * (-1)
-TICK_LIMIT = 5000
+from typing import TypeVar, Generic
+
+T = TypeVar('T')
+
+WORD_MAX_VALUE = 2 ** (WORD_WIDTH - 1) - 1
+WORD_MIN_VALUE = 2 ** (WORD_WIDTH - 1) * (-1)
+TICK_LIMIT = 100
+ITOC_CONST = ord('0')
+
+
+# Utility
+# Wrapper to pass to methods values by reference
+class Wrapper(Generic[T]):
+    def __init__(self, val: T) -> None:
+        self.val: T = val
+
+    def get(self) -> T:
+        return self.val
+
+    def set(self, val: T) -> None:
+        self.val = val
+
+    def __eq__(self, o) -> bool:
+        if type(self) == type(o):
+            return self.val == o.val
+        elif type(self.val) == type(o):
+            return self.val == o
+        else:
+            assert 0, f"Equal operator doesn't support operands '{type(self)}' '{type(o)}'"
+            return False
+
+    def __repr__(self) -> str:
+        return self.val.__repr__()
+
+
+# Trigger to pass value on if state_prev == High and state_cur == Low
+class Latch(Generic[T]):
+    # target - wrapper, because can't pass value by pointer
+    def __init__(self, target: Wrapper[T]):
+        self.latched: T | None = None
+        self.was_high: bool = False
+        self.target: Wrapper[T] = target
+
+    # if False then pass value to latch else 
+    def latch(self, is_high: bool, value: T | None = None):
+        if self.was_high and not is_high:
+            assert self.latched is not None
+            self.target.set(self.latched)
+        else:
+            self.latched = value
+        # store last state
+        self.was_high = is_high
 
 
 class Alu:
@@ -17,7 +65,10 @@ class Alu:
         ADD = 0,
         SUB = 1,
         MUL = 2,
-        DIV = 3
+        DIV = 3,
+        MOD = 4,
+        RIGHT = 5,
+        LEFT = 6
 
     class Flags(int, Enum):
         # idx of bit
@@ -30,14 +81,17 @@ class Alu:
             self.Operations.ADD: lambda l, r: l + r,
             self.Operations.SUB: lambda l, r: l - r,
             self.Operations.MUL: lambda l, r: l * r,
-            self.Operations.DIV: lambda l, r: l / r,
+            self.Operations.DIV: lambda l, r: l // r,
+            self.Operations.MOD: lambda l, r: l % r,
+            self.Operations.RIGHT: lambda _, r: r,
+            self.Operations.LEFT: lambda l, _: l
         }
 
     def get_bit(self, flag):
         return self.flags >> flag.value
 
     def _set_bit(self, x: int, flag):
-        n = flag.value
+        n: int = flag.value
         self.flags = self.flags & ~(1 << n) | (x << n)
 
     def _post_set_flags(self, res: int):
@@ -53,7 +107,7 @@ class Alu:
         else:
             return res
 
-    def perform(self, op: Operations, left: int, right: int):
+    def perform(self, op: Operations, left: int, right: int) -> int:
         assert op in self.operations, \
             f"Operation {op} is not present in alu operations."
 
@@ -63,25 +117,27 @@ class Alu:
         return res
 
 
-class DataPath(Enum):
+class DataPath:
     # ports - buses connected to ports where on device side:
     #   ports[i]["in"] - input stack, ports[i]["out"] - output stack
     def __init__(self, memory: list, ports: list[dict]) -> None:
         assert len(memory), "Should be at least one instruction"
         self.memory: list[Instruction] = memory
 
-        self.ports_in: list[int] = [p["in"] for p in ports]
-        self.ports_out: list[int] = [p["out"] for p in ports]
-        self.accumulator: int = 0
-        self.data_reg: int = 0
+        self.ports_in: list[list[int]] = [p["in"] for p in ports]
+        self.ports_out: list[list[int]] = [p["out"] for p in ports]
+
         self.alu: Alu = Alu()
+        # registers
+        self.ac: Wrapper[int] = Wrapper[int](-1)  # accumulator
+        self.dr: Wrapper[int] = Wrapper[int](-1)  # data register
 
     def _get_mem_cell(self, addr: int):
         lb = 0
         rb = len(self.memory) - 1
-        while lb < rb:
-            m = (lb + rb) / 2
-            cell = self.memory[addr]
+        while lb <= rb:
+            m = (lb + rb) // 2
+            cell = self.memory[m]
             if cell.address < addr:
                 lb = m + 1
             elif cell.address > addr:
@@ -105,33 +161,56 @@ class DataPath(Enum):
         # never will get here if everything is ok
         return Instruction()
 
+    def alu_perform(self, op: Alu.Operations, left: int, right: int) -> int:
+        return self.alu.perform(op, left, right)
+
+    def port_perform(self, port: int, io_wr: bool):
+        if io_wr:
+            pout = self.ac.get()
+            logging.debug(f"port[{port}].out << {pout}")
+            self.ports_out[port].append(pout)
+        else:
+            if len(self.ports_in[port]) == 0:
+                raise Exception(f"DataPath: Ports[{port}] queue is empty")
+
+            pin = self.ports_in[port].pop(0)
+            logging.debug(f"port[{port}].in >> {pin}")
+            self.ac.set(pin)
+
+    def __repr__(self) -> str:
+        return "AC: {}, DR: {}".format(
+            self.ac,
+            self.dr
+        )
+
 
 class ControlUnit:
-    class Status:
+    class Status(Enum):
         RUNNABLE = 0,
         HALTED = 1,
         TERMINATED = 2
 
-    class Stage:
+    class Stage(Enum):
         FETCH = 0,
         DECODE = 1,
         EXECUTE = 2
 
-    def __init__(self, data_path: DataPath, start_pos: int, tick_limit: int = TICK_LIMIT) -> None:
-        self.data_path = data_path
-        self.program_counter: int = start_pos
-        self.tick_counter: int = 0  # for instruction
+    def __init__(self, data_path: DataPath, start_pos: int) -> None:
+        self.data_path: DataPath = data_path
+        # registers
+        self.program_counter: Wrapper[int] = Wrapper[int](start_pos)
+        self.tick_counter: Wrapper[int] = Wrapper[int](-1)  # for instruction
         self.instr_reg: Instruction = Instruction()  # struct format
-        self.stage = ControlUnit.Stage.FETCH
+
+        self.stage: ControlUnit.Stage = ControlUnit.Stage.FETCH
 
         self._status = ControlUnit.Status.RUNNABLE
         self._tick: int = 0
-        self._tick_limit: int = tick_limit
-        # stored value on d triggers in latch
-        self._pc_latch: int = -1
-        self._tc_latch: int = -1
-        self._ac_latch: int = -1
-        self._dr_latch: int = -1
+        # to emulate latch
+        self.pc_latch: Latch[int] = Latch[int](self.program_counter)
+        self.tc_latch: Latch[int] = Latch[int](self.tick_counter)
+        self.ac_latch: Latch[int] = Latch[int](self.data_path.ac)
+        self.dr_latch: Latch[int] = Latch[int](self.data_path.dr)
 
     def get_tick(self):
         return self._tick
@@ -139,78 +218,138 @@ class ControlUnit:
     def get_status(self):
         return self._status
 
-    # Latch registers
-    # is_high - level of signal: False -> 0, True -> 1
-    def latch_pc(self, is_high: bool, value=0):
-        if is_high:
-            self._pc_latch = value
-        else:
-            self.program_counter = self._pc_latch
-
-    def latch_tc(self, is_high: bool, value=0):
-        if is_high:
-            self._tc_latch = value
-        else:
-            self.tick_counter = self._tc_latch
-
-    def latch_ac(self, is_high: bool, value):
-        if is_high:
-            self._ac_latch = value
-        else:
-            self.data_path.accumulator = self._ac_latch
-
-    def latch_dr(self, is_high: bool, value):
-        if is_high:
-            self._dr_latch = value
-        else:
-            self.data_path.data_reg = self._dr_latch
-
     # Instruction Cycle
     def fetch(self):
-        cmd = self.data_path.memory_perform(self.program_counter, oe=True)
+        cmd = self.data_path.memory_perform(self.program_counter.get(), oe=True)
         self.instr_reg = cmd
-        self.tick_counter = 0
-        self.latch_pc(True, self.program_counter + 1)
+        self.tick_counter.set(0)
+        self.pc_latch.latch(True, self.program_counter.get() + WORD_WIDTH)
 
-    # return value helps program to identify continue to decode or no
+    # cycle ended or not
     def decode(self) -> bool:
-        self.latch_pc(False)
+        self.pc_latch.latch(False)
+        self.tc_latch.latch(False)
 
         cmd: Instruction = self.instr_reg
         op = cmd.opcode
 
-        if self.tick_counter == 0:
-            self.latch_tc(True, self.tick_counter + 1)
+        if self.tick_counter.get() == 0:
+            self.tc_latch.latch(True, self.tick_counter.get() + 1)
+            # commands with at least one argument
+            if op not in [Opcode.INC, Opcode.DEC, Opcode.CTOI, Opcode.ITOC, Opcode.HALT]:
+                self.data_path.dr.set(cmd.args[0])
             # indirect commands
             if op in [Opcode.ADD_M, Opcode.SUB_M, Opcode.MOD_M, Opcode.MUL_M,
                       Opcode.LD_M, Opcode.CMP_M]:
-                self.data_path.data_reg = cmd.args[0]
-                return True
-            else:
                 return False
-        elif self._tc_latch == 1:
-            self.latch_tc(False)
-            assert self.tick_counter == 1
-            self.latch_tc(True, self.tick_counter + 1)
+            else:
+                return True
+        elif self.tick_counter.get() == 1:
+            self.tc_latch.latch(True, self.tick_counter.get() + 1)
             # load indirect argument
-            data = self.data_path.memory_perform(self.program_counter, oe=True).value
-            self.latch_dr(True, data)
-            return False
+            data = self.data_path.memory_perform(self.data_path.dr.get(), oe=True).value
+            self.dr_latch.latch(True, data)
+            return True
         # else
         assert 0, "Decoder should last max 2 ticks"
-        return False
+        return True
 
+    # cycle ended or not
     def execute(self) -> bool:
-        self.latch_tc(False)
-        pass
+        self.tc_latch.latch(False)
+        self.dr_latch.latch(False)
+        cmd: Instruction = self.instr_reg
+        op = cmd.opcode
+
+        if op == Opcode.HALT:
+            self._status = ControlUnit.Status.HALTED
+            return True
+
+        # Accumulator modification commands
+        if op in [Opcode.INC, Opcode.DEC, Opcode.ITOC, Opcode.CTOI]:
+            ac_old: int = self.data_path.ac.get()
+            ac_new: int = -1
+            match op:
+                case Opcode.INC:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.ADD, ac_old, 1)
+                case Opcode.DEC:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.SUB, ac_old, 1)
+                case Opcode.ITOC:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.ADD, ac_old, ITOC_CONST)
+                case Opcode.CTOI:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.SUB, ac_old, ITOC_CONST)
+            self.ac_latch.latch(True, ac_new)
+            return True
+
+        # Accumulator + data_reg modification commands
+        if op in [Opcode.ADD_M, Opcode.ADD_IMM, Opcode.SUB_M, Opcode.SUB_IMM, Opcode.DIV_M,
+                  Opcode.DIV_IMM, Opcode.MOD_M, Opcode.MOD_IMM, Opcode.MUL_M, Opcode.MUL_IMM,
+                  Opcode.CMP_IMM, Opcode.CMP_M]:
+            ac_old: int = self.data_path.ac.get()
+            ac_new: int = -1
+            dr_val = self.data_path.dr.get()
+
+            if op in [Opcode.CMP_M, Opcode.CMP_IMM]:
+                self.data_path.alu_perform(Alu.Operations.SUB, ac_old, dr_val)
+                return True
+
+            match op:
+                case Opcode.ADD_M | Opcode.ADD_IMM:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.ADD, ac_old, dr_val)
+                case Opcode.SUB_M | Opcode.SUB_IMM:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.SUB, ac_old, dr_val)
+                case Opcode.MUL_M | Opcode.MUL_IMM:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.MUL, ac_old, dr_val)
+                case Opcode.DIV_M | Opcode.DIV_IMM:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.DIV, ac_old, dr_val)
+                case Opcode.MOD_M | Opcode.MOD_IMM:
+                    ac_new = self.data_path.alu_perform(Alu.Operations.MOD, ac_old, dr_val)
+            self.ac_latch.latch(True, ac_new)
+            return True
+
+        # Load value in accumulator from mem
+        if op in [Opcode.LD_M, Opcode.LD_IMM]:
+            dr_val = self.data_path.dr.get()
+            self.data_path.ac.set(self.data_path.alu_perform(Alu.Operations.RIGHT, 0, dr_val))
+            return True
+
+        # Store value from accumulator in mem
+        if op in [Opcode.ST_IMM]:
+            dr_val = self.data_path.dr.get()
+            ac_val = self.data_path.ac.get()
+            self.data_path.memory_perform(dr_val, ac_val, wr=True)
+            return True
+
+        # Jumps
+        if op in [Opcode.JE, Opcode.JNE, Opcode.JS, Opcode.JMP]:
+            do_jump: bool = True
+            match op:
+                case Opcode.JE:
+                    do_jump = self.data_path.alu.get_bit(Alu.Flags.ZERO) == 1
+                case Opcode.JNE:
+                    do_jump = self.data_path.alu.get_bit(Alu.Flags.ZERO) == 0
+                case Opcode.JS:
+                    do_jump = self.data_path.alu.get_bit(Alu.Flags.NEG) == 1
+            if do_jump:
+                self.program_counter.set(self.data_path.dr.get())
+            return True
+
+        # Port mapped IO
+        if op in [Opcode.IN_IMM, Opcode.OUT_IMM]:
+            port = self.data_path.dr.get()
+            self.data_path.port_perform(port, op == Opcode.OUT_IMM)
+            return True
+
+        raise Exception(f"Reached unknown Opcode '{op}' while executing")
 
     def next_tick(self):
+        # fetch
         if self.stage == ControlUnit.Stage.FETCH:
             self.fetch()
             self.stage = ControlUnit.Stage.DECODE
         # decode
         elif self.stage == ControlUnit.Stage.DECODE:
-            ended = self.execute()
+            ended = self.decode()
             if ended:
                 self.stage = ControlUnit.Stage.EXECUTE
         # execute
@@ -232,15 +371,25 @@ class ControlUnit:
             self.next_tick()
 
     def __repr__(self) -> str:
-        return "SOSTOYANIYA NET, MNE VPADLU"
+        return "TICK: {}, PC: {}, TC: {}, DP: {{ {} }}, IR: {}, STAGE: {}, STAT: {}".format(
+            self._tick,
+            self.program_counter,
+            self.tick_counter,
+            self.data_path,
+            self.instr_reg,
+            self.stage,
+            self._status,
+        )
 
 
-def simulation(memory, start_pos, ports, tick_limit, by_tick: bool = True):
+def simulation(memory, start_pos, ports: list[dict], tick_limit=TICK_LIMIT, by_tick: bool = True):
     data_path = DataPath(memory, ports)
-    control_unit = ControlUnit(data_path, start_pos, tick_limit)
+    control_unit = ControlUnit(data_path, start_pos)
+    # initial status
+    logging.debug('%s', control_unit)
 
     status = control_unit.get_status()
-    while status == ControlUnit.Status.RUNNABLE:
+    while status == ControlUnit.Status.RUNNABLE and control_unit.get_tick() < tick_limit:
         # select execute by tick or by instruction
         if by_tick:
             control_unit.next_tick()
@@ -258,9 +407,14 @@ def main(args):
     assert len(args) == 2, "Wrong arguments: machine.py <code_file> <input_file>"
     code_file, input_file = args
 
-    input_token = []
+    ports = [
+        {
+            "in": [1, 2, 3, 4],
+            "out": []
+        }
+    ]
     memory, start_pos = read_code(code_file)
-    print(memory, start_pos)
+    simulation(memory, start_pos, ports)
 
 
 if __name__ == '__main__':
