@@ -30,7 +30,7 @@ jobs:
   docker-test:
     name: Run tests & display coverage on Docker
     runs-on: ubuntu-latest
-    container: zubrailx/ca-lab3:first
+    container: zubrailx/ca-lab3:rlatest
     steps:
       - uses: actions/checkout@v3
         with:

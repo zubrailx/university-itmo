@@ -1,0 +1,33 @@
+{
+  "instructions": [
+    {
+      "address": 0,
+      "args": [
+        0
+      ],
+      "opcode": "ld_imm"
+    },
+    {
+      "address": 32,
+      "args": [
+        0
+      ],
+      "opcode": "in_imm"
+    },
+    {
+      "address": 64,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm"
+    },
+    {
+      "address": 96,
+      "args": [
+        32
+      ],
+      "opcode": "jmp"
+    }
+  ],
+  "start_pos": 0
+}
