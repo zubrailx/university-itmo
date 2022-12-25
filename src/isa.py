@@ -39,7 +39,7 @@ class Opcode(str, Enum):
     IN_IMM = "in_imm"
     OUT_IMM = "out_imm"
     HALT = "halt"
-    
+
     def __repr__(self) -> str:
         return super().__repr__()
 
@@ -188,7 +188,7 @@ class Instruction:
         self.value: int | None = value
 
     def __repr__(self) -> str:
-       return self.__dict__.__repr__() 
+        return self.__dict__.__repr__()
 
 
 def _dict_to_instruction(dct: dict) -> Instruction:
@@ -203,7 +203,7 @@ def _dict_to_instruction(dct: dict) -> Instruction:
 
 
 # Read and write
-def write_code(fname, instructions, start_pos):
+def write_code(fname: str, instructions: list, start_pos: int):
     code = {
         "instructions": instructions,
         "start_pos": start_pos
@@ -212,7 +212,7 @@ def write_code(fname, instructions, start_pos):
         file.write(json.dumps(code, indent=2, sort_keys=True, default=lambda o: o.__dict__))
 
 
-def read_code(fname):
+def read_code(fname: str):
     with open(fname, encoding="utf-8") as file:
         code = json.loads(file.read())
 
@@ -220,3 +220,14 @@ def read_code(fname):
         code["instructions"][idx] = _dict_to_instruction(dct)
 
     return code["instructions"], code["start_pos"]
+
+
+def read_input(fname: str) -> dict[str, dict[str, list[int]]]:
+    with open(fname, encoding="utf-8") as file:
+        ports = json.loads(file.read())
+    return ports
+
+
+def write_output(fname: str, ports: dict[str, dict[str, list[int]]]):
+    with open(fname, "w", encoding="utf-8") as file:
+        file.write(json.dumps(ports, indent=2, sort_keys=True))

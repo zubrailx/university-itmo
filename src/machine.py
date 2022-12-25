@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from isa import Opcode, read_code, Instruction, WORD_WIDTH
+from isa import Opcode, read_code, Instruction, WORD_WIDTH, read_input, write_output
 
 import logging
 import sys
@@ -12,7 +12,7 @@ T = TypeVar('T')
 
 WORD_MAX_VALUE = 2 ** (WORD_WIDTH - 1) - 1
 WORD_MIN_VALUE = 2 ** (WORD_WIDTH - 1) * (-1)
-TICK_LIMIT = 100
+TICK_LIMIT = 5000
 ITOC_CONST = ord('0')
 
 
@@ -119,13 +119,18 @@ class Alu:
 
 class DataPath:
     # ports - buses connected to ports where on device side:
-    #   ports[i]["in"] - input stack, ports[i]["out"] - output stack
-    def __init__(self, memory: list, ports: list[dict]) -> None:
+    #   ports[num][0] - in, ports[num][1] - out
+    def __init__(self, memory: list, ports: dict[str, dict[str, list[int]]]) -> None:
         assert len(memory), "Should be at least one instruction"
         self.memory: list[Instruction] = memory
 
-        self.ports_in: list[list[int]] = [p["in"] for p in ports]
-        self.ports_out: list[list[int]] = [p["out"] for p in ports]
+        self.ports_in: dict[str, list[int]] = {}
+        self.ports_out: dict[str, list[int]] = {}
+        for num, port in ports.items():
+            if "in" in port:
+                self.ports_in[num] = port["in"]
+            if "out" in port:
+                self.ports_out[num] = port["out"]
 
         self.alu: Alu = Alu()
         # registers
@@ -165,16 +170,17 @@ class DataPath:
         return self.alu.perform(op, left, right)
 
     def port_perform(self, port: int, io_wr: bool):
+        # convert port from int to str
+        port = str(port)
         if io_wr:
             pout = self.ac.get()
-            logging.debug(f"port[{port}].out << {pout}")
+            logging.debug(f"ports[{port}].out << {pout}")
             self.ports_out[port].append(pout)
         else:
             if len(self.ports_in[port]) == 0:
-                raise Exception(f"DataPath: Ports[{port}] queue is empty")
-
+                raise Exception(f"DataPath: ports[{port}].in queue is empty")
             pin = self.ports_in[port].pop(0)
-            logging.debug(f"port[{port}].in >> {pin}")
+            logging.debug(f"ports[{port}].in >> {pin}")
             self.ac.set(pin)
 
     def __repr__(self) -> str:
@@ -382,7 +388,7 @@ class ControlUnit:
         )
 
 
-def simulation(memory, start_pos, ports: list[dict], tick_limit=TICK_LIMIT, by_tick: bool = True):
+def simulation(memory, start_pos, ports: dict[str, dict[str, list[int]]], tick_limit=TICK_LIMIT, by_tick: bool = True):
     data_path = DataPath(memory, ports)
     control_unit = ControlUnit(data_path, start_pos)
     # initial status
@@ -402,19 +408,16 @@ def simulation(memory, start_pos, ports: list[dict], tick_limit=TICK_LIMIT, by_t
     if status == ControlUnit.Status.TERMINATED:
         print("WARNING: machine was terminated.")
 
+    return ports
+
 
 def main(args):
-    assert len(args) == 2, "Wrong arguments: machine.py <code_file> <input_file>"
-    code_file, input_file = args
-
-    ports = [
-        {
-            "in": [1, 2, 3, 4],
-            "out": []
-        }
-    ]
+    assert len(args) == 3, "Wrong arguments: machine.py <code_file> <input_file> <output_file>"
+    code_file, input_fname, output_fname = args
+    
     memory, start_pos = read_code(code_file)
-    simulation(memory, start_pos, ports)
+    ports = read_input(input_fname)
+    write_output(output_fname, simulation(memory, start_pos, ports))
 
 
 if __name__ == '__main__':
