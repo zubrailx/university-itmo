@@ -1,0 +1,219 @@
+{
+  "instructions": [
+    {
+      "address": 0,
+      "args": [
+        104
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 32,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 64,
+      "args": [
+        101
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 96,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 128,
+      "args": [
+        108
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 160,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 192,
+      "args": [
+        108
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 224,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 256,
+      "args": [
+        111
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 288,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 320,
+      "args": [
+        32
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 352,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 384,
+      "args": [
+        119
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 416,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 448,
+      "args": [
+        111
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 480,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 512,
+      "args": [
+        114
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 544,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 576,
+      "args": [
+        108
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 608,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 640,
+      "args": [
+        100
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 672,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 704,
+      "args": [
+        46
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 736,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 768,
+      "args": [
+        92
+      ],
+      "opcode": "ld_imm",
+      "value": null
+    },
+    {
+      "address": 800,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm",
+      "value": null
+    },
+    {
+      "address": 832,
+      "args": [],
+      "opcode": "halt",
+      "value": null
+    }
+  ],
+  "start_pos": 0
+}

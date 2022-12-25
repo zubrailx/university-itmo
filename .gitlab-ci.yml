@@ -1,0 +1,12 @@
+# all jobs on deploy because markdownlint should'nt block updates.
+
+lab3:
+  stage: test
+  image:
+    name: python-tools
+    entrypoint: [""]
+  script:
+    - python3-coverage run -m pytest --verbose
+    - find . -type f -name "*.py" | xargs -t python3-coverage report
+    - find . -type f -name "*.py" | xargs -t pep8 --ignore=E501
+    - find . -type f -name "*.py" | xargs -t pylint
