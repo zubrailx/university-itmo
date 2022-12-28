@@ -514,8 +514,8 @@ Exception: Parser
         ^   ^                                                     (+1)                      +---+    |       
         |   |                                                      |       +--------+       |   |<---+       
       +-------+                                    +---------------+--+----|   PC   |<------|MUX|            
-      | IMUX  |                        dr_out o    |                  |    +--------+       |   |<---o       
-   +->+-------+                               |    |                  |                     +---+  dr_out    
+   +->| IMUX  |                        dr_out o    |                  |    +--------+       |   |<---o       
+   |  +-------+                               |    |                  |                     +---+  dr_out    
    |      ^               +--------+          |    |                  +-----------+           ^              
    |  out |          +--->|   AC   |          |    | addr +-------------+         |           |              
 +--|---->[ ]         |    +--------+          +----+-----w|             |         |           +-------+      
@@ -614,6 +614,7 @@ PC (program_counter) - счетчик инструкций.
 
 1. cat
 2. hello
+3. prob2 with user input
 
 #### Пример использования и журнал работы процессора на примере `cat`:
 
@@ -724,9 +725,9 @@ DEBUG:root:Operations count: 60
 
 Для каждого модуля по файлу с модульными тестами.
 
-1. [`test/translator.py`](./test/translator_test.py)
-2. [`test/isa.py`](./test/isa_test.py)
-3. [`test/machine_test.py`](./test/machine_test.py)
+1. [translator](./test/unit_translator_test.py)
+2. [isa](./test/unit_isa_test.py)
+3. [machine](./test/unit_machine_test.py)
 
 ## CI
 
