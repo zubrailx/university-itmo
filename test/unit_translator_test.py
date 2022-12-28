@@ -2,7 +2,7 @@
 # pylint: disable=missing-function-docstring  # чтобы не быть Капитаном Очевидностью
 # pylint: disable=line-too-long               # строки с ожидаемым выводом
 
-"""Интеграционные тесты
+"""Модульные тесты translator
 """
 
 import os

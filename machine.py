@@ -127,10 +127,8 @@ class Alu:
 
     @staticmethod
     def _fix_overflow(res: int) -> int:
-        if res > WORD_MAX_VALUE:
-            return int(res + WORD_MIN_VALUE + WORD_MAX_VALUE)
-        if res < WORD_MIN_VALUE:
-            return int(res + WORD_MAX_VALUE - WORD_MIN_VALUE)
+        if res > WORD_MAX_VALUE or res < WORD_MIN_VALUE:
+            res = (res + (WORD_MAX_VALUE + 1)) % (2 * (WORD_MAX_VALUE + 1)) - WORD_MAX_VALUE - 1
         return res
 
     def perform(self, op: Operations, left: int, right: int) -> int:
