@@ -166,7 +166,6 @@ class DataPath:
                 rb = m - 1
             else:
                 return cell
-
         raise Exception(f"DataPath: No instructions found with address '{addr}'")
 
     def memory_perform(self, addr: int, data_in: int = 0, oe: bool = False,
@@ -187,7 +186,7 @@ class DataPath:
         return self.alu.perform(op, left, right)
 
     # io_sel - number of port
-    def io_perform(self, io_sel: int, is_in: bool=False, is_out: bool=False) -> int:
+    def io_perform(self, io_sel: int, is_in: bool = False, is_out: bool = False) -> int:
         assert not is_in or not is_out, "In and Out are set to True, undefined behaviour"
         if is_in:
             if len(self.ports_in[io_sel]) == 0:
@@ -219,7 +218,6 @@ class ControlUnit:
         """Статус машины."""
         RUNNABLE = 0
         HALTED = 1
-        TERMINATED = 2
 
     class Stage(Enum):
         """Этап выполнения команды."""
@@ -255,6 +253,10 @@ class ControlUnit:
         # unlatch accumulator,and program_counter
         self.ac_latch.latch(False)
         self.pc_latch.latch(False)
+
+        # check status of model
+        if self._status != self.Status.RUNNABLE:
+            return False
 
         cmd = self.data_path.memory_perform(self.program_counter.get(), oe=True)
         assert isinstance(cmd, Instruction)
@@ -367,15 +369,24 @@ class ControlUnit:
             return True
 
         # Jumps
-        if op in [Opcode.JE, Opcode.JNE, Opcode.JS, Opcode.JMP]:
+        if op in [Opcode.JE, Opcode.JNE, Opcode.JB, Opcode.JMP, Opcode.JBE, Opcode.JG, Opcode.JGE]:
             do_jump: bool = True
+
+            f_z: int = self.data_path.alu.get_bit(Alu.Flags.ZERO)
+            f_n: int = self.data_path.alu.get_bit(Alu.Flags.NEG)
             match op:
                 case Opcode.JE:
-                    do_jump = self.data_path.alu.get_bit(Alu.Flags.ZERO) == 1
+                    do_jump = f_z == 1
                 case Opcode.JNE:
-                    do_jump = self.data_path.alu.get_bit(Alu.Flags.ZERO) == 0
-                case Opcode.JS:
-                    do_jump = self.data_path.alu.get_bit(Alu.Flags.NEG) == 1
+                    do_jump = f_z == 0
+                case Opcode.JB:
+                    do_jump = f_n == 1
+                case Opcode.JBE:
+                    do_jump = f_n == 1 or f_z == 1
+                case Opcode.JG:
+                    do_jump = f_n == 0 and f_z == 0
+                case Opcode.JGE:
+                    do_jump = f_n == 0 or f_z == 1
             if do_jump:
                 self.pc_latch.latch(True, self.data_path.dr.get())
             return True
@@ -394,8 +405,9 @@ class ControlUnit:
     def next_tick(self) -> None:
         # fetch
         if self.stage == ControlUnit.Stage.FETCH:
-            self.fetch()
-            self.stage = ControlUnit.Stage.DECODE
+            ended = self.fetch()
+            if ended:
+                self.stage = ControlUnit.Stage.DECODE
         # decode
         elif self.stage == ControlUnit.Stage.DECODE:
             ended = self.decode()
@@ -431,14 +443,17 @@ class ControlUnit:
         )
 
 
+# возвращает вывод на портах и количество исполненных инструкций
 def simulation(memory: list[Instruction], start_pos: int, ports: Ports,
-               tick_limit: int = TICK_LIMIT, by_tick: bool = True) -> Ports:
+               tick_limit: int, by_tick: bool) -> tuple[Ports, int]:
     data_path = DataPath(memory, ports)
     control_unit = ControlUnit(data_path, start_pos)
     # initial status
     logging.debug('%s', control_unit)
 
     status = control_unit.get_status()
+
+    cnt: int = 0
     while status == ControlUnit.Status.RUNNABLE and control_unit.get_tick() < tick_limit:
         # select execute by tick or by instruction
         if by_tick:
@@ -448,18 +463,32 @@ def simulation(memory: list[Instruction], start_pos: int, ports: Ports,
 
         status = control_unit.get_status()
         logging.debug('%s', control_unit)
-    if status == ControlUnit.Status.TERMINATED:
-        print("WARNING: machine was terminated.")
-    return ports
+        cnt += 1
+    return (ports, cnt)
 
 
 def main(args: list[str]) -> None:
-    assert len(args) == 3, "Wrong arguments: machine.py <code_file> <input_file> <output_file>"
-    code_file, input_fname, output_fname = args
+    assert len(args) >= 3, "Wrong arguments:" \
+        "machine.py [options] <code_file> <input_file> <output_file>"
+
+    code_file, input_fname, output_fname = args[-3], args[-2], args[-1]
+    options = [arg.strip() for arg in args[0: -3]]
+
+    params = {
+        "by_tick": True,
+        "tick_limit": TICK_LIMIT
+    }
+    # parse options
+    params["by_tick"] = "-i" not in options
+    if "-t" in options:
+        idx = options.index("-t")
+        params["tick_limit"] = int(options[idx + 1])
 
     memory, start_pos = read_code(code_file)
     ports = read_input(input_fname)
-    ports_out = simulation(memory, start_pos, ports, by_tick=False)
+    ports_out, op_cnt = simulation(memory, start_pos, ports,
+                                   tick_limit=params["tick_limit"], by_tick=bool(params["by_tick"]))
+    logging.debug("Operations count: %d", op_cnt)
     write_output(output_fname, ports_out)
 
 

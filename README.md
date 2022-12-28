@@ -53,10 +53,10 @@ BNF:
 - `.data` - секция для данных
 
 ### Метки
-- `label:` - метка (для выполнения иструкций перехода);
-- `_start:` - обязательная метка, сигнализирующая начало программы, может находиться где угодно, главное чтобы указывала на инструкцию;
-- На одни и те же инструкции (команды и данные) могут быть указаны несколько меток, однако метки не могут дублироваться и одни, и те же метки указывать на разные инструкции;
-- Область видимости глобальная;
+- `label:` - метка (для выполнения иструкций перехода).
+- `_start:` - обязательная метка, сигнализирующая начало программы, может находиться где угодно, главное чтобы указывала на инструкцию.
+- На одни и те же инструкции (команды и данные) могут быть указаны несколько меток, однако метки не могут дублироваться, и одни и те же метки указывать на разные инструкции.
+- Область видимости глобальная.
 
 ### Команды
 
@@ -151,11 +151,29 @@ BNF:
 |-----------|-----------|
 |`jne imm32`|           |
 
-* `js` - переход, если знак (отрицательное число).
+* `jb` - переход, если знак (отрицательное число).
 
 |Instruction|Description|
 |-----------|-----------|
-|`js imm32`|           |
+|`jb imm32`|           |
+
+* `jbe` - переход, если не знак.
+
+|Instruction|Description|
+|-----------|-----------|
+|`jbe imm32`|           |
+
+* `jg` - переход, если знак (отрицательное число).
+
+|Instruction|Description|
+|-----------|-----------|
+|`jg imm32`|           |
+
+* `jge` - переход, если не знак.
+
+|Instruction|Description|
+|-----------|-----------|
+|`jge imm32`|           |
 
 * `jmp` - безусловный переход.
 
@@ -182,8 +200,8 @@ BNF:
 |`halt`     |           |
 
 #### Примечание
-* `m32` - адрес в памяти, из которого мы берем значение. Здесь также можно использовать метки, поскольку в отличие от обычного `asm` в данной ЛР они имеют абсолютный адрес. Синтаксически на asm:
-* `imm32` - неизменяемое число, будь то константа или адрес метки, который может быть получен во время генерации кода.
+* `m32` - адрес в памяти, из которого мы берем значение. Здесь можно использовать метки, в отличие от обычного `asm` в данной ЛР они имеют абсолютный адрес. Синтаксически на asm:
+
 ```asm
 cmd [label] ; [label] - m32
 cmd label ; label - imm32
@@ -191,7 +209,7 @@ cmd label ; label - imm32
 cmd - команда
 ```
 
-* Реализована возможность имплементации команд с несколькими аргументами
+* `imm32` - неизменяемое число, будь то константа или адрес метки, который может быть получен во время генерации кода.
 
 ### Комментарии
 * `; здесь комментарий` - однострочный комментарий до конца строки
@@ -202,7 +220,7 @@ cmd - команда
 
 ### Массивы
 
-* Не реализованы.
+* Не реализованы, но и не требовалось.
 
 ## Организация памяти
 
@@ -212,7 +230,7 @@ cmd - команда
 
 1. Память команд и данных. Машинное слово -- 32 бит, знаковое. Линейное адресное пространство. Реализуется списком чисел и инструкций, идущих друг за другом с интервалом в 32 бита.
 
-2. Отдельного разделения на память команд и данных нет. При попытке исполнения иструкции переменной программа падает на исключении (так сказать лимитации json).
+2. Отдельного разделения на память команд и данных нет. При попытке исполнения инструкции переменной программа падает на исключении.
 
 3. Scope в языке глобальный, вся память является статической.
 
@@ -235,8 +253,8 @@ cmd - команда
 |    ...                      |
 | 0x00: var1                  | <- var_label: value1
 | 0x20: cmd1                  | <- cmd1: args
-| 0x40: cmd2                  | <- cmd2: args
-| 0x60: var2                  | <- var_label: value2
+| 0x40: cmd2                  | w- cmd2: args
+| 0x60: var2                  | w- var_label: value2
 |    ...                      |
 +-----------------------------+
 ```
@@ -250,13 +268,15 @@ cmd - команда
     * Адресуется через регистр data_register, program_counter.
     * Может быть записана из аккумулятора.
     * Может быть прочитана в регистр data_register или instruction_register.
+
+
 * Ввод-вывод - port-mapped. Осуществляется посредством взаимодействия с accumulator. Номер порта - контанта.
 * Program_counter - счетчик команд. Инкрементируется с каждой инструкцией, может быть перезаписан командой перехода.
 * Tick_counter - счетчик номера такта с начала обработки инструкции.
-* Инструкции обрабатываются последовательно друг за другом. У каждой иструкции есть этапы FETCH, DECODE, EXECUTE.
+* Инструкции обрабатываются последовательно друг за другом. У каждой иструкции есть этапы `FETCH`, `DECODE`, `EXECUTE`.
 * Прерываний нет.
 * Машина поддерживает только абсолютную адресацию.
-* Присутствуют флаги Z(zero), N(neg) для команд перехода.
+* Присутствуют флаги Z (zero), N (neg) для команд перехода.
 
 
 ### Набор инструкции
@@ -288,7 +308,10 @@ cmd - команда
 |`cmp <imm32>`|`cmp_imm`|3            |  -    |
 |`je <imm32>` |`je`     |3            |  -    |
 |`jne <imm32>`|`jne`    |3            |  -    |
-|`js <imm32>` |`js`     |3            |  -    |
+|`jb <imm32>` |`js`     |3            |  -    |
+|`jbe <imm32>`|`js`     |3            |  -    |
+|`jg <imm32>` |`js`     |3            |  -    |
+|`jge <imm32>`|`js`     |3            |  -    |
 |`jmp <imm32>`|`jmp`    |3            |  -    |
 |`in <imm32>` |`in_imm` |3            |  -    |
 |`out <imm32>`|`out_imm`|3            |  -    |
@@ -345,7 +368,7 @@ cmd - команда
 * Этапы трансляции (функция translate):
     * Токенизирование: преобразование исходного кода в последовательность лексем (`LexerNode`).
     * Парсинг: на основании токенов строится дерево AST. Парсер умеет бросать ошибки и намекать, в чем проблема, в случае невалидных исходников (`class Parser`).
-    * Проверка дерева парсер на соответствие аргументов инструкций и наличия самих инструкций в словаре `ISACommands`, типа инструкций в соответствующих секциях (так в секции `.data` нельзя определить команду), проверка границ чисел.
+    * Проверка дерева, сгенерированного парсером, на соответствие аргументов инструкций и наличия самих инструкций в словаре `ISACommands`, типа инструкций в соответствующих секциях (так в секции `.data` нельзя определить команду), проверка границ чисел.
     * Генерация машинного кода на основании дерева AST парсера.
 
 * Парсер и лексер реализуют обработку исходных кодов в соответствие с `ebnf`;
@@ -476,19 +499,12 @@ Exception: Parser
 
 ## Модель процессора
 
+Реализована в [machine](./machine.py).
+
 ### Схема DataPath and ControlUnit
 
-* IR - Instruction Register
-* TC - Tick Counter
-* PC - Program Counter
-* IMUX - Inverse Multiplexor
-* MUX - Multiplexor
-* AC - Accumulator
-* MEM - main memory
-* cdev(in/out) - character device
-* FLAGS - (N - negative, Z - zero)
-
 #### Изображение
+
 ![schema](./schema.jpg)
 
 #### Текстовое
@@ -502,9 +518,9 @@ Exception: Parser
    +->+-------+                               |    |                  |                     +---+  dr_out    
    |      ^               +--------+          |    |                  +-----------+           ^              
    |  out |          +--->|   AC   |          |    | addr +-------------+         |           |              
-+--|---->[ ]         |    +--------+          +----+----->|             |         |           +-------+      
++--|---->[ ]         |    +--------+          +----+-----w|             |         |           +-------+      
 |  |      |          |           |            |   data_in |             |       ==(0)                 |      
-|  |      +----------------------+------------|---------->|             |         | +--------+        |      
+|  |      +----------------------+------------|----------w|             |         | +--------+        |      
 |  |  cdev cdev      |           |            |           |     MEM     | oe      | |        |        |      
 |  |    |   |        |           |            |           |             |<---+    v v        |        |      
 |  |    v   v     +-----+        |     +--------+         |             | wr |  +-----+      |        |      
@@ -523,7 +539,7 @@ Exception: Parser
 |  |         |             |            |             |     |  |   IR    | | |     |       +------+   |      
 |  |io_sel   |             |            |             |     |  +---------+ | |     |       |          |      
 |  |         | ac_latch/sel|            |             |     |       |      | |     |       |  +-------+       
-|  |         |             |            v dr_latch/sel|     |       |      | |     |       |  | pc_latch/sel 
+|  |         |             |            v dr_latch/sel|     |       v      | |     v       |  | pc_latch/sel 
 +-------------------------------------------------------------------------------------------------------+
 |                                                                                                       |
 |                                  Instruction Decoder and Dispatcher                                   |
@@ -533,72 +549,211 @@ Exception: Parser
 
 ### DataPath
 
+Реализована в классе DataPath. Отдельно выделен класс Alu, являющийся арифметико-логическое устройство.
+
+MEM (memory) - основная память.
+* data_in - входные данные, которые мы хотим записать.
+* addr - адрес, с которого хотим прочитать или куда хотим записать.
+* oe - чтение.
+* wr - запись.
+
+DR (data_register) - регистр данных. Предназначен для косвенных операций. Также в него пишется прямой аргумент, чтобы не вести отдельную линию к аккумулятору.
+* dr_latch/sel - выбор линии мультиплексора, захват значения, результат в начале следующего такта.
+
+AC - аккумуляторный регистр.
+* ac_latch/sel - выбор линии мультиплексора, захват значения, результат в начале следующего такта.
+
+ALU/FLAGS - объединенная на схеме структура. 
+* ALU - арифметико-логическое устройство.
+* FLAGS - флаги. N (neg) - после выполнения операции с АЛУ результат отрицательный, Z (zero) - после выполнения 0.
+
+IO - ввод вывод.
+* cdev - порты к символьным устройствам ввода-вывода, которые принимают за раз машинное слово. На схеме отделены порты ввода и порты вывода.
+* io_sel - выбор линии, куда производится запись.
+* in - сигнализирует чтение.
+* out - сигнализирует запись.
+* Выставление in и out сразу - неопределенное поведение.
+
+Прочее:
+* IMUX - Inverse Multiplexor.
+* MUX - Multiplexor.
 
 ### ControlUnit
 
+Реализован в классе ControlUnit.
+* Hardwired.
+* Моделируется на уровне тактов.
+
+Instruction Decoder and Dispatcher - декодировщик инструкций и установщик сигналов.
+*  При выполнении очередного такта выставляет значения на линии.
+
+IR (instruction_register) - регистр инструкций, в которой хранится текущая выполняемая инструкция.
+
+TC (tick_counter) - счетчик тиков с начала выполнения инструкции.
+* tc_latch/sel - выбор линии, захват значения до начала следующего такта.
+
+PC (program_counter) - счетчик инструкций.
+* pc_latch/sel - выбор линии, захват значения до начала следующего такта.
+* dr_out - выходящее значение с регистра данных для установки в PC.
+
+#### Особенности работы модели
+
+* Для журнала состояния используется стандартный модуль logging.
+* Текущее состояние (`RUNNABLE`, `HALTED`) - отражает в каком состоянии сейчас находится машина.
+* При выполнении инструкции `halt` машина переходит в состояние `HALTED`.
+* При выполнении исключительной ситуации бросается `Exception`.
+* Управление симуляцией реализовано в функции `Simulate`.
 
 ## Апробация
 
-В качестве тестов использованы алгоритмы:
+### Интеграционное тестирование
 
-1. fdskfaj
+Реализованы в [`test/integrational_test.py`](./test/integrational_test.py).
 
-Интеграционные тесты: [integration_test]()
+Алгоритмы, на которых производится тестирование:
 
-CI (Github):
+1. cat
+2. hello
 
-``` yaml
-# ./github/workflows/ci.yml
-docker-test:
-  name: Run tests & display coverage on Docker
-  runs-on: ubuntu-latest
-  container: zubrailx/ca-lab3:first
-  steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: '1'
+#### Пример использования и журнал работы процессора на примере `cat`:
 
-    - name: Test
-      run: |
-        ./test-run.sh
+``` console
+$ cat cat.asm
+section .text
+
+_start:
+  ld 0
+
+.loop:
+  in 0 ; read from port 0
+  cmp 0
+  je end
+  out 1
+  jmp .loop
+
+end:
+  halt
+
+$ cat cat_in-foo
+{
+  "0": {
+    "in": [
+      "foo",
+      0
+    ]
+  },
+  "1": {
+    "out": []
+  }
+}
 
 
-# ./test-run.sh
-coverage run -m pytest --verbose
-find src test -type f -name "*.py" | xargs -t python3 -m coverage report
-find src test -type f -name "*.py" | xargs -t python3 -m pycodestyle --ignore=E501
-find src test -type f -name "*.py" | xargs -t python3 -m pylint
+$ ./machine.py cases/cat cases/cat_in-foo cases/cat_out
+DEBUG:root:TICK: 0, PC: 0, TC: -1, DP: { AC: -1, DR: -1, FLG: { Z: 0, N: 0 } }, IR: {'address': -1, 'opcode': None, 'args': None, 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 1, PC: 0, TC: -1, DP: { AC: -1, DR: -1, FLG: { Z: 0, N: 0 } }, IR: {'address': 0, 'opcode': ld_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 2, PC: 32, TC: 0, DP: { AC: -1, DR: -1, FLG: { Z: 0, N: 0 } }, IR: {'address': 0, 'opcode': ld_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 3, PC: 32, TC: 1, DP: { AC: -1, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 0, 'opcode': ld_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 4, PC: 32, TC: 1, DP: { AC: 0, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 5, PC: 64, TC: 0, DP: { AC: 0, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[0].in >> 102 ('f')
+DEBUG:root:TICK: 6, PC: 64, TC: 1, DP: { AC: 0, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 7, PC: 64, TC: 1, DP: { AC: 102, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 8, PC: 96, TC: 0, DP: { AC: 102, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 9, PC: 96, TC: 1, DP: { AC: 102, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 10, PC: 96, TC: 1, DP: { AC: 102, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 11, PC: 128, TC: 0, DP: { AC: 102, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 12, PC: 128, TC: 1, DP: { AC: 102, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 13, PC: 128, TC: 1, DP: { AC: 102, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 14, PC: 160, TC: 0, DP: { AC: 102, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[1].out << 102 ('f')
+DEBUG:root:TICK: 15, PC: 160, TC: 1, DP: { AC: 102, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 16, PC: 160, TC: 1, DP: { AC: 102, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 17, PC: 192, TC: 0, DP: { AC: 102, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 18, PC: 192, TC: 1, DP: { AC: 102, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 19, PC: 32, TC: 1, DP: { AC: 102, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 20, PC: 64, TC: 0, DP: { AC: 102, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[0].in >> 111 ('o')
+DEBUG:root:TICK: 21, PC: 64, TC: 1, DP: { AC: 102, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 22, PC: 64, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 23, PC: 96, TC: 0, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 24, PC: 96, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 25, PC: 96, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 26, PC: 128, TC: 0, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 27, PC: 128, TC: 1, DP: { AC: 111, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 28, PC: 128, TC: 1, DP: { AC: 111, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 29, PC: 160, TC: 0, DP: { AC: 111, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[1].out << 111 ('o')
+DEBUG:root:TICK: 30, PC: 160, TC: 1, DP: { AC: 111, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 31, PC: 160, TC: 1, DP: { AC: 111, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 32, PC: 192, TC: 0, DP: { AC: 111, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 33, PC: 192, TC: 1, DP: { AC: 111, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 34, PC: 32, TC: 1, DP: { AC: 111, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 35, PC: 64, TC: 0, DP: { AC: 111, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[0].in >> 111 ('o')
+DEBUG:root:TICK: 36, PC: 64, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 37, PC: 64, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 38, PC: 96, TC: 0, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 39, PC: 96, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 40, PC: 96, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 41, PC: 128, TC: 0, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 42, PC: 128, TC: 1, DP: { AC: 111, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 43, PC: 128, TC: 1, DP: { AC: 111, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 44, PC: 160, TC: 0, DP: { AC: 111, DR: 192, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[1].out << 111 ('o')
+DEBUG:root:TICK: 45, PC: 160, TC: 1, DP: { AC: 111, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 128, 'opcode': out_imm, 'args': [1], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 46, PC: 160, TC: 1, DP: { AC: 111, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 47, PC: 192, TC: 0, DP: { AC: 111, DR: 1, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 48, PC: 192, TC: 1, DP: { AC: 111, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 160, 'opcode': jmp, 'args': [32], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 49, PC: 32, TC: 1, DP: { AC: 111, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 50, PC: 64, TC: 0, DP: { AC: 111, DR: 32, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:ports[0].in >> 0 ('')
+DEBUG:root:TICK: 51, PC: 64, TC: 1, DP: { AC: 111, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 32, 'opcode': in_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 52, PC: 64, TC: 1, DP: { AC: 0, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 53, PC: 96, TC: 0, DP: { AC: 0, DR: 0, FLG: { Z: 0, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 54, PC: 96, TC: 1, DP: { AC: 0, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 64, 'opcode': cmp_imm, 'args': [0], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 55, PC: 96, TC: 1, DP: { AC: 0, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 56, PC: 128, TC: 0, DP: { AC: 0, DR: 0, FLG: { Z: 1, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 57, PC: 128, TC: 1, DP: { AC: 0, DR: 192, FLG: { Z: 1, N: 0 } }, IR: {'address': 96, 'opcode': je, 'args': [192], 'value': None}, STAGE: Stage.FETCH, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 58, PC: 192, TC: 1, DP: { AC: 0, DR: 192, FLG: { Z: 1, N: 0 } }, IR: {'address': 192, 'opcode': halt, 'args': [], 'value': None}, STAGE: Stage.DECODE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 59, PC: 224, TC: 0, DP: { AC: 0, DR: 192, FLG: { Z: 1, N: 0 } }, IR: {'address': 192, 'opcode': halt, 'args': [], 'value': None}, STAGE: Stage.EXECUTE, STAT: Status.RUNNABLE
+DEBUG:root:TICK: 60, PC: 224, TC: 1, DP: { AC: 0, DR: 192, FLG: { Z: 1, N: 0 } }, IR: {'address': 192, 'opcode': halt, 'args': [], 'value': None}, STAGE: Stage.FETCH, STAT: Status.HALTED
+DEBUG:root:Operations count: 60
 ```
 
-где:
+### Модульное тестирование
+
+Для каждого модуля по файлу с модульными тестами.
+
+1. [`test/translator.py`](./test/translator_test.py)
+2. [`test/isa.py`](./test/isa_test.py)
+3. [`test/machine_test.py`](./test/machine_test.py)
+
+## CI
+
+* [gitlab-ci](./.gitlab-ci.yml)
+
+* [github-ci](./.github/workflows/ci.yml)
+
+* [test-run](./test-run.sh)
+
+Используемые утилиты:
 
 - `coverage` -- формирование отчёта об уровне покрытия исходного кода.
 - `pytest` -- утилита для запуска тестов.
 - `pep8` -- утилита для проверки форматирования кода. `E501` (длина строк) отключено, но не следует этим злоупотреблять.
-- `pylint` -- утилита для проверки качества кода. Некоторые правила отключены в отдельных модулях с целью упрощения кода.
-- Docker image `python-tools` включает в себя все перечисленные утилиты. Его конфигурация: [Dockerfile](./Dockerfile).
+- `pylint`, `mypy` -- утилиты для проверки качества кода. Некоторые правила отключены в отдельных модулях с целью упрощения кода.
 
-Пример использования и журнал работы процессора на примере `cat`:
+Docker:
 
-``` console
-```
+- Gitlab `python-tools` - выделенный image. Включает в себя все перечисленные утилиты.
+- Github `ca-lab3:rlatest`. Конфигурация: [Dockerfile](./Dockerfile) 
 
-| ФИО           | алг.  | LoC       | code байт | code инстр. | инстр. | такт. | вариант |
-|---------------|-------|-----------|-----------|-------------|--------|-------|---------|
-| Преподавателя | hello | ...       | -         | ...         | ...    | ...   | ...     |
+## Табличка
 
-```
-add imm:
+| ФИО                     | алг.   | LoC       | code байт | code инстр. | инстр. | такт. | вариант |
+|--------------------------|-------|-----------|-----------|-------------|--------|-------|---------|
+| Кулаков Никита Васильевич | cat | 11        | 683       | 7           | 20     | 60   | `asm | acc | neum | hw | tick | struct | stream | port | prob2 ` |
+| Кулаков Никита Васильевич | hello | 28        | 2621       | 27           | 27     | 81   | `asm | acc | neum | hw | tick | struct | stream | port | prob2 ` |
+| Кулаков Никита Васильевич | prob2 | 58        | 5057       | 56           | 644     | 2163   | `asm | acc | neum | hw | tick | struct | stream | port | prob2 ` |
 
-1) mem[pc] -> ir, pc = pc + 1, tc = 0
-2) (ir, tick) -> decoder -> dr, tick += 1
-3)  alu(acc, dr) -> acc, tick += 1
-
-add m:
-
-1) mem[pc] -> ir, pc = pc + 1, tc = 0
-2) (ir, tick) -> decoder -> dr, tick += 1
-3) mem[dr] -> dr, tick += 1
-3)  alu(acc, dr) -> acc, tick += 1
-
-```
+* LoC считаю чистыми, то есть удаляя комментарии и ставя метки в одну строчку с командами.

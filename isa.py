@@ -47,7 +47,10 @@ class Opcode(str, Enum):
     CMP_IMM = "cmp_imm"
     JE = "je"
     JNE = "jne"
-    JS = "js"
+    JB = "jb"  # below
+    JG = "jg"  # greater
+    JBE = "jbe"  # below or equals
+    JGE = "jge"  # greater or equals
     JMP = "jmp"
     IN_IMM = "in_imm"
     OUT_IMM = "out_imm"
@@ -172,8 +175,20 @@ def init_commands(commands: CommandDict) -> None:
         (Opcode.JNE, tuple([ArgumentTypes.Direct])),
     ]))
 
-    commands.append(Command("js", [
-        (Opcode.JS, tuple([ArgumentTypes.Direct])),
+    commands.append(Command("jb", [
+        (Opcode.JB, tuple([ArgumentTypes.Direct])),
+    ]))
+
+    commands.append(Command("jbe", [
+        (Opcode.JBE, tuple([ArgumentTypes.Direct])),
+    ]))
+
+    commands.append(Command("jg", [
+        (Opcode.JG, tuple([ArgumentTypes.Direct])),
+    ]))
+
+    commands.append(Command("jge", [
+        (Opcode.JGE, tuple([ArgumentTypes.Direct])),
     ]))
 
     commands.append(Command("jmp", [
@@ -279,8 +294,8 @@ def _ports_to_int(ports: dict[int | str, dict[str, list[Any]]]) -> dict[int, dic
             rlist = []
             for e in vlist:
                 if isinstance(e, str):
-                    e = ord(e)
-                if isinstance(e, int):
+                    rlist.extend([ord(c) for c in e])
+                elif isinstance(e, int):
                     rlist.append(e)
                 else:
                     raise Exception("Unsupported type '{type(e)}' in input")

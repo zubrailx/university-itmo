@@ -1,75 +1,46 @@
 section .data
-; program variables
-cur: 2 ; current number
-nth: 0 ; nth number - 1 we need to find 
 
-input: 0
+fmax: 4000000 ; max value of fibonacci
 
-sum: 0 ; 
-sum_inv: 0 ; because we will receive result like 45 instead of 54
-dig: 1 ; cnt of inverted sum digits
-
-tmp: 0
+sum: 0 
+sum_inv: 0 ; inverted sum (for output)
+dig: 1 ; count of digits in output
 
 ftmp: 0
-fp: 2 ; previous value of fibonacci
-fpp: 1 ; previous of previous value
+fp: 2 ; previous
+fpp: 1 ; previous of previous
+cur: 2 ; current fibonacci
 
 section .text
 _start:
-.input:
-  ld 0
-  in 0 ; read fibonacci number from port 0
-  cmp '\n' ; cmp with line separator
-  je input_end
-
-  ctoi ; covert value to character
-  st [tmp]
-  ld [input]
-  mul 10
-  add [tmp]
-  st [input]
-  jmp .input
-
-
-input_end:
-  ld [input]
-  cmp 0
-; user can't input negative value
-  je out_sum_inv
-  cmp 1
-  je out_sum_inv
-
-  ; else value is at least 2
-calc:
-  inc
-  st [nth]      ; increment fth value
-  ld [cur]
-
-.loop2:
-  cmp [nth]
-  je invert_sum
-  mod 2
-  jne .not_add
-
-.add:
-  ld [sum]
-  add [fp]
+  ld [fp]
+  cmp [fmax]
+  jg print_res
+  ; initiate sum with second fib
   st [sum]
-
-.not_add:
-  ld [fp]
-  add [fpp]
+.loop:
   st [ftmp]
-  ld [fp]
-  st [fpp]
-  ld [ftmp]
+  add [fpp]
+  cmp [fmax]
+  jg invert_sum ; if new value is larger than 
+  ; recalc current fibonacci
   st [fp]
+  ld [ftmp]
+  st [fpp]
+  ; increment current
   ld [cur]
   inc
   st [cur]
-  jmp .loop2
-
+  mod 2
+  jne .add_end
+.add:
+  ld [fp]
+  add [sum]
+  st [sum]
+.add_end:
+  ld [fp] ; var need to loop
+  jmp .loop
+  
 invert_sum:
 .loop4: ; invert sum numbers
   ld [sum]
@@ -79,7 +50,7 @@ invert_sum:
 ; divide sum by 10
   ld [sum]
   div 10
-  je out_sum_inv
+  je print_res
   st [sum]
 ; multiply sum_inv by 10
   ld [sum_inv]
@@ -91,7 +62,7 @@ invert_sum:
   st [dig]
   jmp .loop4
   
-out_sum_inv: 
+print_res: 
   ld [sum_inv]
 .loop3:
   mod 10
@@ -100,14 +71,13 @@ out_sum_inv:
 ; decrease cnt of digits
   ld [dig]
   dec
-  st [dig]
   je halt
+  st [dig]
 ; load next inverted char
   ld [sum_inv]
   div 10
   st [sum_inv]
   jmp .loop3
-
 
 halt:
   halt

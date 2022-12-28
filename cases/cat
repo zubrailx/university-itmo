@@ -17,16 +17,35 @@
     {
       "address": 64,
       "args": [
+        0
+      ],
+      "opcode": "cmp_imm"
+    },
+    {
+      "address": 96,
+      "args": [
+        192
+      ],
+      "opcode": "je"
+    },
+    {
+      "address": 128,
+      "args": [
         1
       ],
       "opcode": "out_imm"
     },
     {
-      "address": 96,
+      "address": 160,
       "args": [
         32
       ],
       "opcode": "jmp"
+    },
+    {
+      "address": 192,
+      "args": [],
+      "opcode": "halt"
     }
   ],
   "start_pos": 0
