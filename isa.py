@@ -114,7 +114,7 @@ class CommandDict:
 
 
 # Init with commands
-def init_commands(commands: CommandDict) -> None:
+def _init_commands(commands: CommandDict) -> None:
     commands.append(Command("inc", [(Opcode.INC, tuple([]))]))
     commands.append(Command("dec", [(Opcode.DEC, tuple([]))]))
 
@@ -294,7 +294,7 @@ def init_commands(commands: CommandDict) -> None:
 
 # Init commands
 ISACommands = CommandDict()
-init_commands(ISACommands)
+_init_commands(ISACommands)
 
 
 class Instruction:

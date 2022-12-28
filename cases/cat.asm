@@ -1,3 +1,4 @@
+; infinite program
 section .text
 
 _start:
