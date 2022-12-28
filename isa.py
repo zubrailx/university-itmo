@@ -66,7 +66,9 @@ OpcodeCommand = tuple[Opcode, tuple[ArgumentTypes, ...]]
 class Command:
     """Команда и ее вариации с аргументами."""
 
-    def __init__(self, name: str, in_vars: Optional[list[OpcodeCommand]] = None) -> None:
+    def __init__(
+        self, name: str, in_vars: Optional[list[OpcodeCommand]] = None
+    ) -> None:
         if in_vars is None:
             in_vars = []
 
@@ -113,99 +115,181 @@ class CommandDict:
 
 # Init with commands
 def init_commands(commands: CommandDict) -> None:
-    commands.append(Command("inc", [
-        (Opcode.INC, tuple([]))
-    ]))
-    commands.append(Command("dec", [
-        (Opcode.DEC, tuple([]))
-    ]))
+    commands.append(Command("inc", [(Opcode.INC, tuple([]))]))
+    commands.append(Command("dec", [(Opcode.DEC, tuple([]))]))
 
-    commands.append(Command("itoc", [
-        (Opcode.ITOC, tuple([]))
-    ]))
+    commands.append(Command("itoc", [(Opcode.ITOC, tuple([]))]))
 
-    commands.append(Command("ctoi", [
-        (Opcode.CTOI, tuple([]))
-    ]))
+    commands.append(Command("ctoi", [(Opcode.CTOI, tuple([]))]))
 
-    commands.append(Command("add", [
-        (Opcode.ADD_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.ADD_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "add",
+            [
+                (Opcode.ADD_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.ADD_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("sub", [
-        (Opcode.SUB_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.SUB_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "sub",
+            [
+                (Opcode.SUB_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.SUB_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("div", [
-        (Opcode.DIV_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.DIV_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "div",
+            [
+                (Opcode.DIV_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.DIV_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("mod", [
-        (Opcode.MOD_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.MOD_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "mod",
+            [
+                (Opcode.MOD_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.MOD_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("mul", [
-        (Opcode.MUL_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.MUL_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "mul",
+            [
+                (Opcode.MUL_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.MUL_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("ld", [
-        (Opcode.LD_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.LD_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "ld",
+            [
+                (Opcode.LD_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.LD_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("st", [
-        (Opcode.ST_IMM, tuple([ArgumentTypes.Indirect])),
-    ]))
+    commands.append(
+        Command(
+            "st",
+            [
+                (Opcode.ST_IMM, tuple([ArgumentTypes.Indirect])),
+            ],
+        )
+    )
 
-    commands.append(Command("cmp", [
-        (Opcode.CMP_M, tuple([ArgumentTypes.Indirect])),
-        (Opcode.CMP_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "cmp",
+            [
+                (Opcode.CMP_M, tuple([ArgumentTypes.Indirect])),
+                (Opcode.CMP_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("je", [
-        (Opcode.JE, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "je",
+            [
+                (Opcode.JE, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("jne", [
-        (Opcode.JNE, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "jne",
+            [
+                (Opcode.JNE, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("jb", [
-        (Opcode.JB, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "jb",
+            [
+                (Opcode.JB, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("jbe", [
-        (Opcode.JBE, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "jbe",
+            [
+                (Opcode.JBE, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("jg", [
-        (Opcode.JG, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "jg",
+            [
+                (Opcode.JG, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("jge", [
-        (Opcode.JGE, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "jge",
+            [
+                (Opcode.JGE, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("jmp", [
-        (Opcode.JMP, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "jmp",
+            [
+                (Opcode.JMP, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("in", [
-        (Opcode.IN_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "in",
+            [
+                (Opcode.IN_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("out", [
-        (Opcode.OUT_IMM, tuple([ArgumentTypes.Direct])),
-    ]))
+    commands.append(
+        Command(
+            "out",
+            [
+                (Opcode.OUT_IMM, tuple([ArgumentTypes.Direct])),
+            ],
+        )
+    )
 
-    commands.append(Command("halt", [
-        (Opcode.HALT, tuple()),
-    ]))
+    commands.append(
+        Command(
+            "halt",
+            [
+                (Opcode.HALT, tuple()),
+            ],
+        )
+    )
 
 
 # Init commands
@@ -216,8 +300,13 @@ init_commands(ISACommands)
 class Instruction:
     """Описание выражения из исходного текста программы."""
 
-    def __init__(self, address: int = -1, opcode: Optional[Opcode] = None,
-                 args: Optional[list[int]] = None, value: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        address: int = -1,
+        opcode: Optional[Opcode] = None,
+        args: Optional[list[int]] = None,
+        value: Optional[int] = None,
+    ) -> None:
         self.address: int = address  # address should be not None
         self.opcode: Opcode | None = opcode
         self.args: Optional[list[int]] = args
@@ -256,10 +345,7 @@ def write_code(fname: str, in_instructions: list[Instruction], start_pos: int) -
                     inst[k] = v
             instructions.append(inst)
 
-        code = {
-            "instructions": instructions,
-            "start_pos": start_pos
-        }
+        code = {"instructions": instructions, "start_pos": start_pos}
         file.write(json.dumps(code, indent=2, sort_keys=True))
 
 
@@ -275,7 +361,9 @@ def read_code(fname: str) -> tuple[list[Instruction], int]:
 
 # INPUT/OUTPUT
 # Convert json port numbers and string list input to int
-def _ports_to_str(ports: dict[int, dict[str, list[int]]]) -> dict[str, dict[str, list[str]]]:
+def _ports_to_str(
+    ports: dict[int, dict[str, list[int]]]
+) -> dict[str, dict[str, list[str]]]:
     ret = {}
     for pnum, pentry in ports.items():
         rentry = {}
@@ -286,7 +374,9 @@ def _ports_to_str(ports: dict[int, dict[str, list[int]]]) -> dict[str, dict[str,
 
 
 # Convert json port numbers and string list input to str
-def _ports_to_int(ports: dict[int | str, dict[str, list[Any]]]) -> dict[int, dict[str, list[int]]]:
+def _ports_to_int(
+    ports: dict[int | str, dict[str, list[Any]]]
+) -> dict[int, dict[str, list[int]]]:
     rport = {}
     for pnum, pentry in ports.items():
         rentry = {}

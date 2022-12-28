@@ -15,14 +15,21 @@ import sys
 from ast import literal_eval
 from typing import Any, Optional
 
-from isa import ArgumentTypes, ISACommands, write_code, Instruction, \
-    WORD_WIDTH, WORD_MIN_VALUE, WORD_MAX_VALUE
+from isa import (
+    ArgumentTypes,
+    ISACommands,
+    write_code,
+    Instruction,
+    WORD_WIDTH,
+    WORD_MIN_VALUE,
+    WORD_MAX_VALUE,
+)
 
 
 # Line and offset starts with 0
 def get_line_off(source: str, off: int) -> tuple[int, int]:
     cur = 0
-    for num, line in enumerate(source.split('\n')):
+    for num, line in enumerate(source.split("\n")):
         if cur + len(line) > off:
             return num, off - cur
         cur += len(line) + 1
@@ -34,6 +41,7 @@ def get_line_off(source: str, off: int) -> tuple[int, int]:
 # ----------------------------------------------------------
 class LexerNode:
     """Лексемы, получаемые лексером."""
+
     def __init__(self, ntype: str, off: int, raw: str | None) -> None:
         self.ltype: str = ntype
         self.off: int = off
@@ -42,18 +50,15 @@ class LexerNode:
 
 # None - don't include identifier
 LexemSpec: dict[str, tuple[Optional[str], str]] = {
-    "Keyword": ("Keyword", r'section'),
-    "Identifier": ("Identifier", r'[a-zA-Z_\.]\w*'),
-    "Syntax": ("Syntax", r'\[|\]|:|,'),
-
-    "NumericLiteral": ("NumericLiteral", r'[-+]?\d+'),
+    "Keyword": ("Keyword", r"section"),
+    "Identifier": ("Identifier", r"[a-zA-Z_\.]\w*"),
+    "Syntax": ("Syntax", r"\[|\]|:|,"),
+    "NumericLiteral": ("NumericLiteral", r"[-+]?\d+"),
     "StringLiteral": ("StringLiteral", r'".*"'),
     "CharLiteral": ("CharLiteral", r"'(.|\\n|\\t|\\r|\\q)'"),
-
-    "EOL": ("EOL", r'\n'),
-
-    "Comment": (None, r';.*$'),
-    "Whitespace": (None, r'\s+'),
+    "EOL": ("EOL", r"\n"),
+    "Comment": (None, r";.*$"),
+    "Whitespace": (None, r"\s+"),
 }
 
 
@@ -61,7 +66,7 @@ def lexem_process(src: LexerNode) -> None:
     if src.ltype == "CharLiteral":
         assert src.raw is not None
         # replace escaped character with actual
-        src.raw = src.raw[0] + literal_eval('"' + src.raw[1: -1] + '"') + src.raw[-1]
+        src.raw = src.raw[0] + literal_eval('"' + src.raw[1:-1] + '"') + src.raw[-1]
 
 
 def lexer_process(source: str) -> list[LexerNode]:
@@ -85,7 +90,7 @@ def lexer_process(source: str) -> list[LexerNode]:
             line, off = get_line_off(source, cur_pos)
             raise Exception(f"Lexer\nUnknown lexem near line:{line + 1},off:{off + 1}.")
 
-    lexem_list.append(LexerNode('EOF', cur_pos, None))
+    lexem_list.append(LexerNode("EOF", cur_pos, None))
     return lexem_list
 
 
@@ -99,20 +104,11 @@ class Parser:
     # Error handling
     @staticmethod
     def err_leaf(context: str, msg: str, lexem: LexerNode) -> dict[str, Any]:
-        return {
-            "type": "Error",
-            "context": context,
-            "message": msg,
-            "lexem": lexem
-        }
+        return {"type": "Error", "context": context, "message": msg, "lexem": lexem}
 
     @staticmethod
     def err_path(context: str, childs: list[dict[str, Any]]) -> dict[str, Any]:
-        return {
-            "type": "Error",
-            "context": context,
-            "childs": childs
-        }
+        return {"type": "Error", "context": context, "childs": childs}
 
     @staticmethod
     def is_err(node: dict[str, Any]) -> bool:
@@ -187,7 +183,7 @@ class Parser:
             "type": "Section",
             "value": None,  # section name
             "instructions": [],
-            "last_err": None
+            "last_err": None,
         }
         kwd = self.keyword("section")
         if self.is_err(kwd):
@@ -229,12 +225,7 @@ class Parser:
 
     def instr_command(self) -> dict[str, Any]:
         start = self.cur
-        root = {
-            "type": "Command",
-            "labels": [],
-            "cmd": None,
-            "args": []
-        }
+        root = {"type": "Command", "labels": [], "cmd": None, "args": []}
         # Parse labels
         label = self.instr_label()
         while not self.is_err(label):
@@ -281,11 +272,7 @@ class Parser:
 
     def instr_variable(self) -> dict[str, Any]:
         start = self.cur
-        root = {
-            "type": "Variable",
-            "label": None,
-            "value": 0
-        }
+        root = {"type": "Variable", "label": None, "value": 0}
         # parse label
         label = self.instr_label()
         if self.is_err(label):
@@ -319,22 +306,13 @@ class Parser:
     def direct_argument(self) -> dict[str, Any]:
         ident = self.identifier()
         if not self.is_err(ident):
-            return {
-                "type": ArgumentTypes.Direct,
-                "value": ident["lexem"].raw
-            }
+            return {"type": ArgumentTypes.Direct, "value": ident["lexem"].raw}
         int_lit = self.int_lit()
         if not self.is_err(int_lit):
-            return {
-                "type": ArgumentTypes.Direct,
-                "value": self.val_from_int(int_lit)
-            }
+            return {"type": ArgumentTypes.Direct, "value": self.val_from_int(int_lit)}
         char_lit = self.char_lit()
         if not self.is_err(char_lit):
-            return {
-                "type": ArgumentTypes.Direct,
-                "value": self.val_from_char(char_lit)
-            }
+            return {"type": ArgumentTypes.Direct, "value": self.val_from_char(char_lit)}
         return self.err_path(ArgumentTypes.Direct, [ident, int_lit, char_lit])
 
     def indirect_argument(self) -> dict[str, Any]:
@@ -349,10 +327,7 @@ class Parser:
                 # right bracket
                 brr = self.syntax("]")
                 if not self.is_err(brr):
-                    return {
-                        "type": ArgumentTypes.Indirect,
-                        "value": iden["lexem"].raw
-                    }
+                    return {"type": ArgumentTypes.Indirect, "value": iden["lexem"].raw}
                 err = self.err_path(ArgumentTypes.Indirect, [brl, iden, brr])
             else:
                 err = self.err_path(ArgumentTypes.Indirect, [brl, iden])
@@ -386,10 +361,7 @@ class Parser:
             return self.err_leaf("Keyword", f"Got {kwd.ltype}", kwd)
         if kwd.raw != value:
             return self.err_leaf("Keyword", f"Not equals '{value}'", kwd)
-        return {
-            "type": "Keyword",
-            "lexem": kwd
-        }
+        return {"type": "Keyword", "lexem": kwd}
 
     def syntax(self, value: str) -> dict[str, Any]:
         kwd = self.get_lex()
@@ -397,37 +369,25 @@ class Parser:
             return self.err_leaf("Syntax", f"Got {kwd.ltype}", kwd)
         if kwd.raw != value:
             return self.err_leaf("Syntax", f"Not equals '{value}'", kwd)
-        return {
-            "type": "Syntax",
-            "lexem": kwd
-        }
+        return {"type": "Syntax", "lexem": kwd}
 
     def identifier(self) -> dict[str, Any]:
         cur = self.get_lex()
         if cur.ltype != "Identifier":
             return self.err_leaf("Identifier", f"Got {cur.ltype}", cur)
-        return {
-            "type": "Identifier",
-            "lexem": cur
-        }
+        return {"type": "Identifier", "lexem": cur}
 
     def int_lit(self) -> dict[str, Any]:
         cur = self.get_lex()
         if cur.ltype != "NumericLiteral":
             return self.err_leaf("IntLiteral", f"Got {cur.ltype}", cur)
-        return {
-            "type": "NumericLiteral",
-            "lexem": cur
-        }
+        return {"type": "NumericLiteral", "lexem": cur}
 
     def char_lit(self) -> dict[str, Any]:
         cur = self.get_lex()
         if cur.ltype != "CharLiteral":
             return self.err_leaf("CharLiteral", f"Got {cur.ltype}", cur)
-        return {
-            "type": "CharLiteral",
-            "lexem": cur
-        }
+        return {"type": "CharLiteral", "lexem": cur}
 
     def is_eol(self) -> bool:
         cur = self.get_lex()
@@ -439,7 +399,9 @@ def parse(lexem_list: list[LexerNode]) -> dict[str, Any]:
     ast = parser.parse(lexem_list)
 
     if ast["type"] == "Error":
-        raise Exception(f"Parser\n{json.dumps(ast, indent=2, default=lambda o: o.__dict__)}")
+        raise Exception(
+            f"Parser\n{json.dumps(ast, indent=2, default=lambda o: o.__dict__)}"
+        )
     return ast
 
 
@@ -464,11 +426,15 @@ def check_bounds(inst: dict[str, Any]) -> None:
         for arg in args:
             if isinstance(arg, int):
                 if _int_out_of_bounds(arg):
-                    raise Exception(f"Argument '{arg}' of command '{inst['cmd']}' is out of bounds")
+                    raise Exception(
+                        f"Argument '{arg}' of command '{inst['cmd']}' is out of bounds"
+                    )
     elif inst["type"] == "Variable":
         val = inst["value"]
         if _int_out_of_bounds(val):
-            raise Exception(f"Argument '{val}' of command '{inst['cmd']}' is out of bounds")
+            raise Exception(
+                f"Argument '{val}' of command '{inst['cmd']}' is out of bounds"
+            )
 
 
 def check_section_instructions(ast: dict[str, Any]) -> None:
@@ -479,7 +445,9 @@ def check_section_instructions(ast: dict[str, Any]) -> None:
 
         for inst in sect["instructions"]:
             if inst["type"] not in SectionInstrTypes[sect_name]:
-                raise Exception(f"Instruction type of {inst} in '{sect_name}' is not permitted")
+                raise Exception(
+                    f"Instruction type of {inst} in '{sect_name}' is not permitted"
+                )
             # check variable bounds
             check_bounds(inst)
 
@@ -495,18 +463,16 @@ def inst_to_isa_pre(inst: dict[str, Any]) -> Instruction:
         # opcode
         opcode = cmd.get_opcode(tuple(isa_args))
         if opcode is None:
-            raise Exception(f"Command '{name}' doesn't support {isa_args}. Given args:"
-                            "{inst['args']}\n" f"List of supported: {cmd.get_command_vars()}")
+            raise Exception(
+                f"Command '{name}' doesn't support {isa_args}. Given args:"
+                "{inst['args']}\n"
+                f"List of supported: {cmd.get_command_vars()}"
+            )
         return Instruction(
-            address=-1,
-            opcode=opcode,
-            args=[arg["value"] for arg in inst["args"]]
+            address=-1, opcode=opcode, args=[arg["value"] for arg in inst["args"]]
         )
     # else variable
-    return Instruction(
-        address=-1,
-        value=inst["value"]
-    )
+    return Instruction(address=-1, value=inst["value"])
 
 
 def generate_code(ast: dict[str, Any], start_pos: int = 0) -> dict[str, Any]:
@@ -542,18 +508,14 @@ def generate_code(ast: dict[str, Any], start_pos: int = 0) -> dict[str, Any]:
                 elif not isinstance(arg, int):
                     raise Exception(f"Label '{arg}' not found")
 
-    return {
-        "instructions": inst_list,
-        "start_pos": labels.get("_start", 0)
-    }
+    return {"instructions": inst_list, "start_pos": labels.get("_start", 0)}
 
 
 # ----------------------------------------------------------
 # Main
 # ----------------------------------------------------------
 def main(args: list[str]) -> None:
-    assert len(args) == 2, \
-        "Wrong arguments: translator.py <input_file> <target_file>"
+    assert len(args) == 2, "Wrong arguments: translator.py <input_file> <target_file>"
     source, target = args
 
     with open(source, "rt", encoding="utf-8") as f:
@@ -565,5 +527,5 @@ def main(args: list[str]) -> None:
     write_code(target, code["instructions"], code["start_pos"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1:])

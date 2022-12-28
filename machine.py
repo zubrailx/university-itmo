@@ -15,22 +15,30 @@ import sys
 import logging
 from typing import TypeVar, Generic, Any, Callable, Optional
 
-from isa import Opcode, read_code, Instruction, WORD_WIDTH, read_input, \
-    write_output, WORD_MAX_VALUE, WORD_MIN_VALUE
+from isa import (
+    Opcode,
+    read_code,
+    Instruction,
+    WORD_WIDTH,
+    read_input,
+    write_output,
+    WORD_MAX_VALUE,
+    WORD_MIN_VALUE,
+)
 
-T = TypeVar('T')
+T = TypeVar("T")
 Ports = dict[int, dict[str, list[int]]]
 
 
 TICK_LIMIT = 10000
-ITOC_CONST = ord('0')
+ITOC_CONST = ord("0")
 INT_UNDEF = -1
 
 
 # Utility
 # Wrapper to pass to methods values by reference
 class Wrapper(Generic[T]):
-    """ Wrapper to different types to pass values like 'by reference'."""
+    """Wrapper to different types to pass values like 'by reference'."""
 
     def __init__(self, val: T) -> None:
         self.val: T = val
@@ -78,6 +86,7 @@ class Alu:
 
     class Operations(Enum):
         """Тип операции АЛУ."""
+
         ADD = 0
         SUB = 1
         MUL = 2
@@ -88,6 +97,7 @@ class Alu:
 
     class Flags(int, Enum):
         """Флаги, получаемые после подсчета АЛУ."""
+
         # idx of bit
         ZERO = 0
         NEG = 1
@@ -101,7 +111,7 @@ class Alu:
             self.Operations.DIV: lambda lsv, rsv: lsv // rsv,
             self.Operations.MOD: lambda lsv, rsv: lsv % rsv,
             self.Operations.RIGHT: lambda _, rsv: rsv,
-            self.Operations.LEFT: lambda lsv, _: lsv
+            self.Operations.LEFT: lambda lsv, _: lsv,
         }
 
     def get_bit(self, flag: Flags) -> int:
@@ -124,8 +134,9 @@ class Alu:
         return res
 
     def perform(self, op: Operations, left: int, right: int) -> int:
-        assert op in self.operations, \
-            f"Operation {op} is not present in alu operations."
+        assert (
+            op in self.operations
+        ), f"Operation {op} is not present in alu operations."
 
         res = self.operations[op](left, right)
         res = self._fix_overflow(res)
@@ -168,18 +179,23 @@ class DataPath:
                 return cell
         raise Exception(f"DataPath: No instructions found with address '{addr}'")
 
-    def memory_perform(self, addr: int, data_in: int = 0, oe: bool = False,
-                       wr: bool = False) -> Optional[Instruction]:
+    def memory_perform(
+        self, addr: int, data_in: int = 0, oe: bool = False, wr: bool = False
+    ) -> Optional[Instruction]:
         cell = self._get_mem_cell(addr)
         if wr:
             if cell.value is not None:
                 cell.value = data_in
                 logging.debug("mem[%d] = %d", addr, data_in)
             else:
-                raise Exception(f"DataPath: Trying to overwrite code on address '{addr}")
+                raise Exception(
+                    f"DataPath: Trying to overwrite code on address '{addr}"
+                )
         if oe:
             return cell
-        assert oe or wr, "Invalid arguments to memory_perform. Should be oe=True or wr=True"
+        assert (
+            oe or wr
+        ), "Invalid arguments to memory_perform. Should be oe=True or wr=True"
         return None
 
     def alu_perform(self, op: Alu.Operations, left: int, right: int) -> int:
@@ -187,7 +203,9 @@ class DataPath:
 
     # io_sel - number of port
     def io_perform(self, io_sel: int, is_in: bool = False, is_out: bool = False) -> int:
-        assert not is_in or not is_out, "In and Out are set to True, undefined behaviour"
+        assert (
+            not is_in or not is_out
+        ), "In and Out are set to True, undefined behaviour"
         if is_in:
             if len(self.ports_in[io_sel]) == 0:
                 raise Exception(f"DataPath: ports[{io_sel}].in queue is empty")
@@ -205,7 +223,7 @@ class DataPath:
             self.ac,
             self.dr,
             self.alu.get_bit(Alu.Flags.ZERO),
-            self.alu.get_bit(Alu.Flags.NEG)
+            self.alu.get_bit(Alu.Flags.NEG),
         )
 
 
@@ -214,13 +232,16 @@ class ControlUnit:
     Блок управления процессора. Выполняет декодирование инструкций и
     управляет состоянием процессора, включая обработку данных (DataPath).
     """
+
     class Status(Enum):
         """Статус машины."""
+
         RUNNABLE = 0
         HALTED = 1
 
     class Stage(Enum):
         """Этап выполнения команды."""
+
         FETCH = 0
         DECODE = 1
         EXECUTE = 2
@@ -281,18 +302,32 @@ class ControlUnit:
 
         if self.tick_counter.get() == 0:
             # commands with at least one argument
-            if op not in [Opcode.INC, Opcode.DEC, Opcode.CTOI, Opcode.ITOC, Opcode.HALT]:
+            if op not in [
+                Opcode.INC,
+                Opcode.DEC,
+                Opcode.CTOI,
+                Opcode.ITOC,
+                Opcode.HALT,
+            ]:
                 self.dr_latch.latch(True, cmd.args[0])
             # indirect commands
-            return op not in [Opcode.ADD_M, Opcode.SUB_M, Opcode.MOD_M, Opcode.MUL_M,
-                              Opcode.LD_M, Opcode.CMP_M]
+            return op not in [
+                Opcode.ADD_M,
+                Opcode.SUB_M,
+                Opcode.MOD_M,
+                Opcode.MUL_M,
+                Opcode.LD_M,
+                Opcode.CMP_M,
+            ]
 
         if self.tick_counter.get() == 1:
             # load indirect argument
             instr = self.data_path.memory_perform(self.data_path.dr.get(), oe=True)
             assert isinstance(instr, Instruction)
             if instr.value is None:
-                raise Exception(f"Trying to load instruction '{instr}' instead of variable")
+                raise Exception(
+                    f"Trying to load instruction '{instr}' instead of variable"
+                )
 
             self.dr_latch.latch(True, instr.value)
             return True
@@ -322,16 +357,31 @@ class ControlUnit:
                 case Opcode.DEC:
                     ac_new = self.data_path.alu_perform(Alu.Operations.SUB, ac_old, 1)
                 case Opcode.ITOC:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.ADD, ac_old, ITOC_CONST)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.ADD, ac_old, ITOC_CONST
+                    )
                 case Opcode.CTOI:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.SUB, ac_old, ITOC_CONST)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.SUB, ac_old, ITOC_CONST
+                    )
             self.ac_latch.latch(True, ac_new)
             return True
 
         # Accumulator + data_reg modification commands
-        if op in [Opcode.ADD_M, Opcode.ADD_IMM, Opcode.SUB_M, Opcode.SUB_IMM, Opcode.DIV_M,
-                  Opcode.DIV_IMM, Opcode.MOD_M, Opcode.MOD_IMM, Opcode.MUL_M, Opcode.MUL_IMM,
-                  Opcode.CMP_IMM, Opcode.CMP_M]:
+        if op in [
+            Opcode.ADD_M,
+            Opcode.ADD_IMM,
+            Opcode.SUB_M,
+            Opcode.SUB_IMM,
+            Opcode.DIV_M,
+            Opcode.DIV_IMM,
+            Opcode.MOD_M,
+            Opcode.MOD_IMM,
+            Opcode.MUL_M,
+            Opcode.MUL_IMM,
+            Opcode.CMP_IMM,
+            Opcode.CMP_M,
+        ]:
             ac_old = self.data_path.ac.get()
             ac_new = INT_UNDEF
             dr_val = self.data_path.dr.get()
@@ -342,15 +392,25 @@ class ControlUnit:
 
             match op:
                 case Opcode.ADD_M | Opcode.ADD_IMM:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.ADD, ac_old, dr_val)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.ADD, ac_old, dr_val
+                    )
                 case Opcode.SUB_M | Opcode.SUB_IMM:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.SUB, ac_old, dr_val)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.SUB, ac_old, dr_val
+                    )
                 case Opcode.MUL_M | Opcode.MUL_IMM:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.MUL, ac_old, dr_val)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.MUL, ac_old, dr_val
+                    )
                 case Opcode.DIV_M | Opcode.DIV_IMM:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.DIV, ac_old, dr_val)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.DIV, ac_old, dr_val
+                    )
                 case Opcode.MOD_M | Opcode.MOD_IMM:
-                    ac_new = self.data_path.alu_perform(Alu.Operations.MOD, ac_old, dr_val)
+                    ac_new = self.data_path.alu_perform(
+                        Alu.Operations.MOD, ac_old, dr_val
+                    )
             self.ac_latch.latch(True, ac_new)
             return True
 
@@ -369,7 +429,15 @@ class ControlUnit:
             return True
 
         # Jumps
-        if op in [Opcode.JE, Opcode.JNE, Opcode.JB, Opcode.JMP, Opcode.JBE, Opcode.JG, Opcode.JGE]:
+        if op in [
+            Opcode.JE,
+            Opcode.JNE,
+            Opcode.JB,
+            Opcode.JMP,
+            Opcode.JBE,
+            Opcode.JG,
+            Opcode.JGE,
+        ]:
             do_jump: bool = True
 
             f_z: int = self.data_path.alu.get_bit(Alu.Flags.ZERO)
@@ -424,8 +492,9 @@ class ControlUnit:
         self._tick += 1
 
     def next_instruction(self) -> None:
-        assert self.stage == ControlUnit.Stage.FETCH, \
-            f"Each instruction should start with FETCH, but given '{self.stage}'"
+        assert (
+            self.stage == ControlUnit.Stage.FETCH
+        ), f"Each instruction should start with FETCH, but given '{self.stage}'"
 
         self.next_tick()
         while self.stage != ControlUnit.Stage.FETCH:
@@ -444,17 +513,24 @@ class ControlUnit:
 
 
 # возвращает вывод на портах и количество исполненных инструкций
-def simulation(memory: list[Instruction], start_pos: int, ports: Ports,
-               tick_limit: int, by_tick: bool) -> tuple[Ports, int]:
+def simulation(
+    memory: list[Instruction],
+    start_pos: int,
+    ports: Ports,
+    tick_limit: int,
+    by_tick: bool,
+) -> tuple[Ports, int]:
     data_path = DataPath(memory, ports)
     control_unit = ControlUnit(data_path, start_pos)
     # initial status
-    logging.debug('%s', control_unit)
+    logging.debug("%s", control_unit)
 
     status = control_unit.get_status()
 
     cnt: int = 0
-    while status == ControlUnit.Status.RUNNABLE and control_unit.get_tick() < tick_limit:
+    while (
+        status == ControlUnit.Status.RUNNABLE and control_unit.get_tick() < tick_limit
+    ):
         # select execute by tick or by instruction
         if by_tick:
             control_unit.next_tick()
@@ -462,22 +538,20 @@ def simulation(memory: list[Instruction], start_pos: int, ports: Ports,
             control_unit.next_instruction()
 
         status = control_unit.get_status()
-        logging.debug('%s', control_unit)
+        logging.debug("%s", control_unit)
         cnt += 1
     return (ports, cnt)
 
 
 def main(args: list[str]) -> None:
-    assert len(args) >= 3, "Wrong arguments:" \
-        "machine.py [options] <code_file> <input_file> <output_file>"
+    assert len(args) >= 3, (
+        "Wrong arguments:" "machine.py [options] <code_file> <input_file> <output_file>"
+    )
 
     code_file, input_fname, output_fname = args[-3], args[-2], args[-1]
-    options = [arg.strip() for arg in args[0: -3]]
+    options = [arg.strip() for arg in args[0:-3]]
 
-    params = {
-        "by_tick": True,
-        "tick_limit": TICK_LIMIT
-    }
+    params = {"by_tick": True, "tick_limit": TICK_LIMIT}
     # parse options
     params["by_tick"] = "-i" not in options
     if "-t" in options:
@@ -486,12 +560,17 @@ def main(args: list[str]) -> None:
 
     memory, start_pos = read_code(code_file)
     ports = read_input(input_fname)
-    ports_out, op_cnt = simulation(memory, start_pos, ports,
-                                   tick_limit=params["tick_limit"], by_tick=bool(params["by_tick"]))
+    ports_out, op_cnt = simulation(
+        memory,
+        start_pos,
+        ports,
+        tick_limit=params["tick_limit"],
+        by_tick=bool(params["by_tick"]),
+    )
     logging.debug("Operations count: %d", op_cnt)
     write_output(output_fname, ports_out)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
     main(sys.argv[1:])
