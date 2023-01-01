@@ -1,0 +1,11 @@
+---
+ColumnLimit: 88
+AlwaysBreakTemplateDeclarations: Yes
+PointerAlignment: Right
+SortIncludes: CaseInsensitive
+SpacesBeforeTrailingComments: 0
+TabWidth: 2
+# UseTab: Always
+SpaceAfterTemplateKeyword: false
+Standard: Latest
+...
