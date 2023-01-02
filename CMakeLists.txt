@@ -45,20 +45,18 @@ find_package(BISON)
 # -----------------------------------------------------------------------------
 set(PARSER_DIR ${CMAKE_GENERATED_BIN_DIR})
 
-set(LEXER_OUT ${PARSER_DIR}/lexer.c)
-set(PARSER_OUT ${PARSER_DIR}/parser.c)
+set(LEXER_OUT ${PARSER_DIR}/lexer.cpp)
+set(PARSER_OUT ${PARSER_DIR}/parser.cpp)
 
 set(SRC_PARSE ${PROJECT_SRC_DIR})
 
 flex_target(LEXER 
   "${SRC_PARSE}/parse.l" 
-  "${LEXER_OUT}" DEFINES_FILE "${PARSER_DIR}/lexer.h")
+  "${LEXER_OUT}" DEFINES_FILE "${PARSER_DIR}/lexer.hpp")
 
 bison_target(PARSER 
   "${SRC_PARSE}/parse.y" 
-  "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.h")
-
-add_flex_bison_dependency(LEXER PARSER)
+  "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.hpp")
 # -----------------------------------------------------------------------------
 # Library
 # -----------------------------------------------------------------------------

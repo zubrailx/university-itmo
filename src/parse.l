@@ -4,9 +4,9 @@
 %{
 int fileno(FILE *stream);
 
-#include "parser.h"
-#include "subtok.h"
-#include <string.h>
+#include "subtok.hpp"
+#include "parser.hpp"
+#include <cstring>
 
 
 void yyerror(const char *s, ...);
@@ -39,10 +39,10 @@ SET { return SET; }
 INTO { return INTO; }
 VALUES { return VALUES; }
 
-STR { yylval.subtok = DATA_STR; return TYPE; }
-BOOL { yylval.subtok = DATA_BOOL; return TYPE; }
-DOUBLE { yylval.subtok = DATA_DOUBLE; return TYPE; }
-INT32 { yylval.subtok = DATA_INT32; return TYPE; }
+STR { yylval.dtype = DataType::STR; return DTYPE; }
+BOOL { yylval.dtype = DataType::BOOL; return DTYPE; }
+DOUBLE { yylval.dtype = DataType::DOUBLE; return DTYPE; }
+INT32 { yylval.dtype = DataType::INT32; return DTYPE; }
 
 [.,*();] { return yytext[0]; }
 
@@ -51,13 +51,13 @@ AND { return AND; }
 IN { return IN; }
 NOT { return NOT; }
 
-"=" { yylval.subtok = COMPARE_EQ; return COMPARE; }
+"=" { yylval.ctype = CompareType::EQ; return COMPARE; }
 "<>" | 
-"!=" { yylval.subtok = COMPARE_NEQ; return COMPARE; }
-">" { yylval.subtok = COMPARE_GR; return COMPARE; }
-"<" { yylval.subtok = COMPARE_LO; return COMPARE; }
-"<=" { yylval.subtok = COMPARE_LEQ; return COMPARE; }
-">=" { yylval.subtok = COMPARE_GEQ; return COMPARE; }
+"!=" { yylval.ctype = CompareType::NEQ; return COMPARE; }
+">" { yylval.ctype = CompareType::GR; return COMPARE; }
+"<" { yylval.ctype = CompareType::LO; return COMPARE; }
+"<=" { yylval.ctype = CompareType::LEQ; return COMPARE; }
+">=" { yylval.ctype = CompareType::GEQ; return COMPARE; }
 
 true { yylval.ival = 1; return BOOLEAN; }
 false { yylval.ival = 0; return BOOLEAN; }
