@@ -1,7 +1,30 @@
-## Lab-2 QPG (query plan generator)
+# Lab-2 QPG (query plan generator)
 
-### Build system
+### Условия
 
+* На равенство и неравенство для чисел, строк и булевских значений
+* На строгие и нестрогие сравнения для чисел
+* Существование подстроки
+* Логическую комбинацию произвольного количества условий и булевских значений
+* В качестве любого аргумента условий могут выступать литеральные значения (константы) или ссылки на значения, ассоциированные с элементами данных (поля, атрибуты, свойства)
+* 
+
+### Какие бывают выражения
+
+Some kind of EBNF
+```
+query := (<select> | <update> | <delete> | <insert> | <drop> | <create>) ";"
+
+<select> := SELECT ({<column_names>}+ | *) FROM ("(" <select> ")" | <table_name>) WHERE <condition>
+<update> := UPDATE <table_name> SET <column_name> = <value> { "," <column_name> = <value> }* WHERE <condition>
+<delete> := DELETE FROM <table_name> WHERE <condition>
+<insert> := INSERT INTO <table_name> "(" <column_name> { "," <column_name> }* ")" VALUES "(" <value> { "," <value> }* ")"
+<drop> := DROP TABLE <table_name>
+<create> := CREATE TABLE <table_name> "(" <column_name> <datatype> { "," <column_name> <datatype> } ")"
+```
+
+
+## Build
 ```sh
 # Default build type - build
 

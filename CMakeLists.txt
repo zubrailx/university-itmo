@@ -21,7 +21,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 set(PROJECT_TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 set(PROJECT_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+
 set(CMAKE_GENERATED_BIN_DIR ${CMAKE_BINARY_DIR}/gen)
+file(MAKE_DIRECTORY ${CMAKE_GENERATED_BIN_DIR})
 # -----------------------------------------------------------------------------
 # Configurations
 # -----------------------------------------------------------------------------
@@ -41,37 +43,35 @@ find_package(BISON)
 # -----------------------------------------------------------------------------
 # Flex / bison targets
 # -----------------------------------------------------------------------------
-set(PARSER_DIR ${CMAKE_GENERATED_BIN_DIR}/parse)
+set(PARSER_DIR ${CMAKE_GENERATED_BIN_DIR})
 
 set(LEXER_OUT ${PARSER_DIR}/lexer.c)
 set(PARSER_OUT ${PARSER_DIR}/parser.c)
 
-set(SRC_PARSE ${PROJECT_SRC_DIR}/parse)
+set(SRC_PARSE ${PROJECT_SRC_DIR})
 
 flex_target(LEXER 
-  "${SRC_PARSE}/lexer.l" 
+  "${SRC_PARSE}/parse.l" 
   "${LEXER_OUT}" DEFINES_FILE "${PARSER_DIR}/lexer.h")
 
 bison_target(PARSER 
-  "${SRC_PARSE}/parser.y" 
+  "${SRC_PARSE}/parse.y" 
   "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.h")
 
 add_flex_bison_dependency(LEXER PARSER)
 # -----------------------------------------------------------------------------
 # Library
 # -----------------------------------------------------------------------------
-set(PROJECT_LIB_NAME lib${PROJECT_NAME})
-
-set(LIB_HDRS
-)
+set(PROJECT_LIB_NAME ${PROJECT_NAME})
 
 set(LIB_SRCS
-  src/main.c
+  src/qpg.cpp 
 )
 
 add_library(${PROJECT_LIB_NAME} STATIC ${LIB_SRCS} ${LEXER_OUT} ${PARSER_OUT})
 target_include_directories(${PROJECT_LIB_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_LIB_NAME} PRIVATE ${PARSER_DIR})
+target_include_directories(${PROJECT_LIB_NAME} PRIVATE ${PROJECT_SRC_DIR})
 
 target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall
@@ -90,7 +90,7 @@ target_link_options(${PROJECT_LIB_NAME} PUBLIC
 # -----------------------------------------------------------------------------
 set(PROJECT_EXEC_NAME ${PROJECT_NAME}_exec)
 
-set(EXEC_SRC ${PROJECT_SOURCE_DIR}/app/main.c)
+set(EXEC_SRC ${PROJECT_SOURCE_DIR}/app/main.cpp)
 
 if (EXISTS ${EXEC_SRC})
   add_executable(${PROJECT_EXEC_NAME} ${EXEC_SRC})
