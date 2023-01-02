@@ -38,6 +38,7 @@ void yyerror(const char *s, ...);
 %token SET
 %token INTO
 %token VALUES
+%token CROSS_JOIN
 %token <subtok> TYPE
 
 %token ','
@@ -70,24 +71,52 @@ stmt:
 | drop_stmt   {}
 | create_stmt {}
 
+  /* SELECT */
 select_stmt:
-  SELECT column_list FROM source WHERE condition {}
-| SELECT column_list FROM source {}
+  SELECT column_list FROM table_ref WHERE condition {}
+| SELECT column_list FROM table_ref {}
 
+table_ref:
+  table_factor {}
+| join_table {}
+
+table_factor:
+  table_name opt_as_alias {}
+| table_subquery as_alias {}
+
+table_subquery:
+  '(' select_stmt ')' {}
+
+// left ast
+join_table:
+  table_ref CROSS_JOIN table_factor {}
+
+opt_as_alias:
+  as_alias  {}
+| /* nil */ {}
+
+as_alias:
+  AS table_name
+
+  /* UPDATE */
 update_stmt:
   UPDATE table_name SET assign_column_list WHERE condition {}
 | UPDATE table_name SET assign_column_list {}
 
+  /* DELETE */
 delete_stmt:
   DELETE FROM table_name WHERE condition {}
 
+  /* INSERT */
 insert_stmt:
   INSERT INTO table_name '(' column_list ')' VALUES '(' value_list ')' {}
 | INSERT INTO table_name VALUES '(' value_list ')' {}
 
+  /* DROP */
 drop_stmt:
   DROP TABLE table_name {}
 
+  /* CREATE */
 create_stmt:
   CREATE TABLE table_name '(' create_loc_list ')' {}
 
@@ -97,6 +126,7 @@ create_loc_list:
 
 create_definition:
   column_name TYPE {}
+
 
 assign_column_list:
   column_name COMPARE value 
@@ -118,10 +148,6 @@ column:
 
 column_name:
   NAME {}
-
-source:
-  table_name {}
-| '(' select_stmt ')' AS table_name {}
 
 table_name:
   NAME {}

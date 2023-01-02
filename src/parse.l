@@ -32,7 +32,7 @@ CREATE { return CREATE; }
 DROP { return DROP; }
 TABLE { return TABLE; }
 FROM { return FROM; }
-JOIN { return JOIN; }
+CROSS_JOIN { return CROSS_JOIN; }
 WHERE { return WHERE; }
 AS { return AS; }
 SET { return SET; }

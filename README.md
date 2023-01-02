@@ -13,6 +13,8 @@
 
 Some kind of EBNF
 ```
+
+SELECT * FROM table_sources WHERE smth.
 query := (<select> | <update> | <delete> | <insert> | <drop> | <create>) ";"
 
 <select> := SELECT ({<column_names>}+ | *) FROM ("(" <select> ")" | <table_name>) WHERE <condition>
