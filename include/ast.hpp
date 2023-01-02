@@ -28,6 +28,15 @@ public:
   AstType getType() const { return this->m_type; }
 
   virtual std::string repr() const = 0;
+
+  std::string repr_extend(const std::string &str) const {
+    std::string out = "{ ";
+    out += "ast_type: " + std::to_string(static_cast<int>(m_type));
+    out += ", ";
+    out += str;
+    out += " }";
+    return out;
+  }
 };
 // }}}
 
@@ -74,8 +83,11 @@ public:
   }
 
   std::string repr() const override {
-    return "{ type: " + std::to_string(static_cast<int>(m_dtype)) + ", val: '" +
-           strval + "' }";
+    std::string out;
+    out += "dtype: " + std::to_string(static_cast<int>(m_dtype));
+    out += ", ";
+    out += "val: '" + strval + "'";
+    return repr_extend(out);
   }
 };
 
@@ -94,6 +106,20 @@ template <typename T> class AstList : public Ast {
 protected:
   std::list<std::unique_ptr<T>> m_lst;
 
+  std::string _repr() const {
+    std::string out;
+    out += "list: ";
+    out += "[ ";
+    for (auto it = m_lst.begin(); it != m_lst.end(); ++it) {
+      out = out + (*it)->repr() + ", ";
+    }
+    if (m_lst.begin() != m_lst.end()) {
+      out.resize(out.size() - 2);
+    }
+    out += " ]";
+    return out;
+  }
+
 public:
   AstList(AstList<T> *lst, T *last) : Ast(lst->getType()) {
     std::swap(m_lst, lst->m_lst);
@@ -106,14 +132,7 @@ public:
 
   AstList(AstType type) : Ast(type) {}
 
-  std::string repr() const override {
-    std::string out = "[";
-    for (auto it = m_lst.begin(); it != m_lst.end(); ++it) {
-      out = out + (*it)->repr() + ",";
-    }
-    out.append("]");
-    return out;
-  }
+  std::string repr() const override { return repr_extend(_repr()); }
 };
 // }}}
 
@@ -137,12 +156,10 @@ public:
   }
 
   std::string repr() const {
-    std::string out = "{ ";
-    if (m_htn) {
-      out += "table: '" + m_table + "', ";
-    }
-    out += "column: '" + m_column + "' }";
-    return out;
+    std::string out;
+    out += "table: '" + m_table + "', ";
+    out += "column: '" + m_column + "'";
+    return repr_extend(out);
   }
 };
 
@@ -155,11 +172,11 @@ public:
   ColumnList() : AstList(AstType::COLUMN_LIST) { do_all = true; }
 
   std::string repr() const override {
-    std::string out = "{ do_all: "; 
-    out += (do_all ? "true" : "false");
+    std::string out;
+    out += "do_all: " + std::string(do_all ? "true" : "false");
     out += ", ";
-    out += AstList<Column>::repr();
-    return out;
+    out += AstList<Column>::_repr();
+    return repr_extend(out);
   }
 };
 // }}}
