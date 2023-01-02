@@ -9,3 +9,9 @@ enum CompareType {
   COMPARE_GEQ
 };
 
+enum DataType {
+  DATA_STR,
+  DATA_BOOL,
+  DATA_DOUBLE,
+  DATA_INT32
+};

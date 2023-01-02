@@ -2,20 +2,28 @@
 %option debug
 
 %{
+int fileno(FILE *stream);
+
 #include "parser.h"
 #include "subtok.h"
-#include <stdio.h>
+#include <string.h>
+
 
 void yyerror(const char *s, ...);
 %}
 
-int [+-]?[0-9]+
-float [+-]?([0-9]+[.]?[0-9]*)
-space [ \t \n]+
+
+letter [a-zA-Z_]
+digit [0-9]
+space [ \t\n]+
+
+symbol {letter}({letter}|{digit})*
+int [+-]?{digit}+
+float [+-]?({digit}+[\.]?{digit}*)
+str (\".*\")|(\'.*\')
 
 %%
 
-  /* keywords */
 SELECT { return SELECT; }
 UPDATE { return UPDATE; }
 DELETE { return DELETE; }
@@ -23,12 +31,21 @@ INSERT { return INSERT; }
 CREATE { return CREATE; }
 DROP { return DROP; }
 TABLE { return TABLE; }
-";" { return EOEXPR; }
 FROM { return FROM; }
 JOIN { return JOIN; }
 WHERE { return WHERE; }
+AS { return AS; }
+SET { return SET; }
+INTO { return INTO; }
+VALUES { return VALUES; }
 
-  /* operators */
+STR { yylval.subtok = DATA_STR; return TYPE; }
+BOOL { yylval.subtok = DATA_BOOL; return TYPE; }
+DOUBLE { yylval.subtok = DATA_DOUBLE; return TYPE; }
+INT32 { yylval.subtok = DATA_INT32; return TYPE; }
+
+[.,*();] { return yytext[0]; }
+
 OR { return OR; }
 AND { return AND; }
 IN { return IN; }
@@ -42,16 +59,17 @@ NOT { return NOT; }
 "<=" { yylval.subtok = COMPARE_LEQ; return COMPARE; }
 ">=" { yylval.subtok = COMPARE_GEQ; return COMPARE; }
 
-[.,] { return yytext[0]; }
-
 true { yylval.ival = 1; return BOOLEAN; }
 false { yylval.ival = 0; return BOOLEAN; }
 
 {int} { yylval.ival = atoi(yytext); return INTNUM; }
 {float} { yylval.fval = atof(yytext); return FLOATNUM; }
-{space} {}
-. { yyerror("Lexer: undefined character read: '%s'", yytext); }
+{symbol} { yylval.sval = yytext; return NAME; }
+{str} { yylval.sval = strdup(yytext+1); yylval.sval[yyleng-2] = 0; return STRING; }
 
+{space} { }
 <<EOF>> { fprintf(stdout, "%d", yylineno); yyterminate(); }
+
+. { yyerror("Lexer: undefined character read: '%s'", yytext); }
 
 %%
