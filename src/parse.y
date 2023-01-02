@@ -2,10 +2,14 @@
 #include "lexer.hpp"
 #include <cstdio>
 #include <cstdarg>
+
+#include <iostream>
+
 %}
 
 %code requires {
-#include "subtok.hpp"
+#include <subtok.hpp>
+#include <ast.hpp>
 }
 
 %define parse.error verbose
@@ -16,9 +20,13 @@
   char *sval;
   CompareType ctype;
   DataType dtype;
+
+  Ast* nterm;
 }
 
 %{
+Ast * parsed_result;
+
 void yyerror(const char *s, ...);
 %}
 
@@ -57,23 +65,29 @@ void yyerror(const char *s, ...);
 %left NOT
 %left <ctype> COMPARE /* = != > < <= >= */
 
+%nterm <nterm> stmt stmt_list value value_list column column_list column_list_h 
+%nterm <sval> table_name column_name
+
 %start stmt_list
 
 %%
 
 stmt_list: 
-  stmt ';' YYEOF {}
-| stmt_list stmt ';' YYEOF {}
+  stmt ';' YYEOF { parsed_result = $1; }
+| stmt_list stmt ';' YYEOF { parsed_result = $1; }
 ;
 
-stmt: 
-  select_stmt {}
-| update_stmt {}
-| delete_stmt {}
-| insert_stmt {}
-| drop_stmt   {}
-| create_stmt {}
-;
+stmt:
+  column_list { $$ = $1; }
+
+/* stmt:  */
+/*   select_stmt {} */
+/* | update_stmt {} */
+/* | delete_stmt {} */
+/* | insert_stmt {} */
+/* | drop_stmt   {} */
+/* | create_stmt {} */
+/* ; */
 
   /* SELECT */
 select_stmt:
@@ -154,26 +168,39 @@ assign_column_list:
 ;
 
 column_list:
-  '*' {}
-| column_list_h {}
+  '*' { $$ = new ColumnList(); }
+| column_list_h { $$ = $1; }
 ;
 
 column_list_h:
-  column {}
-| column_list_h ',' column {}
+  column { $$ = new ColumnList((Column*)$1); }
+| column_list_h ',' column {
+  $$ = new ColumnList((ColumnList*)$1, (Column*)$3);
+  delete $1;
+}
 ;
 
 column:
-  table_name '.' column_name {}
-| column_name {}
+  table_name '.' column_name {
+  std::string tabmove = std::string($1);
+  std::string colmove = std::string($3);
+  $$ = new Column(std::move(tabmove), std::move(colmove));
+  free($1);
+  free($3);
+}
+| column_name { 
+  std::string colmove = std::string($1);
+  $$ = new Column(std::move(colmove));
+  free($1);
+}
 ;
 
 column_name:
-  NAME {}
+  NAME { $$ = $1; }
 ;
 
 table_name:
-  NAME {}
+  NAME { $$ = $1; }
 ;
 
 condition:
@@ -191,15 +218,20 @@ statement:
 ;
 
 value_list:
-  value {}
-| value_list ',' value {}
+  value { $$ = new AstList((AstValue*)$1, AstType::VARIABLE_LIST); }
+| value_list ',' value 
+  { $$ = new AstList((AstList<AstValue>*)$1, (AstValue*)$3); delete $1; }
 ;
 
 value:
-  INTNUM {}
-| BOOLEAN {}
-| FLOATNUM {}
-| STRING {}
+  INTNUM { $$ = new AstValue((int32_t)$1, DataType::INT32); }
+| BOOLEAN { $$ = new AstValue((bool)$1, DataType::BOOL); }
+| FLOATNUM { $$ = new AstValue((double)$1, DataType::DOUBLE); }
+| STRING { 
+  std::string move = std::string($1); // copy constructor to free allocated memory
+  $$ = new AstValue(std::move(move), DataType::STR);
+  free($1); // copied in lexer
+}
 ;
 
 %%

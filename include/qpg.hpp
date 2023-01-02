@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include "ast.hpp"
 #include <iostream>
+#include <string>
 
-void parse_input(std::string str);
+std::unique_ptr<Ast> parse_input(const std::string& str);

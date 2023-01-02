@@ -64,6 +64,7 @@ set(PROJECT_LIB_NAME ${PROJECT_NAME})
 
 set(LIB_SRCS
   src/qpg.cpp 
+  src/ast.cpp
 )
 
 add_library(${PROJECT_LIB_NAME} STATIC ${LIB_SRCS} ${LEXER_OUT} ${PARSER_OUT})

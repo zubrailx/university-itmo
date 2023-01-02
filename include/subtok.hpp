@@ -1,6 +1,6 @@
 #pragma once
 
-enum CompareType {
+enum class CompareType {
   EQ,
   NEQ,
   LO,
@@ -9,7 +9,7 @@ enum CompareType {
   GEQ
 };
 
-enum DataType {
+enum class DataType {
   STR,
   BOOL,
   DOUBLE,

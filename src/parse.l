@@ -4,10 +4,9 @@
 %{
 int fileno(FILE *stream);
 
-#include "subtok.hpp"
+#include <subtok.hpp>
 #include "parser.hpp"
 #include <cstring>
-
 
 void yyerror(const char *s, ...);
 %}
@@ -64,8 +63,15 @@ false { yylval.ival = 0; return BOOLEAN; }
 
 {int} { yylval.ival = atoi(yytext); return INTNUM; }
 {float} { yylval.fval = atof(yytext); return FLOATNUM; }
-{symbol} { yylval.sval = yytext; return NAME; }
-{str} { yylval.sval = strdup(yytext+1); yylval.sval[yyleng-2] = 0; return STRING; }
+{symbol} { 
+  yylval.sval = strdup(yytext);
+  return NAME;
+}
+{str} { 
+  yylval.sval = strdup(yytext+1);
+  yylval.sval[yyleng-2] = 0;
+  return STRING;
+}
 
 {space} { }
 <<EOF>> { fprintf(stdout, "%d", yylineno); yyterminate(); }

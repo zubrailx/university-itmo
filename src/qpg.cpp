@@ -1,9 +1,13 @@
 #include <qpg.hpp>
 
-#include "parser.hpp"
 #include "lexer.hpp"
+#include "parser.hpp"
+#include <ast.hpp>
 
-void parse_input(std::string str) {
+extern Ast* parsed_result;
+
+std::unique_ptr<Ast> parse_input(const std::string& str) {
   yy_scan_string(str.c_str());
   yyparse();
+  return std::unique_ptr<Ast>(parsed_result);
 }
