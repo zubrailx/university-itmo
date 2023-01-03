@@ -38,7 +38,7 @@ enum class JoinType {
 
 enum class StatementType { CONST, UNARY, BINARY, COLUMN };
 
-enum class OperationType { EQ, NEQ, LO, GR, LEQ, GEQ, NOT, AND, OR };
+enum class OperationType { EQ, NEQ, LO, GR, LEQ, GEQ, NOT, AND, OR, IN };
 
 enum class DataType { STR, BOOL, DOUBLE, INT32 };
 
@@ -643,3 +643,4 @@ public:
     return repr_extend(out);
   }
 };
+// }}}

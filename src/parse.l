@@ -49,6 +49,7 @@ INT32 { yylval.dtype = DataType::INT32; return DTYPE; }
 OR { yylval.optype = OperationType::OR; return COMPARE; }
 AND { yylval.optype = OperationType::AND; return COMPARE; }
 NOT { yylval.optype = OperationType::NOT; return COMPARE; }
+IN { yylval.optype = OperationType::IN; return COMPARE; }
 "=" { yylval.optype = OperationType::EQ; return COMPARE; }
 "<>" | 
 "!=" { yylval.optype = OperationType::NEQ; return COMPARE; }
