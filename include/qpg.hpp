@@ -4,4 +4,8 @@
 #include <iostream>
 #include <string>
 
-std::unique_ptr<Ast> parse_input(const std::string& str);
+struct AstWrapper {
+  std::unique_ptr<Ast> ast;
+};
+
+int parse_input(const std::string &str, AstWrapper &res);

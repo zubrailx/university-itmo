@@ -1,6 +1,7 @@
 
 /* %define parse.error verbose */
-/* %param { yyscan_t scanner } */
+
+%parse-param { AstWrapper &parsed_result }
 
 %code top{
 #include <cstdio>
@@ -12,6 +13,9 @@
 
 %code requires {
 #include <ast.hpp>
+#include <qpg.hpp>
+
+void yyerror(AstWrapper &parsed_result, const char *s, ...);
 }
 
 
@@ -24,12 +28,6 @@
 
   Ast* nterm;
 }
-
-%{
-Ast * parsed_result;
-
-void yyerror(const char *s, ...);
-%}
 
 /* parameters */
 %token <sval> NAME
@@ -72,8 +70,8 @@ void yyerror(const char *s, ...);
 %%
 
 stmt_list: 
-  stmt ';' YYEOF { parsed_result = $1; }
-| stmt_list stmt ';' YYEOF { parsed_result = $1; }
+  stmt ';' YYEOF { parsed_result.ast = std::unique_ptr<Ast>($1); }
+| stmt_list stmt ';' YYEOF { parsed_result.ast = std::unique_ptr<Ast>($1); }
 ;
 
 stmt: 
@@ -188,7 +186,7 @@ create_definition:
 assign_column_list:
   column_name COMPARE value 
   { if ($2 != OperationType::EQ) { 
-    yyerror("bad update assignment to '%s', $1"); YYERROR; 
+    yyerror(parsed_result, "bad update assignment to '%s', $1"); YYERROR; 
     }
     auto colval = new AstColumnValue($1, (AstValue*)$3);
     $$ = new AstList<AstColumnValue>(colval, AstType::COLUMN_VALUE_LIST);
@@ -196,7 +194,7 @@ assign_column_list:
   }
 | assign_column_list ',' column_name COMPARE value
   { if ($4 != OperationType::EQ) { 
-    yyerror("bad update assignment to '%s', $1"); YYERROR; 
+    yyerror(parsed_result, "bad update assignment to '%s', $1"); YYERROR; 
     }
     auto colval = new AstColumnValue($3, (AstValue*)$5);
     auto collist = (AstList<AstColumnValue>*)$1;
@@ -258,7 +256,7 @@ value:
 
 %%
 
-void yyerror(const char *s, ...){
+void yyerror(AstWrapper &parsed_result, const char *s, ...){
   extern int yylineno;
   va_list lst;
   va_start(lst, s);

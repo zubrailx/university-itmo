@@ -9,7 +9,7 @@ int fileno(FILE *stream);
 #include <ast.hpp>
 #include <cstring>
 
-void yyerror(const char *s, ...);
+AstWrapper aw_tmp;
 %}
 
 
@@ -73,6 +73,6 @@ false { yylval.ival = 0; return BOOLEAN; }
 
 {space} { }
 
-. { yyerror("Lexer: undefined character read: '%s'", yytext); }
+. { yyerror(aw_tmp, "Lexer: undefined character read: '%s'", yytext); }
 
 %%
