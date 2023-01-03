@@ -36,7 +36,9 @@ enum class JoinType {
   CROSS_JOIN,
 };
 
-enum class CompareType { EQ, NEQ, LO, GR, LEQ, GEQ, BOOL, AND, OR };
+enum class StatementType { CONST, UNARY, BINARY, COLUMN };
+
+enum class OperationType { EQ, NEQ, LO, GR, LEQ, GEQ, NOT, AND, OR };
 
 enum class DataType { STR, BOOL, DOUBLE, INT32 };
 
@@ -268,35 +270,105 @@ public:
 // AstStatement {{{
 class AstStatement : public Ast {
 private:
-  bool m_result;
-  std::unique_ptr<Ast> m_lsv;
-  std::unique_ptr<Ast> m_rsv;
-  CompareType m_ctype;
+  StatementType m_stype;
+
+protected:
+  std::string str_repr() const {
+    std::string out;
+    out += "stype: ";
+    out += std::to_string(static_cast<int>(m_stype));
+    return out;
+  }
 
 public:
-  AstStatement(bool result) : Ast(AstType::STATEMENT) {
-    m_result = result;
-    m_ctype = CompareType::BOOL;
+  AstStatement(StatementType stype) : Ast(AstType::STATEMENT) {
+    m_stype = stype;
   }
-  AstStatement(Ast *left, CompareType ctype, Ast *right)
-      : Ast(AstType::STATEMENT) {
-    m_lsv = std::unique_ptr<Ast>(left);
-    m_rsv = std::unique_ptr<Ast>(right);
-    m_ctype = ctype;
+};
+
+class AstStatementConst : public AstStatement {
+private:
+  std::unique_ptr<AstValue> m_res;
+
+public:
+  AstStatementConst(AstValue *res) : AstStatement(StatementType::CONST) {
+    m_res = std::unique_ptr<AstValue>(res);
   }
   std::string repr() const {
-    std::string out;
-    out += "ctype: ";
-    out += std::to_string(static_cast<int>(m_ctype));
-    if (m_ctype == CompareType::BOOL) {
-      return repr_extend(out);
-    }
+    std::string out = AstStatement::str_repr();
     out += ", ";
-    out += "lsv: ";
-    out += m_lsv.get()->repr();
+    out += "res: ";
+    out += m_res.get()->repr();
+    return repr_extend(out);
+  }
+};
+
+class AstStatementColumn : public AstStatement {
+private:
+  std::unique_ptr<AstColumn> m_col;
+
+public:
+  AstStatementColumn(AstColumn *col) : AstStatement(StatementType::COLUMN) {
+    m_col = std::unique_ptr<AstColumn>(col);
+  }
+  std::string repr() const {
+    std::string out = AstStatement::str_repr();
     out += ", ";
-    out += "rsv: ";
-    out += m_rsv.get()->repr();
+    out += "column: ";
+    out += m_col.get()->repr();
+    return repr_extend(out);
+  }
+};
+
+class AstStatementUnary : public AstStatement {
+private:
+  std::unique_ptr<AstStatement> m_operand;
+  OperationType m_op;
+
+public:
+  AstStatementUnary(AstStatement *operand, OperationType op)
+      : AstStatement(StatementType::UNARY) {
+    m_operand = std::unique_ptr<AstStatement>(operand);
+    m_op = op;
+  }
+
+  std::string repr() const {
+    std::string out = AstStatement::str_repr();
+    out += ", ";
+    out += "operand: ";
+    out += m_operand.get()->repr();
+    out += ", ";
+    out += "op_type: ";
+    out += std::to_string(static_cast<int>(m_op));
+    return repr_extend(out);
+  }
+};
+
+class AstStatementBinary : public AstStatement {
+private:
+  std::unique_ptr<AstStatement> m_left;
+  std::unique_ptr<AstStatement> m_right;
+  OperationType m_op;
+
+public:
+  AstStatementBinary(AstStatement *left, AstStatement *right, OperationType op)
+      : AstStatement(StatementType::BINARY) {
+    m_left = std::unique_ptr<AstStatement>(left);
+    m_right = std::unique_ptr<AstStatement>(right);
+    m_op = op;
+  }
+
+  std::string repr() const {
+    std::string out = AstStatement::str_repr();
+    out += ", ";
+    out += "op_left: ";
+    out += m_left.get()->repr();
+    out += ", ";
+    out += "op_right: ";
+    out += m_right.get()->repr();
+    out += ", ";
+    out += "op_type: ";
+    out += std::to_string(static_cast<int>(m_op));
     return repr_extend(out);
   }
 };
@@ -548,7 +620,6 @@ public:
 };
 // }}}
 
-
 // AstCreate {{{
 class AstCreate : public Ast {
 private:
@@ -556,7 +627,8 @@ private:
   std::unique_ptr<AstList<AstColumnType>> m_collist;
 
 public:
-  AstCreate(const char *table, AstList<AstColumnType> *collist) : Ast(AstType::CREATE) {
+  AstCreate(const char *table, AstList<AstColumnType> *collist)
+      : Ast(AstType::CREATE) {
     m_table = std::string(table);
     m_collist = std::unique_ptr<AstList<AstColumnType>>(collist);
   }

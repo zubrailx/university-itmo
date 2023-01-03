@@ -19,7 +19,7 @@
   int ival;
   double fval;
   char *sval;
-  CompareType ctype;
+  OperationType optype;
   DataType dtype;
 
   Ast* nterm;
@@ -60,13 +60,9 @@ void yyerror(const char *s, ...);
 %token '*'
 
 /* operators with precedence */
-%left OR
-%left AND
-%nonassoc IN
-%left NOT
-%left <ctype> COMPARE /* = != > < <= >= */
+%left <optype> COMPARE /* = != > < <= >= and or not */
 
-%nterm <nterm> value value_list column column_list column_list_h table_source table_ref condition join_table table_subquery statement assign_column_list create_definition create_loc_list
+%nterm <nterm> value value_list column column_list column_list_h table_source table_ref  join_table table_subquery statement assign_column_list create_definition create_loc_list
 %nterm <nterm> stmt stmt_list select_stmt update_stmt delete_stmt insert_stmt drop_stmt create_stmt
 
 %nterm <sval> table_name column_name opt_as_alias as_alias
@@ -90,7 +86,7 @@ stmt:
 
   /* SELECT */
 select_stmt:
-  SELECT column_list FROM table_ref WHERE condition {
+  SELECT column_list FROM table_ref WHERE statement {
     $$ = new AstSelect((AstColumnList*)$2, $4, (AstStatement*)$6); 
   }
 | SELECT column_list FROM table_ref {$$ = new AstSelect((AstColumnList*)$2, $4, nullptr); }
@@ -126,7 +122,7 @@ as_alias:
 
   /* UPDATE */
 update_stmt:
-  UPDATE table_name SET assign_column_list WHERE condition { 
+  UPDATE table_name SET assign_column_list WHERE statement { 
     $$ = new AstUpdate($2, (AstList<AstColumnValue>*)$4, (AstStatement*)$6); 
     free($2);
   }
@@ -138,7 +134,7 @@ update_stmt:
 
   /* DELETE */
 delete_stmt:
-  DELETE FROM table_name WHERE condition {
+  DELETE FROM table_name WHERE statement {
     $$ = new AstDelete($3, (AstStatement*)$5);
     free($3);
   }
@@ -191,7 +187,7 @@ create_definition:
 
 assign_column_list:
   column_name COMPARE value 
-  { if ($2 != CompareType::EQ) { 
+  { if ($2 != OperationType::EQ) { 
     yyerror("bad update assignment to '%s', $1"); YYERROR; 
     }
     auto colval = new AstColumnValue($1, (AstValue*)$3);
@@ -199,7 +195,7 @@ assign_column_list:
     free($1);
   }
 | assign_column_list ',' column_name COMPARE value
-  { if ($4 != CompareType::EQ) { 
+  { if ($4 != OperationType::EQ) { 
     yyerror("bad update assignment to '%s', $1"); YYERROR; 
     }
     auto colval = new AstColumnValue($3, (AstValue*)$5);
@@ -235,18 +231,16 @@ table_name:
   NAME { $$ = $1; }
 ;
 
-condition:
-  condition AND condition { $$ = new AstStatement($1, CompareType::AND, $3); }
-| condition OR condition { $$ = new AstStatement($1, CompareType::OR, $3); }
-| '(' condition ')' { $$ = $2; }
-| statement {}
-;
-
 statement:
-  BOOLEAN { $$ = new AstStatement($1); }
-| column COMPARE column { $$ = new AstStatement($1, $2, $3); }
-| column COMPARE value { $$ = new AstStatement($1, $2, $3); }
-| value COMPARE column { $$ = new AstStatement($1, $2, $3); }
+  value { $$ = new AstStatementConst((AstValue*)$1); }
+| column { $$ = new AstStatementColumn((AstColumn*)$1); }
+| '(' statement ')' { $$ = $2; }
+| statement COMPARE statement { 
+    $$ = new AstStatementBinary((AstStatement*)$1, (AstStatement*)$3, $2); 
+  }
+| COMPARE statement { 
+    $$ = new AstStatementUnary((AstStatement*)$2, $1); 
+  }
 ;
 
 value_list:

@@ -46,22 +46,19 @@ INT32 { yylval.dtype = DataType::INT32; return DTYPE; }
 
 [.,*();] { return yytext[0]; }
 
-OR { return OR; }
-AND { return AND; }
-IN { return IN; }
-NOT { return NOT; }
-
-"=" { yylval.ctype = CompareType::EQ; return COMPARE; }
+OR { yylval.optype = OperationType::OR; return COMPARE; }
+AND { yylval.optype = OperationType::AND; return COMPARE; }
+NOT { yylval.optype = OperationType::NOT; return COMPARE; }
+"=" { yylval.optype = OperationType::EQ; return COMPARE; }
 "<>" | 
-"!=" { yylval.ctype = CompareType::NEQ; return COMPARE; }
-">" { yylval.ctype = CompareType::GR; return COMPARE; }
-"<" { yylval.ctype = CompareType::LO; return COMPARE; }
-"<=" { yylval.ctype = CompareType::LEQ; return COMPARE; }
-">=" { yylval.ctype = CompareType::GEQ; return COMPARE; }
+"!=" { yylval.optype = OperationType::NEQ; return COMPARE; }
+">" { yylval.optype = OperationType::GR; return COMPARE; }
+"<" { yylval.optype = OperationType::LO; return COMPARE; }
+"<=" { yylval.optype = OperationType::LEQ; return COMPARE; }
+">=" { yylval.optype = OperationType::GEQ; return COMPARE; }
 
 true { yylval.ival = 1; return BOOLEAN; }
 false { yylval.ival = 0; return BOOLEAN; }
-
 {int} { yylval.ival = atoi(yytext); return INTNUM; }
 {float} { yylval.fval = atof(yytext); return FLOATNUM; }
 {symbol} { 
