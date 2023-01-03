@@ -242,3 +242,10 @@ Create table:
 В ходе выполнения данной лабораторной работы я постарался разобраться с тем, как использовать bison, flex, а также особенностями различных парсеров, такими как парсеры Top-down, Bottom-up, LL, LR, LL, LL(k), что значат эти аббревиатуры.
 
 P.S. Реализации находятся в директориях `src`, `include`.
+
+P.P.S. Обновил код, чтобы можно было в одну строчку несколько запросов писать.
+
+```console
+> select * from t1; select * from t2;
+{ ast_type: 8, list: [ { ast_type: 13, column_list: { ast_type: 3, do_all: true, list: [  ] }, table_ref: { ast_type: 9, has_alias: false, name: t1 }, has_cond: false }, { ast_type: 13, column_list: { ast_type: 3, do_all: true, list: [  ] }, table_ref: { ast_type: 9, has_alias: false, name: t2 }, has_cond: false } ] }
+```

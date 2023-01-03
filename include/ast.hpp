@@ -20,6 +20,8 @@ enum class AstType {
   COLUMN_TYPE,
   COLUMN_TYPE_LIST,
 
+  QUERY_LIST,
+
   TABLE,
   JOIN,
   STATEMENT,
@@ -149,11 +151,11 @@ protected:
 public:
   AstList(AstList<T> *lst, T *last) : Ast(lst->getType()) {
     std::swap(m_lst, lst->m_lst);
-    m_lst.push_back(std::unique_ptr<T>(last));
+    m_lst.emplace_back(last);
   }
 
   AstList(T *single, AstType type) : Ast(type) {
-    m_lst.push_back(std::unique_ptr<T>(single));
+    m_lst.emplace_back(single);
   }
 
   AstList(AstType type) : Ast(type) {}

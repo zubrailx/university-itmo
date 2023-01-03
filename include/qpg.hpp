@@ -5,7 +5,13 @@
 #include <string>
 
 struct AstWrapper {
-  std::unique_ptr<Ast> ast;
+  AstList<Ast>* list = nullptr;
+
+  ~AstWrapper() {
+    if (list) {
+      delete list;
+    }
+  }
 };
 
 int parse_input(const std::string &str, AstWrapper &res);

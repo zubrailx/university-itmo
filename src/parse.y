@@ -61,17 +61,26 @@ void yyerror(AstWrapper &parsed_result, const char *s, ...);
 %left <optype> COMPARE /* = != > < <= >= and or not */
 
 %nterm <nterm> value value_list column column_list column_list_h table_source table_ref  join_table table_subquery statement assign_column_list create_definition create_loc_list
-%nterm <nterm> stmt stmt_list select_stmt update_stmt delete_stmt insert_stmt drop_stmt create_stmt
-
+%nterm <nterm> stmt stmt_list select_stmt update_stmt delete_stmt insert_stmt drop_stmt create_stmt stmt_list_h
 %nterm <sval> table_name column_name opt_as_alias as_alias
 
 %start stmt_list
 
 %%
 
-stmt_list: 
-  stmt ';' YYEOF { parsed_result.ast = std::unique_ptr<Ast>($1); }
-| stmt_list stmt ';' YYEOF { parsed_result.ast = std::unique_ptr<Ast>($1); }
+stmt_list:
+  stmt_list_h { 
+    auto lst = (AstList<Ast>*)$1; 
+    parsed_result.list = lst; 
+  }
+
+stmt_list_h: 
+  stmt ';' { $$ = new AstList<Ast>($1, AstType::QUERY_LIST); }
+| stmt_list stmt ';' YYEOF { 
+    auto lst = (AstList<Ast>*) $1;
+    $$ = new AstList<Ast>(lst, $2);
+    delete $1; 
+  }
 ;
 
 stmt: 

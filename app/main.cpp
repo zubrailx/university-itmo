@@ -13,7 +13,7 @@ int main() {
       if (code) {
         std::cout << "ret_code: " << code << std::endl;
       } else {
-        std::cout << ast_wr.ast->repr() << std::endl;
+        std::cout << ast_wr.list->repr() << std::endl;
       }
       buf.clear();
       std::cout << "> ";
