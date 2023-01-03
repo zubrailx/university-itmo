@@ -4,8 +4,8 @@
 %{
 int fileno(FILE *stream);
 
-#include <subtok.hpp>
 #include "parser.hpp"
+#include <ast.hpp>
 #include <cstring>
 
 void yyerror(const char *s, ...);

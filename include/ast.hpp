@@ -1,8 +1,7 @@
 #pragma once
 
-#include <subtok.hpp>
-
 #include <cassert>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <string>
@@ -11,10 +10,35 @@
 enum class AstType {
   VARIABLE,
   VARIABLE_LIST,
+
   COLUMN,
   COLUMN_LIST,
-  STATEMENT_LIST,
+
+  COLUMN_VALUE,
+  COLUMN_VALUE_LIST,
+
+  COLUMN_TYPE,
+  COLUMN_TYPE_LIST,
+
+  TABLE,
+  JOIN,
+  STATEMENT,
+  SUBQUERY,
+  SELECT,
+  UPDATE,
+  DELETE,
+  INSERT,
+  DROP,
+  CREATE
 };
+
+enum class JoinType {
+  CROSS_JOIN,
+};
+
+enum class CompareType { EQ, NEQ, LO, GR, LEQ, GEQ, BOOL, AND, OR };
+
+enum class DataType { STR, BOOL, DOUBLE, INT32 };
 
 // Ast {{{
 class Ast {
@@ -137,21 +161,20 @@ public:
 // }}}
 
 // Column {{{
-struct Column : Ast {
+struct AstColumn : Ast {
 private:
   bool m_htn; // has table name
   std::string m_table;
   std::string m_column;
 
 public:
-  Column(std::string &&column)
-      : Ast(AstType::COLUMN), m_column(std::move(column)) {
+  AstColumn(const char *column)
+      : Ast(AstType::COLUMN), m_column(std::string(column)) {
     m_htn = false;
   }
 
-  Column(std::string &&table, std::string &&column)
-      : Column(std::move(column)) {
-    m_table = std::move(table);
+  AstColumn(const char *table, const char *column) : AstColumn(column) {
+    m_table = std::string(table);
     m_htn = true;
   }
 
@@ -163,20 +186,388 @@ public:
   }
 };
 
-class ColumnList : public AstList<Column> {
+class AstColumnList : public AstList<AstColumn> {
 private:
   bool do_all = false; // select all columns
 public:
-  ColumnList(ColumnList *lst, Column *last) : AstList(lst, last) {}
-  ColumnList(Column *col) : AstList(col, AstType::COLUMN_LIST) {}
-  ColumnList() : AstList(AstType::COLUMN_LIST) { do_all = true; }
+  AstColumnList(AstColumnList *lst, AstColumn *last) : AstList(lst, last) {}
+  AstColumnList(AstColumn *col) : AstList(col, AstType::COLUMN_LIST) {}
+  AstColumnList() : AstList(AstType::COLUMN_LIST) { do_all = true; }
 
   std::string repr() const override {
     std::string out;
     out += "do_all: " + std::string(do_all ? "true" : "false");
     out += ", ";
-    out += AstList<Column>::_repr();
+    out += AstList<AstColumn>::_repr();
     return repr_extend(out);
   }
 };
 // }}}
+
+// AstTable {{{
+class AstTable : public Ast {
+private:
+  std::string m_name;
+  bool m_has_alias = false;
+  std::string m_alias;
+
+public:
+  AstTable(std::string &&name, const char *alias) : Ast(AstType::TABLE) {
+    if (alias) {
+      m_has_alias = true;
+      m_alias = std::string(alias);
+    }
+    m_name = std::move(name);
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "has_alias: ";
+    out += m_has_alias ? "true" : "false";
+    if (m_has_alias) {
+      out += ", ";
+      out += "alias: ";
+      out += m_alias;
+    }
+    out += ", ";
+    out += "name: ";
+    out += m_name;
+    return repr_extend(out);
+  }
+};
+// }}}
+
+// AstJoin {{{
+class AstJoin : public Ast {
+private:
+  std::unique_ptr<Ast> m_lsv;
+  JoinType m_jtype;
+  std::unique_ptr<Ast> m_rsv;
+
+public:
+  AstJoin(Ast *lsv, JoinType jtype, Ast *rsv) : Ast(AstType::JOIN) {
+    m_lsv = std::unique_ptr<Ast>(lsv);
+    m_jtype = jtype;
+    m_rsv = std::unique_ptr<Ast>(rsv);
+  }
+  std::string repr() const {
+    std::string out;
+    out += "jtype: ";
+    out += std::to_string(static_cast<int>(m_jtype));
+    out += ", ";
+    out += "lsv: ";
+    out += m_lsv.get()->repr();
+    out += ", ";
+    out += "rsv: ";
+    out += m_rsv.get()->repr();
+    return repr_extend(out);
+  }
+};
+// }}}
+
+// AstStatement {{{
+class AstStatement : public Ast {
+private:
+  bool m_result;
+  std::unique_ptr<Ast> m_lsv;
+  std::unique_ptr<Ast> m_rsv;
+  CompareType m_ctype;
+
+public:
+  AstStatement(bool result) : Ast(AstType::STATEMENT) {
+    m_result = result;
+    m_ctype = CompareType::BOOL;
+  }
+  AstStatement(Ast *left, CompareType ctype, Ast *right)
+      : Ast(AstType::STATEMENT) {
+    m_lsv = std::unique_ptr<Ast>(left);
+    m_rsv = std::unique_ptr<Ast>(right);
+    m_ctype = ctype;
+  }
+  std::string repr() const {
+    std::string out;
+    out += "ctype: ";
+    out += std::to_string(static_cast<int>(m_ctype));
+    if (m_ctype == CompareType::BOOL) {
+      return repr_extend(out);
+    }
+    out += ", ";
+    out += "lsv: ";
+    out += m_lsv.get()->repr();
+    out += ", ";
+    out += "rsv: ";
+    out += m_rsv.get()->repr();
+    return repr_extend(out);
+  }
+};
+// }}}
+
+// AstSelect {{{
+class AstSelect : public Ast {
+private:
+  std::unique_ptr<AstColumnList> m_collist;
+  std::unique_ptr<Ast> m_table_ref;
+
+  std::unique_ptr<AstStatement> m_cond;
+  bool m_has_cond;
+
+public:
+  AstSelect(AstColumnList *collist, Ast *table_ref, AstStatement *cond)
+      : Ast(AstType::SELECT) {
+    m_collist = std::unique_ptr<AstColumnList>(collist);
+    m_table_ref = std::unique_ptr<Ast>(table_ref);
+    m_has_cond = (bool)cond;
+    if (m_has_cond) {
+      m_cond = std::unique_ptr<AstStatement>(cond);
+    }
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "column_list: ", out += m_collist.get()->repr();
+    out += ", ";
+    out += "table_ref: ";
+    out += m_table_ref.get()->repr();
+    out += ", ";
+    out += "has_cond: ";
+    out += m_has_cond ? "true" : "false";
+    if (m_has_cond) {
+      out += ", ";
+      out += "cond: ";
+      out += m_cond.get()->repr();
+    }
+    return repr_extend(out);
+  }
+};
+// }}}
+
+// AstSubquery {{{
+class AstSubquery : public Ast {
+private:
+  std::unique_ptr<AstSelect> m_query;
+
+  bool m_has_alias = false;
+  std::string m_alias;
+
+public:
+  AstSubquery(AstSelect *query) : Ast(AstType::SUBQUERY) {
+    m_query = std::unique_ptr<AstSelect>(query);
+  }
+
+  void setAlias(const char *alias) {
+    m_alias = std::string(alias);
+    m_has_alias = true;
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "query: ";
+    out += m_query.get()->repr();
+    out += ", ";
+    out += "has_alias: ";
+    out += m_has_alias ? "true" : "false";
+    if (m_has_alias) {
+      out += ", ";
+      out += "alias: ";
+      out += m_alias;
+    }
+    return repr_extend(out);
+  }
+};
+// }}}
+
+class AstColumnValue : public Ast {
+private:
+  std::unique_ptr<AstColumn> m_column;
+  std::unique_ptr<AstValue> m_value;
+
+public:
+  AstColumnValue(const char *col, AstValue *value)
+      : Ast(AstType::COLUMN_VALUE) {
+    m_column = std::make_unique<AstColumn>(col);
+    m_value = std::unique_ptr<AstValue>(value);
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "column: ";
+    out += m_column.get()->repr();
+    out += ", ";
+    out += "value: ";
+    out += m_value.get()->repr();
+    return repr_extend(out);
+  }
+};
+
+// AstUpdate {{{
+class AstUpdate : public Ast {
+private:
+  std::string m_table;
+  std::unique_ptr<AstList<AstColumnValue>> m_collist;
+
+  std::unique_ptr<AstStatement> m_cond;
+  bool m_has_cond;
+
+public:
+  AstUpdate(const char *table, AstList<AstColumnValue> *collist,
+            AstStatement *cond)
+      : Ast(AstType::UPDATE) {
+    m_table = std::string(table);
+    m_collist = std::unique_ptr<AstList<AstColumnValue>>(collist);
+    m_has_cond = (bool)cond;
+    if (m_has_cond) {
+      m_cond = std::unique_ptr<AstStatement>(cond);
+    }
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "table: ";
+    out += m_table;
+    out += ", ";
+    out += "column_list: ";
+    out += m_collist.get()->repr();
+    out += ", ";
+    out += "has_cond: ";
+    out += m_has_cond ? "true" : "false";
+    if (m_has_cond) {
+      out += ", ";
+      out += "cond: ";
+      out += m_cond.get()->repr();
+    }
+    return repr_extend(out);
+  }
+};
+// }}}
+
+// AstDelete {{{
+class AstDelete : public Ast {
+private:
+  std::string m_table;
+
+  std::unique_ptr<AstStatement> m_cond;
+  bool m_has_cond;
+
+public:
+  AstDelete(const char *table, AstStatement *cond) : Ast(AstType::DELETE) {
+    m_table = std::string(table);
+    m_has_cond = (bool)cond;
+    if (m_has_cond) {
+      m_cond = std::unique_ptr<AstStatement>(cond);
+    }
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "table: ";
+    out += m_table;
+    out += ", ";
+    out += "has_cond: ";
+    out += m_has_cond ? "true" : "false";
+    if (m_has_cond) {
+      out += ", ";
+      out += "cond: ";
+      out += m_cond.get()->repr();
+    }
+    return repr_extend(out);
+  }
+};
+///}}}
+
+// AstDelete {{{
+class AstInsert : public Ast {
+private:
+  std::string m_table;
+
+  std::unique_ptr<AstColumnList> m_collist;
+  std::unique_ptr<AstList<AstValue>> m_vallist;
+
+public:
+  AstInsert(const char *table, AstColumnList *collist,
+            AstList<AstValue> *vallist)
+      : Ast(AstType::INSERT) {
+    m_table = std::string(table);
+    m_collist = std::unique_ptr<AstColumnList>(collist);
+    m_vallist = std::unique_ptr<AstList<AstValue>>(vallist);
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "table: ";
+    out += m_table;
+    out += ", ";
+    out += "collist: ";
+    out += m_collist.get()->repr();
+    out += ", ";
+    out += "vallist: ";
+    out += m_vallist.get()->repr();
+    return repr_extend(out);
+  }
+};
+// }}}
+
+// AstDelete {{{
+class AstDrop : public Ast {
+private:
+  std::string m_table;
+
+public:
+  AstDrop(const char *table) : Ast(AstType::DROP) {
+    m_table = std::string(table);
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "table: ";
+    out += m_table;
+    return repr_extend(out);
+  }
+};
+
+// {{{ AstColumnType
+class AstColumnType : public Ast {
+private:
+  std::unique_ptr<AstColumn> m_column;
+  DataType m_type;
+
+public:
+  AstColumnType(AstColumn *column, DataType type) : Ast(AstType::COLUMN_TYPE) {
+    m_column = std::unique_ptr<AstColumn>(column);
+    m_type = type;
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "column: ";
+    out += m_column.get()->repr();
+    out += ", ";
+    out += "type: ";
+    out += std::to_string(static_cast<int>(m_type));
+    return repr_extend(out);
+  }
+};
+// }}}
+
+
+// AstCreate {{{
+class AstCreate : public Ast {
+private:
+  std::string m_table;
+  std::unique_ptr<AstList<AstColumnType>> m_collist;
+
+public:
+  AstCreate(const char *table, AstList<AstColumnType> *collist) : Ast(AstType::CREATE) {
+    m_table = std::string(table);
+    m_collist = std::unique_ptr<AstList<AstColumnType>>(collist);
+  }
+
+  std::string repr() const {
+    std::string out;
+    out += "table: ";
+    out += m_table;
+    out += ", ";
+    out += "collist: ";
+    out += m_collist.get()->repr();
+    return repr_extend(out);
+  }
+};
