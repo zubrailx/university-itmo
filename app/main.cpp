@@ -9,6 +9,6 @@ int main() {
   // auto ast = parse_input("DROP TABLE idkwhat;");
   auto ast = parse_input("CREATE TABLE idk ( col1 INT32, col2 DOUBLE, col3 BOOL, col4 STR);");
   // auto ast = parse_input("select * from table1 where true;");
-  std::cout << ast.get()->repr();
+  std::cout << ast.get()->repr() << std::endl;
   return 0;
 }

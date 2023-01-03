@@ -1,5 +1,6 @@
-%option noyywrap nodefault yylineno case-insensitive
-%option debug
+%option noyywrap nodefault yylineno case-insensitive noinput nounput 
+/* %option reentrant bison-bridge */
+/* %option debug */
 
 %{
 int fileno(FILE *stream);
@@ -74,7 +75,6 @@ false { yylval.ival = 0; return BOOLEAN; }
 }
 
 {space} { }
-<<EOF>> { fprintf(stdout, "%d", yylineno); yyterminate(); }
 
 . { yyerror("Lexer: undefined character read: '%s'", yytext); }
 

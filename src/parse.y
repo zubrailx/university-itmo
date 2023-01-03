@@ -1,17 +1,19 @@
-%{
-#include "lexer.hpp"
+
+/* %define parse.error verbose */
+/* %param { yyscan_t scanner } */
+
+%code top{
 #include <cstdio>
 #include <cstdarg>
-
 #include <iostream>
 
-%}
+#include "lexer.hpp"
+}
 
 %code requires {
 #include <ast.hpp>
 }
 
-%define parse.error verbose
 
 %union {
   int ival;
