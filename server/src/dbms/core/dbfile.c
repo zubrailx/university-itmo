@@ -1,6 +1,6 @@
 #include "dbfile.h"
 
-#include <util/define.h>
+#include <dbms/util/define.h>
 
 #include <malloc.h>
 #include <string.h>

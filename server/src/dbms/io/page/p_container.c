@@ -2,7 +2,7 @@
 
 #include <malloc.h>
 #include <stddef.h>
-#include <util/define.h>
+#include <dbms/util/define.h>
 
 PAGE_CONSTRUCT_DEFAULT_IMPL(struct page_container, container, PAGE_CONTAINER)
 PAGE_DESTRUCT_DEFAULT_IMPL(struct page_container, container)

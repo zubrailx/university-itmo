@@ -1,8 +1,7 @@
 #include <malloc.h>
 
-#include <database.h>
-
-#include <util/define.h>
+#include <dbms/database.h>
+#include <dbms/util/define.h>
 
 #include "core/dbfile.h"
 #include "core/dbmeta.h"

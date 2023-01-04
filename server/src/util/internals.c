@@ -1,4 +1,4 @@
-#include <util/internals.h>
+#include <dbms/util/internals.h>
 
 extern inline bool fileoff_is_null(struct fileoff_t off);
 extern inline struct pageoff_t get_pageoff_t(uint32_t size);

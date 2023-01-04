@@ -2,8 +2,8 @@
 
 #include <stddef.h>
 
-#include <util/define.h>
-#include <util/internals.h>
+#include <dbms/util/define.h>
+#include <dbms/util/internals.h>
 
 typedef struct page_index {
   pageoff_t start;

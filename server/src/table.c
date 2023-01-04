@@ -1,7 +1,7 @@
 #include "dbms/op_schema.h"
 #include "dbms/op_table.h"
 #include "dbms/page.h"
-#include <table.h>
+#include <dbms/table.h>
 
 int row_list_insert(struct dbms *dbms, const char *table_name,
                     struct dto_row_list *list) {

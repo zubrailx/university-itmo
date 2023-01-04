@@ -1,7 +1,7 @@
 #pragma once
 
 #include "dto/dto_table.h"
-#include <util/internals.h>
+#include <dbms/util/internals.h>
 
 struct dbms;
 struct dp_tuple;

@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include <util/internals.h>
+#include <dbms/util/internals.h>
 
 #include "page/p_base.h"
 

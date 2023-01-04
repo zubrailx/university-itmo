@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include <database.h>
+#include <dbms/database.h>
 
 struct meta;
 

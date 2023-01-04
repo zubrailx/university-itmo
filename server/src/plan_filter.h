@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stddef.h>
-#include <util/column_types.h>
+#include <dbms/util/column_types.h>
 
 struct tp_tuple;
 struct plan_table_info;

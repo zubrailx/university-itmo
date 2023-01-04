@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dto_table.h>
+#include <dbms/dto_table.h>
 #include <stdbool.h>
 
 typedef struct dto_table_column {

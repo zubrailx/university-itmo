@@ -5,7 +5,7 @@
 #include "dbms/page.h"
 #include "dbms/table.h"
 #include "plan_filter.h"
-#include <plan.h>
+#include <dbms/plan.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

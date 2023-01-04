@@ -2,7 +2,7 @@
 
 #include "p_base.h"
 #include "sso.h"
-#include <util/column_types.h>
+#include <dbms/util/column_types.h>
 
 // NOTE: currently without indexes
 struct dp_tuple;

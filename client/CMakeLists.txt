@@ -112,17 +112,3 @@ if (DEFINED TSTS)
   add_test(NAME ${PROJECT_TEST_NAME} COMMAND $<TARGET_FILE:${PROJECT_TEST_NAME}> 
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
-# -----------------------------------------------------------------------------
-# Formatting
-# -----------------------------------------------------------------------------
-add_custom_target(clang-format
-        COMMAND
-        clang-format
-        -style=file
-        -i
-        ${LIB_SRCS} ${LIB_HDRS} ${EXEC_SRC} ${TSTS}
-        WORKING_DIRECTORY
-        ${PROJECT_SOURCE_DIR}
-        COMMENT
-        "Running clang-format on sources..."
-)

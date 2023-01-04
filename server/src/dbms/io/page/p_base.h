@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 
-#include <util/internals.h>
+#include <dbms/util/internals.h>
 
 typedef struct base_header {
   uint8_t type;

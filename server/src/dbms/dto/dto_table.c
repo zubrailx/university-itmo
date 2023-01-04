@@ -1,10 +1,8 @@
 #include "dto_table.h"
-#include <dto_table.h>
+#include <dbms/util/define.h>
 
 #include <malloc.h>
 #include <string.h>
-
-#include <util/define.h>
 
 static dto_table_column *
 dto_table_column_construct(const char *name, const enum table_column_type type,

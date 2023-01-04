@@ -2,7 +2,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include <util/internals.h>
+#include <dbms/util/internals.h>
 
 typedef uint32_t slot_number;
 

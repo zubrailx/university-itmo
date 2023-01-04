@@ -5,8 +5,8 @@
 #include "dbms/table.h"
 
 #include <assert.h>
-#include <plan.h>
-#include <plan_funcs.h>
+#include <dbms/plan.h>
+#include <dbms/plan_funcs.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
