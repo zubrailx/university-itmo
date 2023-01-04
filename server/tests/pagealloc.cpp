@@ -9,8 +9,7 @@ extern "C" {
 #include "../src/dbms/iter.h"
 #include "../src/dbms/page.h"
 #include "../src/dbms/pagealloc.h"
-#include "database.h"
-#include <database.h>
+#include <dbms/database.h>
 }
 
 TEST(pagealloc, test) {

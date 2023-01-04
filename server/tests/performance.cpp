@@ -6,15 +6,15 @@ extern "C" {
 #include "../src/dbms/dto/dto_table.h"
 #include "../src/dbms/op_dbms.c"
 #include "../src/util/printers.h"
-#include <database.h>
-#include <dto_row.h>
-#include <dto_table.h>
-#include <plan.h>
-#include <plan_filter.h>
-#include <plan_funcs.h>
-#include <schema.h>
-#include <table.h>
-#include <util/column_types.h>
+#include <dbms/database.h>
+#include <dbms/dto_row.h>
+#include <dbms/dto_table.h>
+#include <dbms/plan.h>
+#include <dbms/plan_filter.h>
+#include <dbms/plan_funcs.h>
+#include <dbms/schema.h>
+#include <dbms/table.h>
+#include <dbms/util/column_types.h>
 }
 
 

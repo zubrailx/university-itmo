@@ -251,9 +251,9 @@ statement:
 ;
 
 value_list:
-  value { $$ = new AstList((AstValue*)$1, AstType::VARIABLE_LIST); }
+  value { $$ = new AstList<AstValue>((AstValue*)$1, AstType::VARIABLE_LIST); }
 | value_list ',' value 
-  { $$ = new AstList((AstList<AstValue>*)$1, (AstValue*)$3); delete $1; }
+  { $$ = new AstList<AstValue>((AstList<AstValue>*)$1, (AstValue*)$3); delete $1; }
 ;
 
 value:

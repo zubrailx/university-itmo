@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include <util/internals.h>
+#include <dbms/util/internals.h>
 }
 
 TEST(types, sizes) {

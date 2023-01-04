@@ -13,9 +13,16 @@ project(dbms
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Let's nicely support folders in IDEs
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   set(CMAKE_CONFIGURATION_TYPES Debug Released Sanitized)
+
+  include(CTest)
 endif()
+
+# External libraries
+set(FETCHCONTENT_QUIET OFF)
+include(FetchContent)
 
 # Library
 add_subdirectory(src)
@@ -29,6 +36,7 @@ endif()
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING)
    AND BUILD_TESTING)
+  enable_testing()
   add_subdirectory(tests)
 endif()
 

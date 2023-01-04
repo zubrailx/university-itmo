@@ -3,11 +3,11 @@
 extern "C" {
 #include "../src/dbms/dto/dto_row.h"
 #include "../src/util/printers.h"
-#include <database.h>
-#include <dto_row.h>
-#include <dto_table.h>
-#include <schema.h>
-#include <table.h>
+#include <dbms/database.h>
+#include <dbms/dto_row.h>
+#include <dbms/dto_table.h>
+#include <dbms/schema.h>
+#include <dbms/table.h>
 }
 
 TEST(table, insert_list) {

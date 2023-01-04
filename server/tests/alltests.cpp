@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include <database.h>
+#include <dbms/database.h>
 }
 
 int test(int argc, char **argv) {

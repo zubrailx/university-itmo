@@ -5,7 +5,7 @@
 extern "C" {
 #include "../src/dbms/core/dbfile.h"
 #include "../src/dbms/core/dbms.h"
-#include <database.h>
+#include <dbms/database.h>
 }
 
 TEST(database_public, create) {
