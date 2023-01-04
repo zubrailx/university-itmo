@@ -62,7 +62,8 @@ void dbms_create_table(const struct dto_table *dto_table, struct dbms *dbms) {
     pageoff_t size = dp_body_page(get_bodyoff_t(typle_size + sizeof(page_index)));
     page_loc = dbms_dp_create(dbms, size, &page);
 
-    assert(dp_insert_table(page, tuple).bytes != 0);
+    int asr = dp_insert_table(page, tuple).bytes;
+    assert(asr != 0);
   }
   // close resources
   dbms_dp_close(&page, page_loc, dbms);

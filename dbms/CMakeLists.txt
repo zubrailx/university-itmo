@@ -15,7 +15,7 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-  set(CMAKE_CONFIGURATION_TYPES Debug Released Sanitized)
+  set(CMAKE_CONFIGURATION_TYPES Debug Release Sanitized)
 
   include(CTest)
 endif()

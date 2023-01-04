@@ -201,7 +201,8 @@ static void dpt_commit(struct dp_tuple *dpt, struct dbms *dbms) {
   // check if columns are equals
   assert(old->header.cols == dpt->header.cols);
   for (size_t i = 0; i < old->header.cols; ++i) {
-    assert(!memcmp(dpt->columns + i, old->columns + i, sizeof(dpt_column)));
+    int asr = !memcmp(dpt->columns + i, old->columns + i, sizeof(dpt_column));
+    assert(asr);
   }
   // update header
   memcpy(&old->header, &dpt->header, sizeof(dpt_header));

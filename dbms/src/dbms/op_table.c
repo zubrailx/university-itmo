@@ -7,7 +7,6 @@
 #include "sso.h"
 #include "table.h"
 #include "table_dist.h"
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
