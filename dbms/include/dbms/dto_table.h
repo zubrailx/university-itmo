@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdbool.h>
 #include <dbms/util/column_types.h>
+#include <stdbool.h>
 
 typedef struct dto_table_column_limits {
   bool is_null;

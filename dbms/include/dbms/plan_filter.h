@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/column_types.h"
+#include <dbms/util/column_types.h>
 
 struct dbms;
 struct fast_binop_func;

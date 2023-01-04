@@ -1,28 +1,8 @@
-cmake_minimum_required(VERSION 3.13)
+project(client LANGUAGES C CXX)
 
-# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-  cmake_policy(SET CMP0135 NEW)
-endif()
-# -----------------------------------------------------------------------------
-# Basic setup
-# -----------------------------------------------------------------------------
-project(qpg 
-  DESCRIPTION "Query plan generator"
-  LANGUAGES C CXX)
+set(PROJECT_EXEC_NAME ${PROJECT_NAME}_exec)
 
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-  # Let's nicely support folders in IDEs
-  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+add_executable(${PROJECT_EXEC_NAME} 
+  main.cpp)
 
-  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-  set(CMAKE_CONFIGURATION_TYPES Debug Released Sanitized)
-endif()
-
-# Library
-add_subdirectory(src)
-
-# Executable
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-  add_subdirectory(apps)
-endif()
+target_link_libraries(${PROJECT_EXEC_NAME} qpg)

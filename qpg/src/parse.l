@@ -6,7 +6,7 @@
 int fileno(FILE *stream);
 
 #include "parser.hpp"
-#include <ast.hpp>
+#include <qpg/ast.hpp>
 #include <cstring>
 
 AstWrapper aw_tmp;

@@ -10,5 +10,15 @@ endif()
 set(PROJECT_NAME csm) # client-server model
 project(${PROJECT_NAME} LANGUAGES C CXX)
 
-add_subdirectory(server)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_CXX_FLAGS "-std=c++2b ${CMAKE_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "-std=c2x ${CMAKE_C_FLAGS}")
+
+# Libs
+add_subdirectory(qpg)
+add_subdirectory(dbms)
+
+# Client-server
 add_subdirectory(client)
+add_subdirectory(server)

@@ -12,8 +12,8 @@
 }
 
 %code requires {
-#include <ast.hpp>
-#include <qpg.hpp>
+#include <qpg/ast.hpp>
+#include <qpg/qpg.hpp>
 
 void yyerror(AstWrapper &parsed_result, const char *s, ...);
 }

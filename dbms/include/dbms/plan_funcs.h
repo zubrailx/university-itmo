@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/column_types.h"
+#include <dbms/util/column_types.h>
 
 #define EXT_UNOP(name) extern struct fast_unop_func name
 #define EXT_BINOP(name) extern struct fast_binop_func name

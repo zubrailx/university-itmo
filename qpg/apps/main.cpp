@@ -1,4 +1,4 @@
-#include <qpg.hpp>
+#include <qpg/qpg.hpp>
 
 int main() {
   std::string buf;

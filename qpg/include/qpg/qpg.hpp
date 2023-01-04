@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast.hpp"
+#include <qpg/ast.hpp>
 #include <iostream>
 #include <string>
 
