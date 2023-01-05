@@ -173,10 +173,9 @@ void operate(struct dbms *dbms) {
   }
 }
 
-int main() {
+void test_dbms() {
   struct dbms *dbms = dbms_create("tmp/table-create_and_drop.bin");
   create_table(dbms);
   operate(dbms);
   dbms_close(&dbms);
-  return 0;
 }

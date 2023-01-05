@@ -20,5 +20,6 @@ add_subdirectory(qpg)
 add_subdirectory(dbms)
 
 # Client-server
+add_subdirectory(proto)
 add_subdirectory(client)
 add_subdirectory(server)

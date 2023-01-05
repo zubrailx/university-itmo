@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message Hello {
+  string hello_world = 1;
+}
