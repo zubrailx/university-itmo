@@ -60,7 +60,8 @@ typedef struct tpt_column_base TPT_COLUMN_BASE tpt_column_base;
   (TPT_COLUMN_SIZE(enum_name) - offsetof(struct tpt_column_##enum_name, entry))
 
 #define TPT_COLUMN_ALIGN(enum_name, offset)                                            \
-  _ALIGNED_PADDING(offset, alignof(typeof(((struct tpt_column_##enum_name *)0)->entry)))
+  _ALIGNED_PADDING(offset,                                                             \
+                   alignof(__typeof__(((struct tpt_column_##enum_name *)0)->entry)))
 
 // define columns
 TPT_COLUMN(bool, COLUMN_TYPE_BOOL)

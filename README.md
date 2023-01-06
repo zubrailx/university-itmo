@@ -2,7 +2,7 @@
 
 - [x] - Написать базовую конфигурацию сервера, чтобы отправить пример запроса
 - [x] - Если база данных не существует, то создать
-- [ ] - Add destructor for ast parser
+- [x] - Add destructor for ast parser
 - [ ] - Сделать create_table, drop_table
 - [ ] - Сделать insert (клиент, сервер)
 - [ ] - Сделать select (клиент, сервер)
