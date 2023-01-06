@@ -9,7 +9,7 @@ int main() {
     buf.append("\n");
     if (line.find(';') != std::string::npos) {
       AstWrapper ast_wr;
-      int code = parse_input(buf, ast_wr);
+      int code = parse_command(buf, ast_wr);
       if (code) {
         std::cout << "ret_code: " << code << std::endl;
       } else {

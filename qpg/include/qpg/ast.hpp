@@ -77,7 +77,8 @@ private:
     virtual const std::type_info &type() const noexcept = 0;
   };
 
-  template <typename T> struct Storage : StorageBase {
+  template<typename T>
+  struct Storage : StorageBase {
     T m_value;
 
     explicit Storage(T &&value) : m_value(std::forward<T>(value)) {}
@@ -85,12 +86,13 @@ private:
     const std::type_info &type() const noexcept override { return typeid(T); }
   };
 
-  template <typename T>
+  template<typename T>
   std::unique_ptr<StorageBase> make_holder(T &&value) const noexcept {
     return std::make_unique<Storage<T>>(std::forward<T>(value));
   }
 
-  template <typename T> std::string str_repr(T &&val) const;
+  template<typename T>
+  std::string str_repr(T &&val) const;
 
 private:
   std::unique_ptr<StorageBase> m_inst;
@@ -98,14 +100,15 @@ private:
   DataType m_dtype;
 
 public:
-  template <typename T>
+  template<typename T>
   AstValue(T &&obj, DataType dtype)
       : Ast(AstType::VARIABLE), m_inst(make_holder(obj)), m_dtype(dtype) {
     // get string at runtime
     strval = std::string(str_repr(std::forward<T>(obj)));
   };
 
-  template <typename T> T getValue() {
+  template<typename T>
+  T getValue() {
     assert(typeid(T) == m_inst->type());
     return static_cast<const Storage<T> *>(m_inst.get())->m_value;
   }
@@ -120,17 +123,20 @@ public:
 };
 
 // idk how to check type using static_assert
-template <> inline std::string AstValue::str_repr(std::string &&val) const {
+template<>
+inline std::string AstValue::str_repr(std::string &&val) const {
   return val;
 }
 
-template <typename T> std::string AstValue::str_repr(T &&val) const {
+template<typename T>
+std::string AstValue::str_repr(T &&val) const {
   return std::to_string(val);
 }
 // }}}
 
 // AstList {{{
-template <typename T> class AstList : public Ast {
+template<typename T>
+class AstList : public Ast {
 protected:
   std::list<std::unique_ptr<T>> m_lst;
 
@@ -154,12 +160,12 @@ public:
     m_lst.emplace_back(last);
   }
 
-  AstList(T *single, AstType type) : Ast(type) {
-    m_lst.emplace_back(single);
-  }
+  AstList(T *single, AstType type) : Ast(type) { m_lst.emplace_back(single); }
 
   AstList(AstType type) : Ast(type) {}
 
+public:
+  const std::list<std::unique_ptr<T>> *getList() const { return &m_lst; }
   std::string repr() const override { return repr_extend(_repr()); }
 };
 // }}}
@@ -167,13 +173,12 @@ public:
 // Column {{{
 struct AstColumn : Ast {
 private:
-  bool m_htn; // has table name
+  bool m_htn;// has table name
   std::string m_table;
   std::string m_column;
 
 public:
-  AstColumn(const char *column)
-      : Ast(AstType::COLUMN), m_column(std::string(column)) {
+  AstColumn(const char *column) : Ast(AstType::COLUMN), m_column(std::string(column)) {
     m_htn = false;
   }
 
@@ -192,7 +197,7 @@ public:
 
 class AstColumnList : public AstList<AstColumn> {
 private:
-  bool do_all = false; // select all columns
+  bool do_all = false;// select all columns
 public:
   AstColumnList(AstColumnList *lst, AstColumn *last) : AstList(lst, last) {}
   AstColumnList(AstColumn *col) : AstList(col, AstType::COLUMN_LIST) {}
@@ -283,9 +288,7 @@ protected:
   }
 
 public:
-  AstStatement(StatementType stype) : Ast(AstType::STATEMENT) {
-    m_stype = stype;
-  }
+  AstStatement(StatementType stype) : Ast(AstType::STATEMENT) { m_stype = stype; }
 };
 
 class AstStatementConst : public AstStatement {
@@ -456,8 +459,7 @@ private:
   std::unique_ptr<AstValue> m_value;
 
 public:
-  AstColumnValue(const char *col, AstValue *value)
-      : Ast(AstType::COLUMN_VALUE) {
+  AstColumnValue(const char *col, AstValue *value) : Ast(AstType::COLUMN_VALUE) {
     m_column = std::make_unique<AstColumn>(col);
     m_value = std::unique_ptr<AstValue>(value);
   }
@@ -483,8 +485,7 @@ private:
   bool m_has_cond;
 
 public:
-  AstUpdate(const char *table, AstList<AstColumnValue> *collist,
-            AstStatement *cond)
+  AstUpdate(const char *table, AstList<AstColumnValue> *collist, AstStatement *cond)
       : Ast(AstType::UPDATE) {
     m_table = std::string(table);
     m_collist = std::unique_ptr<AstList<AstColumnValue>>(collist);
@@ -557,8 +558,7 @@ private:
   std::unique_ptr<AstList<AstValue>> m_vallist;
 
 public:
-  AstInsert(const char *table, AstColumnList *collist,
-            AstList<AstValue> *vallist)
+  AstInsert(const char *table, AstColumnList *collist, AstList<AstValue> *vallist)
       : Ast(AstType::INSERT) {
     m_table = std::string(table);
     m_collist = std::unique_ptr<AstColumnList>(collist);
@@ -586,9 +586,7 @@ private:
   std::string m_table;
 
 public:
-  AstDrop(const char *table) : Ast(AstType::DROP) {
-    m_table = std::string(table);
-  }
+  AstDrop(const char *table) : Ast(AstType::DROP) { m_table = std::string(table); }
 
   std::string repr() const {
     std::string out;
@@ -629,8 +627,7 @@ private:
   std::unique_ptr<AstList<AstColumnType>> m_collist;
 
 public:
-  AstCreate(const char *table, AstList<AstColumnType> *collist)
-      : Ast(AstType::CREATE) {
+  AstCreate(const char *table, AstList<AstColumnType> *collist) : Ast(AstType::CREATE) {
     m_table = std::string(table);
     m_collist = std::unique_ptr<AstList<AstColumnType>>(collist);
   }

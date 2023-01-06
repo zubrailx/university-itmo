@@ -6,6 +6,7 @@
 
 struct AstWrapper {
   AstList<Ast>* list = nullptr;
+  std::string err_msg;
 
   ~AstWrapper() {
     if (list) {
@@ -14,4 +15,4 @@ struct AstWrapper {
   }
 };
 
-int parse_input(const std::string &str, AstWrapper &res);
+int parse_command(const std::string &str, AstWrapper &res);

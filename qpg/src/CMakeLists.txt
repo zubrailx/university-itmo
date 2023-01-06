@@ -23,11 +23,12 @@ bison_target(PARSER
   "./parse.y" 
   "${PARSER_OUT}" DEFINES_FILE "${PARSER_DIR}/parser.hpp")
 
-
 # Add library with flex/bison
 add_library(${PROJECT_LIB_NAME} STATIC ${SRCS} ${LEXER_OUT} ${PARSER_OUT})
 target_include_directories(${PROJECT_LIB_NAME} PUBLIC "../include")
 target_include_directories(${PROJECT_LIB_NAME} PRIVATE ${PARSER_DIR})
+target_link_libraries(${PROJECT_LIB_NAME}
+  )
 
 target_compile_options(${PROJECT_LIB_NAME} PUBLIC
   -Wall

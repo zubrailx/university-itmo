@@ -2,4 +2,6 @@ build/
 .cache/
 tmp/
 compile_commands.json
+cmake-build-debug/
 .null-ls*
+.idea/

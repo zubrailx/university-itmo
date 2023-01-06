@@ -8,9 +8,14 @@
 #include <string>
 
 namespace po = boost::program_options;
+using namespace dbpb;
 
 constexpr int DEFAULT_PORT = 6543;
 const std::string DEFAULT_DBFILE = "tmp/db.bin";
+
+void display_output(DatabaseResponse &response) {
+  std::cout << response.ByteSizeLong() << std::endl;
+}
 
 void run_client(const std::string &dbfile, const int port) {
   std::string buf;
@@ -26,6 +31,8 @@ void run_client(const std::string &dbfile, const int port) {
   DatabaseResponse response;
 
   std::cout << "Created channel on port: " << port << "." << std::endl;
+
+  request.set_db_name(dbfile);
   std::cout << "Working with db: " << dbfile << "." << std::endl;
 
   std::cout << "> ";
@@ -48,19 +55,28 @@ void run_client(const std::string &dbfile, const int port) {
       // append trimmed line
       grpc::ClientContext context;
 
-      request.set_db_name(dbfile);
       request.set_command(buf);
 
-      grpc::Status status = stub->PerformQuery(&context, request, &response);
+      // single response
+      // grpc::Status status = stub->PerformQuery(&context, request, &response);
 
+      // streaming from server
+      std::unique_ptr<grpc::ClientReader<DatabaseResponse>> reader(
+          stub->PerformQuerySS(&context, request));
+
+      while (reader->Read(&response)) {
+        std::cout << "Read element!" << std::endl;
+      }
+
+      grpc::Status status = reader->Finish();
       if (!status.ok()) {
         std::cout << "ERROR(code=" << status.error_code()
                   << "): " << status.error_message() << std::endl;
       }
-      // New iteration
-      buf.clear();
-      std::cout << "> ";
     }
+    // New iteration
+    buf.clear();
+    std::cout << "> ";
   }
 }
 

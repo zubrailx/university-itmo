@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package dbpb;
+
 import "google/protobuf/any.proto";
 
 message DatabaseRequest {
@@ -36,4 +38,5 @@ message DatabaseResponse {
 
 service DatabaseQuery {
   rpc PerformQuery(DatabaseRequest) returns (DatabaseResponse) {}
+  rpc PerformQuerySS(DatabaseRequest) returns (stream DatabaseResponse) {}
 }

@@ -72,15 +72,17 @@ void yyerror(AstWrapper &parsed_result, const char *s, ...);
 %%
 
 stmt_list:
-  stmt_list_h { 
+  stmt_list_h YYEOF { 
     auto lst = (AstList<Ast>*)$1; 
     parsed_result.list = lst; 
     $$ = nullptr;
   }
 
 stmt_list_h: 
-  stmt ';' { $$ = new AstList<Ast>($1, AstType::QUERY_LIST); }
-| stmt_list stmt ';' YYEOF { 
+  stmt ';' { std::cout << "STATEMENT" << std::endl;
+  $$ = new AstList<Ast>($1, AstType::QUERY_LIST); }
+| stmt_list_h stmt ';' {
+    std::cout << "STATEMENT_LIST" << std::endl;
     auto lst = (AstList<Ast>*) $1;
     $$ = new AstList<Ast>(lst, $2);
     delete $1; 
@@ -271,9 +273,15 @@ value:
 
 void yyerror(AstWrapper &parsed_result, const char *s, ...){
   extern int yylineno;
+  char buffer[100];
+  int cx = 0;
+  cx = snprintf(buffer + cx, 100 - cx, "%d: error: ", yylineno);
+
   va_list lst;
   va_start(lst, s);
-  fprintf(stderr, "%d: error: ", yylineno);
-  vfprintf(stderr, s, lst);
-  fprintf(stderr, "\n");
+  cx += vsnprintf(buffer + cx, 100 - cx, s, lst);
+  va_end(lst);
+
+  snprintf(buffer + cx, 100 - cx, "\n");
+  parsed_result.err_msg = std::string(buffer, cx);
 }
