@@ -11,8 +11,6 @@
 namespace po = boost::program_options;
 using namespace dbpb;
 
-constexpr int DEFAULT_PORT = 6543;
-
 class DatabaseQueryService final : public DatabaseQuery::Service {
 private:
   void ProcessAstSelect(DatabaseResponse &response, const Ast *root) {
@@ -58,8 +56,8 @@ private:
 
 public:
   ::grpc::Status PerformQuery(::grpc::ServerContext *context,
-                                      const ::DatabaseRequest *request,
-                                      ::DatabaseResponse *response) override {
+                              const ::DatabaseRequest *request,
+                              ::DatabaseResponse *response) override {
     AstWrapper astw;
     int code = parse_command(request->command(), astw);
     if (code) {
@@ -71,8 +69,8 @@ public:
   }
 
   grpc::Status PerformQuerySS(grpc::ServerContext *context,
-                                      const DatabaseRequest *request,
-                                      grpc::ServerWriter<DatabaseResponse> *writer) override {
+                              const DatabaseRequest *request,
+                              grpc::ServerWriter<DatabaseResponse> *writer) override {
     AstWrapper astw;
     int code = parse_command(request->command(), astw);
 
@@ -81,7 +79,7 @@ public:
     }
 
     const auto *astList = astw.list->getList();
-    for (const auto & it : *astList) {
+    for (const auto &it : *astList) {
       DatabaseResponse resp;
       ProcessAstSingle(resp, it.get());
       writer->Write(resp);
@@ -91,17 +89,17 @@ public:
 };
 
 // Run server
-void run_server(const int port) {
+void run_server(const std::string &address, const int port) {
   grpc::ServerBuilder builder;
-  builder.AddListeningPort("0.0.0.0:" + std::to_string(port),
-                           grpc::InsecureServerCredentials());
+  std::string uri = address + ":" + std::to_string(port);
+  builder.AddListeningPort(uri, grpc::InsecureServerCredentials());
 
   DatabaseQueryService db_service;
   builder.RegisterService(&db_service);
 
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
 
-  std::cout << "Listening port: " << port << "." << std::endl;
+  std::cout << "Listening uri: " << uri << "." << std::endl;
   server->Wait();
 }
 
@@ -109,8 +107,11 @@ void run_server(const int port) {
 int main(int argc, char *argv[]) {
   po::options_description desc("Client options");
 
-  desc.add_options()("help,h", "Show help")("port,p", po::value<int>(),
-                                            "Server port (default=6543)");
+  desc.add_options()
+    ("help,h", "Show help")
+    ("port,p", po::value<int>()->default_value(6543), "Server port")
+    ("address,a", po::value<std::string>()->default_value("0.0.0.0"), "Listened address")
+    ;
 
   po::variables_map vm;
   try {
@@ -123,9 +124,10 @@ int main(int argc, char *argv[]) {
       std::cout << desc << std::endl;
       return 0;
     }
-    const int port = !vm.count("port") ? DEFAULT_PORT : vm["port"].as<int>();
+    const int port = vm["port"].as<int>();
+    const std::string address = vm["address"].as<std::string>();
 
-    run_server(port);
+    run_server(address, port);
 
   } catch (std::exception &ex) {
     std::cout << ex.what() << std::endl;

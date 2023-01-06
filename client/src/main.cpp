@@ -10,27 +10,24 @@
 namespace po = boost::program_options;
 using namespace dbpb;
 
-constexpr int DEFAULT_PORT = 6543;
-const std::string DEFAULT_DBFILE = "tmp/db.bin";
-
 void display_output(DatabaseResponse &response) {
   std::cout << response.ByteSizeLong() << std::endl;
 }
 
-void run_client(const std::string &dbfile, const int port) {
+void run_client(const std::string &dbfile, const std::string &address, const int port) {
   std::string buf;
   std::string line;
 
   // Create channel and attach
-  auto channel = grpc::CreateChannel("localhost:" + std::to_string(DEFAULT_PORT),
-                                     grpc::InsecureChannelCredentials());
+  std::string target = address + ":" + std::to_string(port);
+  auto channel = grpc::CreateChannel(target, grpc::InsecureChannelCredentials());
 
   std::unique_ptr<DatabaseQuery::Stub> stub = DatabaseQuery::NewStub(channel);
 
   DatabaseRequest request;
   DatabaseResponse response;
 
-  std::cout << "Created channel on port: " << port << "." << std::endl;
+  std::cout << "Created channel on target: " << target << "." << std::endl;
 
   request.set_db_name(dbfile);
   std::cout << "Working with db: " << dbfile << "." << std::endl;
@@ -84,9 +81,11 @@ int main(int argc, char *argv[]) {
 
   po::options_description desc("Client options");
 
-  desc.add_options()("help,h", "Show help")("port,p", po::value<int>(),
-                                            "Server port (default=6543)")(
-      "database,d", po::value<std::string>(), "Database file (default=tmp/db.bin)");
+  desc.add_options()
+    ("help,h", "Show help")
+    ("address,a", po::value<std::string>()->default_value("localhost"), "Server address")
+    ("port,p", po::value<int>()->default_value(6543), "Server port")
+    ("database,d", po::value<std::string>()->default_value(".tmp-db.bin"), "Database file");
 
   po::variables_map vm;
   try {
@@ -99,11 +98,11 @@ int main(int argc, char *argv[]) {
       std::cout << desc << std::endl;
       return 0;
     }
-    const int port = !vm.count("port") ? DEFAULT_PORT : vm["port"].as<int>();
-    const std::string dbfile =
-        !vm.count("database") ? DEFAULT_DBFILE : vm["database"].as<std::string>();
+    const int port = vm["port"].as<int>();
+    const std::string address = vm["address"].as<std::string>();
+    const std::string dbfile = vm["database"].as<std::string>();
 
-    run_client(dbfile, port);
+    run_client(dbfile, address, port);
 
   } catch (std::exception &ex) {
     std::cout << ex.what() << std::endl;

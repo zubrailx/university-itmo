@@ -1,6 +1,6 @@
 %option noyywrap nodefault yylineno case-insensitive noinput nounput 
 /* %option reentrant bison-bridge */
-%option debug
+/* %option debug */
 
 %{
 int fileno(FILE *stream);
