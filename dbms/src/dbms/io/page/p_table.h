@@ -2,6 +2,7 @@
 
 #include "p_base.h"
 #include "sso.h"
+#include <dbms/util/align.h>
 #include <dbms/util/column_types.h>
 
 // NOTE: currently without indexes
@@ -50,13 +51,16 @@ typedef struct tpt_column_base TPT_COLUMN_BASE tpt_column_base;
   struct tpt_column_##enum_name {                                                      \
     struct TPT_COLUMN_BASE;                                                            \
     type entry;                                                                        \
-  } __attribute__((packed));
+  };
 
 // helpers
-#define TPT_COLUMN_SIZE(enum_name) sizeof(struct tpt_column_##enum_name)
 #define TPT_COL_TYPE(enum_name) tpt_column_##enum_name
+#define TPT_COLUMN_SIZE(enum_name) sizeof(struct tpt_column_##enum_name)
 #define TPT_ENTRY_SIZE(enum_name)                                                      \
   (TPT_COLUMN_SIZE(enum_name) - offsetof(struct tpt_column_##enum_name, entry))
+
+#define TPT_COLUMN_ALIGN(enum_name, offset)                                            \
+  _ALIGNED_PADDING(offset, alignof(typeof(((struct tpt_column_##enum_name *)0)->entry)))
 
 // define columns
 TPT_COLUMN(bool, COLUMN_TYPE_BOOL)
@@ -70,7 +74,7 @@ typedef struct tpt_header {
 
 typedef struct tp_tuple {
   struct tpt_header header;
-  struct tpt_column_base columns[];// just the pointer to the first entry start (packed)
+  struct tpt_column_base columns[];// just the pointer to the first entry start
 } tp_tuple;
 
 // To create tp_tuple from dto

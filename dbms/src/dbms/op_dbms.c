@@ -23,39 +23,55 @@ static meta *dbms_meta_construct() {
 
 static void dbms_meta_destruct(meta **meta_ptr) { meta_destruct(meta_ptr); }
 
+static int dbms_destruct(dbms **dbms_ptr) {
+  if (*dbms_ptr) {
+    int res = dbfile_destruct(&(*dbms_ptr)->dbfile);
+    dbms_meta_destruct(&(*dbms_ptr)->meta);
+    free(*dbms_ptr);
+    *dbms_ptr = NULL;
+    return res;
+  } else {
+    return -1;
+  }
+}
+
 // dbms
 static dbms *dbms_construct(const char *fname, bool do_trunc) {
   dbms *db = my_malloc(dbms);
-  db->dbfile = dbfile_construct(fname, do_trunc);
-  db->meta = dbms_meta_construct();
-  return db;
-}
+  *db = (dbms) {};
 
-static void dbms_destruct(dbms **dbms_ptr) {
-  dbfile_destruct(&(*dbms_ptr)->dbfile);
-  dbms_meta_destruct(&(*dbms_ptr)->meta);
-  free(*dbms_ptr);
-  *dbms_ptr = NULL;
+  db->dbfile = dbfile_construct(fname, do_trunc);
+  if (db->dbfile) {
+    db->meta = dbms_meta_construct();
+  }
+  if (!db->meta) {
+    dbms_destruct(&db);
+  }
+  return db;
 }
 
 // Create database and write to file
 dbms *dbms_create(const char *fname) {
   dbms *dbms = dbms_construct(fname, true);
-  meta_create(dbms->meta, dbms->dbfile->file);
-  // create page allocator
-  dbms_pa_create_close(dbms, FILEOFF_NULL);
-  // create containers data distributer
-  dbms_dd_create_close(dbms);
-  // create pages
-  dbms_dp_create_close(dbms, SIZE_DEFAULT);
-  // update meta
-  meta_alter(dbms->meta, dbms->dbfile->file);
+  if (dbms) {
+    meta_create(dbms->meta, dbms->dbfile->file);
+    // create page allocator
+    dbms_pa_create_close(dbms, FILEOFF_NULL);
+    // create containers data distributer
+    dbms_dd_create_close(dbms);
+    // create pages
+    dbms_dp_create_close(dbms, SIZE_DEFAULT);
+    // update meta
+    meta_alter(dbms->meta, dbms->dbfile->file);
+  }
   return dbms;
 }
 
 dbms *dbms_open(const char *fname) {
   dbms *dbms = dbms_construct(fname, false);
-  meta_load(dbms->meta, dbms->dbfile->file);
+  if (dbms) {
+    meta_load(dbms->meta, dbms->dbfile->file);
+  }
   return dbms;
 }
 
@@ -65,10 +81,14 @@ static void dbms_flush(struct dbms *db) {
 }
 
 void dbms_close(struct dbms **dbms_ptr) {
-  dbms_flush(*dbms_ptr);
-  dbms_destruct(dbms_ptr);
+  if (*dbms_ptr) {
+    dbms_flush(*dbms_ptr);
+    dbms_destruct(dbms_ptr);
+  }
 }
 void dbms_remove(struct dbms **dbms_ptr) {
-  dbfile_remove((*dbms_ptr)->dbfile);
-  dbms_destruct(dbms_ptr);
+  if (*dbms_ptr) {
+    dbfile_remove((*dbms_ptr)->dbfile);
+    dbms_destruct(dbms_ptr);
+  }
 }

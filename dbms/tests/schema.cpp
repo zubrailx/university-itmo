@@ -3,6 +3,7 @@
 extern "C" {
 #include "../src/dbms/dto/dto_table.h"
 #include "../src/util/printers.h"
+#include "../src/dbms/op_dbms.h"
 #include <dbms/database.h>
 #include <dbms/schema.h>
 }

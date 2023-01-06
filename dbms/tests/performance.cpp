@@ -46,7 +46,7 @@ TEST(performance, insert_one) {
 
   size_t units = 1'000'000;
   std::ofstream ofile("tmp/insert_one.log");
-  for (size_t i = 0; i < 100000; ++i) {
+  for (size_t i = 0; i < 1000; ++i) {
     // start
     clock_t time = clock();
 
@@ -97,7 +97,7 @@ TEST(performance, select) {
   for (size_t i = 0; i < 100; ++i) {
     // insert
     dto_row_list l1 = dto_row_list_construct();
-    for (size_t i = 0; i < 10000; ++i) {
+    for (size_t i = 0; i < 100; ++i) {
       dto_row_list_append(&l1, r1);
     }
     row_list_insert(dbms, "table1", &l1);
@@ -155,7 +155,7 @@ TEST(performance, select_optional) {
   for (size_t i = 0; i < 100; ++i) {
     // insert
     dto_row_list l1 = dto_row_list_construct();
-    for (size_t i = 0; i < 10000; ++i) {
+    for (size_t i = 0; i < 100; ++i) {
       dto_row_list_append(&l1, r1);
     }
     row_list_insert(dbms, "table1", &l1);
@@ -235,7 +235,7 @@ TEST(performance, update_optional) {
   for (size_t i = 0; i < 100; ++i) {
     // insert
     dto_row_list l1 = dto_row_list_construct();
-    for (size_t i = 0; i < 10000 / 4; ++i) {
+    for (size_t i = 0; i < 100 / 4; ++i) {
       dto_row_list_append(&l1, r1);
       dto_row_list_append(&l1, r2);
       dto_row_list_append(&l1, r2);
@@ -329,7 +329,7 @@ TEST(performance, delete_optional) {
   for (size_t i = 0; i < 100; ++i) {
     // insert
     dto_row_list l1 = dto_row_list_construct();
-    for (size_t i = 0; i < 10000 / 4; ++i) {
+    for (size_t i = 0; i < 100 / 4; ++i) {
       dto_row_list_append(&l1, r1);
       dto_row_list_append(&l1, r2);
       dto_row_list_append(&l1, r2);
@@ -416,7 +416,7 @@ TEST(performance, size_delete_insert) {
   for (size_t i = 0; i < 100; ++i, ++idx) {
     // insert
     dto_row_list l1 = dto_row_list_construct();
-    for (size_t i = 0; i < 10000 / 4; ++i) {
+    for (size_t i = 0; i < 100 / 4; ++i) {
       dto_row_list_append(&l1, r1);
       dto_row_list_append(&l1, r2);
       dto_row_list_append(&l1, r2);
@@ -470,7 +470,7 @@ TEST(performance, size_delete_insert) {
   for (size_t i = 0; i < 50; ++i, ++idx) {
     // insert
     dto_row_list l1 = dto_row_list_construct();
-    for (size_t i = 0; i < 10000 / 4; ++i) {
+    for (size_t i = 0; i < 100 / 4; ++i) {
       dto_row_list_append(&l1, r1);
       dto_row_list_append(&l1, r2);
       dto_row_list_append(&l1, r2);

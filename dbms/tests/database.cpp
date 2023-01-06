@@ -5,6 +5,7 @@
 extern "C" {
 #include "../src/dbms/core/dbfile.h"
 #include "../src/dbms/core/dbms.h"
+#include "../src/dbms/op_dbms.h"
 #include <dbms/database.h>
 }
 
@@ -34,7 +35,6 @@ TEST(database_public, open) {
 
 TEST(database_public, remove) {
   dbms *db = dbms_create("tmp/dbms.bin");
-  EXPECT_EQ(db->dbfile->is_opened, true);
   dbms_remove(&db);
   EXPECT_EQ(db, nullptr);
   EXPECT_NE(access("tmp/dbms.bin", F_OK), 0);

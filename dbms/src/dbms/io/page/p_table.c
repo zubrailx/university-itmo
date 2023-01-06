@@ -2,6 +2,7 @@
 
 #include "p_database.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,6 +36,21 @@ size_t tp_column_size(uint8_t type) {
     return TPT_COLUMN_SIZE(COLUMN_TYPE_BOOL);
   case COLUMN_TYPE_STRING:
     return TPT_COLUMN_SIZE(COLUMN_TYPE_STRING);
+  default:
+    assert(0 && "ERROR: Unknown column type");
+  }
+}
+
+size_t tp_column_padding(size_t offset, uint8_t type) {
+  switch (type) {
+  case COLUMN_TYPE_DOUBLE:
+    return TPT_COLUMN_ALIGN(COLUMN_TYPE_DOUBLE, offset);
+  case COLUMN_TYPE_INT32:
+    return TPT_COLUMN_ALIGN(COLUMN_TYPE_INT32, offset);
+  case COLUMN_TYPE_BOOL:
+    return TPT_COLUMN_ALIGN(COLUMN_TYPE_BOOL, offset);
+  case COLUMN_TYPE_STRING:
+    return TPT_COLUMN_ALIGN(COLUMN_TYPE_STRING, offset);
   default:
     assert(0 && "ERROR: Unknown column type");
   }
@@ -76,7 +92,11 @@ size_t tp_get_tuple_size(const struct dp_tuple *tuple) {
   size_t cols = tuple->header.cols;
   size_t size = offsetof(struct tp_tuple, columns);
   for (size_t i = 0; i < cols; ++i) {
-    size += tp_column_size(tuple->columns[i].type);
+    // size + alignment
+    uint8_t type = tuple->columns[i].type;
+    size_t col_padd = tp_column_padding(size, type);
+    size_t col_size = tp_column_size(type);
+    size += col_size + col_padd;
   }
   return size;
 }
@@ -88,8 +108,11 @@ tpt_col_info *tp_construct_col_info_arr(const dp_tuple *tuple) {
 
   size_t off_cur = offsetof(struct tp_tuple, columns);
   for (size_t i = 0; i < cols; ++i) {
-    col_info[i] = (tpt_col_info){.start = off_cur};
-    off_cur += tp_column_size(tuple->columns[i].type);
+    uint8_t type = tuple->columns[i].type;
+    size_t col_padd = tp_column_padding(off_cur, type);
+    size_t col_size = tp_column_size(type);
+    col_info[i] = (tpt_col_info){.start = off_cur + col_padd};
+    off_cur += col_padd + col_size;
   }
   return col_info;
 }
@@ -131,9 +154,6 @@ struct table_page *tp_construct_init(const struct pageoff_t size, const fileoff_
     slot_push(page, cur_slot);
     cur_slot.start.bytes -= tuple_size;
   }
-  // TEST:
-  // printf("%u : ", page->header.index_barrier.bytes);
-  // printf("%u", page->header.index_start.bytes);
   return page;
 }
 

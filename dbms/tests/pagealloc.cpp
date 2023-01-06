@@ -5,6 +5,7 @@ extern "C" {
 #include "../src/dbms/core/dbmeta.h"
 #include "../src/dbms/core/dbms.h"
 #include "../src/dbms/dto/dto_table.h"
+#include "../src/dbms/op_dbms.h"
 #include "../src/dbms/io/p_base.h"
 #include "../src/dbms/iter.h"
 #include "../src/dbms/page.h"

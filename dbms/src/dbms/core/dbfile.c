@@ -8,8 +8,6 @@
 // Getters
 FILE *dbfile_file(dbfile *dbfile) { return dbfile->file; }
 const char *dbfile_name(dbfile *dbfile) { return dbfile->fname; }
-bool dbfile_is_opened(dbfile *dbfile) { return dbfile->is_opened; }
-bool dbfile_is_writable(dbfile *dbfile) { return dbfile->is_writable; }
 
 // Construct-destruct
 dbfile *dbfile_construct(const char *fname, bool do_trunc) {
@@ -20,39 +18,44 @@ dbfile *dbfile_construct(const char *fname, bool do_trunc) {
   } else {
     dfile->file = fopen(fname, "r+b");
   }
-  dfile->is_opened = dfile->file;
-  dfile->is_writable = true;
+  // if file is present
+  if (!dfile->file) {
+    dbfile_destruct(&dfile);
+  }
   return dfile;
 }
 
-void dbfile_destruct(dbfile **ptr) {
+int dbfile_destruct(dbfile **ptr) {
   dbfile *dfile = *ptr;
-  dbfile_close(dfile);
-  free(dfile->fname);
-  free(dfile);
-  *ptr = NULL;
+  if (dfile) {
+    int res = dbfile_close(dfile);
+    free(dfile->fname);
+    free(dfile);
+    *ptr = NULL;
+    return res;
+  } else {
+    return -1;
+  }
 }
 
 // Operations with file
-bool dbfile_flush(dbfile *dbfile) {
-  if (dbfile->is_opened && dbfile->is_writable) {
-    fflush(dbfile->file);
-    return true;
-  }
-  return false;
-}
+int dbfile_flush(dbfile *dbfile) { return fflush(dbfile->file); }
 
-bool dbfile_close(dbfile *dbfile) {
-  if (dbfile->is_opened) {
-    fclose(dbfile->file);
+int dbfile_close(dbfile *dbfile) {
+  if (dbfile->file) {
+    int res = fclose(dbfile->file);
     dbfile->file = NULL;
-    dbfile->is_opened = false;
-    return true;
+    return res;
+  } else {
+    return -1;
   }
-  return false;
 }
 
-void dbfile_remove(dbfile *dbfile) {
-  dbfile_close(dbfile);
-  remove(dbfile->fname);
+int dbfile_remove(dbfile *dbfile) {
+  int res = dbfile_close(dbfile);
+  if (!res) {
+    return remove(dbfile->fname);
+  } else {
+    return res;
+  }
 }

@@ -1,4 +1,5 @@
 #include "p_database.h"
+#include <dbms/util/align.h>
 
 #include <assert.h>
 #include <malloc.h>
@@ -26,7 +27,8 @@ size_t dp_space_left(const struct database_page *page) {
 }
 
 size_t dp_tuple_size(size_t columns) {
-  return offsetof(struct dp_tuple, columns) + sizeof(dpt_column) * columns;
+  size_t bsize = offsetof(struct dp_tuple, columns) + sizeof(dpt_column) * columns;
+  return bsize + align_get_padding(bsize, alignof(struct dp_tuple));
 }
 
 dp_tuple *dp_tuple_locate(const struct database_page *page,
@@ -39,8 +41,8 @@ dp_tuple *dp_tuple_locate(const struct database_page *page,
 }
 
 // insert typle + index
-pageoff_t dp_insert_table(struct database_page *page, dp_tuple *typle) {
-  size_t size = dp_tuple_size(typle->header.cols);
+pageoff_t dp_insert_table(struct database_page *page, dp_tuple *tuple) {
+  size_t size = dp_tuple_size(tuple->header.cols);
   if (dp_space_left(page) < size + sizeof(page_index)) {
     return get_pageoff_t(0);
   } else {
@@ -51,12 +53,12 @@ pageoff_t dp_insert_table(struct database_page *page, dp_tuple *typle) {
     page_index index = (page_index){.start = tpl_off_start,
                                     .end = get_pageoff_t(tpl_off_start.bytes + size)};
     {// add information that is relevant only when in file
-      typle->header.is_present = true;
+      tuple->header.is_present = true;
     }
     void *idx_ptr = (char *)page + idx_off_start.bytes;
     memcpy(idx_ptr, &index, sizeof(page_index));
     void *tpl_ptr = (char *)page + tpl_off_start.bytes;
-    memcpy(tpl_ptr, typle, size);
+    memcpy(tpl_ptr, tuple, size);
 
     // update page header
     page->header.index_start = idx_off_start;
