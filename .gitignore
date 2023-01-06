@@ -2,3 +2,4 @@ build/
 .cache/
 tmp/
 compile_commands.json
+.null-ls*

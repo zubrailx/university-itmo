@@ -8,5 +8,6 @@ add_executable(${PROJECT_EXEC_NAME}
 
 target_link_libraries(${PROJECT_EXEC_NAME} PRIVATE 
   dbms
+  qpg 
   proto::grpc_cpp
 )

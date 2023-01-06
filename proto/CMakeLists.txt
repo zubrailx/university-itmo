@@ -23,8 +23,7 @@ find_package(Protobuf REQUIRED)
 
 # Create library
 set(PROTO_FILES 
-  ./dbpb/address.proto
-  ./dbpb/addressbook.proto)
+  ./dbpb/database.proto)
 
 # Builds
 include(./cmake/cpp.cmake)

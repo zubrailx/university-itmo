@@ -19,9 +19,11 @@ protobuf_generate(
   TARGET proto_grpc_cpp 
   LANGUAGE cpp
   PROTOC_OUT_DIR ${PROTOC_CPP_OUT_DIR}
+  IMPORT_DIRS ${Protobuf_INCLUDE_DIR}
 )
 protobuf_generate(TARGET proto_grpc_cpp LANGUAGE grpc 
   GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
   PLUGIN "protoc-gen-grpc=${_GRPC_CPP_PLUGIN_LOCATION}"
   PROTOC_OUT_DIR ${PROTOC_CPP_OUT_DIR}
+  IMPORT_DIRS ${Protobuf_INCLUDE_DIR}
 )
