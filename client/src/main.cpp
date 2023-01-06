@@ -1,5 +1,8 @@
+#include "grpcpp/create_channel.h"
+#include "grpcpp/security/credentials.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
+#include <dbpb/database.grpc.pb.h>
 
 #include <iostream>
 #include <string>
@@ -13,16 +16,48 @@ void run_client(const std::string &dbfile, const int port) {
   std::string buf;
   std::string line;
 
-  std::cout << "Enter DB command:" << std::endl;
+  // Create channel and attach
+  auto channel = grpc::CreateChannel("localhost:" + std::to_string(DEFAULT_PORT),
+                                     grpc::InsecureChannelCredentials());
+
+  std::unique_ptr<DatabaseQuery::Stub> stub = DatabaseQuery::NewStub(channel);
+
+  DatabaseRequest request;
+  DatabaseResponse response;
+
+  std::cout << "Created channel on port: " << port << "." << std::endl;
+  std::cout << "Working with db: " << dbfile << "." << std::endl;
+
   std::cout << "> ";
   while (getline(std::cin, line)) {
-    buf.append(line);
-    buf.append("\n");
     // Check if command end
     std::string line_cp = boost::trim_right_copy(line);
     size_t cp_size = line_cp.size();
-    if (cp_size && line_cp[cp_size - 1] == ';') {
-      // TODO: send command to server
+
+    bool query_ended = cp_size && line_cp[cp_size - 1] == ';';
+
+    // Append trimmed line if ended
+    if (query_ended) {
+      buf.append(line_cp);
+    } else {
+      buf.append(line);
+      buf.append("\n");
+    }
+
+    if (query_ended) {
+      // append trimmed line
+      grpc::ClientContext context;
+
+      request.set_db_name(dbfile);
+      request.set_command(buf);
+
+      grpc::Status status = stub->PerformQuery(&context, request, &response);
+
+      if (!status.ok()) {
+        std::cout << "ERROR(code=" << status.error_code()
+                  << "): " << status.error_message() << std::endl;
+      }
+      // New iteration
       buf.clear();
       std::cout << "> ";
     }
@@ -33,8 +68,9 @@ int main(int argc, char *argv[]) {
 
   po::options_description desc("Client options");
 
-  desc.add_options()("help,h", "Show help")("port,p", po::value<int>(), "Server port")(
-      "database,d", po::value<std::string>(), "Database file");
+  desc.add_options()("help,h", "Show help")("port,p", po::value<int>(),
+                                            "Server port (default=6543)")(
+      "database,d", po::value<std::string>(), "Database file (default=tmp/db.bin)");
 
   po::variables_map vm;
   try {

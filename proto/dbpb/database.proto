@@ -12,12 +12,26 @@ message ErrorStatus {
   repeated google.protobuf.Any details = 2;
 }
 
+enum QueryType {
+  QUERY_TYPE_UNSPECIFIED = 0;
+
+  QUERY_TYPE_INSERT = 1;
+  QUERY_TYPE_SELECT = 2;
+  QUERY_TYPE_UPDATE = 3;
+  QUERY_TYPE_DELETE = 4;
+
+  QUERY_TYPE_CREATE = 5;
+  QUERY_TYPE_DROP = 6;
+}
+
 message DatabaseResponse {
   optional ErrorStatus err_status = 1;
 
   repeated google.protobuf.Any table_column_infos = 2;
   repeated google.protobuf.Any table_rows = 3;
   uint32 row_count = 4;
+
+  QueryType query_type = 5;
 }
 
 service DatabaseQuery {
