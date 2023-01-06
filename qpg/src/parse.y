@@ -29,6 +29,9 @@ void yyerror(AstWrapper &parsed_result, const char *s, ...);
   Ast* nterm;
 }
 
+%destructor { if ($$) { delete $$; } } <nterm>
+%destructor { if ($$) { free($$); } } <sval>
+
 /* parameters */
 %token <sval> NAME
 %token <sval> STRING
@@ -72,6 +75,7 @@ stmt_list:
   stmt_list_h { 
     auto lst = (AstList<Ast>*)$1; 
     parsed_result.list = lst; 
+    $$ = nullptr;
   }
 
 stmt_list_h: 
@@ -84,12 +88,12 @@ stmt_list_h:
 ;
 
 stmt: 
-  select_stmt {}
-| update_stmt {}
-| delete_stmt {}
-| insert_stmt {}
-| drop_stmt   {}
-| create_stmt {}
+  select_stmt { $$ = $1; }
+| update_stmt { $$ = $1; }
+| delete_stmt { $$ = $1; }
+| insert_stmt { $$ = $1; }
+| drop_stmt   { $$ = $1; }
+| create_stmt { $$ = $1; }
 
   /* SELECT */
 select_stmt:
@@ -106,7 +110,7 @@ table_ref:
 
 table_source:
   table_name opt_as_alias { $$ = new AstTable(std::string($1), $2); free($1); free($2); }
-| table_subquery as_alias { ((AstSubquery*)$1)->setAlias($2); free($2); }
+| table_subquery as_alias { $$ = $1; ((AstSubquery*)$1)->setAlias($2); free($2); }
 ;
 
 table_subquery:
@@ -119,7 +123,7 @@ join_table:
 ;
 
 opt_as_alias:
-  as_alias  {}
+  as_alias  { $$ = $1; }
 | /* nil */ { $$ = nullptr; }
 ;
 

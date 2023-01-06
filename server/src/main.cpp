@@ -5,6 +5,8 @@
 #include <grpcpp/server_builder.h>
 #include <iostream>
 
+#include <qpg/qpg.hpp>
+
 namespace po = boost::program_options;
 
 constexpr int DEFAULT_PORT = 6543;
