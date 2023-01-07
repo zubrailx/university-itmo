@@ -160,7 +160,7 @@ static void fast_unop_pass(void *self_void, const struct tp_tuple **tuple_arr) {
   self->parent->pass(self->parent, tuple_arr);
 }
 
-struct fast_unop *fast_unop_construct(void *parent, struct fast_unop_func *fuf,
+struct fast_unop *fast_unop_construct(void *parent, const struct fast_unop_func *fuf,
                                       struct dbms *dbms) {
   struct fast_unop *self = my_malloc(struct fast_unop);
   *self = (struct fast_unop){
@@ -213,7 +213,7 @@ static void fast_binop_pass(void *self_void, const struct tp_tuple **tuple_arr) 
 }
 
 struct fast_binop *fast_binop_construct(void *p_left, void *p_right,
-                                        struct fast_binop_func *fbf,
+                                        const struct fast_binop_func *fbf,
                                         struct dbms *dbms) {
   struct fast_binop *self = my_malloc(struct fast_binop);
   *self = (struct fast_binop){

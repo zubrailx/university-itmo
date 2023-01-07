@@ -14,6 +14,7 @@ struct fast_unop_func {
   enum table_column_type ret_type;
 };
 
+EXT_UNOP(UNARY_UNDEF);
 EXT_UNOP(BOOL_NOT);
 // }}}
 
@@ -23,6 +24,8 @@ struct fast_binop_func {
   enum table_column_type ret_type;
 };
 
+EXT_BINOP(BINARY_UNDEF);
+
 EXT_BINOP(DOUBLE_LARGER);
 EXT_BINOP(DOUBLE_EQUALS);
 
@@ -31,8 +34,10 @@ EXT_BINOP(INT32_LARGER);
 
 EXT_BINOP(BOOL_OR);
 EXT_BINOP(BOOL_AND);
+EXT_BINOP(BOOL_EQUALS);
 
 EXT_BINOP(STRING_EQUALS);
+EXT_BINOP(STRING_IN);
 // }}}
 
 #undef EXT_BINOP

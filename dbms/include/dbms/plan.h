@@ -123,7 +123,6 @@ struct plan_update {
   INHERIT struct tp_tuple **(*get)(void *self);
   INHERIT bool (*end)(void *self);
 
-  // get parent rows -> update -> parent rows updated
   OVERRIDE bool (*next)(void *self);
   OVERRIDE void (*destruct)(void *self);
 

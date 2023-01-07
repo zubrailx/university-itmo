@@ -13,3 +13,8 @@ std::string toString(table_column_type type);
 std::string toString(const AstValue *ref);
 
 void *getAstValuePtr(AstValue *ref);
+
+
+const struct fast_unop_func *toDbmsFunc(OperationType optype, table_column_type dtype);
+const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type left,
+                                         table_column_type right);

@@ -7,6 +7,8 @@
 #include <string.h>
 
 // fast_unop {{{
+struct fast_unop_func UNARY_UNDEF = {.func = NULL, .ret_type = COLUMN_TYPE_UNKNOWN};
+
 static void bool_not(struct fast_unop *self, void *arg_void) {
   struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) * arg, *res;
   arg = arg_void;
@@ -16,10 +18,11 @@ static void bool_not(struct fast_unop *self, void *arg_void) {
   res->entry = !arg->entry;
 }
 struct fast_unop_func BOOL_NOT = {.func = bool_not, .ret_type = COLUMN_TYPE_BOOL};
-
 // }}}
 
 // fast_binop {{{
+struct fast_binop_func BINARY_UNDEF = {.func = NULL, .ret_type = COLUMN_TYPE_UNKNOWN};
+
 static void double_larger(struct fast_binop *self, void *arg1_void, void *arg2_void) {
   struct TPT_COL_TYPE(COLUMN_TYPE_DOUBLE) * arg1, *arg2;
   arg1 = arg1_void, arg2 = arg2_void;
@@ -103,6 +106,17 @@ static void bool_and(struct fast_binop *self, void *arg1_void, void *arg2_void) 
 }
 struct fast_binop_func BOOL_AND = {.func = bool_and, .ret_type = COLUMN_TYPE_BOOL};
 
+static void bool_equals(struct fast_binop *self, void *arg1_void, void *arg2_void) {
+  struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) * arg1, *arg2;
+  arg1 = arg1_void, arg2 = arg2_void;
+  struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *res = self->base.res;
+
+  res->is_null = arg1->is_null || arg2->is_null;
+  res->entry = arg1->entry == arg2->entry;
+}
+struct fast_binop_func BOOL_EQUALS = {.func = bool_equals,
+                                       .ret_type = COLUMN_TYPE_BOOL};
+
 static void string_equals(struct fast_binop *self, void *arg1_void, void *arg2_void) {
   struct TPT_COL_TYPE(COLUMN_TYPE_STRING) * arg1, *arg2;
   arg1 = arg1_void, arg2 = arg2_void;
@@ -122,5 +136,26 @@ static void string_equals(struct fast_binop *self, void *arg1_void, void *arg2_v
   free((void *)str2);
 }
 struct fast_binop_func STRING_EQUALS = {.func = string_equals,
+                                        .ret_type = COLUMN_TYPE_BOOL};
+
+static void string_in(struct fast_binop *self, void *arg1_void, void *arg2_void) {
+  struct TPT_COL_TYPE(COLUMN_TYPE_STRING) * arg1, *arg2;
+  arg1 = arg1_void, arg2 = arg2_void;
+  struct TPT_COL_TYPE(COLUMN_TYPE_BOOL) *res = self->base.res;
+
+  if (arg1->is_null || arg2->is_null) {
+    res->is_null = true;
+    return;
+  } else {
+    res->is_null = false;
+  }
+
+  const char *str1 = dbms_sso_construct_select(&arg1->entry, self->dbms);
+  const char *str2 = dbms_sso_construct_select(&arg2->entry, self->dbms);
+  res->entry = !strstr(str1, str2);
+  free((void *)str1);
+  free((void *)str2);
+}
+struct fast_binop_func STRING_IN = {.func = string_in,
                                         .ret_type = COLUMN_TYPE_BOOL};
 // }}}

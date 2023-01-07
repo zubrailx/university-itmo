@@ -11,6 +11,9 @@ extern "C" {
 #include <dbms/database.h>
 #include <dbms/dto_row.h>
 #include <dbms/dto_table.h>
+#include <dbms/plan.h>
+#include <dbms/plan_filter.h>
+#include <dbms/plan_funcs.h>
 #include <dbms/schema.h>
 #include <dbms/table.h>
 }
@@ -131,14 +134,144 @@ private:
         MapTableColumnIdxs(ast_idxs, dto_header, collist->m_lst);
         // check for validity
         if (!CheckTableColumnIdxs(resp, ast_idxs, collist)) {
-          goto dto_destruct;
+          goto fill_response;
         }
       }
       CheckTableColumnTypes(resp, dto_header, ast_idxs, vallist);
+    fill_response:
       FillResponseTableHeader(resp, dto_header);
     }
-  dto_destruct:
     dto_table_destruct(&dto_header);
+  }
+
+  void PreprocAstColumnList(DatabaseResponse &resp, const AstColumnList *ast_clist) {
+    if (ast_clist->m_lst.size()) {
+      auto *err_status = resp.mutable_err_status();
+      err_status->set_message("Projection in select is not supported");
+    }
+  }
+
+  void StatusAstUnexpected(const Ast *ast) {
+    std::cout << fmt::format("Unexpected ast type {}", (int)ast->getType())
+              << std::endl;
+    assert(0);
+  }
+
+  plan *ParseAsTableSource(DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
+    plan *out = nullptr;
+    switch (ast->getType()) {
+    case AstType::TABLE: {
+      const auto *table = (AstTable *)ast;
+      auto *plan_source = plan_source_construct(table->m_name.c_str(), dbms);
+      if (table->m_has_alias) {
+        out = (plan *)plan_select_construct_move(plan_source, table->m_alias.c_str());
+      }
+      break;
+    }
+    case AstType::SUBQUERY: {
+      const auto *subq = (AstSubquery *)ast;
+      auto *select = ParseAsSelect(resp, subq->m_query.get(), dbms);
+      out = (plan *)plan_select_construct_move(select, subq->m_alias.c_str());
+      break;
+    }
+    default:
+      StatusAstUnexpected(ast);
+    }
+    return out;
+  }
+
+  plan *ParseAsTableRef(DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
+    plan *out = nullptr;
+    switch (ast->getType()) {
+    case AstType::TABLE:
+    case AstType::SUBQUERY: {
+      out = ParseAsTableSource(resp, ast, dbms);
+      break;
+    }
+    case AstType::JOIN: {
+      const auto *join = (AstJoin *)ast;
+      auto *left = ParseAsTableRef(resp, join->m_lsv.get(), dbms);
+      auto *right = ParseAsTableSource(resp, join->m_rsv.get(), dbms);
+      out = (plan *)plan_cross_join_construct_move(left, right);
+      break;
+    }
+    default:
+      StatusAstUnexpected(ast);
+    }
+    return out;
+  }
+
+  fast *ParseAsStatement(DatabaseResponse &resp, const AstStatement *ast, dbms *dbms) {
+    fast *out = nullptr;
+
+    switch (ast->m_stype) {
+    case StatementType::CONST: {
+      auto *st_const = (AstStatementConst *)ast;
+      auto tct = toTableColumnType(st_const->m_res->m_dtype);
+      out = (fast *)fast_const_construct(tct, getAstValuePtr(st_const->m_res.get()),
+                                         dbms);
+      break;
+    }
+    case StatementType::COLUMN: {
+      auto *st_column = (AstStatementColumn *)ast;
+      const char *table = st_column->m_col->m_table.c_str();
+      const char *column = st_column->m_col->m_column.c_str();
+      out = (fast *)fast_column_construct(table, column, dbms);
+      break;
+    }
+    case StatementType::UNARY: {
+      auto *st_unary = (AstStatementUnary *)ast;
+      auto *parent = ParseAsStatement(resp, st_unary->m_operand.get(), dbms);
+      auto *func = toDbmsFunc(st_unary->m_op, parent->res_type);
+      out = (fast *)fast_unop_construct((void *)parent, func, dbms);
+      break;
+    }
+    case StatementType::BINARY: {
+      auto *binary = (AstStatementBinary *)ast;
+      auto *left = ParseAsStatement(resp, binary->m_left.get(), dbms);
+      auto *right = ParseAsStatement(resp, binary->m_right.get(), dbms);
+      auto *func = toDbmsFunc(binary->m_op, left->res_type, right->res_type);
+      out = (fast *)fast_binop_construct(left, right, func, dbms);
+      break;
+    }
+    default:
+      StatusAstUnexpected(ast);
+    }
+    return out;
+  }
+
+  // NOTE: ParseAsSelect can return select or filter
+  plan *ParseAsSelect(DatabaseResponse &resp, const AstSelect *ast, dbms *dbms) {
+    const auto *ast_clist = ast->m_collist.get();
+    PreprocAstColumnList(resp, ast_clist);
+
+    plan *out = ParseAsTableRef(resp, ast->m_table_ref.get(), dbms);
+
+    if (ast->m_has_cond) {
+      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms);
+      out = (plan *)plan_filter_construct_move(out, filter);
+    }
+    return out;
+  }
+
+  plan_select *ParseAsSelectWrapper(DatabaseResponse &resp, const AstSelect *ast,
+                                    dbms *dbms) {
+    auto *out = ParseAsSelect(resp, ast, dbms);
+    if (out->type == PLAN_TYPE_SELECT) {
+      return (plan_select *)out;
+    } else {
+      return plan_select_construct_move(out, "");
+    }
+  }
+
+  void FillResponseTableHeader(DatabaseResponse &resp, const plan_table_info *pti,
+                               dbms *dbms) {
+    auto *header = resp.mutable_header();
+  }
+
+  void FillResponseTableBodyRow(DatabaseResponse &resp, const plan_table_info *pti,
+                                const tp_tuple *tuple, dbms *dbms) {
+    auto *body_row = resp.mutable_body();
   }
 
   // SELECT
@@ -151,11 +284,35 @@ private:
       writer->Write(resp);
       return;
     }
+    // NOTE: projection is not supported
+    plan_select *select = ParseAsSelectWrapper(resp, (const AstSelect *)root, dbms);
+
+    size_t pti_size;
+    const auto *pti = select->get_info(select, &pti_size);
+    assert(pti_size == 1);
 
     auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_SELECT);
-
+    FillResponseTableHeader(resp, pti, dbms);
     writer->Write(resp);
+
+    // create new response for body
+    resp = DatabaseResponse();
+
+    select->start(select);
+    while (!select->end(select)) {
+      const tp_tuple *tuple = select->get(select)[0];
+      FillResponseTableBodyRow(resp, pti, tuple, dbms);
+      writer->Write(resp);
+      select->next(select);
+    }
+    select->destruct(select);
+  }
+
+  plan_update *ParseAsUpdate(DatabaseResponse &resp, const AstUpdate *ast, dbms *dbms) {
+    plan_update *out = nullptr;
+    std::cout << "NOT IMPLEMENTED " << __PRETTY_FUNCTION__ << std::endl;
+    return out;
   }
 
   // UPDATE
@@ -169,10 +326,28 @@ private:
       return;
     }
 
+    plan_update *update = ParseAsUpdate(resp, (const AstUpdate *)root, dbms);
+
+    size_t pti_size;
+    const auto *pti = update->get_info(update, &pti_size);
+
+    update->start(update);
+    while (!update->end(update)) {
+      update->next(update);
+    }
+    update->destruct(update);
+
     auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
-
+    FillResponseTableHeader(resp, pti, dbms);
+    // write header at the end
     writer->Write(resp);
+  }
+
+  plan_delete *ParseAsDelete(DatabaseResponse &resp, const AstDelete *ast, dbms *dbms) {
+    plan_delete *out = nullptr;
+    std::cout << "NOT IMPLEMENTED " << __PRETTY_FUNCTION__ << std::endl;
+    return out;
   }
 
   // DELETE
@@ -186,9 +361,21 @@ private:
       return;
     }
 
+    plan_delete *pdelete = ParseAsDelete(resp, (const AstDelete *)root, dbms);
+
+    size_t pti_size;
+    const auto *pti = pdelete->get_info(pdelete, &pti_size);
+
+    pdelete->start(pdelete);
+    while (!pdelete->end(pdelete)) {
+      pdelete->next(pdelete);
+    }
+    pdelete->destruct(pdelete);
+
     auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_DELETE);
-
+    FillResponseTableHeader(resp, pti, dbms);
+    // write header at the end
     writer->Write(resp);
   }
 

@@ -1,27 +1,8 @@
 #pragma once
 
-#include <stddef.h>
+#include <dbms/plan_filter.h>
 #include <dbms/util/column_types.h>
-
-struct tp_tuple;
-struct plan_table_info;
-
-enum fast_type { FAST_UNOP, FAST_BINOP, FAST_CONST, FAST_COLUMN, FAST_FREED };
-
-// fast {{{
-struct fast {
-  enum fast_type type;
-  // result of calc
-  void *res;
-  enum table_column_type res_type;
-
-  void (*compile)(void *self, size_t pti_size, struct plan_table_info *info_arr);
-  void (*destruct)(void *self);
-
-  void *(*calc)(void *self);// void * - returned result
-  void (*pass)(void *self, const struct tp_tuple **tuple_arr);
-};
-// }}}
+#include <stddef.h>
 
 // fast_const {{{
 struct fast_const {
