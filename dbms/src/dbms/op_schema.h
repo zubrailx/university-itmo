@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dto/dto_table.h"
+#include <dbms/dto_table.h>
 #include <dbms/util/internals.h>
 
 struct dbms;

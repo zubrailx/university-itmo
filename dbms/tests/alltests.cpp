@@ -23,6 +23,6 @@ int test_google(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  return test(argc, argv);
-  // return test_google(argc, argv);
+  // return test(argc, argv);
+  return test_google(argc, argv);
 }

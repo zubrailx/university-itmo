@@ -36,13 +36,13 @@ TEST(table, insert_list) {
   int32_t row1_3 = 5;
 
   const void *row[] = {&row1_1, &row1_2, &row1_3, &row1_4};
-  dto_row_list list = dto_row_list_construct();
+  dto_row_list *list = dto_row_list_construct();
   int n = 200;
   for (int i = 0; i < n; ++i) {
-    dto_row_list_append(&list, row);
+    dto_row_list_append(list, row);
   }
   printf("Operations: %u\n", n);
-  row_list_insert(dbms, "table1", &list);
+  row_list_insert(dbms, "table1", list);
 
   // print_table_rows(dbms, "table1");
   dto_row_list_destruct(&list);

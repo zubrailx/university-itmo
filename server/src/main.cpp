@@ -9,8 +9,10 @@
 
 extern "C" {
 #include <dbms/database.h>
+#include <dbms/dto_row.h>
 #include <dbms/dto_table.h>
 #include <dbms/schema.h>
+#include <dbms/table.h>
 }
 #include <qpg/qpg.hpp>
 
@@ -21,17 +23,124 @@ using namespace dbpb;
 
 class DatabaseQueryService final : public DatabaseQuery::Service {
 private:
-  dbms *OpenDatabase(const std::string db_name, DatabaseResponse &resp) {
+  dbms *OpenDatabase(const std::string &db_name, DatabaseResponse &resp) {
     dbms *dbms = database_open(db_name.c_str(), false);
 
     if (dbms == nullptr) {
-      auto *err_status = new ErrorStatus();
+      auto *err_status = resp.mutable_err_status();
       err_status->set_message(fmt::format("Cannot open database {}", db_name));
-      resp.set_allocated_err_status(err_status);
     }
     return dbms;
   }
 
+  // idxs in ast_idx represent idxs of columns in actual table
+  void MapTableColumnIdxs(std::vector<int> &ast_idxs, dto_table *dto_header,
+                          const std::list<std::unique_ptr<AstColumn>> &collist) {
+    size_t ast_idx = 0;
+    for (const auto &ast_col : collist) {
+      size_t dto_idx = 0;
+      for (const auto *column = dto_header->first; column != nullptr;
+           column = column->next) {
+        if (strcmp(ast_col->m_column.c_str(), column->name) == 0) {
+          ast_idxs[ast_idx] = static_cast<int>(dto_idx);
+        }
+        ++dto_idx;
+      }
+      ++ast_idx;
+    }
+  }
+
+  void FillTableHeaderResponse(DatabaseResponse &resp, dto_table *dto_header) {
+    auto *header_row = resp.mutable_header();
+    for (const auto *col = dto_header->first; col != nullptr; col = col->next) {
+      DatabaseHeaderColumn *row_column = header_row->add_columns();
+      row_column->set_column_name(std::string(col->name));
+      row_column->set_column_type(toString(col->type));
+    }
+  }
+
+  bool CheckTableColumnIdxs(DatabaseResponse &resp, std::vector<int> &ast_idxs,
+                            const AstColumnList *collist) {
+    size_t col_idx = 0;
+    for (const auto &col : collist->m_lst) {
+      if (ast_idxs[col_idx] < 0) {
+        auto *err_status = resp.mutable_err_status();
+        err_status->set_message(
+            fmt::format("Column {} is not present in table", col->m_column));
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool CheckTableColumnTypes(DatabaseResponse &resp, dto_table *dto_header,
+                             std::vector<int> &ast_idxs,
+                             const AstList<AstValue> *vallist) {
+    size_t ast_idx = 0;
+    for (const auto &ast_val : vallist->m_lst) {
+
+      int i = 0;
+      auto *dto_col_cur = dto_header->first;
+      while (i != ast_idxs[ast_idx]) {
+        dto_col_cur = dto_col_cur->next;
+        assert(dto_col_cur != nullptr);
+        ++i;
+      }
+
+      auto tct = toTableColumnType(ast_val->m_dtype);
+      if (tct != dto_col_cur->type) {
+        auto *err_status = resp.mutable_err_status();
+        err_status->set_message(
+            fmt::format("Column {} has different type", dto_col_cur->name));
+        return false;
+      }
+      ++ast_idx;
+    }
+    return true;
+  }
+
+  void GetTableHeaderWithAstMap(std::vector<int> &ast_idxs,
+                                const std::string &table_name, struct dbms *dbms,
+                                const AstColumnList *collist,
+                                const AstList<AstValue> *vallist,
+                                DatabaseResponse &resp) {
+    auto *dto_header = table_construct_header(dbms, table_name.c_str());
+    // Map database header
+    if (!dto_header) {
+      auto *err_status = resp.mutable_err_status();
+      err_status->set_message(fmt::format("Table {} does not exist", table_name));
+    } else {
+      size_t col_size;
+
+      if (collist->do_all) {
+        col_size = dto_table_column_cnt(dto_header);
+      } else {
+        col_size = collist->m_lst.size();
+      }
+      // resize array and init with -1
+      ast_idxs.resize(col_size);
+      for (size_t i = 0; i < col_size; ++i) {
+        ast_idxs[i] = -1;
+      }
+      // if do_all flag in collist is present
+      if (collist->do_all) {
+        for (int i = 0; i < (int)col_size; ++i) {
+          ast_idxs[i] = i;
+        }
+      } else {
+        MapTableColumnIdxs(ast_idxs, dto_header, collist->m_lst);
+
+        // check for validity
+        if (CheckTableColumnIdxs(resp, ast_idxs, collist)) {
+          CheckTableColumnTypes(resp, dto_header, ast_idxs, vallist);
+        }
+      }
+      FillTableHeaderResponse(resp, dto_header);
+    }
+    dto_table_destruct(&dto_header);
+  }
+
+  // SELECT
   void SSAstSelect(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -42,13 +151,13 @@ private:
       return;
     }
 
-    auto *header_row = new DatabaseHeaderRow();
+    auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_SELECT);
-    resp.set_allocated_header(header_row);
 
     writer->Write(resp);
   }
 
+  // UPDATE
   void SSAstUpdate(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -59,13 +168,13 @@ private:
       return;
     }
 
-    auto *header_row = new DatabaseHeaderRow();
+    auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
-    resp.set_allocated_header(header_row);
 
     writer->Write(resp);
   }
 
+  // DELETE
   void SSAstDelete(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -76,13 +185,13 @@ private:
       return;
     }
 
-    auto *header_row = new DatabaseHeaderRow();
+    auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_DELETE);
-    resp.set_allocated_header(header_row);
 
     writer->Write(resp);
   }
 
+  // INSERT
   void SSAstInsert(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -93,13 +202,51 @@ private:
       return;
     }
 
-    auto *header_row = new DatabaseHeaderRow();
-    header_row->set_query_type(QueryType::QUERY_TYPE_INSERT);
-    resp.set_allocated_header(header_row);
+    const auto *insert = (AstInsert *)root;
 
+    std::vector<int> ast_idxs;
+    GetTableHeaderWithAstMap(ast_idxs, insert->m_table, dbms, insert->m_collist.get(),
+                             insert->m_vallist.get(), resp);
+    writer->Write(resp);
+
+    // Insert only one column
+    if (resp.has_err_status()) {
+      return;
+    }
+    // Get column count from previous response
+    size_t table_cols = resp.header().columns_size();
+    auto **void_arr = (const void **)calloc(table_cols, sizeof(void *));
+    // Create array for next responses
+    auto *resp_col_arr = new DatabaseBodyColumn *[table_cols];
+
+    // Create new response
+    resp = DatabaseResponse();
+    auto *resp_body = resp.mutable_body();
+
+    for (size_t i = 0; i < table_cols; ++i) {
+      resp_col_arr[i] = resp_body->add_columns();
+    }
+
+    // Copy row to void_arr and insert to body response
+    size_t ast_idx = 0;
+    for (const auto &ast_val : insert->m_vallist->m_lst) {
+      size_t tar_idx = ast_idxs[ast_idx];
+      void_arr[tar_idx] = getAstValuePtr(ast_val.get());
+      resp_col_arr[tar_idx]->set_column_value(ast_val->strval);
+      ++ast_idx;
+    }
+
+    auto *dto_row_list = dto_row_list_construct();
+    dto_row_list_append(dto_row_list, void_arr);
+    row_list_insert(dbms, insert->m_table.c_str(), dto_row_list);
+    dto_row_list_destruct(&dto_row_list);
+    // close resources and write row in response
+    delete[] resp_col_arr;
+    free(void_arr);
     writer->Write(resp);
   }
 
+  // CREATE
   void SSAstCreate(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -141,6 +288,7 @@ private:
     writer->Write(resp);
   }
 
+  // DROP
   void SSAstDrop(grpc::ServerWriter<DatabaseResponse> *writer,
                  const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;

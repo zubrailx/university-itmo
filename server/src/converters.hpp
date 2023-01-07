@@ -10,3 +10,6 @@ extern "C" {
 table_column_type toTableColumnType(DataType dtype);
 
 std::string toString(table_column_type type);
+std::string toString(const AstValue *ref);
+
+void *getAstValuePtr(AstValue *ref);

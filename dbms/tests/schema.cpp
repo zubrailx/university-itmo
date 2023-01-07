@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "../src/dbms/dto/dto_table.h"
+#include <dbms/dto_table.h>
 #include "../src/util/printers.h"
 #include "../src/dbms/op_dbms.h"
 #include <dbms/database.h>
@@ -20,7 +20,7 @@ TEST(schema, create_and_drop) {
                        (dto_table_column_limits){.is_null = false, .is_unique = true});
   EXPECT_EQ(table_create(dbms, table), true);
   EXPECT_EQ(table_create(dbms, table), false);
-  EXPECT_EQ(table_drop(dbms, table), true);
+  EXPECT_EQ(table_drop(dbms, table->name), true);
   EXPECT_EQ(table_create(dbms, table), true);
 
   dto_table_destruct(&table);

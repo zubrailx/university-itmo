@@ -41,11 +41,11 @@ grpc::Status perform_server_stream(std::unique_ptr<DatabaseQuery::Stub> &stub,
 
   while (reader->Read(&response)) {
     if (response.has_err_status()) {
-      std::cout << "\nError: ";
+      std::cout << "Error: ";
       std::cout << response.err_status().message() << std::endl;
     } else {
       if (response.has_header()) {
-        std::cout << "\nTABLE HEADER:" << std::endl;
+        std::cout << "TABLE HEADER:" << std::endl;
 
         DatabaseHeaderRow header_row = response.header();
         std::string bufout;
@@ -85,7 +85,7 @@ void run_client(const std::string &dbfile, const std::string &address, const int
   request.set_db_name(dbfile);
   DatabaseResponse response;
 
-  std::cout << "\n> ";
+  std::cout << "> ";
   while (getline(std::cin, line)) {
     // Check if command end
     std::string line_cp = boost::trim_right_copy(line);
@@ -111,7 +111,7 @@ void run_client(const std::string &dbfile, const std::string &address, const int
     }
     // New iteration
     buf.clear();
-    std::cout << "\n> ";
+    std::cout << "> ";
   }
 }
 

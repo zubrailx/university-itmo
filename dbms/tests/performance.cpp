@@ -3,9 +3,9 @@
 
 extern "C" {
 #include "../src/dbms/dto/dto_row.h"
-#include "../src/dbms/dto/dto_table.h"
 #include "../src/dbms/op_dbms.c"
 #include "../src/util/printers.h"
+#include <dbms/dto_table.h>
 #include <dbms/database.h>
 #include <dbms/dto_row.h>
 #include <dbms/dto_table.h>
@@ -15,6 +15,7 @@ extern "C" {
 #include <dbms/schema.h>
 #include <dbms/table.h>
 #include <dbms/util/column_types.h>
+#include <dbms/dto_table.h>
 }
 
 
@@ -41,8 +42,8 @@ TEST(performance, insert_one) {
 
   const void *r1[] = {e1, &e2, &o1, &o2};
 
-  dto_row_list l1 = dto_row_list_construct();
-  dto_row_list_append(&l1, r1);
+  dto_row_list *l1 = dto_row_list_construct();
+  dto_row_list_append(l1, r1);
 
   size_t units = 1'000'000;
   std::ofstream ofile("tmp/insert_one.log");
@@ -50,7 +51,7 @@ TEST(performance, insert_one) {
     // start
     clock_t time = clock();
 
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     // end
     time = clock() - time;
     double time_taken = ((double)time) / CLOCKS_PER_SEC * units;
@@ -96,11 +97,11 @@ TEST(performance, select) {
 
   for (size_t i = 0; i < 100; ++i) {
     // insert
-    dto_row_list l1 = dto_row_list_construct();
+    dto_row_list *l1 = dto_row_list_construct();
     for (size_t i = 0; i < 100; ++i) {
-      dto_row_list_append(&l1, r1);
+      dto_row_list_append(l1, r1);
     }
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     dto_row_list_destruct(&l1);
 
     // start
@@ -154,11 +155,11 @@ TEST(performance, select_optional) {
 
   for (size_t i = 0; i < 100; ++i) {
     // insert
-    dto_row_list l1 = dto_row_list_construct();
+    dto_row_list *l1 = dto_row_list_construct();
     for (size_t i = 0; i < 100; ++i) {
-      dto_row_list_append(&l1, r1);
+      dto_row_list_append(l1, r1);
     }
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     dto_row_list_destruct(&l1);
 
     // start
@@ -234,14 +235,14 @@ TEST(performance, update_optional) {
 
   for (size_t i = 0; i < 100; ++i) {
     // insert
-    dto_row_list l1 = dto_row_list_construct();
+    dto_row_list* l1 = dto_row_list_construct();
     for (size_t i = 0; i < 100 / 4; ++i) {
-      dto_row_list_append(&l1, r1);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
+      dto_row_list_append(l1, r1);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
     }
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     dto_row_list_destruct(&l1);
 
     // start
@@ -328,14 +329,14 @@ TEST(performance, delete_optional) {
 
   for (size_t i = 0; i < 100; ++i) {
     // insert
-    dto_row_list l1 = dto_row_list_construct();
+    dto_row_list *l1 = dto_row_list_construct();
     for (size_t i = 0; i < 100 / 4; ++i) {
-      dto_row_list_append(&l1, r1);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
+      dto_row_list_append(l1, r1);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
     }
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     dto_row_list_destruct(&l1);
 
     // start
@@ -415,14 +416,14 @@ TEST(performance, size_delete_insert) {
   size_t idx = 0;
   for (size_t i = 0; i < 100; ++i, ++idx) {
     // insert
-    dto_row_list l1 = dto_row_list_construct();
+    dto_row_list *l1 = dto_row_list_construct();
     for (size_t i = 0; i < 100 / 4; ++i) {
-      dto_row_list_append(&l1, r1);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
+      dto_row_list_append(l1, r1);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
     }
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     dto_row_list_destruct(&l1);
 
     ofile << idx << ";" << dbms->meta->pos_empty.bytes << std::endl;
@@ -469,14 +470,14 @@ TEST(performance, size_delete_insert) {
 
   for (size_t i = 0; i < 50; ++i, ++idx) {
     // insert
-    dto_row_list l1 = dto_row_list_construct();
+    dto_row_list *l1 = dto_row_list_construct();
     for (size_t i = 0; i < 100 / 4; ++i) {
-      dto_row_list_append(&l1, r1);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
-      dto_row_list_append(&l1, r2);
+      dto_row_list_append(l1, r1);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
+      dto_row_list_append(l1, r2);
     }
-    row_list_insert(dbms, "table1", &l1);
+    row_list_insert(dbms, "table1", l1);
     dto_row_list_destruct(&l1);
 
     ofile << idx << ";" << dbms->meta->pos_empty.bytes << std::endl;

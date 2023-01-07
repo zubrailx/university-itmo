@@ -96,9 +96,9 @@ private:
 
 private:
   std::unique_ptr<StorageBase> m_inst;
-  std::string strval;
 
 public:
+  std::string strval;
   DataType m_dtype;
 
 public:
@@ -110,9 +110,15 @@ public:
   };
 
   template<typename T>
-  T getValue() {
+  T getValue() const {
     assert(typeid(T) == m_inst->type());
     return static_cast<const Storage<T> *>(m_inst.get())->m_value;
+  }
+
+  template<typename T>
+  T *getValueRef() {
+    assert(typeid(T) == m_inst->type());
+    return &static_cast<Storage<T> *>(m_inst.get())->m_value;
   }
 
   std::string repr() const override {
