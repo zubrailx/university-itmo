@@ -50,7 +50,7 @@ private:
     }
   }
 
-  void FillTableHeaderResponse(DatabaseResponse &resp, dto_table *dto_header) {
+  void FillResponseTableHeader(DatabaseResponse &resp, dto_table *dto_header) {
     auto *header_row = resp.mutable_header();
     for (const auto *col = dto_header->first; col != nullptr; col = col->next) {
       DatabaseHeaderColumn *row_column = header_row->add_columns();
@@ -129,14 +129,15 @@ private:
         }
       } else {
         MapTableColumnIdxs(ast_idxs, dto_header, collist->m_lst);
-
         // check for validity
-        if (CheckTableColumnIdxs(resp, ast_idxs, collist)) {
-          CheckTableColumnTypes(resp, dto_header, ast_idxs, vallist);
+        if (!CheckTableColumnIdxs(resp, ast_idxs, collist)) {
+          goto dto_destruct;
         }
       }
-      FillTableHeaderResponse(resp, dto_header);
+      CheckTableColumnTypes(resp, dto_header, ast_idxs, vallist);
+      FillResponseTableHeader(resp, dto_header);
     }
+  dto_destruct:
     dto_table_destruct(&dto_header);
   }
 
@@ -207,6 +208,8 @@ private:
     std::vector<int> ast_idxs;
     GetTableHeaderWithAstMap(ast_idxs, insert->m_table, dbms, insert->m_collist.get(),
                              insert->m_vallist.get(), resp);
+    auto header = resp.mutable_header();
+    header->set_query_type(QueryType::QUERY_TYPE_INSERT);
     writer->Write(resp);
 
     // Insert only one column
