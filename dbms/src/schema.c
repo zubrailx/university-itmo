@@ -18,10 +18,10 @@ bool table_create(struct dbms *dbms, struct dto_table *table) {
   }
 }
 
-bool table_drop(struct dbms *dbms, struct dto_table *table) {
+bool table_drop(struct dbms *dbms, const char *table_name) {
   fileoff_t fileoff;
   pageoff_t pageoff;
-  if (dbms_find_table(table->name, dbms, &fileoff, &pageoff)) {
+  if (dbms_find_table(table_name, dbms, &fileoff, &pageoff)) {
     return dbms_drop_table(fileoff, pageoff, dbms);
   }
   return false;

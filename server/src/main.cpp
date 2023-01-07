@@ -48,6 +48,7 @@ private:
 
     writer->Write(resp);
   }
+
   void SSAstUpdate(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -64,6 +65,7 @@ private:
 
     writer->Write(resp);
   }
+
   void SSAstDelete(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -80,6 +82,7 @@ private:
 
     writer->Write(resp);
   }
+
   void SSAstInsert(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -96,6 +99,7 @@ private:
 
     writer->Write(resp);
   }
+
   void SSAstCreate(grpc::ServerWriter<DatabaseResponse> *writer,
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
@@ -149,10 +153,21 @@ private:
 
     auto *header_row = new DatabaseHeaderRow();
     header_row->set_query_type(QueryType::QUERY_TYPE_DROP);
-    resp.set_allocated_header(header_row);
 
+    const auto *drop = (const AstDrop *)root;
+    bool res = table_drop(dbms, drop->m_table.c_str());
+    if (!res) {
+      auto *err_status = new ErrorStatus();
+      err_status->set_message(fmt::format("Table {} does not exists", drop->m_table));
+      resp.set_allocated_err_status(err_status);
+    }
+
+    database_close(&dbms, false);
+
+    resp.set_allocated_header(header_row);
     writer->Write(resp);
   }
+
   void SSAstUnspecified(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
     DatabaseResponse resp;
 

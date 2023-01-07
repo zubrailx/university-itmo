@@ -3,16 +3,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <dbpb/database.grpc.pb.h>
+#include <google/protobuf/util/json_util.h>
 
 #include <iostream>
 #include <string>
 
 namespace po = boost::program_options;
 using namespace dbpb;
-
-void display_output(DatabaseResponse &response) {
-  std::cout << response.ByteSizeLong() << std::endl;
-}
 
 void process_status(const grpc::Status &status) {
   if (!status.ok()) {
@@ -37,13 +34,34 @@ grpc::Status perform_server_stream(std::unique_ptr<DatabaseQuery::Stub> &stub,
   std::unique_ptr<grpc::ClientReader<DatabaseResponse>> reader(
       stub->PerformQuerySS(&context, request));
 
+  google::protobuf::util::JsonOptions json_opts;
+  json_opts.add_whitespace = true;
+
+  bool last_header = false;
+
   while (reader->Read(&response)) {
     if (response.has_err_status()) {
-      std::cout << "Error: ";
+      std::cout << "\nError: ";
       std::cout << response.err_status().message() << std::endl;
     } else {
       if (response.has_header()) {
-        std::cout << response.header().query_type() << std::endl;
+        std::cout << "\nTABLE HEADER:" << std::endl;
+
+        DatabaseHeaderRow header_row = response.header();
+        std::string bufout;
+        google::protobuf::util::MessageToJsonString(header_row, &bufout, json_opts);
+        std::cout << bufout;
+
+        last_header = true;
+      } else {
+        if (last_header) {
+          std::cout << "TABLE BODY:" << std::endl;
+          last_header = false;
+        }
+        DatabaseBodyRow body_row = response.body();
+        std::string bufout;
+        google::protobuf::util::MessageToJsonString(body_row, &bufout, json_opts);
+        std::cout << bufout;
       }
     }
   }
@@ -67,7 +85,7 @@ void run_client(const std::string &dbfile, const std::string &address, const int
   request.set_db_name(dbfile);
   DatabaseResponse response;
 
-  std::cout << "> ";
+  std::cout << "\n> ";
   while (getline(std::cin, line)) {
     // Check if command end
     std::string line_cp = boost::trim_right_copy(line);
@@ -93,7 +111,7 @@ void run_client(const std::string &dbfile, const std::string &address, const int
     }
     // New iteration
     buf.clear();
-    std::cout << "> ";
+    std::cout << "\n> ";
   }
 }
 
