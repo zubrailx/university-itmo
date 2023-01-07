@@ -4,7 +4,6 @@
 // operations with table pages and tuples
 
 #include "io/page/p_container.h"
-#include "io/page/po_ptr.h"
 
 struct dbms;
 struct tp_tuple;

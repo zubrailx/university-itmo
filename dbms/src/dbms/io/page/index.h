@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 #include <dbms/util/define.h>
-#include <dbms/util/internals.h>
+#include <dbms/internals/po_ptr.h>
 
 typedef struct page_index {
   pageoff_t start;

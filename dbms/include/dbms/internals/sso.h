@@ -1,9 +1,7 @@
 #pragma once
 
-#include <stdbool.h>
+#include <dbms/internals/po_ptr.h>
 #include <stddef.h>
-
-#include "po_ptr.h"
 
 #define SSO_SSIZE_SIZE (sizeof(size_t) - sizeof(bool))
 #define SSO_MXLEN (sizeof(struct _str_not_in))

@@ -4,6 +4,7 @@
 
 struct dbms;
 struct dto_table;
+struct dp_tuple;
 
 bool table_exists(struct dbms *dbms, const char *name);
 bool table_create(struct dbms *dbms, struct dto_table *table);

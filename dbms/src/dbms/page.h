@@ -5,7 +5,7 @@
 #include "io/page/p_database.h"
 #include "io/page/p_slot.h"
 #include "io/page/p_table.h"
-#include <dbms/util/internals.h>
+#include <dbms/internals/page_loc.h>
 
 extern const pageoff_t DATABASE_PAGE_MIN_SIZE;
 extern const pageoff_t TABLE_PAGE_MIN_SIZE;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dbms/util/internals.h>
+#include <dbms/internals/page_loc.h>
 
 typedef struct po_ptr {
   fileoff_t fileoff;

@@ -11,6 +11,9 @@ table_column_type toTableColumnType(DataType dtype);
 
 std::string toString(table_column_type type);
 std::string toString(const AstValue *ref);
+std::string toString(const struct tpt_column_base *tpt_base,
+                     const struct dpt_column *dpt_column, struct dbms *dbms);
+// std
 
 void *getAstValuePtr(AstValue *ref);
 

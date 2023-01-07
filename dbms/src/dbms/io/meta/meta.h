@@ -1,7 +1,7 @@
 #pragma once
 
+#include <dbms/internals/page_loc.h>
 #include <stddef.h>
-#include <dbms/util/internals.h>
 
 struct slot_page_entry {
   fileoff_t last;

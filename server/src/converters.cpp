@@ -1,10 +1,12 @@
 #include "converters.hpp"
-#include "dbms/util/column_types.h"
 #include <fmt/core.h>
 #include <ios>
 
 extern "C" {
+#include <dbms/internals/dp_tuple.h>
 #include <dbms/plan_funcs.h>
+#include <dbms/tp_tuple.h>
+#include <dbms/util/column_types.h>
 }
 
 #include <cstdint>
@@ -54,6 +56,11 @@ std::string toString(const AstValue *ref) {
   default:
     return std::string();
   }
+}
+
+std::string toString(const struct tpt_column_base *tpt_base,
+                     const struct dpt_column *dpt_column, struct dbms *dbms) {
+  return std::string(tp_column_to_str(tpt_base, dpt_column, dbms));
 }
 
 // convert to types for table to read

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "p_base.h"
-#include "sso.h"
+#include <dbms/internals/sso.h>
+#include <dbms/internals/tpt_col_info.h>
 #include <dbms/util/align.h>
 #include <dbms/util/column_types.h>
 
@@ -77,11 +78,6 @@ typedef struct tp_tuple {
   struct tpt_header header;
   struct tpt_column_base columns[];// just the pointer to the first entry start
 } tp_tuple;
-
-// To create tp_tuple from dto
-typedef struct tpt_col_info {
-  size_t start;
-} tpt_col_info;
 
 // Iterators
 typedef struct tp_tuple_iter {

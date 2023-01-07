@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/page/sso.h"
+#include <dbms/internals/sso.h>
 
 struct dbms;
 

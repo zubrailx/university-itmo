@@ -8,7 +8,7 @@
 
 // strings are stored in s
 
-#include "io/page/po_ptr.h"
+#include <dbms/internals/po_ptr.h>
 #include <stddef.h>
 
 struct dbms;

@@ -2,7 +2,6 @@
 
 #include "io/page/p_table.h"
 #include <stddef.h>
-#include <dbms/util/internals.h>
 
 struct dbms;
 

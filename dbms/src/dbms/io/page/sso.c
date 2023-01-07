@@ -1,4 +1,4 @@
-#include "sso.h"
+#include <dbms/internals/sso.h>
 
 size_t sso_to_size(const unsigned char *ssize) {
   size_t res = 0;

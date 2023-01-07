@@ -11,6 +11,9 @@ extern "C" {
 #include <dbms/database.h>
 #include <dbms/dto_row.h>
 #include <dbms/dto_table.h>
+#include <dbms/internals/dp_tuple.h>
+#include <dbms/internals/dto_tuple.h>
+#include <dbms/internals/tpt_col_info.h>
 #include <dbms/plan.h>
 #include <dbms/plan_filter.h>
 #include <dbms/plan_funcs.h>
@@ -266,12 +269,26 @@ private:
 
   void FillResponseTableHeader(DatabaseResponse &resp, const plan_table_info *pti,
                                dbms *dbms) {
-    auto *header = resp.mutable_header();
+    auto *dpt = pti->dpt;
+    dto_table *dto_table;
+    dp_tuple_to_dto(dpt, &dto_table, dbms);
+    FillResponseTableHeader(resp, dto_table);
+    dto_table_destruct(&dto_table);
   }
 
   void FillResponseTableBodyRow(DatabaseResponse &resp, const plan_table_info *pti,
                                 const tp_tuple *tuple, dbms *dbms) {
     auto *body_row = resp.mutable_body();
+    for (size_t i = 0; i < pti->dpt->header.cols; ++i) {
+      auto *column = body_row->add_columns();
+
+      // NOTE: this is bad, mb it can be implemented in plan
+      const auto *dpt_column = pti->dpt->columns + i;
+      const auto *tpt_column =
+          (tpt_column_base *)((char *)tuple + pti->col_info[i].start);
+
+      column->set_column_value(toString(tpt_column, dpt_column, dbms));
+    }
   }
 
   // SELECT
@@ -309,9 +326,32 @@ private:
     select->destruct(select);
   }
 
-  plan_update *ParseAsUpdate(DatabaseResponse &resp, const AstUpdate *ast, dbms *dbms) {
+  plan_update *ParseAsUpdate(DatabaseResponse &resp, const AstUpdate *ast, dbms *dbms,
+                             column_value **cva_out) {
     plan_update *out = nullptr;
-    std::cout << "NOT IMPLEMENTED " << __PRETTY_FUNCTION__ << std::endl;
+
+    // create source
+    plan_source *source = plan_source_construct(ast->m_table.c_str(), dbms);
+
+    // create update list
+    const auto *ast_cvlist = ast->m_collist.get();
+    size_t list_size = ast_cvlist->m_lst.size();
+    *cva_out = (column_value *)malloc(sizeof(column_value) * list_size);
+
+    size_t idx = 0;
+    for (const auto &cv : ast_cvlist->m_lst) {
+      (*cva_out)[idx].column_name = cv->m_column->m_column.c_str();
+      (*cva_out)[idx].column_value = getAstValuePtr(cv->m_value.get());
+    }
+
+    // construct
+    if (ast->m_has_cond) {
+      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms);
+      plan_filter *pl_filt = plan_filter_construct_move(source, filter);
+      out = plan_update_construct_move(pl_filt, list_size, *cva_out);
+    } else {
+      out = plan_update_construct_move(source, list_size, *cva_out);
+    }
     return out;
   }
 
@@ -326,7 +366,8 @@ private:
       return;
     }
 
-    plan_update *update = ParseAsUpdate(resp, (const AstUpdate *)root, dbms);
+    column_value *cv_arr;
+    plan_update *update = ParseAsUpdate(resp, (const AstUpdate *)root, dbms, &cv_arr);
 
     size_t pti_size;
     const auto *pti = update->get_info(update, &pti_size);
@@ -336,17 +377,28 @@ private:
       update->next(update);
     }
     update->destruct(update);
+    free(cv_arr);
 
     auto *header_row = resp.mutable_header();
     header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
     FillResponseTableHeader(resp, pti, dbms);
-    // write header at the end
     writer->Write(resp);
   }
 
   plan_delete *ParseAsDelete(DatabaseResponse &resp, const AstDelete *ast, dbms *dbms) {
     plan_delete *out = nullptr;
-    std::cout << "NOT IMPLEMENTED " << __PRETTY_FUNCTION__ << std::endl;
+
+    // create source
+    plan_source *source = plan_source_construct(ast->m_table.c_str(), dbms);
+
+    // construct
+    if (ast->m_has_cond) {
+      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms);
+      plan_filter *pl_filt = plan_filter_construct_move(source, filter);
+      out = plan_delete_construct_move(pl_filt);
+    } else {
+      out = plan_delete_construct_move(source);
+    }
     return out;
   }
 
