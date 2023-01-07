@@ -14,6 +14,36 @@ void display_output(DatabaseResponse &response) {
   std::cout << response.ByteSizeLong() << std::endl;
 }
 
+void process_status(const grpc::Status &status) {
+  if (!status.ok()) {
+    std::cout << "ERROR(code=" << status.error_code() << "): " << status.error_message()
+              << std::endl;
+  }
+}
+
+grpc::Status perform_single(std::unique_ptr<DatabaseQuery::Stub> &stub,
+                    const DatabaseRequest &request, DatabaseResponse &response) {
+  grpc::ClientContext context;
+  grpc::Status status = stub->PerformQuery(&context, request, &response);
+
+  return status;
+}
+
+grpc::Status perform_server_stream(std::unique_ptr<DatabaseQuery::Stub> &stub,
+                           const DatabaseRequest &request, DatabaseResponse &response) {
+  grpc::ClientContext context;
+  std::unique_ptr<grpc::ClientReader<DatabaseResponse>> reader(
+      stub->PerformQuerySS(&context, request));
+
+  while (reader->Read(&response)) {
+    if (response.has_header()) {
+      std::cout << response.header().query_type() << std::endl;
+    }
+  }
+
+  return reader->Finish();
+}
+
 void run_client(const std::string &dbfile, const std::string &address, const int port) {
   std::string buf;
   std::string line;
@@ -23,14 +53,12 @@ void run_client(const std::string &dbfile, const std::string &address, const int
   auto channel = grpc::CreateChannel(target, grpc::InsecureChannelCredentials());
 
   std::unique_ptr<DatabaseQuery::Stub> stub = DatabaseQuery::NewStub(channel);
+  std::cout << "Created channel on target: " << target << "." << std::endl;
+  std::cout << "Working with db: " << dbfile << "." << std::endl;
 
   DatabaseRequest request;
-  DatabaseResponse response;
-
-  std::cout << "Created channel on target: " << target << "." << std::endl;
-
   request.set_db_name(dbfile);
-  std::cout << "Working with db: " << dbfile << "." << std::endl;
+  DatabaseResponse response;
 
   std::cout << "> ";
   while (getline(std::cin, line)) {
@@ -38,9 +66,8 @@ void run_client(const std::string &dbfile, const std::string &address, const int
     std::string line_cp = boost::trim_right_copy(line);
     size_t cp_size = line_cp.size();
 
-    bool query_ended = cp_size && line_cp[cp_size - 1] == ';';
-
     // Append trimmed line if ended
+    bool query_ended = cp_size && line_cp[cp_size - 1] == ';';
     if (query_ended) {
       buf.append(line_cp);
     } else {
@@ -48,28 +75,14 @@ void run_client(const std::string &dbfile, const std::string &address, const int
       buf.append("\n");
     }
 
+    // Perform request
     if (query_ended) {
-      // append trimmed line
-      grpc::ClientContext context;
-
       request.set_command(buf);
 
-      // single response
-      // grpc::Status status = stub->PerformQuery(&context, request, &response);
+      // auto status = perform_single(stub, request, response);
+      auto status = perform_server_stream(stub, request, response);
 
-      // streaming from server
-      std::unique_ptr<grpc::ClientReader<DatabaseResponse>> reader(
-          stub->PerformQuerySS(&context, request));
-
-      while (reader->Read(&response)) {
-        std::cout << "Read element!" << std::endl;
-      }
-
-      grpc::Status status = reader->Finish();
-      if (!status.ok()) {
-        std::cout << "ERROR(code=" << status.error_code()
-                  << "): " << status.error_message() << std::endl;
-      }
+      process_status(status);
     }
     // New iteration
     buf.clear();
@@ -81,11 +94,11 @@ int main(int argc, char *argv[]) {
 
   po::options_description desc("Client options");
 
-  desc.add_options()
-    ("help,h", "Show help")
-    ("address,a", po::value<std::string>()->default_value("localhost"), "Server address")
-    ("port,p", po::value<int>()->default_value(6543), "Server port")
-    ("database,d", po::value<std::string>()->default_value(".tmp-db.bin"), "Database file");
+  desc.add_options()("help,h", "Show help")(
+      "address,a", po::value<std::string>()->default_value("localhost"),
+      "Server address")("port,p", po::value<int>()->default_value(6543), "Server port")(
+      "database,d", po::value<std::string>()->default_value(".tmp-db.bin"),
+      "Database file");
 
   po::variables_map vm;
   try {

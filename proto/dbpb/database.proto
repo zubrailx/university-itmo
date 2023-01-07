@@ -26,14 +26,29 @@ enum QueryType {
   QUERY_TYPE_DROP = 6;
 }
 
+message DatabaseHeaderColumn {
+  string column_name = 10;
+  string column_type = 11;
+}
+
+message DatabaseHeaderRow {
+  QueryType query_type = 21;
+  repeated DatabaseHeaderColumn columns = 22;
+}
+
+message DatabaseBodyColumn {
+  string column_value = 31;
+}
+
+message DatabaseBodyRow {
+  repeated DatabaseBodyColumn columns = 41;
+}
+
 message DatabaseResponse {
-  optional ErrorStatus err_status = 1;
-
-  repeated google.protobuf.Any table_column_infos = 2;
-  repeated google.protobuf.Any table_rows = 3;
-  uint32 row_count = 4;
-
-  QueryType query_type = 5;
+  oneof row {
+    DatabaseHeaderRow header = 51;
+    DatabaseBodyRow body = 52;
+  }
 }
 
 service DatabaseQuery {

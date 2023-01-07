@@ -13,61 +13,92 @@ using namespace dbpb;
 
 class DatabaseQueryService final : public DatabaseQuery::Service {
 private:
-  void ProcessAstSelect(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_SELECT);
+  void SSAstSelect(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+    // header
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_SELECT);
+    response.set_allocated_header(header_row);
+
+    writer->Write(response);
   }
-  void ProcessAstUpdate(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_UPDATE);
+  void SSAstUpdate(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+    // header
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
+    response.set_allocated_header(header_row);
+
+    writer->Write(response);
   }
-  void ProcessAstDelete(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_DELETE);
+  void SSAstDelete(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+    // header
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_DELETE);
+    response.set_allocated_header(header_row);
+
+    writer->Write(response);
   }
-  void ProcessAstInsert(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_INSERT);
+  void SSAstInsert(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+    // header
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_INSERT);
+    response.set_allocated_header(header_row);
+
+    writer->Write(response);
   }
-  void ProcessAstCreate(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_CREATE);
+  void SSAstCreate(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+    // header
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_CREATE);
+    response.set_allocated_header(header_row);
+
+    writer->Write(response);
   }
-  void ProcessAstDrop(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_DROP);
+  void SSAstDrop(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+    // header
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_DROP);
+    response.set_allocated_header(header_row);
+
+    writer->Write(response);
   }
-  void ProcessAstUnspecified(DatabaseResponse &response, const Ast *root) {
-    response.set_query_type(QueryType::QUERY_TYPE_UNSPECIFIED);
+  void SSAstUnspecified(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
+    DatabaseResponse response;
+
+    auto *header_row = new DatabaseHeaderRow();
+    header_row->set_query_type(QueryType::QUERY_TYPE_UNSPECIFIED);
+    response.set_allocated_header(header_row);
+    grpc::WriteOptions options;
+
+    options.set_last_message();
+    writer->Write(response, options);
   }
 
-  void ProcessAstSingle(DatabaseResponse &response, Ast *root) {
+  void SSAstSelectType(grpc::ServerWriter<DatabaseResponse> *writer, Ast *root) {
     switch (root->getType()) {
     case AstType::SELECT:
-      return ProcessAstSelect(response, root);
+      return SSAstSelect(writer, root);
     case AstType::UPDATE:
-      return ProcessAstUpdate(response, root);
+      return SSAstUpdate(writer, root);
     case AstType::DELETE:
-      return ProcessAstDelete(response, root);
+      return SSAstDelete(writer, root);
     case AstType::INSERT:
-      return ProcessAstInsert(response, root);
+      return SSAstInsert(writer, root);
     case AstType::DROP:
-      return ProcessAstDrop(response, root);
+      return SSAstDrop(writer, root);
     case AstType::CREATE:
-      return ProcessAstCreate(response, root);
+      return SSAstCreate(writer, root);
     default:
-      return ProcessAstUnspecified(response, root);
+      return SSAstUnspecified(writer, root);
     }
   }
 
 public:
-  ::grpc::Status PerformQuery(::grpc::ServerContext *context,
-                              const ::DatabaseRequest *request,
-                              ::DatabaseResponse *response) override {
-    AstWrapper astw;
-    int code = parse_command(request->command(), astw);
-    if (code) {
-      std::cout << "ERROR: " << astw.err_msg << std::endl;
-    } else {
-      std::cout << astw.list->repr() << std::endl;
-    }
-    return grpc::Status::OK;
-  }
-
   grpc::Status PerformQuerySS(grpc::ServerContext *context,
                               const DatabaseRequest *request,
                               grpc::ServerWriter<DatabaseResponse> *writer) override {
@@ -80,9 +111,7 @@ public:
 
     const auto *astList = astw.list->getList();
     for (const auto &it : *astList) {
-      DatabaseResponse resp;
-      ProcessAstSingle(resp, it.get());
-      writer->Write(resp);
+      SSAstSelectType(writer, it.get());
     }
     return grpc::Status::OK;
   }

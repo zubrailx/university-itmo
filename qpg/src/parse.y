@@ -81,7 +81,6 @@ stmt_list:
 stmt_list_h: 
   stmt ';' { $$ = new AstList<Ast>($1, AstType::QUERY_LIST); }
 | stmt_list_h stmt ';' {
-    std::cout << "STATEMENT_LIST" << std::endl;
     auto lst = (AstList<Ast>*) $1;
     $$ = new AstList<Ast>(lst, $2);
     delete $1; 
