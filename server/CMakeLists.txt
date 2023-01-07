@@ -2,16 +2,29 @@ project(server LANGUAGES C CXX)
 
 set(PROJECT_EXEC_NAME ${PROJECT_NAME}_exec)
 
-# Client executable
+# External libraries
 find_package(Boost 1.80.0 REQUIRED COMPONENTS 
   program_options)
 
+set(FETCHCONTENT_QUIET OFF)
+include(FetchContent)
+
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(fmt)
+
+# Executable
 add_executable(${PROJECT_EXEC_NAME} 
-  ./src/main.cpp)
+  ./src/converters.cpp
+  ./src/main.cpp
+)
 
 target_link_libraries(${PROJECT_EXEC_NAME} PRIVATE 
   dbms
   qpg 
+  fmt::fmt
   proto::grpc_cpp
   ${Boost_LIBRARIES}
 )

@@ -36,11 +36,11 @@ static int dbms_destruct(dbms **dbms_ptr) {
 }
 
 // dbms
-static dbms *dbms_construct(const char *fname, bool do_trunc) {
+static dbms *dbms_construct(const char *fname, bool should_exist, bool do_trunc) {
   dbms *db = my_malloc(dbms);
-  *db = (dbms) {};
+  *db = (dbms){};
 
-  db->dbfile = dbfile_construct(fname, do_trunc);
+  db->dbfile = dbfile_construct(fname, should_exist, do_trunc);
   if (db->dbfile) {
     db->meta = dbms_meta_construct();
   }
@@ -50,27 +50,35 @@ static dbms *dbms_construct(const char *fname, bool do_trunc) {
   return db;
 }
 
+static void create_whole_meta(struct dbms *dbms) {
+  meta_create(dbms->meta, dbms->dbfile->file);
+  // create page allocator
+  dbms_pa_create_close(dbms, FILEOFF_NULL);
+  // create containers data distributer
+  dbms_dd_create_close(dbms);
+  // create pages
+  dbms_dp_create_close(dbms, SIZE_DEFAULT);
+  // update meta
+  meta_alter(dbms->meta, dbms->dbfile->file);
+}
+
 // Create database and write to file
 dbms *dbms_create(const char *fname) {
-  dbms *dbms = dbms_construct(fname, true);
+  dbms *dbms = dbms_construct(fname, false, true);
   if (dbms) {
-    meta_create(dbms->meta, dbms->dbfile->file);
-    // create page allocator
-    dbms_pa_create_close(dbms, FILEOFF_NULL);
-    // create containers data distributer
-    dbms_dd_create_close(dbms);
-    // create pages
-    dbms_dp_create_close(dbms, SIZE_DEFAULT);
-    // update meta
-    meta_alter(dbms->meta, dbms->dbfile->file);
+    create_whole_meta(dbms);
   }
   return dbms;
 }
 
-dbms *dbms_open(const char *fname) {
-  dbms *dbms = dbms_construct(fname, false);
+dbms *dbms_open(const char *fname, bool should_exist) {
+  dbms *dbms = dbms_construct(fname, should_exist, false);
   if (dbms) {
-    meta_load(dbms->meta, dbms->dbfile->file);
+    if (dbms->dbfile->is_new) {
+      create_whole_meta(dbms);
+    } else {
+      meta_load(dbms->meta, dbms->dbfile->file);
+    }
   }
   return dbms;
 }

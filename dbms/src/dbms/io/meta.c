@@ -7,23 +7,23 @@
 
 // preinit meta->da_len
 void meta_load(struct meta *meta, FILE *file) {
-  fseek(file, offsetof(struct meta, slot_len), SEEK_SET);
+  int asr;
+  asr = !fseek(file, offsetof(struct meta, slot_len), SEEK_SET);
+  assert(asr);
   // size is calculated based on da_len
-  {
-    int asr = fread(&meta->slot_len, sizeof(meta->slot_len), 1, file);
-    assert(asr);
-  }
+  asr = fread(&meta->slot_len, sizeof(meta->slot_len), 1, file);
+  assert(asr);
+
   size_t size = meta_size(meta);
   // read the whole
   rewind(file);
-  {
-    int asr = fread(meta, size, 1, file);
-    assert(asr);
-  }
+  asr = fread(meta, size, 1, file);
+  assert(asr);
 }
 
 void meta_alter(const struct meta *meta, FILE *file) {
-  rewind(file);
+  int asr = !fseek(file, 0, SEEK_SET);
+  assert(asr);
   fwrite(meta, meta_size(meta), 1, file);
 }
 

@@ -4,21 +4,36 @@
 
 #include <malloc.h>
 #include <string.h>
+#include <unistd.h>
+
+#ifdef WIN32
+#include <io.h>
+#define F_OK 0
+#define access _access
+#endif
 
 // Getters
 FILE *dbfile_file(dbfile *dbfile) { return dbfile->file; }
 const char *dbfile_name(dbfile *dbfile) { return dbfile->fname; }
 
 // Construct-destruct
-dbfile *dbfile_construct(const char *fname, bool do_trunc) {
+dbfile *dbfile_construct(const char *fname, bool should_exist, bool do_trunc) {
   dbfile *dfile = my_malloc(dbfile);
   dfile->fname = strdup(fname);
-  if (do_trunc) {
-    dfile->file = fopen(fname, "w+b");
+
+  bool exists = !access(fname, F_OK);
+  dfile->is_new = do_trunc || !exists;
+
+  if (should_exist && !exists) {
+    dfile->file = NULL;
   } else {
-    dfile->file = fopen(fname, "r+b");
+    if (do_trunc || !exists) {
+      dfile->file = fopen(fname, "w+b");
+    } else {
+      dfile->file = fopen(fname, "r+b");
+    }
   }
-  // if file is present
+
   if (!dfile->file) {
     dbfile_destruct(&dfile);
   }

@@ -19,7 +19,7 @@ TEST(database_public, create) {
 TEST(database_public, open) {
   dbms *db = dbms_create("tmp/dbms.bin");
   dbms_close(&db);
-  dbms *opened = dbms_open("tmp/dbms.bin");
+  dbms *opened = dbms_open("tmp/dbms.bin", false);
   db = dbms_create("tmp/dbms2.bin");
   // EXPECT_EQ(opened->meta->pos_empty.bytes, db->meta->pos_empty.bytes);
   // EXPECT_EQ(opened->meta->da.first.bytes, db->meta->da.first.bytes);

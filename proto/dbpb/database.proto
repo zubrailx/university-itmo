@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package dbpb;
 
-import "google/protobuf/any.proto";
+/* import "google/protobuf/any.proto"; */
 
 message DatabaseRequest {
   string db_name = 1;
@@ -11,7 +11,7 @@ message DatabaseRequest {
 
 message ErrorStatus {
   string message = 1;
-  repeated google.protobuf.Any details = 2;
+  /* repeated google.protobuf.Any details = 2; */
 }
 
 enum QueryType {
@@ -45,6 +45,7 @@ message DatabaseBodyRow {
 }
 
 message DatabaseResponse {
+  ErrorStatus err_status = 50;
   oneof row {
     DatabaseHeaderRow header = 51;
     DatabaseBodyRow body = 52;

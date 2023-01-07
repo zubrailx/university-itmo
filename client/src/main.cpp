@@ -22,7 +22,8 @@ void process_status(const grpc::Status &status) {
 }
 
 grpc::Status perform_single(std::unique_ptr<DatabaseQuery::Stub> &stub,
-                    const DatabaseRequest &request, DatabaseResponse &response) {
+                            const DatabaseRequest &request,
+                            DatabaseResponse &response) {
   grpc::ClientContext context;
   grpc::Status status = stub->PerformQuery(&context, request, &response);
 
@@ -30,14 +31,20 @@ grpc::Status perform_single(std::unique_ptr<DatabaseQuery::Stub> &stub,
 }
 
 grpc::Status perform_server_stream(std::unique_ptr<DatabaseQuery::Stub> &stub,
-                           const DatabaseRequest &request, DatabaseResponse &response) {
+                                   const DatabaseRequest &request,
+                                   DatabaseResponse &response) {
   grpc::ClientContext context;
   std::unique_ptr<grpc::ClientReader<DatabaseResponse>> reader(
       stub->PerformQuerySS(&context, request));
 
   while (reader->Read(&response)) {
-    if (response.has_header()) {
-      std::cout << response.header().query_type() << std::endl;
+    if (response.has_err_status()) {
+      std::cout << "Error: ";
+      std::cout << response.err_status().message() << std::endl;
+    } else {
+      if (response.has_header()) {
+        std::cout << response.header().query_type() << std::endl;
+      }
     }
   }
 

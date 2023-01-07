@@ -15,10 +15,10 @@ typedef struct base_page {
 
 enum page_types {
   PAGE_UNKNOWN = 0,
-  PAGE_CONTAINER,
   PAGE_DATABASE,
   PAGE_SLOT,
   PAGE_TABLE,
+  PAGE_CONTAINER,
   PAGE_DUMPED,
 };
 
