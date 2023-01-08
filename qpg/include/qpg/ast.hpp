@@ -74,16 +74,18 @@ private:
   struct StorageBase {
     virtual ~StorageBase() = default;
 
-    virtual const std::type_info &type() const noexcept = 0;
+    // virtual const std::type_info &type() const noexcept = 0;
   };
 
   template<typename T>
   struct Storage : StorageBase {
     T m_value;
 
-    explicit Storage(T value) : m_value(value) {}
+    explicit Storage(const T &value) : m_value(value) {}
 
-    const std::type_info &type() const noexcept override { return typeid(T); }
+    explicit Storage(T &&value) : m_value(std::move(value)) {}
+
+    // const std::type_info &type() const noexcept override { return typeid(T); }
   };
 
   template<typename T>
@@ -100,20 +102,20 @@ public:
   // copy object
   template<typename T>
   AstValue(T obj, DataType dtype) : Ast(AstType::VARIABLE) {
-    m_inst = std::make_unique<Storage<T>>(obj);
+    m_inst = std::make_unique<Storage<T>>(std::forward<T>(obj));
     m_dtype = dtype;
     strval = std::string(str_repr(std::move(obj)));
   };
 
   template<typename T>
   T getValue() const {
-    assert(typeid(T) == m_inst->type());
+    // assert(typeid(T) == m_inst->type());
     return static_cast<const Storage<T> *>(m_inst.get())->m_value;
   }
 
   template<typename T>
   const T &getValueRef() const {
-    assert(typeid(T) == m_inst->type());
+    // assert(typeid(T) == m_inst->type());
     return static_cast<const Storage<T> *>(m_inst.get())->m_value;
   }
 
