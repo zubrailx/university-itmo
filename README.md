@@ -1,4 +1,4 @@
-# itmo_llp-lab3
+# itmo_llp-lab3 (BEBRA-DB + BEBRA-SQL)
 
 База данных с клиент-серверным взаимодействием.
 
@@ -88,7 +88,7 @@ Client options:
 * `client` - клиенсткое приложение
 * `server` - серверное приложение
 * `qpg` - (query plan generator) - получено в результате выполнения ЛР 2
-* `dbms` - (database manager) - получено в результате выполнения ЛР 2
+* `dbms` - (database manager) - получено в результате выполнения ЛР 1
 * `proto` - описанные protobuf сообщения
 
 Для линковки модулей друг с другом используется CMake.
