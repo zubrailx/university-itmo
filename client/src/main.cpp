@@ -86,6 +86,12 @@ void run_client(const std::string &dbfile, const std::string &address, const int
   DatabaseResponse response;
 
   std::cout << "> ";
+
+  // std::stringstream ss;
+  // ss << "create table t1 (c1 bool, c2 int32);" << std::endl;
+  // ss << "insert into t1 values(true, 52);" << std::endl;
+  // ss << "select * from t1;" << std::endl;
+
   while (getline(std::cin, line)) {
     // Check if command end
     std::string line_cp = boost::trim_right_copy(line);

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include "../src/dbms/io/page/sso.h"
+#include <dbms/internals/sso.h>
 }
 
 TEST(sso, test) {

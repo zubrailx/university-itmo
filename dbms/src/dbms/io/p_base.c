@@ -34,7 +34,8 @@ void page_alter(struct base_page *base, FILE *file, fileoff_t page_start) {
   int asr;
   asr = !fseek(file, page_start.bytes, SEEK_SET);
   assert(asr);
-  fwrite(base, base->header.size.bytes, 1, file);
+  asr = fwrite(base, base->header.size.bytes, 1, file);
+  assert(asr);
 }
 
 void page_drop(FILE *file, fileoff_t page_start) {

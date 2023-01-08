@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #define OVERRIDE
 #define INHERIT
@@ -71,7 +71,8 @@ struct plan_source {
   OVERRIDE void (*destruct)(void *self_ptr);
 };
 
-struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms);
+struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms,
+                                          const char **err_msg);
 // }}}
 
 // plan_parent {{{
@@ -135,7 +136,8 @@ struct column_value {
 };
 
 struct plan_update *plan_update_construct_move(void *parent_void, size_t size,
-                                               struct column_value *arr);
+                                               struct column_value *arr,
+                                               const char **err_msg);
 // }}}
 
 // plan_delete {{{
@@ -155,7 +157,7 @@ struct plan_delete {
   void (*start)(void *self);// only present in terminal plan_nodes
 };
 
-struct plan_delete *plan_delete_construct_move(void *parent_void);
+struct plan_delete *plan_delete_construct_move(void *parent_void, const char **err_msg);
 // }}}
 
 // plan_cross_join {{{
@@ -193,7 +195,8 @@ struct plan_filter {
   OVERRIDE void (*destruct)(void *self);
 };
 
-struct plan_filter *plan_filter_construct_move(void *parent, void *filt);
+struct plan_filter *plan_filter_construct_move(void *parent, void *filt,
+                                               const char **err_msg);
 // }}}
 
 #undef PLAN_PARENT

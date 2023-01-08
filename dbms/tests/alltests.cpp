@@ -11,8 +11,9 @@ extern "C" {
 
 int test(int argc, char **argv) {
   struct dbms *dbms = database_open(".tmp-db.bin", false);
+  const char *err_msg = nullptr;
   struct plan_select *select_table1 =
-      plan_select_construct_move(plan_source_construct("table1", dbms), "");
+      plan_select_construct_move(plan_source_construct("table1", dbms, &err_msg), "");
 
   select_table1->start(select_table1);
   while (!select_table1->end(select_table1)) {

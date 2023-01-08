@@ -147,11 +147,13 @@ private:
     dto_table_destruct(&dto_header);
   }
 
-  void PreprocAstColumnList(DatabaseResponse &resp, const AstColumnList *ast_clist) {
+  bool CheckAstColumnList(DatabaseResponse &resp, const AstColumnList *ast_clist) {
     if (ast_clist->m_lst.size()) {
       auto *err_status = resp.mutable_err_status();
       err_status->set_message("Projection in select is not supported");
+      return false;
     }
+    return true;
   }
 
   void StatusAstUnexpected(const Ast *ast) {
@@ -160,24 +162,50 @@ private:
     assert(0);
   }
 
+  bool CheckPlanOnNullptr(DatabaseResponse &resp, void *plan, const char **err_msg) {
+    if (plan == nullptr) {
+      if (err_msg) {
+        resp.mutable_err_status()->set_message(*err_msg);
+        free((void *)*err_msg);
+        *err_msg = nullptr;
+      }
+      return false;
+    }
+    return true;
+  }
+
   plan *ParseAsTableSource(DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
     plan *out = nullptr;
     switch (ast->getType()) {
     case AstType::TABLE: {
       const auto *table = (AstTable *)ast;
-      auto *plan_source = plan_source_construct(table->m_name.c_str(), dbms);
+
+      const char *err_msg = nullptr;
+      auto *plan_source = plan_source_construct(table->m_name.c_str(), dbms, &err_msg);
+      if (!CheckPlanOnNullptr(resp, plan_source, &err_msg)) {
+        return nullptr;
+      }
+
       if (table->m_has_alias) {
         out = (plan *)plan_select_construct_move(plan_source, table->m_alias.c_str());
+      } else {
+        out = (plan *)plan_source;
       }
       break;
     }
     case AstType::SUBQUERY: {
       const auto *subq = (AstSubquery *)ast;
+
       auto *select = ParseAsSelect(resp, subq->m_query.get(), dbms);
+      if (select == nullptr) {
+        return nullptr;
+      }
+
       out = (plan *)plan_select_construct_move(select, subq->m_alias.c_str());
       break;
     }
     default:
+      std::cout << "TABLE_SOURCE" << std::endl;
       StatusAstUnexpected(ast);
     }
     return out;
@@ -194,17 +222,25 @@ private:
     case AstType::JOIN: {
       const auto *join = (AstJoin *)ast;
       auto *left = ParseAsTableRef(resp, join->m_lsv.get(), dbms);
+      if (left == nullptr) {
+        return nullptr;
+      }
       auto *right = ParseAsTableSource(resp, join->m_rsv.get(), dbms);
+      if (right == nullptr) {
+        return nullptr;
+      }
       out = (plan *)plan_cross_join_construct_move(left, right);
       break;
     }
     default:
+      std::cout << "TABLE_REF" << std::endl;
       StatusAstUnexpected(ast);
     }
     return out;
   }
 
-  fast *ParseAsStatement(DatabaseResponse &resp, const AstStatement *ast, dbms *dbms) {
+  fast *ParseAsStatement(DatabaseResponse &resp, const AstStatement *ast, dbms *dbms,
+                         const struct plan_table_info *info_arr, size_t pti_size) {
     fast *out = nullptr;
 
     switch (ast->m_stype) {
@@ -219,21 +255,62 @@ private:
       auto *st_column = (AstStatementColumn *)ast;
       const char *table = st_column->m_col->m_table.c_str();
       const char *column = st_column->m_col->m_column.c_str();
-      out = (fast *)fast_column_construct(table, column, dbms);
+
+      const char *err_msg = nullptr;
+      out = (fast *)fast_column_construct(table, column, dbms, &err_msg);
+      if (!CheckPlanOnNullptr(resp, out, &err_msg)) {
+        return nullptr;
+      } else {
+        // run compile forcibly
+        const char *err_msg = nullptr;
+        out->compile(out, pti_size, info_arr, &err_msg);
+        if (err_msg) {
+          resp.mutable_err_status()->set_message(std::string(err_msg));
+          free((void *)err_msg);
+          out->destruct(out);
+          return nullptr;
+        }
+      }
       break;
     }
     case StatementType::UNARY: {
       auto *st_unary = (AstStatementUnary *)ast;
-      auto *parent = ParseAsStatement(resp, st_unary->m_operand.get(), dbms);
-      auto *func = toDbmsFunc(st_unary->m_op, parent->res_type);
-      out = (fast *)fast_unop_construct((void *)parent, func, dbms);
-      break;
+
+      auto *parent =
+          ParseAsStatement(resp, st_unary->m_operand.get(), dbms, info_arr, pti_size);
+      if (parent == nullptr) {
+        return nullptr;
+      }
+
+      auto *func = toDbmsFunc(st_unary->m_op, parent->res_type, resp);
+      if (func == &UNARY_UNDEF) {
+        parent->destruct(parent);
+        return nullptr;
+      } else {
+        out = (fast *)fast_unop_construct((void *)parent, func, dbms);
+        break;
+      }
     }
     case StatementType::BINARY: {
       auto *binary = (AstStatementBinary *)ast;
-      auto *left = ParseAsStatement(resp, binary->m_left.get(), dbms);
-      auto *right = ParseAsStatement(resp, binary->m_right.get(), dbms);
-      auto *func = toDbmsFunc(binary->m_op, left->res_type, right->res_type);
+
+      auto *left =
+          ParseAsStatement(resp, binary->m_left.get(), dbms, info_arr, pti_size);
+      if (left == nullptr) {
+        return nullptr;
+      }
+      auto *right =
+          ParseAsStatement(resp, binary->m_right.get(), dbms, info_arr, pti_size);
+      if (right == nullptr) {
+        return nullptr;
+      }
+
+      auto *func = toDbmsFunc(binary->m_op, left->res_type, right->res_type, resp);
+      if (func == &BINARY_UNDEF) {
+        left->destruct(left);
+        right->destruct(right);
+        return nullptr;
+      }
       out = (fast *)fast_binop_construct(left, right, func, dbms);
       break;
     }
@@ -246,24 +323,45 @@ private:
   // NOTE: ParseAsSelect can return select or filter
   plan *ParseAsSelect(DatabaseResponse &resp, const AstSelect *ast, dbms *dbms) {
     const auto *ast_clist = ast->m_collist.get();
-    PreprocAstColumnList(resp, ast_clist);
+    if (!CheckAstColumnList(resp, ast_clist)) {
+      return nullptr;
+    }
 
-    plan *out = ParseAsTableRef(resp, ast->m_table_ref.get(), dbms);
+    plan *table_ref = ParseAsTableRef(resp, ast->m_table_ref.get(), dbms);
+    if (table_ref == nullptr) {
+      return nullptr;
+    }
 
     if (ast->m_has_cond) {
-      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms);
-      out = (plan *)plan_filter_construct_move(out, filter);
+
+      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms, table_ref->pti_arr,
+                                      table_ref->arr_size);
+      if (filter == nullptr) {
+        table_ref->destruct(table_ref);
+        return nullptr;
+      }
+
+      const char *err_msg = nullptr;
+      plan *pl_filt = (plan *)plan_filter_construct_move(table_ref, filter, &err_msg);
+      CheckPlanOnNullptr(resp, pl_filt, &err_msg);
+      return pl_filt;
+    } else {
+      return table_ref;
     }
-    return out;
   }
 
   plan_select *ParseAsSelectWrapper(DatabaseResponse &resp, const AstSelect *ast,
                                     dbms *dbms) {
+
     auto *out = ParseAsSelect(resp, ast, dbms);
+    if (out == nullptr) {
+      return nullptr;
+    }
+
     if (out->type == PLAN_TYPE_SELECT) {
       return (plan_select *)out;
     } else {
-      return plan_select_construct_move(out, "");
+      return plan_select_construct_move(out, "virtual");
     }
   }
 
@@ -296,6 +394,9 @@ private:
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
 
+    auto *header_row = resp.mutable_header();
+    header_row->set_query_type(QueryType::QUERY_TYPE_SELECT);
+
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
       writer->Write(resp);
@@ -303,27 +404,34 @@ private:
     }
     // NOTE: projection is not supported
     plan_select *select = ParseAsSelectWrapper(resp, (const AstSelect *)root, dbms);
+    // if error while parsing
+    if (select == nullptr) {
+      writer->Write(resp);
+      return;
+    }
 
     size_t pti_size;
     const auto *pti = select->get_info(select, &pti_size);
     assert(pti_size == 1);
 
-    auto *header_row = resp.mutable_header();
-    header_row->set_query_type(QueryType::QUERY_TYPE_SELECT);
     FillResponseTableHeader(resp, pti, dbms);
     writer->Write(resp);
 
     // create new response for body
-    resp = DatabaseResponse();
 
     select->start(select);
     while (!select->end(select)) {
+      resp = DatabaseResponse();
+
       const tp_tuple *tuple = select->get(select)[0];
       FillResponseTableBodyRow(resp, pti, tuple, dbms);
       writer->Write(resp);
+
       select->next(select);
     }
     select->destruct(select);
+    // close database
+    database_close(&dbms, false);
   }
 
   plan_update *ParseAsUpdate(DatabaseResponse &resp, const AstUpdate *ast, dbms *dbms,
@@ -331,7 +439,11 @@ private:
     plan_update *out = nullptr;
 
     // create source
-    plan_source *source = plan_source_construct(ast->m_table.c_str(), dbms);
+    const char *err_msg = nullptr;
+    plan_source *source = plan_source_construct(ast->m_table.c_str(), dbms, &err_msg);
+    if (!CheckPlanOnNullptr(resp, source, &err_msg)) {
+      return nullptr;
+    }
 
     // create update list
     const auto *ast_cvlist = ast->m_collist.get();
@@ -346,12 +458,23 @@ private:
 
     // construct
     if (ast->m_has_cond) {
-      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms);
-      plan_filter *pl_filt = plan_filter_construct_move(source, filter);
-      out = plan_update_construct_move(pl_filt, list_size, *cva_out);
+      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms,
+                                      source->base.pti_arr, source->base.arr_size);
+      if (filter == nullptr) {
+        source->destruct(source);
+        return nullptr;
+      }
+
+      const char *err_msg = nullptr;
+      plan_filter *pl_filt = plan_filter_construct_move(source, filter, &err_msg);
+      if (!CheckPlanOnNullptr(resp, pl_filt, &err_msg)) {
+        return nullptr;
+      }
+      out = plan_update_construct_move(pl_filt, list_size, *cva_out, &err_msg);
     } else {
-      out = plan_update_construct_move(source, list_size, *cva_out);
+      out = plan_update_construct_move(source, list_size, *cva_out, &err_msg);
     }
+    CheckPlanOnNullptr(resp, out, &err_msg);
     return out;
   }
 
@@ -360,17 +483,26 @@ private:
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
 
+    auto *header_row = resp.mutable_header();
+    header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
+
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
       writer->Write(resp);
       return;
     }
 
-    column_value *cv_arr;
+    column_value *cv_arr = nullptr;
     plan_update *update = ParseAsUpdate(resp, (const AstUpdate *)root, dbms, &cv_arr);
+    if (update == nullptr) {
+      free(cv_arr);
+      writer->Write(resp);
+      return;
+    }
 
     size_t pti_size;
     const auto *pti = update->get_info(update, &pti_size);
+    FillResponseTableHeader(resp, pti, dbms);
 
     update->start(update);
     while (!update->end(update)) {
@@ -379,9 +511,8 @@ private:
     update->destruct(update);
     free(cv_arr);
 
-    auto *header_row = resp.mutable_header();
-    header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
-    FillResponseTableHeader(resp, pti, dbms);
+    // close database
+    database_close(&dbms, false);
     writer->Write(resp);
   }
 
@@ -389,16 +520,31 @@ private:
     plan_delete *out = nullptr;
 
     // create source
-    plan_source *source = plan_source_construct(ast->m_table.c_str(), dbms);
+    const char *err_msg = nullptr;
+    plan_source *source = plan_source_construct(ast->m_table.c_str(), dbms, &err_msg);
+    if (!CheckPlanOnNullptr(resp, source, &err_msg)) {
+      return nullptr;
+    }
 
     // construct
     if (ast->m_has_cond) {
-      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms);
-      plan_filter *pl_filt = plan_filter_construct_move(source, filter);
-      out = plan_delete_construct_move(pl_filt);
+      fast *filter = ParseAsStatement(resp, ast->m_cond.get(), dbms,
+                                      source->base.pti_arr, source->base.arr_size);
+      if (filter == nullptr) {
+        source->destruct(source);
+        return nullptr;
+      }
+
+      const char *err_msg;
+      plan_filter *pl_filt = plan_filter_construct_move(source, filter, &err_msg);
+      if (!CheckPlanOnNullptr(resp, pl_filt, &err_msg)) {
+        return nullptr;
+      }
+      out = plan_delete_construct_move(pl_filt, &err_msg);
     } else {
-      out = plan_delete_construct_move(source);
+      out = plan_delete_construct_move(source, &err_msg);
     }
+    CheckPlanOnNullptr(resp, out, &err_msg);
     return out;
   }
 
@@ -407,6 +553,9 @@ private:
                    const DatabaseRequest *req, const Ast *root) {
     DatabaseResponse resp;
 
+    auto *header_row = resp.mutable_header();
+    header_row->set_query_type(QueryType::QUERY_TYPE_DELETE);
+
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
       writer->Write(resp);
@@ -414,20 +563,22 @@ private:
     }
 
     plan_delete *pdelete = ParseAsDelete(resp, (const AstDelete *)root, dbms);
+    if (pdelete == nullptr) {
+      writer->Write(resp);
+      return;
+    }
 
     size_t pti_size;
     const auto *pti = pdelete->get_info(pdelete, &pti_size);
+    FillResponseTableHeader(resp, pti, dbms);
 
     pdelete->start(pdelete);
     while (!pdelete->end(pdelete)) {
       pdelete->next(pdelete);
     }
     pdelete->destruct(pdelete);
-
-    auto *header_row = resp.mutable_header();
-    header_row->set_query_type(QueryType::QUERY_TYPE_DELETE);
-    FillResponseTableHeader(resp, pti, dbms);
-    // write header at the end
+    // close database
+    database_close(&dbms, false);
     writer->Write(resp);
   }
 
@@ -485,6 +636,9 @@ private:
     // close resources and write row in response
     delete[] resp_col_arr;
     free(void_arr);
+
+    // close database
+    database_close(&dbms, false);
     writer->Write(resp);
   }
 
@@ -524,6 +678,8 @@ private:
     }
 
     dto_table_destruct(&dto_table);
+
+    // close database
     database_close(&dbms, false);
 
     resp.set_allocated_header(header_row);

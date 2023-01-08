@@ -80,38 +80,43 @@ const void *getAstValuePtr(AstValue *ref) {
 }
 
 static const struct fast_unop_func *unsupportedFunc(OperationType op_type,
-                                                    table_column_type dtype) {
-  std::cout << fmt::format("Unsupported op type: {}, ({})\n", (int)op_type, (int)dtype);
+                                                    table_column_type dtype,
+                                                    dbpb::DatabaseResponse &resp) {
+  resp.mutable_err_status()->set_message(
+      fmt::format("Unsupported op type: {}, ({})\n", (int)op_type, (int)dtype));
   return &UNARY_UNDEF;
 }
 
 static const struct fast_binop_func *unsupportedFunc(OperationType op_type,
                                                      table_column_type left,
-                                                     table_column_type right) {
-  std::cout << fmt::format("Unsupported op type: {}, ({}, {}) \n", (int)op_type,
-                           (int)left, (int)right);
+                                                     table_column_type right,
+                                                     dbpb::DatabaseResponse &resp) {
+  resp.mutable_err_status()->set_message(fmt::format(
+      "Unsupported op type: {}, ({}, {}) \n", (int)op_type, (int)left, (int)right));
   return &BINARY_UNDEF;
 }
 
-const struct fast_unop_func *toDbmsFunc(OperationType optype, table_column_type dtype) {
+const struct fast_unop_func *toDbmsFunc(OperationType optype, table_column_type dtype,
+                                        dbpb::DatabaseResponse &resp) {
   switch (optype) {
   case OperationType::NOT: {
     switch (dtype) {
     case COLUMN_TYPE_BOOL:
       return &BOOL_NOT;
     default:
-      return unsupportedFunc(optype, dtype);
+      return unsupportedFunc(optype, dtype, resp);
     }
   default:
-    return unsupportedFunc(optype, dtype);
+    return unsupportedFunc(optype, dtype, resp);
   }
   }
 }
 
 const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type left,
-                                         table_column_type right) {
+                                         table_column_type right,
+                                         dbpb::DatabaseResponse &resp) {
   if (left != right) {
-    return unsupportedFunc(optype, left, right);
+    return unsupportedFunc(optype, left, right, resp);
   }
 
   switch (optype) {
@@ -121,7 +126,7 @@ const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type
     case COLUMN_TYPE_BOOL:
       return &BOOL_AND;
     default:
-      return unsupportedFunc(optype, left, right);
+      return unsupportedFunc(optype, left, right, resp);
     }
   }
 
@@ -130,7 +135,7 @@ const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type
     case COLUMN_TYPE_BOOL:
       return &BOOL_OR;
     default:
-      return unsupportedFunc(optype, left, right);
+      return unsupportedFunc(optype, left, right, resp);
     }
   }
 
@@ -145,7 +150,7 @@ const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type
     case COLUMN_TYPE_STRING:
       return &STRING_EQUALS;
     default:
-      return unsupportedFunc(optype, left, right);
+      return unsupportedFunc(optype, left, right, resp);
     }
   }
 
@@ -156,7 +161,7 @@ const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type
     case COLUMN_TYPE_INT32:
       return &INT32_LARGER;
     default:
-      return unsupportedFunc(optype, left, right);
+      return unsupportedFunc(optype, left, right, resp);
     }
   }
 
@@ -165,11 +170,11 @@ const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type
     case COLUMN_TYPE_STRING:
       return &STRING_IN;
     default:
-      return unsupportedFunc(optype, left, right);
+      return unsupportedFunc(optype, left, right, resp);
     }
   }
 
   default:
-    return unsupportedFunc(optype, left, right);
+    return unsupportedFunc(optype, left, right, resp);
   }
 }

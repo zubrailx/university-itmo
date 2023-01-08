@@ -83,8 +83,6 @@ private:
 
     explicit Storage(const T &value) : m_value(value) {}
 
-    explicit Storage(T &&value) : m_value(std::move(value)) {}
-
     // const std::type_info &type() const noexcept override { return typeid(T); }
   };
 
@@ -102,7 +100,7 @@ public:
   // copy object
   template<typename T>
   AstValue(T obj, DataType dtype) : Ast(AstType::VARIABLE) {
-    m_inst = std::make_unique<Storage<T>>(std::forward<T>(obj));
+    m_inst = std::make_unique<Storage<T>>(obj);
     m_dtype = dtype;
     strval = std::string(str_repr(std::move(obj)));
   };

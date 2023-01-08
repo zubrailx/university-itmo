@@ -107,8 +107,9 @@ TEST(performance, select) {
     // start
     clock_t time = clock();
     {// select
+      const char *err_msg;
       struct plan_select *select_table1 = plan_select_construct_move(
-          plan_source_construct("table1", dbms), "temp-table1");
+          plan_source_construct("table1", dbms, &err_msg), "temp-table1");
 
       select_table1->start(select_table1);
       while (!select_table1->end(select_table1)) {
@@ -166,7 +167,8 @@ TEST(performance, select_optional) {
     clock_t time = clock();
     {// select
 
-      auto *so = plan_source_construct("table1", dbms);
+      const char *err_msg;
+      auto *so = plan_source_construct("table1", dbms, &err_msg);
 
       // filter
       auto fc_name = fast_column_construct("table1", "name", dbms);
@@ -249,7 +251,8 @@ TEST(performance, update_optional) {
     clock_t time = clock();
     {// select
 
-      auto *ps = plan_source_construct("table1", dbms);
+      const char *err_msg;
+      auto *ps = plan_source_construct("table1", dbms, &err_msg);
 
       struct plan_filter *pf;
       {
@@ -282,7 +285,7 @@ TEST(performance, update_optional) {
         col_val_arr[0].column_name = "name";
         col_val_arr[0].column_value = "heavy";
 
-        pu = plan_update_construct_move(pf, cols, col_val_arr);
+        pu = plan_update_construct_move(pf, cols, col_val_arr, &err_msg);
         free(col_val_arr);
       }
 
@@ -343,7 +346,8 @@ TEST(performance, delete_optional) {
     clock_t time = clock();
     {// select
 
-      auto *ps = plan_source_construct("table1", dbms);
+      const char *err_msg;
+      auto *ps = plan_source_construct("table1", dbms, &err_msg);
 
       struct plan_filter *pf;
       {
@@ -370,7 +374,7 @@ TEST(performance, delete_optional) {
 
       struct plan_delete *pu;
       {
-        pu = plan_delete_construct_move(pf);
+        pu = plan_delete_construct_move(pf, &err_msg);
       }
 
       pu->start(pu);
@@ -431,7 +435,8 @@ TEST(performance, size_delete_insert) {
 
   {// delete 1/4 of rows
 
-    auto *ps = plan_source_construct("table1", dbms);
+    const char *err_msg;
+    auto *ps = plan_source_construct("table1", dbms, &err_msg);
 
     struct plan_filter *pf;
     {
@@ -458,7 +463,7 @@ TEST(performance, size_delete_insert) {
 
     struct plan_delete *pu;
     {
-      pu = plan_delete_construct_move(pf);
+      pu = plan_delete_construct_move(pf, &err_msg);
     }
 
     pu->start(pu);

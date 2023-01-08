@@ -27,7 +27,8 @@ void fast_destruct(void *self_void) {
 
 // fast_const {{{
 static void fast_const_compile(void *self_void, size_t pti_size,
-                               struct plan_table_info *info_arr) {}
+                               const struct plan_table_info *info_arr,
+                               const char **err_msg) {}
 
 static void *fast_const_calc(void *self_void) {
   struct fast *self = self_void;
@@ -65,7 +66,8 @@ struct fast_const *fast_const_construct(enum table_column_type col_type,
 
 // fast_column {{{
 static void fast_column_compile(void *self_void, size_t pti_size,
-                                struct plan_table_info *info_arr) {
+                                const struct plan_table_info *info_arr,
+                                const char **err_msg) {
   struct fast_column *self = self_void;
 
   for (size_t ti = 0; ti < pti_size; ++ti) {
@@ -73,8 +75,8 @@ static void fast_column_compile(void *self_void, size_t pti_size,
     if (!strcmp(pti->table_name, self->table_name)) {
       int ci = dbms_find_column_idx(pti->dpt, self->column_name, self->dbms);
       if (ci < 0) {
-        printf("Column not found in table '%s'.\n", self->table_name);
-        assert(0 && "Not found.\n");
+        *err_msg = strdup("Column not found in table.");
+        return;
       }
       // Set idxs, allocate tptc
       self->tbl_idx = ti;
@@ -93,7 +95,7 @@ static void fast_column_compile(void *self_void, size_t pti_size,
     }
   }
   if (self->resc_size == 0) {
-    assert(0 && "fast_column: Table or column not found.\n");
+    *err_msg = strdup("fast_column: Table or column not found.");
     return;
   }
 }
@@ -118,7 +120,8 @@ static void fast_column_pass(void *self_void, const struct tp_tuple **tuple_arr)
 }
 
 struct fast_column *fast_column_construct(const char *table_name,
-                                          const char *column_name, struct dbms *dbms) {
+                                          const char *column_name, struct dbms *dbms,
+                                          const char **err_msg) {
   struct fast_column *self = my_malloc(struct fast_column);
   *self = (struct fast_column){
       .base = fast_construct(FAST_COLUMN),
@@ -126,6 +129,12 @@ struct fast_column *fast_column_construct(const char *table_name,
       .column_name = strdup(column_name),
       .dbms = dbms,
   };
+
+  if (!strcmp(table_name, "")) {
+    *err_msg = strdup("Table name should be present");
+    free(self);
+    return NULL;
+  }
 
   self->base.compile = fast_column_compile;
   self->base.destruct = fast_column_destruct;
@@ -137,9 +146,10 @@ struct fast_column *fast_column_construct(const char *table_name,
 
 // fast_unop {{{
 static void fast_unop_compile(void *self_void, size_t pti_size,
-                              struct plan_table_info *info_arr) {
+                              const struct plan_table_info *info_arr,
+                              const char **err_msg) {
   struct fast_unop *self = self_void;
-  self->parent->compile(self->parent, pti_size, info_arr);
+  self->parent->compile(self->parent, pti_size, info_arr, err_msg);
 }
 
 static void fast_unop_destruct(void *self_void) {
@@ -184,10 +194,15 @@ struct fast_unop *fast_unop_construct(void *parent, const struct fast_unop_func 
 
 // fast_binop {{{
 static void fast_binop_compile(void *self_void, size_t pti_size,
-                               struct plan_table_info *info_arr) {
+                               const struct plan_table_info *info_arr,
+                               const char **err_msg) {
   struct fast_binop *self = self_void;
-  self->left->compile(self->left, pti_size, info_arr);
-  self->right->compile(self->right, pti_size, info_arr);
+  self->left->compile(self->left, pti_size, info_arr, err_msg);
+  // abort if error message is present
+  if (*err_msg) {
+    return;
+  }
+  self->right->compile(self->right, pti_size, info_arr, err_msg);
 }
 
 static void fast_binop_destruct(void *self_void) {

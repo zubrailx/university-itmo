@@ -43,6 +43,7 @@ dbfile *dbfile_construct(const char *fname, bool should_exist, bool do_trunc) {
 int dbfile_destruct(dbfile **ptr) {
   dbfile *dfile = *ptr;
   if (dfile) {
+    dbfile_flush(dfile);
     int res = dbfile_close(dfile);
     free(dfile->fname);
     free(dfile);

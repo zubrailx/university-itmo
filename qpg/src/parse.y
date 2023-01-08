@@ -146,12 +146,12 @@ update_stmt:
 
   /* DELETE */
 delete_stmt:
-  DELETE FROM table_name WHERE statement {
-    $$ = new AstDelete($3, (AstStatement*)$5);
+  DELETE FROM table_name {
+    $$ = new AstDelete($3, nullptr);
     free($3);
   }
-|  DELETE FROM table_name {
-    $$ = new AstDelete($3, nullptr);
+| DELETE FROM table_name WHERE statement {
+    $$ = new AstDelete($3, (AstStatement*)$5);
     free($3);
   }
 ;

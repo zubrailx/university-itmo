@@ -19,6 +19,7 @@ void meta_load(struct meta *meta, FILE *file) {
   rewind(file);
   asr = fread(meta, size, 1, file);
   assert(asr);
+  meta->open_count += 1;
 }
 
 void meta_alter(const struct meta *meta, FILE *file) {

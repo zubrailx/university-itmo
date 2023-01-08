@@ -187,15 +187,18 @@ static void plan_source_start(void *self_void, bool do_write) {
 }
 
 // @do_write - do open on write
-struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms) {
+// can return nullptr
+struct plan_source *plan_source_construct(const void *table_name, struct dbms *dbms,
+                                          const char **err_msg) {
   struct plan_source *self = my_malloc(struct plan_source);
   // specific for source
   self->dbms = dbms;
   pageoff_t dpt_off;
   fileoff_t dpt_loc;
   if (!dbms_find_table(table_name, dbms, &dpt_loc, &dpt_off)) {
-    printf("plan_source_construct: Table not found.\n");
-    goto err;
+    *err_msg = strdup("plan_source_construct: Table not found.");
+    free(self);
+    return NULL;
   }
 
   struct dp_tuple *plan_dpt;
@@ -236,10 +239,6 @@ struct plan_source *plan_source_construct(const void *table_name, struct dbms *d
     self->base.get_dbms = plan_source_get_dbms;
     self->base.start = plan_source_start;
   }
-  return self;
-err:
-  printf("plan_source_construct: Failed.\n");
-  plan_source_destruct(self);
   return self;
 }
 // }}}
@@ -509,8 +508,10 @@ static void plan_update_start_public(void *self_void) {
   self->base.start(self, true);
 }
 
+// can return nullptr
 struct plan_update *plan_update_construct_move(void *parent_void, size_t cv_size,
-                                               struct column_value *arr) {
+                                               struct column_value *arr,
+                                               const char **err_msg) {
   struct plan_update *self = my_malloc(struct plan_update);
   *self = (struct plan_update){};
 
@@ -526,14 +527,14 @@ struct plan_update *plan_update_construct_move(void *parent_void, size_t cv_size
     size_t arr_size;
     const struct plan_table_info *parent_info = parent->get_info(parent, &arr_size);
     if (parent->arr_size != 1 || !parent_info[0].dpt->header.is_present) {
-      printf("plan_update_construct: Parent iterates over virtual table.\n");
-      goto err;
+      *err_msg = strdup("plan_update_construct: Parent iterates over virtual table.");
+      goto destruct;
     }
     // Set dbms and check
     bool res = parent->get_dbms(parent, &self->dbms);
     if (!res) {
-      printf("plan_update_construct: Doesn't have access to file.\n");
-      goto err;
+      *err_msg = strdup("plan_update_construct: Doesn't have access to file.");
+      goto destruct;
     }
     // Set iter
     self->iter = NULL;
@@ -548,9 +549,8 @@ struct plan_update *plan_update_construct_move(void *parent_void, size_t cv_size
       int idx = dbms_find_column_idx(self->base.pti_arr[0].dpt, arr[i].column_name,
                                      self->dbms);
       if (idx < 0) {
-        printf("plan_update_construct: Columns name '%s' not found.\n",
-               arr[i].column_name);
-        goto err;
+        *err_msg = strdup("plan_update_construct: Columns not found.");
+        goto destruct;
       } else {
         self->col_idxs[i] = (size_t)idx;
         self->col_vals[i] = arr[i].column_value;
@@ -576,8 +576,7 @@ struct plan_update *plan_update_construct_move(void *parent_void, size_t cv_size
   }
   return self;
 
-err:
-  printf("plan_update_construct: Failed.\n");
+destruct:
   plan_update_destruct(self);
   return self;
 }
@@ -628,12 +627,14 @@ static void plan_delete_start(void *self_void, bool do_write) {
   }
 }
 
+// can return nullptr
 static void plan_delete_start_public(void *self_void) {
   struct plan_delete *self = self_void;
   self->base.start(self, true);
 }
 
-struct plan_delete *plan_delete_construct_move(void *parent_void) {
+struct plan_delete *plan_delete_construct_move(void *parent_void,
+                                               const char **err_msg) {
   struct plan_delete *self = my_malloc(struct plan_delete);
   *self = (struct plan_delete){};
   // move
@@ -647,14 +648,14 @@ struct plan_delete *plan_delete_construct_move(void *parent_void) {
     size_t arr_size;
     const struct plan_table_info *parent_info = parent->get_info(parent, &arr_size);
     if (arr_size != 1 || !parent_info[0].dpt->header.is_present) {
-      printf("plan_delete_construct: Parent iterates over virtual table.\n");
-      goto err;
+      *err_msg = strdup("plan_delete_construct: Parent iterates over virtual table.");
+      goto destruct;
     }
     // Set dbms and check
     bool res = parent->get_dbms(parent, &self->dbms);
     if (!res) {
-      printf("plan_delete_construct: Doesn't have access to file.\n");
-      goto err;
+      *err_msg = strdup("plan_delete_construct: Doesn't have access to file.");
+      goto destruct;
     }
     // Set iter
     self->iter = NULL;
@@ -682,9 +683,8 @@ struct plan_delete *plan_delete_construct_move(void *parent_void) {
   }
   return self;
 
-err:
-  printf("plan_delete_construct: Failed.\n");
-  plan_update_destruct(self);
+destruct:
+  plan_parent_destruct(self);
   return self;
 }
 // }}}
@@ -846,12 +846,14 @@ static void plan_filter_start(void *self_void, bool do_write) {
   plan_zero_tp_tuple(self);
 }
 
-struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
+struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void,
+                                               const char **err_msg) {
   struct plan_filter *self = my_malloc(struct plan_filter);
   struct fast *filt = filt_void;
   *self = (struct plan_filter){};
-
   self->parent = parent;
+  self->filt = filt;
+
   {// Construct
     size_t arr_size = self->parent->arr_size;
     self->base = plan_construct(PLAN_TYPE_FILTER, arr_size);
@@ -859,8 +861,12 @@ struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
     // Set pti
     plan_set_pti_deep(&self->base, self->parent->pti_arr);
     // Add filter and compile it
-    self->filt = filt;
-    filt->compile(filt, self->base.arr_size, self->base.pti_arr);
+    const char *err_msgin = NULL;
+    filt->compile(filt, self->base.arr_size, self->base.pti_arr, &err_msgin);
+    if (err_msgin) {
+      *err_msg = err_msgin;
+      goto destruct;
+    }
   }
   {
     VIRT_INHERIT((*self), base, get_info);
@@ -878,6 +884,10 @@ struct plan_filter *plan_filter_construct_move(void *parent, void *filt_void) {
     self->base.start = plan_filter_start;
   }
   return self;
+
+destruct:
+  plan_filter_destruct(self);
+  return NULL;
 }
 // }}}
 

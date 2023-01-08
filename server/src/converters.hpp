@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dbpb/database.pb.h>
 #include <qpg/ast.hpp>
 
 extern "C" {
@@ -17,7 +18,12 @@ std::string toString(const struct tpt_column_base *tpt_base,
 
 const void *getAstValuePtr(AstValue *ref);
 
+const struct fast_unop_func *toDbmsFunc(OperationType optype, table_column_type dtype,
+                                        dbpb::DatabaseResponse &resp);
 
-const struct fast_unop_func *toDbmsFunc(OperationType optype, table_column_type dtype);
+const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type left,
+                                         table_column_type right,
+                                         dbpb::DatabaseResponse &resp);
+
 const struct fast_binop_func *toDbmsFunc(OperationType optype, table_column_type left,
                                          table_column_type right);

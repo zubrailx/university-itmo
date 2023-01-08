@@ -11,6 +11,7 @@ struct slot_page_entry {
 
 /* Stored in file */
 typedef struct meta {
+  int32_t open_count;
   // file position (like heap position in malloc)
   fileoff_t pos_empty;
 
