@@ -120,7 +120,7 @@ void plan_set_pti_deep_idx(struct plan *plan, const struct plan_table_info *pti,
   plan_set_pti_shallow_idx(plan, pti, idx);
 
   size_t cols = pti->dpt->header.cols;
-  size_t dpt_size = dp_tuple_size(cols);
+  size_t dpt_size = dp_tuple_size_without_padding(cols);
 
   struct plan_table_info *p_pti = plan->pti_arr + idx;
 
@@ -354,7 +354,7 @@ static dp_tuple *dpt_flatten_malloc(size_t size, const struct plan_table_info *s
     total_cols += src[i].dpt->header.cols;
   }
   {
-    dest = malloc(dp_tuple_size(total_cols));
+    dest = malloc(dp_tuple_size_without_padding(total_cols));
     // Header
     // zero everything until columns
     memset(dest, 0, offsetof(struct dp_tuple, columns));
@@ -364,7 +364,7 @@ static dp_tuple *dpt_flatten_malloc(size_t size, const struct plan_table_info *s
     size_t cur_col = 0;
     for (size_t i = 0; i < size; ++i) {
       const size_t icols = src[i].dpt->header.cols;
-      const size_t icol_size = dp_tuple_size(icols) - offsetof(dp_tuple, columns);
+      const size_t icol_size = dp_tuple_size_without_padding(icols) - offsetof(dp_tuple, columns);
 
       memcpy(dest->columns + cur_col, src[i].dpt->columns, icol_size);
       cur_col += icols;
@@ -383,7 +383,7 @@ static void plan_select_start(void *self_void, bool do_write) {
 
   parent->start(parent, do_write);
 
-  if (parent->get(parent)[0] != NULL) {
+  if (!parent->end(parent)) {
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
     tpt_flatten(self->base.tuple_arr[0], parent->get(parent), self);
   } else {
@@ -769,6 +769,9 @@ static void plan_cross_join_start(void *self_void, bool do_write) {
   tp_tuple **tpt_right = self->p_right->get(self->p_right);
   for (size_t r = 0; r < self->p_right->arr_size; ++r, ++cur) {
     self->base.tuple_arr[cur] = tpt_right[r];
+  }
+  if (self->end(self)) {
+    plan_zero_tp_tuple(self);
   }
 }
 

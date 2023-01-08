@@ -26,8 +26,12 @@ size_t dp_space_left(const struct database_page *page) {
   return (page->header.index_start.bytes - page->header.tuple_end.bytes);
 }
 
+size_t dp_tuple_size_without_padding(size_t cols) {
+  return offsetof(struct dp_tuple, columns) + sizeof(dpt_column) * cols;
+}
+
 size_t dp_tuple_size(size_t columns) {
-  size_t bsize = offsetof(struct dp_tuple, columns) + sizeof(dpt_column) * columns;
+  size_t bsize = dp_tuple_size_without_padding(columns);
   return bsize + align_get_padding(bsize, alignof(struct dp_tuple));
 }
 

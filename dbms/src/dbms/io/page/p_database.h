@@ -53,6 +53,7 @@ struct database_page *dp_construct_init(struct pageoff_t size, fileoff_t prev,
 // Tuple
 size_t dp_space_left(const struct database_page *page);
 size_t dp_tuple_size(size_t columns);
+size_t dp_tuple_size_without_padding(size_t cols);
 
 dp_tuple *dp_tuple_locate(const struct database_page *page, pageoff_t idx_pageoff);
 
