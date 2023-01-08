@@ -250,14 +250,302 @@ TABLE BODY:
 }
 ```
 
-Выборка (select):
+Выборка (select+join):
 
 ```console
-
+> select * from t1 cross_join t2;
+TABLE HEADER:
+{
+ "queryType": "QUERY_TYPE_SELECT",
+ "columns": [
+  {
+   "columnName": "c1",
+   "columnType": "int32"
+  },
+  {
+   "columnName": "c2",
+   "columnType": "bool"
+  },
+  {
+   "columnName": "c1",
+   "columnType": "bool"
+  },
+  {
+   "columnName": "c2",
+   "columnType": "int32"
+  },
+  {
+   "columnName": "c3",
+   "columnType": "double"
+  },
+  {
+   "columnName": "c4",
+   "columnType": "string"
+  }
+ ]
+}
+TABLE BODY:
+{
+ "columns": [
+  {
+   "columnValue": "5555"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "0"
+  },
+  {
+   "columnValue": "0.000000"
+  },
+  {}
+ ]
+}
+{
+ "columns": [
+  {
+   "columnValue": "1111"
+  },
+  {
+   "columnValue": "true"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "0"
+  },
+  {
+   "columnValue": "0.000000"
+  },
+  {}
+ ]
+}
 ```
 
+Выборка с подзапросом:
 
+```console
+> select * from t1 cross_join (select * from t1 cross_join t2) as v1;
+TABLE HEADER:
+{
+ "queryType": "QUERY_TYPE_SELECT",
+ "columns": [
+  {
+   "columnName": "c1",
+   "columnType": "int32"
+  },
+  {
+   "columnName": "c2",
+   "columnType": "bool"
+  },
+  {
+   "columnName": "c1",
+   "columnType": "int32"
+  },
+  {
+   "columnName": "c2",
+   "columnType": "bool"
+  },
+  {
+   "columnName": "c1",
+   "columnType": "bool"
+  },
+  {
+   "columnName": "c2",
+   "columnType": "int32"
+  },
+  {
+   "columnName": "c3",
+   "columnType": "double"
+  },
+  {
+   "columnName": "c4",
+   "columnType": "string"
+  }
+ ]
+}
+TABLE BODY:
+{
+ "columns": [
+  {
+   "columnValue": "5555"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "5555"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "0"
+  },
+  {
+   "columnValue": "0.000000"
+  },
+  {}
+ ]
+}
+{
+ "columns": [
+  {
+   "columnValue": "5555"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "1111"
+  },
+  {
+   "columnValue": "true"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "0"
+  },
+  {
+   "columnValue": "0.000000"
+  },
+  {}
+ ]
+}
+{
+ "columns": [
+  {
+   "columnValue": "1111"
+  },
+  {
+   "columnValue": "true"
+  },
+  {
+   "columnValue": "5555"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "0"
+  },
+  {
+   "columnValue": "0.000000"
+  },
+  {}
+ ]
+}
+{
+ "columns": [
+  {
+   "columnValue": "1111"
+  },
+  {
+   "columnValue": "true"
+  },
+  {
+   "columnValue": "1111"
+  },
+  {
+   "columnValue": "true"
+  },
+  {
+   "columnValue": "false"
+  },
+  {
+   "columnValue": "0"
+  },
+  {
+   "columnValue": "0.000000"
+  },
+  {}
+ ]
+}
+```
 
+Выборка колонка с колонкой:
+
+```console
+> select * from t3 cross_join t3 as t3a where t3.c1 in t3a.c1;
+TABLE HEADER:
+{
+ "queryType": "QUERY_TYPE_SELECT",
+ "columns": [
+  {
+   "columnName": "c1",
+   "columnType": "string"
+  },
+  {
+   "columnName": "c1",
+   "columnType": "string"
+  }
+ ]
+}
+TABLE BODY:
+{
+ "columns": [
+  {
+   "columnValue": "12345"
+  },
+  {
+   "columnValue": "1234567"
+  }
+ ]
+}
+```
+
+Изменение:
+
+```console
+> update t1 set c2=false where t1.c2 = true;
+TABLE HEADER:
+{
+ "queryType": "QUERY_TYPE_UPDATE",
+ "columns": [
+  {
+   "columnName": "c1",
+   "columnType": "int32"
+  },
+  {
+   "columnName": "c2",
+   "columnType": "bool"
+  }
+ ]
+}
+```
+
+Удаление:
+
+```console
+> delete from t3;
+TABLE HEADER:
+{
+ "queryType": "QUERY_TYPE_DELETE",
+ "columns": [
+  {
+   "columnName": "c1",
+   "columnType": "string"
+  }
+ ]
+}
+```
+
+### Примечание
+
+Грамматику и соответственно команды можно посмотреть в `qpg/src/parse.l` и `qpg/src/parse.y`.
 
 ### Вывод
 
