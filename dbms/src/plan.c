@@ -298,16 +298,34 @@ static bool plan_parent_get_dbms(void *self_void, struct dbms **dbms_out) {
 
 // plan_select{{{
 static void tpt_flatten(struct tp_tuple *dest, struct tp_tuple **src,
-                        const struct plan *parent) {
+                        const struct plan_select *select) {
+
+  const struct plan *parent = select->parent;
   dest->header.is_present = false;
 
-  size_t cur_off = offsetof(tp_tuple, columns);
+  struct tpt_col_info *sel_col_info = select->base.pti_arr[0].col_info;
+  // because of alignment we need to process element by element
+  size_t sel_start_col = 0;
   for (size_t i = 0; i < parent->arr_size; ++i) {
-    size_t icol_size = parent->pti_arr[i].tpt_size - offsetof(tp_tuple, columns);
-    if (src[i] != NULL) {
-      memcpy((void *)dest + cur_off, src[i]->columns, icol_size);
+    struct tpt_col_info *par_col_info = parent->pti_arr[i].col_info;
+    size_t par_icols = parent->pti_arr[i].dpt->header.cols;
+    // for 0 to n-1 column
+    size_t j = 0;
+    for (; j < par_icols - 1; ++j) {
+      void *dest_ptr = (void *)dest + sel_col_info[sel_start_col + j].start;
+      void *src_ptr = (void *)src[i] + par_col_info[j].start;
+      size_t bytes = par_col_info[j + 1].start - par_col_info[j].start;
+      memcpy(dest_ptr, src_ptr, bytes);
     }
-    cur_off += icol_size;
+    // for n column
+    if (par_icols > 0) {
+      size_t lpj = par_icols - 1;
+      void *dest_ptr = (void *)dest + sel_col_info[sel_start_col + lpj].start;
+      void *src_ptr = (void *)src[i] + par_col_info[lpj].start;
+      size_t bytes = parent->pti_arr[i].tpt_size - par_col_info[lpj].start;
+      memcpy(dest_ptr, src_ptr, bytes);
+    }
+    sel_start_col += par_icols;
   }
 }
 
@@ -319,8 +337,7 @@ static bool plan_select_next(void *self_void) {
   if (res) {
     struct tp_tuple **tuple_src = parent->get(self->parent);
     struct tp_tuple *tuple_dest = self->base.tuple_arr[0];
-
-    tpt_flatten(tuple_dest, tuple_src, parent);
+    tpt_flatten(tuple_dest, tuple_src, self);
   } else {
     free(self->base.tuple_arr[0]);
     self->base.tuple_arr[0] = NULL;
@@ -368,7 +385,7 @@ static void plan_select_start(void *self_void, bool do_write) {
 
   if (parent->get(parent)[0] != NULL) {
     self->base.tuple_arr[0] = malloc(self->base.pti_arr[0].tpt_size);
-    tpt_flatten(self->base.tuple_arr[0], parent->get(parent), parent);
+    tpt_flatten(self->base.tuple_arr[0], parent->get(parent), self);
   } else {
     self->base.tuple_arr[0] = NULL;
   }
