@@ -58,8 +58,8 @@ IN { yylval.optype = OperationType::IN; return COMPARE; }
 "<=" { yylval.optype = OperationType::LEQ; return COMPARE; }
 ">=" { yylval.optype = OperationType::GEQ; return COMPARE; }
 
-true { yylval.ival = 1; return BOOLEAN; }
-false { yylval.ival = 0; return BOOLEAN; }
+true { yylval.bval = true; return BOOLEAN; }
+false { yylval.bval = false; return BOOLEAN; }
 {int} { yylval.ival = atoi(yytext); return INTNUM; }
 {float} { yylval.fval = atof(yytext); return FLOATNUM; }
 {symbol} { 

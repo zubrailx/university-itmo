@@ -81,15 +81,10 @@ private:
   struct Storage : StorageBase {
     T m_value;
 
-    explicit Storage(T &&value) : m_value(std::forward<T>(value)) {}
+    explicit Storage(T value) : m_value(value) {}
 
     const std::type_info &type() const noexcept override { return typeid(T); }
   };
-
-  template<typename T>
-  std::unique_ptr<StorageBase> make_holder(T &&value) const noexcept {
-    return std::make_unique<Storage<T>>(std::forward<T>(value));
-  }
 
   template<typename T>
   std::string str_repr(T &&val) const;
@@ -102,11 +97,12 @@ public:
   DataType m_dtype;
 
 public:
+  // copy object
   template<typename T>
-  AstValue(T &&obj, DataType dtype)
-      : Ast(AstType::VARIABLE), m_inst(make_holder(obj)), m_dtype(dtype) {
-    // get string at runtime
-    strval = std::string(str_repr(std::forward<T>(obj)));
+  AstValue(T obj, DataType dtype) : Ast(AstType::VARIABLE) {
+    m_inst = std::make_unique<Storage<T>>(obj);
+    m_dtype = dtype;
+    strval = std::string(str_repr(std::move(obj)));
   };
 
   template<typename T>
@@ -116,9 +112,9 @@ public:
   }
 
   template<typename T>
-  T *getValueRef() {
+  const T &getValueRef() const {
     assert(typeid(T) == m_inst->type());
-    return &static_cast<Storage<T> *>(m_inst.get())->m_value;
+    return static_cast<const Storage<T> *>(m_inst.get())->m_value;
   }
 
   std::string repr() const override {
@@ -169,6 +165,8 @@ public:
   }
 
   AstList(T *single, AstType type) : Ast(type) { m_lst.emplace_back(single); }
+
+  AstList(T &&single, AstType type) : Ast(type) { m_lst.emplace_back(single); }
 
   AstList(AstType type) : Ast(type) {}
 

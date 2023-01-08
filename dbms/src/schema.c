@@ -1,11 +1,10 @@
 #include <dbms/schema.h>
 #include <string.h>
 
-#include "dbms/dto_table.h"
+#include "dbms/converters/table.h"
+#include "dbms/internals/dto_tuple.h"
 #include "dbms/op_schema.h"
 #include "dbms/page.h"
-#include "dbms/converters/table.h"
-#include "dbms/sso.h"
 
 bool table_exists(struct dbms *dbms, const char *table_name) {
   fileoff_t fileoff;

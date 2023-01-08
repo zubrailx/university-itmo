@@ -15,7 +15,7 @@ std::string toString(const struct tpt_column_base *tpt_base,
                      const struct dpt_column *dpt_column, struct dbms *dbms);
 // std
 
-void *getAstValuePtr(AstValue *ref);
+const void *getAstValuePtr(AstValue *ref);
 
 
 const struct fast_unop_func *toDbmsFunc(OperationType optype, table_column_type dtype);

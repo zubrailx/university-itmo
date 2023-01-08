@@ -64,16 +64,16 @@ std::string toString(const struct tpt_column_base *tpt_base,
 }
 
 // convert to types for table to read
-void *getAstValuePtr(AstValue *ref) {
+const void *getAstValuePtr(AstValue *ref) {
   switch (ref->m_dtype) {
   case DataType::STR:
-    return (void *)ref->getValueRef<std::string>()->c_str();
+    return ref->getValueRef<std::string>().c_str();
   case DataType::BOOL:
-    return ref->getValueRef<bool>();
+    return &ref->getValueRef<bool>();
   case DataType::DOUBLE:
-    return ref->getValueRef<double>();
+    return &ref->getValueRef<double>();
   case DataType::INT32:
-    return ref->getValueRef<int32_t>();
+    return &ref->getValueRef<int32_t>();
   default:
     return nullptr;
   }

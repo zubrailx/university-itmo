@@ -23,6 +23,7 @@ void yyerror(AstWrapper &parsed_result, const char *s, ...);
   int ival;
   double fval;
   char *sval;
+  bool bval;
   OperationType optype;
   DataType dtype;
 
@@ -36,7 +37,7 @@ void yyerror(AstWrapper &parsed_result, const char *s, ...);
 %token <sval> NAME
 %token <sval> STRING
 %token <ival> INTNUM
-%token <ival> BOOLEAN
+%token <bval> BOOLEAN
 %token <fval> FLOATNUM
 
 /* reserved keywords */
