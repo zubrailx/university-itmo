@@ -12,4 +12,5 @@ add_executable(${PROJECT_EXEC_NAME}
 target_link_libraries(${PROJECT_EXEC_NAME} PRIVATE 
   proto::grpc_cpp
   ${Boost_LIBRARIES}
+  qpg
 )
