@@ -21,5 +21,6 @@ add_subdirectory(dbms)
 
 # Client-server
 add_subdirectory(proto)
+add_subdirectory(arc)
 add_subdirectory(client)
 add_subdirectory(server)

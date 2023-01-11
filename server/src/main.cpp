@@ -25,11 +25,10 @@ extern "C" {
 #include "converters.hpp"
 
 namespace po = boost::program_options;
-using namespace dbpb;
 
-class DatabaseQueryService final : public DatabaseQuery::Service {
+class DatabaseQueryService final : public dbpb::DatabaseQuery::Service {
 private:
-  dbms *OpenDatabase(const std::string &db_name, DatabaseResponse &resp) {
+  dbms *OpenDatabase(const std::string &db_name, dbpb::DatabaseResponse &resp) {
     dbms *dbms = database_open(db_name.c_str(), false);
 
     if (dbms == nullptr) {
@@ -56,16 +55,16 @@ private:
     }
   }
 
-  void FillResponseTableHeader(DatabaseResponse &resp, dto_table *dto_header) {
+  void FillResponseTableHeader(dbpb::DatabaseResponse &resp, dto_table *dto_header) {
     auto *header_row = resp.mutable_header();
     for (const auto *col = dto_header->first; col != nullptr; col = col->next) {
-      DatabaseHeaderColumn *row_column = header_row->add_columns();
+      dbpb::DatabaseHeaderColumn *row_column = header_row->add_columns();
       row_column->set_column_name(std::string(col->name));
       row_column->set_column_type(toString(col->type));
     }
   }
 
-  bool CheckTableColumnIdxs(DatabaseResponse &resp, std::vector<int> &ast_idxs,
+  bool CheckTableColumnIdxs(dbpb::DatabaseResponse &resp, std::vector<int> &ast_idxs,
                             const AstColumnList *collist) {
     size_t col_idx = 0;
     for (const auto &col : collist->m_lst) {
@@ -79,7 +78,7 @@ private:
     return true;
   }
 
-  bool CheckTableColumnTypes(DatabaseResponse &resp, dto_table *dto_header,
+  bool CheckTableColumnTypes(dbpb::DatabaseResponse &resp, dto_table *dto_header,
                              std::vector<int> &ast_idxs,
                              const AstList<AstValue> *vallist) {
     size_t ast_idx = 0;
@@ -109,7 +108,7 @@ private:
                                 const std::string &table_name, struct dbms *dbms,
                                 const AstColumnList *collist,
                                 const AstList<AstValue> *vallist,
-                                DatabaseResponse &resp) {
+                                dbpb::DatabaseResponse &resp) {
     auto *dto_header = table_construct_header(dbms, table_name.c_str());
     // Map database header
     if (!dto_header) {
@@ -147,7 +146,8 @@ private:
     dto_table_destruct(&dto_header);
   }
 
-  bool CheckAstColumnList(DatabaseResponse &resp, const AstColumnList *ast_clist) {
+  bool CheckAstColumnList(dbpb::DatabaseResponse &resp,
+                          const AstColumnList *ast_clist) {
     if (ast_clist->m_lst.size()) {
       auto *err_status = resp.mutable_err_status();
       err_status->set_message("Projection in select is not supported");
@@ -162,7 +162,8 @@ private:
     assert(0);
   }
 
-  bool CheckPlanOnNullptr(DatabaseResponse &resp, void *plan, const char **err_msg) {
+  bool CheckPlanOnNullptr(dbpb::DatabaseResponse &resp, void *plan,
+                          const char **err_msg) {
     if (plan == nullptr) {
       if (err_msg) {
         resp.mutable_err_status()->set_message(*err_msg);
@@ -174,7 +175,7 @@ private:
     return true;
   }
 
-  plan *ParseAsTableSource(DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
+  plan *ParseAsTableSource(dbpb::DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
     plan *out = nullptr;
     switch (ast->getType()) {
     case AstType::TABLE: {
@@ -211,7 +212,7 @@ private:
     return out;
   }
 
-  plan *ParseAsTableRef(DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
+  plan *ParseAsTableRef(dbpb::DatabaseResponse &resp, const Ast *ast, dbms *dbms) {
     plan *out = nullptr;
     switch (ast->getType()) {
     case AstType::TABLE:
@@ -239,8 +240,9 @@ private:
     return out;
   }
 
-  fast *ParseAsStatement(DatabaseResponse &resp, const AstStatement *ast, dbms *dbms,
-                         const struct plan_table_info *info_arr, size_t pti_size) {
+  fast *ParseAsStatement(dbpb::DatabaseResponse &resp, const AstStatement *ast,
+                         dbms *dbms, const struct plan_table_info *info_arr,
+                         size_t pti_size) {
     fast *out = nullptr;
 
     switch (ast->m_stype) {
@@ -321,7 +323,7 @@ private:
   }
 
   // NOTE: ParseAsSelect can return select or filter
-  plan *ParseAsSelect(DatabaseResponse &resp, const AstSelect *ast, dbms *dbms) {
+  plan *ParseAsSelect(dbpb::DatabaseResponse &resp, const AstSelect *ast, dbms *dbms) {
     const auto *ast_clist = ast->m_collist.get();
     if (!CheckAstColumnList(resp, ast_clist)) {
       return nullptr;
@@ -350,7 +352,7 @@ private:
     }
   }
 
-  plan_select *ParseAsSelectWrapper(DatabaseResponse &resp, const AstSelect *ast,
+  plan_select *ParseAsSelectWrapper(dbpb::DatabaseResponse &resp, const AstSelect *ast,
                                     dbms *dbms) {
 
     auto *out = ParseAsSelect(resp, ast, dbms);
@@ -365,7 +367,7 @@ private:
     }
   }
 
-  void FillResponseTableHeader(DatabaseResponse &resp, const plan_table_info *pti,
+  void FillResponseTableHeader(dbpb::DatabaseResponse &resp, const plan_table_info *pti,
                                dbms *dbms) {
     auto *dpt = pti->dpt;
     dto_table *dto_table;
@@ -374,8 +376,9 @@ private:
     dto_table_destruct(&dto_table);
   }
 
-  void FillResponseTableBodyRow(DatabaseResponse &resp, const plan_table_info *pti,
-                                const tp_tuple *tuple, dbms *dbms) {
+  void FillResponseTableBodyRow(dbpb::DatabaseResponse &resp,
+                                const plan_table_info *pti, const tp_tuple *tuple,
+                                dbms *dbms) {
     auto *body_row = resp.mutable_body();
     for (size_t i = 0; i < pti->dpt->header.cols; ++i) {
       auto *column = body_row->add_columns();
@@ -390,12 +393,12 @@ private:
   }
 
   // SELECT
-  void SSAstSelect(grpc::ServerWriter<DatabaseResponse> *writer,
-                   const DatabaseRequest *req, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstSelect(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                   const dbpb::DatabaseRequest *req, const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
     auto *header_row = resp.mutable_header();
-    header_row->set_query_type(QueryType::QUERY_TYPE_SELECT);
+    header_row->set_query_type(dbpb::QueryType::QUERY_TYPE_SELECT);
 
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
@@ -421,7 +424,7 @@ private:
 
     select->start(select);
     while (!select->end(select)) {
-      resp = DatabaseResponse();
+      resp = dbpb::DatabaseResponse();
 
       const tp_tuple *tuple = select->get(select)[0];
       FillResponseTableBodyRow(resp, pti, tuple, dbms);
@@ -434,8 +437,8 @@ private:
     database_close(&dbms, false);
   }
 
-  plan_update *ParseAsUpdate(DatabaseResponse &resp, const AstUpdate *ast, dbms *dbms,
-                             column_value **cva_out) {
+  plan_update *ParseAsUpdate(dbpb::DatabaseResponse &resp, const AstUpdate *ast,
+                             dbms *dbms, column_value **cva_out) {
     plan_update *out = nullptr;
 
     // create source
@@ -479,12 +482,12 @@ private:
   }
 
   // UPDATE
-  void SSAstUpdate(grpc::ServerWriter<DatabaseResponse> *writer,
-                   const DatabaseRequest *req, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstUpdate(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                   const dbpb::DatabaseRequest *req, const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
     auto *header_row = resp.mutable_header();
-    header_row->set_query_type(QueryType::QUERY_TYPE_UPDATE);
+    header_row->set_query_type(dbpb::QueryType::QUERY_TYPE_UPDATE);
 
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
@@ -516,7 +519,8 @@ private:
     writer->Write(resp);
   }
 
-  plan_delete *ParseAsDelete(DatabaseResponse &resp, const AstDelete *ast, dbms *dbms) {
+  plan_delete *ParseAsDelete(dbpb::DatabaseResponse &resp, const AstDelete *ast,
+                             dbms *dbms) {
     plan_delete *out = nullptr;
 
     // create source
@@ -549,12 +553,12 @@ private:
   }
 
   // DELETE
-  void SSAstDelete(grpc::ServerWriter<DatabaseResponse> *writer,
-                   const DatabaseRequest *req, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstDelete(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                   const dbpb::DatabaseRequest *req, const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
     auto *header_row = resp.mutable_header();
-    header_row->set_query_type(QueryType::QUERY_TYPE_DELETE);
+    header_row->set_query_type(dbpb::QueryType::QUERY_TYPE_DELETE);
 
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
@@ -583,9 +587,9 @@ private:
   }
 
   // INSERT
-  void SSAstInsert(grpc::ServerWriter<DatabaseResponse> *writer,
-                   const DatabaseRequest *req, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstInsert(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                   const dbpb::DatabaseRequest *req, const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
@@ -599,7 +603,7 @@ private:
     GetTableHeaderWithAstMap(ast_idxs, insert->m_table, dbms, insert->m_collist.get(),
                              insert->m_vallist.get(), resp);
     auto header = resp.mutable_header();
-    header->set_query_type(QueryType::QUERY_TYPE_INSERT);
+    header->set_query_type(dbpb::QueryType::QUERY_TYPE_INSERT);
     writer->Write(resp);
 
     // Insert only one column
@@ -610,10 +614,10 @@ private:
     size_t table_cols = resp.header().columns_size();
     auto **void_arr = (const void **)calloc(table_cols, sizeof(void *));
     // Create array for next responses
-    auto *resp_col_arr = new DatabaseBodyColumn *[table_cols];
+    auto *resp_col_arr = new dbpb::DatabaseBodyColumn *[table_cols];
 
     // Create new response
-    resp = DatabaseResponse();
+    resp = dbpb::DatabaseResponse();
     auto *resp_body = resp.mutable_body();
 
     for (size_t i = 0; i < table_cols; ++i) {
@@ -643,9 +647,9 @@ private:
   }
 
   // CREATE
-  void SSAstCreate(grpc::ServerWriter<DatabaseResponse> *writer,
-                   const DatabaseRequest *req, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstCreate(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                   const dbpb::DatabaseRequest *req, const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
@@ -653,8 +657,8 @@ private:
       return;
     }
 
-    auto *header_row = new DatabaseHeaderRow();
-    header_row->set_query_type(QueryType::QUERY_TYPE_CREATE);
+    auto *header_row = new dbpb::DatabaseHeaderRow();
+    header_row->set_query_type(dbpb::QueryType::QUERY_TYPE_CREATE);
 
     const auto *create = (const AstCreate *)root;
 
@@ -672,7 +676,7 @@ private:
 
     bool res = table_create(dbms, dto_table);
     if (!res) {
-      auto *err_status = new ErrorStatus();
+      auto *err_status = new dbpb::ErrorStatus();
       err_status->set_message(fmt::format("Table {} already exists", create->m_table));
       resp.set_allocated_err_status(err_status);
     }
@@ -687,9 +691,9 @@ private:
   }
 
   // DROP
-  void SSAstDrop(grpc::ServerWriter<DatabaseResponse> *writer,
-                 const DatabaseRequest *req, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstDrop(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                 const dbpb::DatabaseRequest *req, const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
     dbms *dbms = OpenDatabase(req->db_name(), resp);
     if (dbms == nullptr) {
@@ -697,13 +701,13 @@ private:
       return;
     }
 
-    auto *header_row = new DatabaseHeaderRow();
-    header_row->set_query_type(QueryType::QUERY_TYPE_DROP);
+    auto *header_row = new dbpb::DatabaseHeaderRow();
+    header_row->set_query_type(dbpb::QueryType::QUERY_TYPE_DROP);
 
     const auto *drop = (const AstDrop *)root;
     bool res = table_drop(dbms, drop->m_table.c_str());
     if (!res) {
-      auto *err_status = new ErrorStatus();
+      auto *err_status = new dbpb::ErrorStatus();
       err_status->set_message(fmt::format("Table {} does not exists", drop->m_table));
       resp.set_allocated_err_status(err_status);
     }
@@ -714,19 +718,20 @@ private:
     writer->Write(resp);
   }
 
-  void SSAstUnspecified(grpc::ServerWriter<DatabaseResponse> *writer, const Ast *root) {
-    DatabaseResponse resp;
+  void SSAstUnspecified(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                        const Ast *root) {
+    dbpb::DatabaseResponse resp;
 
-    auto *header_row = new DatabaseHeaderRow();
-    header_row->set_query_type(QueryType::QUERY_TYPE_UNSPECIFIED);
+    auto *header_row = new dbpb::DatabaseHeaderRow();
+    header_row->set_query_type(dbpb::QueryType::QUERY_TYPE_UNSPECIFIED);
     resp.set_allocated_header(header_row);
     grpc::WriteOptions options;
 
     writer->Write(resp, options);
   }
 
-  void SSAstSelectType(grpc::ServerWriter<DatabaseResponse> *writer,
-                       const DatabaseRequest *req, Ast *root) {
+  void SSAstSelectType(grpc::ServerWriter<dbpb::DatabaseResponse> *writer,
+                       const dbpb::DatabaseRequest *req, Ast *root) {
     switch (root->getType()) {
     case AstType::SELECT:
       return SSAstSelect(writer, req, root);
@@ -746,9 +751,9 @@ private:
   }
 
 public:
-  grpc::Status PerformQuerySS(grpc::ServerContext *context,
-                              const DatabaseRequest *request,
-                              grpc::ServerWriter<DatabaseResponse> *writer) override {
+  grpc::Status
+  PerformQuerySS(grpc::ServerContext *context, const dbpb::DatabaseRequest *request,
+                 grpc::ServerWriter<dbpb::DatabaseResponse> *writer) override {
     AstWrapper astw;
     int code = parse_command(request->command(), astw);
 

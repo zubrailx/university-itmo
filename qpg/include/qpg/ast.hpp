@@ -8,6 +8,8 @@
 #include <typeinfo>
 
 enum class AstType {
+  UNSPECIFIED,
+
   VARIABLE,
   VARIABLE_LIST,
 

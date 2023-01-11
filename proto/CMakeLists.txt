@@ -23,7 +23,9 @@ find_package(Protobuf REQUIRED)
 
 # Create library
 set(PROTO_FILES 
-  ./dbpb/database.proto)
+  ./dbpb/database.proto
+  ./dbpb/ast.proto
+)
 
 # Builds
 include(./cmake/cpp.cmake)

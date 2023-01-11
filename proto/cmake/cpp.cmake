@@ -10,7 +10,9 @@ target_link_libraries(proto_grpc_cpp PUBLIC
 set(PROTOC_CPP_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/cpp)
 file(MAKE_DIRECTORY ${PROTOC_CPP_OUT_DIR})
 
-target_include_directories(proto_grpc_cpp PUBLIC ${PROTOC_CPP_OUT_DIR})
+target_include_directories(proto_grpc_cpp PUBLIC 
+  ${PROTOC_CPP_OUT_DIR}
+)
 
 # Generate
 find_program(_GRPC_CPP_PLUGIN_LOCATION grpc_cpp_plugin)

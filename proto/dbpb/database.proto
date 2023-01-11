@@ -2,28 +2,25 @@ syntax = "proto3";
 
 package dbpb;
 
-/* import "google/protobuf/any.proto"; */
-
-message DatabaseRequest {
-  string db_name = 1;
-  string command = 2;
-}
-
-message ErrorStatus {
-  string message = 1;
-  /* repeated google.protobuf.Any details = 2; */
-}
+import "dbpb/ast.proto";
 
 enum QueryType {
   QUERY_TYPE_UNSPECIFIED = 0;
-
   QUERY_TYPE_INSERT = 1;
   QUERY_TYPE_SELECT = 2;
   QUERY_TYPE_UPDATE = 3;
   QUERY_TYPE_DELETE = 4;
-
   QUERY_TYPE_CREATE = 5;
   QUERY_TYPE_DROP = 6;
+}
+
+message DatabaseRequest {
+  string db_name = 1;
+  repeated AstSubclass queries = 2;
+}
+
+message ErrorStatus {
+  string message = 1;
 }
 
 message DatabaseHeaderColumn {
