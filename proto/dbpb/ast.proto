@@ -2,73 +2,13 @@ syntax = "proto3";
 
 package dbpb;
 
-enum AstType {
-  AST_TYPE_UNSPECIFIED = 0;
-  AST_TYPE_VARIABLE = 1;
-  AST_TYPE_COLUMN = 2;
-  AST_TYPE_COLUMN_LIST = 3;
-  AST_TYPE_COLUMN_VALUE = 4;
-  AST_TYPE_COLUMN_VALUE_LIST = 5;
-  AST_TYPE_COLUMN_TYPE = 6;
-  AST_TYPE_COLUMN_TYPE_LIST = 7;
-  AST_TYPE_QUERY_LIST = 8;
-  AST_TYPE_TABLE = 9;
-  AST_TYPE_JOIN = 10;
-  AST_TYPE_STATEMENT = 11;
-  AST_TYPE_SUBQUERY = 12;
-  AST_TYPE_SELECT = 13;
-  AST_TYPE_UPDATE = 14;
-  AST_TYPE_DELETE = 15;
-  AST_TYPE_INSERT = 16;
-  AST_TYPE_DROP = 17;
-  AST_TYPE_CREATE = 18;
-}
-
-enum DataType { 
-  DATA_TYPE_UNSPECIFIED = 0;
-  DATA_TYPE_STR = 1;
-  DATA_TYPE_BOOL = 2;
-  DATA_TYPE_DOUBLE = 3;
-  DATA_TYPE_INT32 = 4;
-}
-
-enum JoinType {
-  JOIN_TYPE_UNSPECIFIED = 0;
-  JOIN_TYPE_CROSS_JOIN = 1;
-}
-
-enum StatementType {
-  STATEMENT_TYPE_UNSPECIFIED = 0;
-  STATEMENT_TYPE_CONST = 1;
-  STATEMENT_TYPE_UNARY = 2;
-  STATEMENT_TYPE_BINARY = 3;
-  STATEMENT_TYPE_COLUMN = 4;
-}
-
-enum OperationType { 
-  OPERATION_TYPE_UNSPECIFIED = 0;
-  OPERATION_TYPE_EQ = 1;
-  OPERATION_TYPE_NEQ = 2; 
-  OPERATION_TYPE_LO = 3;
-  OPERATION_TYPE_GR = 4;
-  OPERATION_TYPE_LEQ = 5;
-  OPERATION_TYPE_GEQ = 6;
-  OPERATION_TYPE_NOT = 7;
-  OPERATION_TYPE_AND = 8;
-  OPERATION_TYPE_OR = 9;
-  OPERATION_TYPE_IN = 10;
-}
-
-message Ast {
-  AstType type = 1;
-}
-
 message AstSubclass {
   oneof subclass {
     AstColumn column = 11;
     AstTable table = 12;
     AstValue value = 13;
     AstList list = 14;
+    AstColumnList column_list = 34;
     AstJoin join = 15;
     AstStatementSubclass statement = 16;
     AstSelect select = 17;
@@ -84,21 +24,18 @@ message AstSubclass {
 }
 
 message AstColumn {
-  Ast parent = 11;
   string table = 21;
   string column = 31;
   bool has_table = 41;
 }
 
 message AstTable {
-  Ast parent = 11;
   string table = 21;
   bool has_alias = 31;
   string alias = 41;
 }
 
 message AstValue {
-  Ast parent = 11;
   oneof value {
     int32 ival = 21;
     double fval = 22;
@@ -108,19 +45,13 @@ message AstValue {
 }
 
 message AstList {
-  Ast parent = 11;
-  AstSubclass elements = 21;
+  repeated AstSubclass elements = 21;
 }
 
 message AstJoin {
-  Ast parent = 11;
+  int32 join_type = 11;
   AstSubclass lsv = 21;
   AstSubclass rsv = 31;
-}
-
-message AstStatement {
-  Ast parent = 11;
-  StatementType stype = 21;
 }
 
 message AstStatementSubclass {
@@ -133,80 +64,74 @@ message AstStatementSubclass {
 }
 
 message AstStatementConst {
-  AstStatement parent = 11;
   AstValue value = 21;
 }
 
 message AstStatementColumn {
-  AstStatement parent = 11;
   AstColumn column = 21;
 }
 
 
 message AstStatementUnary {
-  AstStatement parent = 11;
+  int32 op_type = 11;
   AstStatementSubclass operand = 21;
 }
 
 message AstStatementBinary {
-  AstStatement parent = 11;
+  int32 op_type = 11;
   AstStatementSubclass left = 21;
   AstStatementSubclass right = 22;
 }
 
+message AstColumnList {
+  bool do_all = 11;
+  repeated AstColumn columns = 21;
+}
+
 message AstSelect {
-  Ast parent = 1;
-  AstList columns = 11;
+  AstColumnList list = 11;
   AstSubclass table_ref = 21;
   AstStatementSubclass condition = 31;
 }
 
 message AstSubquery {
-  Ast parent = 1;
   AstSelect query = 11;
   bool has_alias = 21;
   string alias = 22;
 }
 
 message AstColumnValue {
-  Ast parent = 1;
   AstColumn column = 11;
   AstValue value = 12;
 }
 
 message AstUpdate {
-  Ast parent = 1;
   string table = 11;
   AstList collist = 21;
   AstStatementSubclass condition = 31;
 }
 
 message AstDelete {
-  Ast parent = 1;
   string table = 11;
   AstStatementSubclass condition = 21;
 }
 
 message AstInsert {
-  Ast parent = 1;
   string table = 11;
   AstList columns = 21;
   AstList values = 31;
 }
 
 message AstDrop {
-  Ast parent = 1;
   string table = 11;
 }
 
 message AstColumnType {
-  Ast parent = 1;
   AstColumn column = 11;
-  DataType dtype = 12;
+  int32 dtype = 12;
 }
 
 message AstCreate {
-  Ast parent = 1;
   string table = 11;
   AstList columntypes = 21;
 }
