@@ -23,8 +23,10 @@ add_executable(${PROJECT_EXEC_NAME}
 
 target_link_libraries(${PROJECT_EXEC_NAME} PRIVATE 
   dbms
-  qpg 
-  fmt::fmt
+  qpg
   proto::grpc_cpp
+  arc::qpg::proto
+
+  fmt::fmt
   ${Boost_LIBRARIES}
 )

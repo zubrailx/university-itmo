@@ -21,6 +21,7 @@ extern "C" {
 #include <dbms/table.h>
 }
 #include <qpg/qpg.hpp>
+#include <arc/qpg/proto.hpp>
 
 #include "converters.hpp"
 
@@ -754,14 +755,8 @@ public:
   grpc::Status
   PerformQuerySS(grpc::ServerContext *context, const dbpb::DatabaseRequest *request,
                  grpc::ServerWriter<dbpb::DatabaseResponse> *writer) override {
-    AstWrapper astw;
-    int code = parse_command(request->command(), astw);
-
-    if (code) {
-      return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, astw.err_msg);
-    }
-
-    for (const auto &ast : astw.list->m_lst) {
+    for (const auto &pbast : request->queries()) {
+      std::unique_ptr<Ast> ast(arc::qpg::proto::deserialize(pbast));
       std::cout << ast->repr() << std::endl;
       SSAstSelectType(writer, request, ast.get());
     }

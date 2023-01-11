@@ -10,7 +10,9 @@ add_executable(${PROJECT_EXEC_NAME}
   ./src/main.cpp)
 
 target_link_libraries(${PROJECT_EXEC_NAME} PRIVATE 
-  proto::grpc_cpp
-  ${Boost_LIBRARIES}
   qpg
+  proto::grpc_cpp
+  arc::qpg::proto
+
+  ${Boost_LIBRARIES}
 )

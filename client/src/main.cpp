@@ -1,5 +1,7 @@
+#include "arc/qpg/proto.hpp"
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
+#include "qpg/qpg.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <dbpb/database.grpc.pb.h>
@@ -81,17 +83,11 @@ void run_client(const std::string &dbfile, const std::string &address, const int
   std::cout << "Created channel on target: " << target << "." << std::endl;
   std::cout << "Working with db: " << dbfile << "." << std::endl;
 
-  DatabaseRequest request;
-  request.set_db_name(dbfile);
-  DatabaseResponse response;
-
   std::cout << "> ";
-
   // std::stringstream ss;
   // ss << "create table t1 (c1 bool, c2 int32);" << std::endl;
   // ss << "insert into t1 values(true, 52);" << std::endl;
   // ss << "select * from t1;" << std::endl;
-
   while (getline(std::cin, line)) {
     // Check if command end
     std::string line_cp = boost::trim_right_copy(line);
@@ -108,12 +104,27 @@ void run_client(const std::string &dbfile, const std::string &address, const int
 
     // Perform request
     if (query_ended) {
-      request.set_command(buf);
+      DatabaseRequest request;
+      DatabaseResponse response;
 
-      // auto status = perform_single(stub, request, response);
-      auto status = perform_server_stream(stub, request, response);
+      request.set_db_name(dbfile);
 
-      process_status(status);
+      // Parse command using qpg
+      AstWrapper wrapper;
+      parse_command(buf, wrapper);
+
+      if (wrapper.list == nullptr) {
+        std::cout << "Error(client): ";
+        std::cout << wrapper.err_msg << std::endl;
+      } else {
+        for (const auto &ast : wrapper.list->m_lst) {
+          auto query = request.add_queries();
+          arc::qpg::proto::serialize(*ast.get(), *query);
+        }
+        // auto status = perform_single(stub, request, response);
+        auto status = perform_server_stream(stub, request, response);
+        process_status(status);
+      }
     }
     // New iteration
     buf.clear();
