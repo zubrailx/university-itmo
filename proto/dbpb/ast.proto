@@ -24,15 +24,13 @@ message AstSubclass {
 }
 
 message AstColumn {
-  string table = 21;
+  optional string table = 21;
   string column = 31;
-  bool has_table = 41;
 }
 
 message AstTable {
   string table = 21;
-  bool has_alias = 31;
-  string alias = 41;
+  optional string alias = 41;
 }
 
 message AstValue {
@@ -46,6 +44,7 @@ message AstValue {
 
 message AstList {
   repeated AstSubclass elements = 21;
+  int32 ast_type = 22; /* to properly parse elements */
 }
 
 message AstJoin {
@@ -56,10 +55,10 @@ message AstJoin {
 
 message AstStatementSubclass {
   oneof subclass {
-    AstStatementConst const = 11;
-    AstStatementColumn column = 12;
-    AstStatementUnary unary = 13;
-    AstStatementBinary binary = 14;
+    AstStatementConst const = 110;
+    AstStatementColumn column = 120;
+    AstStatementUnary unary = 130;
+    AstStatementBinary binary = 140;
   }
 }
 
@@ -91,13 +90,12 @@ message AstColumnList {
 message AstSelect {
   AstColumnList list = 11;
   AstSubclass table_ref = 21;
-  AstStatementSubclass condition = 31;
+  optional AstStatementSubclass condition = 31;
 }
 
 message AstSubquery {
   AstSelect query = 11;
-  bool has_alias = 21;
-  string alias = 22;
+  optional string alias = 22;
 }
 
 message AstColumnValue {
@@ -108,17 +106,17 @@ message AstColumnValue {
 message AstUpdate {
   string table = 11;
   AstList collist = 21;
-  AstStatementSubclass condition = 31;
+  optional AstStatementSubclass condition = 31;
 }
 
 message AstDelete {
   string table = 11;
-  AstStatementSubclass condition = 21;
+  optional AstStatementSubclass condition = 21;
 }
 
 message AstInsert {
   string table = 11;
-  AstList columns = 21;
+  AstColumnList columns = 21;
   AstList values = 31;
 }
 

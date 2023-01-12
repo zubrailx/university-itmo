@@ -20,8 +20,8 @@ extern "C" {
 #include <dbms/schema.h>
 #include <dbms/table.h>
 }
-#include <qpg/qpg.hpp>
 #include <arc/qpg/proto.hpp>
+#include <qpg/qpg.hpp>
 
 #include "converters.hpp"
 
@@ -755,6 +755,7 @@ public:
   grpc::Status
   PerformQuerySS(grpc::ServerContext *context, const dbpb::DatabaseRequest *request,
                  grpc::ServerWriter<dbpb::DatabaseResponse> *writer) override {
+    std::cout << "Request:" << std::endl;
     for (const auto &pbast : request->queries()) {
       std::unique_ptr<Ast> ast(arc::qpg::proto::deserialize(pbast));
       std::cout << ast->repr() << std::endl;

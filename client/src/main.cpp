@@ -49,7 +49,7 @@ grpc::Status perform_server_stream(std::unique_ptr<DatabaseQuery::Stub> &stub,
       if (response.has_header()) {
         std::cout << "TABLE HEADER:" << std::endl;
 
-        DatabaseHeaderRow header_row = response.header();
+        const DatabaseHeaderRow &header_row = response.header();
         std::string bufout;
         google::protobuf::util::MessageToJsonString(header_row, &bufout, json_opts);
         std::cout << bufout;
@@ -60,7 +60,7 @@ grpc::Status perform_server_stream(std::unique_ptr<DatabaseQuery::Stub> &stub,
           std::cout << "TABLE BODY:" << std::endl;
           last_header = false;
         }
-        DatabaseBodyRow body_row = response.body();
+        const DatabaseBodyRow &body_row = response.body();
         std::string bufout;
         google::protobuf::util::MessageToJsonString(body_row, &bufout, json_opts);
         std::cout << bufout;
@@ -119,9 +119,20 @@ void run_client(const std::string &dbfile, const std::string &address, const int
       } else {
         for (const auto &ast : wrapper.list->m_lst) {
           auto query = request.add_queries();
-          arc::qpg::proto::serialize(*ast.get(), *query);
+          try {
+            arc::qpg::proto::serialize(*ast, *query);
+          } catch (std::exception &ex) {
+            std::cerr << ex.what() << std::endl;
+          }
         }
-        // auto status = perform_single(stub, request, response);
+
+        // google::protobuf::util::JsonOptions json_opts;
+        // json_opts.add_whitespace = true;
+
+        // std::string bufout;
+        // google::protobuf::util::MessageToJsonString(request, &bufout, json_opts);
+        // std::cout << bufout;
+
         auto status = perform_server_stream(stub, request, response);
         process_status(status);
       }
@@ -160,7 +171,7 @@ int main(int argc, char *argv[]) {
     run_client(dbfile, address, port);
 
   } catch (std::exception &ex) {
-    std::cout << ex.what() << std::endl;
+    std::cerr << ex.what() << std::endl;
     std::cout << desc << std::endl;
   }
   return 0;

@@ -166,6 +166,10 @@ public:
     m_lst.emplace_back(last);
   }
 
+  AstList(std::list<std::unique_ptr<T>> &&lst, AstType type) : Ast(type) {
+    std::swap(m_lst, lst);
+  }
+
   AstList(T *single, AstType type) : Ast(type) { m_lst.emplace_back(single); }
 
   AstList(T &&single, AstType type) : Ast(type) { m_lst.emplace_back(single); }
@@ -205,6 +209,10 @@ struct AstColumnList : public AstList<AstColumn> {
 
   AstColumnList(AstColumnList *lst, AstColumn *last) : AstList(lst, last) {}
   AstColumnList(AstColumn *col) : AstList(col, AstType::COLUMN_LIST) {}
+
+  AstColumnList(std::list<std::unique_ptr<AstColumn>> &&lst)
+      : AstList(std::move(lst), AstType::COLUMN_LIST) {}
+
   AstColumnList() : AstList(AstType::COLUMN_LIST) { do_all = true; }
 
   std::string repr() const override {
@@ -223,12 +231,13 @@ struct AstTable : public Ast {
   bool m_has_alias = false;
   std::string m_alias;
 
-  AstTable(std::string &&name, const char *alias) : Ast(AstType::TABLE) {
+  AstTable(std::string &&name) : Ast(AstType::TABLE) { m_name = std::move(name); }
+
+  AstTable(std::string &&name, const char *alias) : AstTable(std::move(name)) {
     if (alias) {
       m_has_alias = true;
       m_alias = std::string(alias);
     }
-    m_name = std::move(name);
   }
 
   std::string repr() const {
@@ -376,12 +385,15 @@ struct AstSelect : public Ast {
   std::unique_ptr<Ast> m_table_ref;
 
   std::unique_ptr<AstStatement> m_cond;
-  bool m_has_cond;
+  bool m_has_cond = false;
 
-  AstSelect(AstColumnList *collist, Ast *table_ref, AstStatement *cond)
-      : Ast(AstType::SELECT) {
+  AstSelect(AstColumnList *collist, Ast *table_ref) : Ast(AstType::SELECT) {
     m_collist = std::unique_ptr<AstColumnList>(collist);
     m_table_ref = std::unique_ptr<Ast>(table_ref);
+  }
+
+  AstSelect(AstColumnList *collist, Ast *table_ref, AstStatement *cond)
+      : AstSelect(collist, table_ref) {
     m_has_cond = (bool)cond;
     if (m_has_cond) {
       m_cond = std::unique_ptr<AstStatement>(cond);
@@ -416,6 +428,10 @@ struct AstSubquery : public Ast {
 
   AstSubquery(AstSelect *query) : Ast(AstType::SUBQUERY) {
     m_query = std::unique_ptr<AstSelect>(query);
+  }
+
+  AstSubquery(AstSelect *query, const char *alias) : AstSubquery(query) {
+    setAlias(alias);
   }
 
   void setAlias(const char *alias) {
@@ -466,12 +482,16 @@ struct AstUpdate : public Ast {
   std::unique_ptr<AstList<AstColumnValue>> m_collist;
 
   std::unique_ptr<AstStatement> m_cond;
-  bool m_has_cond;
+  bool m_has_cond = false;
 
-  AstUpdate(const char *table, AstList<AstColumnValue> *collist, AstStatement *cond)
+  AstUpdate(const char *table, AstList<AstColumnValue> *collist)
       : Ast(AstType::UPDATE) {
     m_table = std::string(table);
     m_collist = std::unique_ptr<AstList<AstColumnValue>>(collist);
+  }
+
+  AstUpdate(const char *table, AstList<AstColumnValue> *collist, AstStatement *cond)
+      : AstUpdate(table, collist) {
     m_has_cond = (bool)cond;
     if (m_has_cond) {
       m_cond = std::unique_ptr<AstStatement>(cond);
@@ -503,10 +523,11 @@ struct AstDelete : public Ast {
   std::string m_table;
 
   std::unique_ptr<AstStatement> m_cond;
-  bool m_has_cond;
+  bool m_has_cond = false;
 
-  AstDelete(const char *table, AstStatement *cond) : Ast(AstType::DELETE) {
-    m_table = std::string(table);
+  AstDelete(const char *table) : Ast(AstType::DELETE) { m_table = std::string(table); }
+
+  AstDelete(const char *table, AstStatement *cond) : AstDelete(table) {
     m_has_cond = (bool)cond;
     if (m_has_cond) {
       m_cond = std::unique_ptr<AstStatement>(cond);
