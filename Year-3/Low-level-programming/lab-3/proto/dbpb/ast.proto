@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package dbpb;
+
+message AstSubclass {
+  oneof subclass {
+    AstColumn column = 11;
+    AstTable table = 12;
+    AstValue value = 13;
+    AstList list = 14;
+    AstColumnList column_list = 34;
+    AstJoin join = 15;
+    AstStatementSubclass statement = 16;
+    AstSelect select = 17;
+    AstUpdate update = 18;
+    AstDelete delete = 19;
+    AstCreate create = 20;
+    AstDrop drop = 21;
+    AstSubquery subquery = 22;
+    AstColumnValue column_value = 23;
+    AstInsert insert = 24;
+    AstColumnType column_type = 25;
+  }
+}
+
+message AstColumn {
+  optional string table = 21;
+  string column = 31;
+}
+
+message AstTable {
+  string table = 21;
+  optional string alias = 41;
+}
+
+message AstValue {
+  oneof value {
+    int32 ival = 21;
+    double fval = 22;
+    string sval = 23;
+    bool bval = 24;
+  }
+}
+
+message AstList {
+  repeated AstSubclass elements = 21;
+  int32 ast_type = 22; /* to properly parse elements */
+}
+
+message AstJoin {
+  int32 join_type = 11;
+  AstSubclass lsv = 21;
+  AstSubclass rsv = 31;
+}
+
+message AstStatementSubclass {
+  oneof subclass {
+    AstStatementConst const = 110;
+    AstStatementColumn column = 120;
+    AstStatementUnary unary = 130;
+    AstStatementBinary binary = 140;
+  }
+}
+
+message AstStatementConst {
+  AstValue value = 21;
+}
+
+message AstStatementColumn {
+  AstColumn column = 21;
+}
+
+
+message AstStatementUnary {
+  int32 op_type = 11;
+  AstStatementSubclass operand = 21;
+}
+
+message AstStatementBinary {
+  int32 op_type = 11;
+  AstStatementSubclass left = 21;
+  AstStatementSubclass right = 22;
+}
+
+message AstColumnList {
+  bool do_all = 11;
+  repeated AstColumn columns = 21;
+}
+
+message AstSelect {
+  AstColumnList list = 11;
+  AstSubclass table_ref = 21;
+  optional AstStatementSubclass condition = 31;
+}
+
+message AstSubquery {
+  AstSelect query = 11;
+  optional string alias = 22;
+}
+
+message AstColumnValue {
+  AstColumn column = 11;
+  AstValue value = 12;
+}
+
+message AstUpdate {
+  string table = 11;
+  AstList collist = 21;
+  optional AstStatementSubclass condition = 31;
+}
+
+message AstDelete {
+  string table = 11;
+  optional AstStatementSubclass condition = 21;
+}
+
+message AstInsert {
+  string table = 11;
+  AstColumnList columns = 21;
+  AstList values = 31;
+}
+
+message AstDrop {
+  string table = 11;
+}
+
+message AstColumnType {
+  AstColumn column = 11;
+  int32 dtype = 12;
+}
+
+message AstCreate {
+  string table = 11;
+  AstList columntypes = 21;
+}

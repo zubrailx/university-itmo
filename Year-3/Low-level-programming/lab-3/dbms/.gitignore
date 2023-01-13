@@ -1,0 +1,9 @@
+build/
+cmake-build-debug/
+.idea/
+
+tmp/
+.cache/
+
+.~lock*
+*.log
