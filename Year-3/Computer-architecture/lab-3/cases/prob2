@@ -1,0 +1,370 @@
+{
+  "instructions": [
+    {
+      "address": 0,
+      "value": 4000000
+    },
+    {
+      "address": 32,
+      "value": 0
+    },
+    {
+      "address": 64,
+      "value": 0
+    },
+    {
+      "address": 96,
+      "value": 1
+    },
+    {
+      "address": 128,
+      "value": 0
+    },
+    {
+      "address": 160,
+      "value": 2
+    },
+    {
+      "address": 192,
+      "value": 1
+    },
+    {
+      "address": 224,
+      "value": 2
+    },
+    {
+      "address": 256,
+      "args": [
+        160
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 288,
+      "args": [
+        0
+      ],
+      "opcode": "cmp_m"
+    },
+    {
+      "address": 320,
+      "args": [
+        1408
+      ],
+      "opcode": "jg"
+    },
+    {
+      "address": 352,
+      "args": [
+        32
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 384,
+      "args": [
+        128
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 416,
+      "args": [
+        192
+      ],
+      "opcode": "add_m"
+    },
+    {
+      "address": 448,
+      "args": [
+        0
+      ],
+      "opcode": "cmp_m"
+    },
+    {
+      "address": 480,
+      "args": [
+        928
+      ],
+      "opcode": "jg"
+    },
+    {
+      "address": 512,
+      "args": [
+        160
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 544,
+      "args": [
+        128
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 576,
+      "args": [
+        192
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 608,
+      "args": [
+        224
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 640,
+      "args": [],
+      "opcode": "inc"
+    },
+    {
+      "address": 672,
+      "args": [
+        224
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 704,
+      "args": [
+        2
+      ],
+      "opcode": "mod_imm"
+    },
+    {
+      "address": 736,
+      "args": [
+        864
+      ],
+      "opcode": "jne"
+    },
+    {
+      "address": 768,
+      "args": [
+        160
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 800,
+      "args": [
+        32
+      ],
+      "opcode": "add_m"
+    },
+    {
+      "address": 832,
+      "args": [
+        32
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 864,
+      "args": [
+        160
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 896,
+      "args": [
+        384
+      ],
+      "opcode": "jmp"
+    },
+    {
+      "address": 928,
+      "args": [
+        32
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 960,
+      "args": [
+        10
+      ],
+      "opcode": "mod_imm"
+    },
+    {
+      "address": 992,
+      "args": [
+        64
+      ],
+      "opcode": "add_m"
+    },
+    {
+      "address": 1024,
+      "args": [
+        64
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 1056,
+      "args": [
+        32
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 1088,
+      "args": [
+        10
+      ],
+      "opcode": "div_imm"
+    },
+    {
+      "address": 1120,
+      "args": [
+        1408
+      ],
+      "opcode": "je"
+    },
+    {
+      "address": 1152,
+      "args": [
+        32
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 1184,
+      "args": [
+        64
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 1216,
+      "args": [
+        10
+      ],
+      "opcode": "mul_imm"
+    },
+    {
+      "address": 1248,
+      "args": [
+        64
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 1280,
+      "args": [
+        96
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 1312,
+      "args": [],
+      "opcode": "inc"
+    },
+    {
+      "address": 1344,
+      "args": [
+        96
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 1376,
+      "args": [
+        928
+      ],
+      "opcode": "jmp"
+    },
+    {
+      "address": 1408,
+      "args": [
+        64
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 1440,
+      "args": [
+        10
+      ],
+      "opcode": "mod_imm"
+    },
+    {
+      "address": 1472,
+      "args": [],
+      "opcode": "itoc"
+    },
+    {
+      "address": 1504,
+      "args": [
+        1
+      ],
+      "opcode": "out_imm"
+    },
+    {
+      "address": 1536,
+      "args": [
+        96
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 1568,
+      "args": [],
+      "opcode": "dec"
+    },
+    {
+      "address": 1600,
+      "args": [
+        1792
+      ],
+      "opcode": "je"
+    },
+    {
+      "address": 1632,
+      "args": [
+        96
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 1664,
+      "args": [
+        64
+      ],
+      "opcode": "ld_m"
+    },
+    {
+      "address": 1696,
+      "args": [
+        10
+      ],
+      "opcode": "div_imm"
+    },
+    {
+      "address": 1728,
+      "args": [
+        64
+      ],
+      "opcode": "st_imm"
+    },
+    {
+      "address": 1760,
+      "args": [
+        1440
+      ],
+      "opcode": "jmp"
+    },
+    {
+      "address": 1792,
+      "args": [],
+      "opcode": "halt"
+    }
+  ],
+  "start_pos": 256
+}
