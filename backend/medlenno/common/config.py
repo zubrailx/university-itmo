@@ -2,6 +2,7 @@ from os import getenv
 from pathlib import Path
 
 from dotenv import load_dotenv
+from fastapi_login import LoginManager
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker as Sessionmaker, DeclarativeBase
 
@@ -33,3 +34,7 @@ sessionmaker = Sessionmaker(bind=engine)
 
 class Base(DeclarativeBase, MappingBase):
     metadata = db_meta
+
+
+SECRET_KEY = getenv("SECRET_KEY", "local")
+manager = LoginManager(SECRET_KEY, "/sign-in")
