@@ -1,0 +1,18 @@
+from __future__ import annotations
+
+from typing import Self
+
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from medlenno.common.config import Base
+
+
+class Name(Base):
+    __tablename__ = "names"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    @classmethod
+    def find_by_(cls, ) -> Self | None:
+        return cls.find_first_by_kwargs()

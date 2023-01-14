@@ -1,0 +1,21 @@
+from fastapi import APIRouter, Depends
+
+from medlenno.common.config import manager
+from medlenno.common.models import PydanticModel
+from medlenno.users.users_db import User
+
+controller = APIRouter()
+
+
+class Model(PydanticModel):
+    pass
+
+
+@controller.get("", tags=[""], response_model=)
+def get_(user: User = Depends(manager), ):
+    return ...
+
+
+@controller.post("", tags=[""])
+def post_(user: User = Depends(manager), ):
+    pass
