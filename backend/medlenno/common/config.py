@@ -3,7 +3,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import DeclarativeBase, sessionmaker as Sessionmaker
+from sqlalchemy.orm import sessionmaker as Sessionmaker, DeclarativeBase
+
+from medlenno.common.sqla import MappingBase
 
 current_directory = Path.cwd()
 if current_directory.name == "medlenno":  # pragma: no cover
@@ -29,5 +31,5 @@ db_meta = MetaData(naming_convention=convention)
 sessionmaker = Sessionmaker(bind=engine)
 
 
-class Base(DeclarativeBase):
+class Base(DeclarativeBase, MappingBase):
     metadata = db_meta
