@@ -3,15 +3,27 @@ from typing import Self
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_login.exceptions import InvalidCredentialsException
-from pydantic import BaseModel
 
 from medlenno.common.config import manager
+from medlenno.common.models import PydanticModel
 from medlenno.users.users_db import User
 
 controller = APIRouter()
 
 
-class UserAuth(BaseModel):
+class UserBase(PydanticModel):
+    name: str
+    description: str | None = None
+    address: str | None = None
+
+
+class UserIn(UserBase):
+    username: str
+    password: str
+    as_cafe: bool = False
+
+
+class UserAuth(PydanticModel):
     id: int
     access_token: str
 
@@ -22,11 +34,11 @@ class UserAuth(BaseModel):
 
 
 @controller.post("/sign-up/", tags=["users"])
-def signup(data: OAuth2PasswordRequestForm = Depends()) -> UserAuth:
+def signup(data: UserIn) -> UserAuth:
     if User.find_by_username(data.username) is not None:
         raise InvalidCredentialsException()
 
-    user = User.create(username=data.username, password=data.password)
+    user = User.create(**data.dict())
     return UserAuth.from_user(user)
 
 

@@ -1,16 +1,17 @@
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
 
-from medlenno.common.config import sessionmaker, db_meta, engine, manager
+from medlenno.common.config import sessionmaker, db_meta, engine, manager, db_url
 from medlenno.common.sqla import DBSessionMiddleware
-from medlenno.users.auth_rst import controller as auth_controller
+from medlenno.users import auth_rst, users_rst
 from medlenno.users.users_db import User
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="sign-in")
 app.add_middleware(DBSessionMiddleware, sessionmaker=sessionmaker)
 
-app.include_router(auth_controller)
+app.include_router(auth_rst.controller)
+app.include_router(users_rst.controller)
 
 
 @manager.user_loader()

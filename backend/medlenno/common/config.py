@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi_login import LoginManager
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Text
 from sqlalchemy.orm import sessionmaker as Sessionmaker, DeclarativeBase
 
 from medlenno.common.sqla import MappingBase
@@ -34,6 +34,9 @@ sessionmaker = Sessionmaker(bind=engine)
 
 class Base(DeclarativeBase, MappingBase):
     metadata = db_meta
+    type_annotation_map = {
+        str: Text
+    }
 
 
 SECRET_KEY = getenv("SECRET_KEY", "local")
