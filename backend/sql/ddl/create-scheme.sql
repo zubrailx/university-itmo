@@ -10,16 +10,16 @@ create type order_status as enum();
 -- Core
 create table suppliers(
   id serial primary key,
+  username varchar(100) unique not null,
+  password varchar(100) not null,
   name varchar(255) not null,
   description text,
-  address text
+  address text not null
 );
 
 create table cafes(
-  id serial primary key,
-  name varchar(255) not null,
-  description text,
-  address text not null,
+  id integer not null references suppliers
+    on update cascade on delete restrict,
   menu_count integer not null 
 );
 
