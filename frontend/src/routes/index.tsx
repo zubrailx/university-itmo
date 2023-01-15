@@ -2,6 +2,8 @@ import { Stack, Typography } from "@suid/material";
 import { Title } from "solid-start";
 import SignUp from "~/components/auth/signup";
 import SignIn from "~/components/auth/signin";
+import { serverURL } from "~/data/fetcher";
+import { userData } from "~/data/user-store";
 
 export default function Home() {
   return (
@@ -67,6 +69,11 @@ export default function Home() {
           <SignIn />
         </Stack>
       </Stack>
+      <a onClick={() => fetch(`${serverURL}/users/me/data/`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Authorization": "Bearer " + userData().token },
+      }).then(res => res.json().then(console.log))}>hey</a>
     </main>
   );
 }

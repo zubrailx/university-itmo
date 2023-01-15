@@ -40,4 +40,4 @@ class Base(DeclarativeBase, MappingBase):
 
 
 SECRET_KEY = getenv("SECRET_KEY", "local")
-manager = LoginManager(SECRET_KEY, "/sign-in")
+manager = LoginManager(SECRET_KEY, "/sign-in-form/")

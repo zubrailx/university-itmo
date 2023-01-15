@@ -1,4 +1,4 @@
-import { Button, Stack, TextField, ToggleButton, ToggleButtonGroup } from "@suid/material";
+import { Button, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@suid/material";
 import { Accessor, For, Setter } from "solid-js";
 
 export type FieldValue = { value?: string, error?: boolean }
@@ -17,6 +17,9 @@ export type FormProps<K extends string> = {
   asCafe?: Accessor<boolean>,
   setAsCafe?: Setter<boolean>,
   buttonText: string,
+  serverError?: string,
+  clearServerError: () => void,
+  onSuccess: (data: any) => void,
 }
 
 export default function Form<K extends string>(props: FormProps<K>) {
@@ -30,9 +33,12 @@ export default function Form<K extends string>(props: FormProps<K>) {
               variant="outlined"
               value={props.data()[key]?.value || ""}
               error={props.data()[key]?.error}
-              onChange={(event: any) => props.setData(
-                (prev) => ({ ...prev, [key]: { value: event.target.value } } as FormData<K>)
-              )}
+              onChange={(event: any) => {
+                props.clearServerError()
+                props.setData(
+                  (prev) => ({ ...prev, [key]: { value: event.target.value } } as FormData<K>)
+                )
+              }}
             />
           </>
         }
@@ -65,11 +71,26 @@ export default function Form<K extends string>(props: FormProps<K>) {
             ) as FormData<K>
           )
           if (Object.values<FieldValue>(props.data()).some(({ error }) => error)) return
-          console.log(props.data())
+          props.onSuccess(
+            Object.fromEntries(
+              (Object.entries<FieldValue>(props.data())
+                .map(([key, { value }]) => [key, value]) as [string, string | boolean | undefined][])
+                .concat(props.asCafe === undefined ? [] : [["as_cafe", props.asCafe()]])
+                .filter(([_, value]) => !!value)
+            )
+          )
         }}
       >
         {props.buttonText}
       </Button>
+      {props.serverError !== undefined
+        && <Typography
+          variant="body1"
+          color="error"
+        >
+          {props.serverError}
+        </Typography>
+      }
     </Stack>
   )
 }

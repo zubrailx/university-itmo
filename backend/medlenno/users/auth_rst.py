@@ -11,15 +11,18 @@ from medlenno.users.users_db import User
 controller = APIRouter()
 
 
+class SignInModel(PydanticModel):
+    username: str
+    password: str
+
+
 class UserBase(PydanticModel):
     name: str
     description: str | None = None
     address: str | None = None
 
 
-class UserIn(UserBase):
-    username: str
-    password: str
+class UserIn(UserBase, SignInModel):
     as_cafe: bool = False
 
 
@@ -36,15 +39,23 @@ class UserAuth(PydanticModel):
 @controller.post("/sign-up/", tags=["users"])
 def signup(data: UserIn) -> UserAuth:
     if User.find_by_username(data.username) is not None:
-        raise InvalidCredentialsException()
+        raise InvalidCredentialsException
 
     user = User.create(**data.dict())
     return UserAuth.from_user(user)
 
 
-@controller.post("/sign-in/", tags=["users"])
+@controller.post("/sign-in-form/", tags=["users"], deprecated=True)
 def signin(data: OAuth2PasswordRequestForm = Depends()) -> UserAuth:
     user = User.find_by_username(data.username)
     if user is None or not user.verify_password(data.password):
-        raise InvalidCredentialsException()
+        raise InvalidCredentialsException
+    return UserAuth.from_user(user)
+
+
+@controller.post("/sign-in/", tags=["users"])
+def signin(data: SignInModel) -> UserAuth:
+    user = User.find_by_username(data.username)
+    if user is None or not user.verify_password(data.password):
+        raise InvalidCredentialsException
     return UserAuth.from_user(user)
