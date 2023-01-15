@@ -28,7 +28,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
             session.get().commit()
 
         session.get().close()
-        session.reset(self.token)
+        # session.reset(self.token)
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
@@ -103,6 +103,10 @@ class MappingBase:
         return db.get_paginated(
             cls.select_by_kwargs(*order_by, **kwargs), offset, limit
         )
+
+    def update(self, **kwargs) -> None:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def delete(self) -> None:
         db.session.delete(self)
