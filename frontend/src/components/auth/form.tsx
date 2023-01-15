@@ -1,4 +1,5 @@
-import { Button, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@suid/material";
+import { Button, Stack, TextField, ToggleButton, ToggleButtonGroup } from "@suid/material";
+import { PropsOf } from "@suid/types";
 import { Accessor, For, Setter } from "solid-js";
 
 export type FieldValue = { value?: string, error?: boolean }
@@ -8,6 +9,7 @@ export type FieldMeta<K extends string> = {
   key: K,
   label: string,
   required: boolean,
+  type?: PropsOf<"input">["type"],
 }
 
 export type FormProps<K extends string> = {
@@ -17,7 +19,6 @@ export type FormProps<K extends string> = {
   asCafe?: Accessor<boolean>,
   setAsCafe?: Setter<boolean>,
   buttonText: string,
-  serverError?: string,
   clearServerError: () => void,
   onSuccess: (data: any) => void,
 }
@@ -27,17 +28,17 @@ export default function Form<K extends string>(props: FormProps<K>) {
     <Stack spacing="16px">
       <For each={props.fields}>
         {
-          ({ key, label }) => <>
+          ({ key, label, type }) => <>
             <TextField
               label={label}
               variant="outlined"
+              type={type === "number" ? "text" : type}
               value={props.data()[key]?.value || ""}
               error={props.data()[key]?.error}
-              onChange={(event: any) => {
+              onChange={({ target: { value: rawValue } }: any) => {
+                const value: string = type === "number" ? rawValue.replaceAll(/[^\-0-9]/g, "").substring(0, 10) : rawValue
                 props.clearServerError()
-                props.setData(
-                  (prev) => ({ ...prev, [key]: { value: event.target.value } } as FormData<K>)
-                )
+                props.setData((prev) => ({ ...prev, [key]: { value } } as FormData<K>))
               }}
             />
           </>
@@ -83,14 +84,6 @@ export default function Form<K extends string>(props: FormProps<K>) {
       >
         {props.buttonText}
       </Button>
-      {props.serverError !== undefined
-        && <Typography
-          variant="body1"
-          color="error"
-        >
-          {props.serverError}
-        </Typography>
-      }
     </Stack>
   )
 }

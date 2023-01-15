@@ -1,9 +1,8 @@
-import { Stack, Typography } from "@suid/material";
+import { Alert, Stack, Typography } from "@suid/material";
 import { Title } from "solid-start";
-import SignUp from "~/components/auth/signup";
+import { serverError } from "~/components/auth/data";
 import SignIn from "~/components/auth/signin";
-import { serverURL } from "~/data/fetcher";
-import { userData } from "~/data/user-store";
+import SignUp from "~/components/auth/signup";
 
 export default function Home() {
   return (
@@ -69,11 +68,13 @@ export default function Home() {
           <SignIn />
         </Stack>
       </Stack>
-      <a onClick={() => fetch(`${serverURL}/users/me/data/`, {
-        method: "GET",
-        credentials: "include",
-        headers: { "Authorization": "Bearer " + userData().token },
-      }).then(res => res.json().then(console.log))}>hey</a>
+      {serverError() !== undefined
+        && <div style={{ position: "absolute", bottom: "30px", right: "20px" }}>
+          <Alert severity="error" variant="filled">
+            {serverError()}
+          </Alert>
+        </div>
+      }
     </main>
   );
 }
