@@ -38,9 +38,7 @@ export default function Root() {
           <ErrorBoundary>
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              <AppBar>
-                <A href="/">Main</A>
-              </AppBar>
+              {/*<Header />*/}
               <Routes>
                 <FileRoutes />
               </Routes>
