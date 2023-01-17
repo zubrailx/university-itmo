@@ -63,3 +63,7 @@ class Recipe2Ingredient(Base):
             recipe_id=recipe_id,
             ingredient_id=ingredient_id,
         )
+
+    @classmethod
+    def find_by_recipe(cls, recipe_id: int) -> Sequence[Self]:
+        return cls.find_all_by_kwargs(recipe_id=recipe_id)

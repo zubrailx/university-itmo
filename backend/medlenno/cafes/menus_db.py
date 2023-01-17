@@ -94,3 +94,7 @@ class Menu2Recipe(Base):
             menu_id=menu_id,
             recipe_id=recipe_id,
         )
+
+    @classmethod
+    def find_by_menu(cls, menu_id: int) -> Sequence[Self]:
+        return cls.find_all_by_kwargs(menu_id=menu_id)

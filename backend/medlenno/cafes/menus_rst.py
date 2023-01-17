@@ -69,9 +69,17 @@ def delete_menu(menu_id: int) -> SuccessModel:
 
 
 class MenuItemEdit(PydanticModel):
-    menu_id: int = Field(alias="ingredient")
-    recipe_id: int = Field(alias="recipe")
+    menu_id: int = Field(alias="main")
+    recipe_id: int = Field(alias="item")
     price: int | None
+
+
+@controller.get("/{menu_id}/items/")
+def get_ingredients_from_recipe(menu_id: int) -> list[dict]:
+    return [
+        {"item": entry.recipe_id, "amount": entry.price}
+        for entry in Menu2Recipe.find_by_menu(menu_id)
+    ]
 
 
 @controller.post("/items/")

@@ -53,10 +53,22 @@ def edit_recipe(data: RecipeEdit, recipe_id: int) -> Recipe:
 
 
 class RecipeItemEdit(PydanticModel):
-    recipe_id: int = Field(alias="recipe")
-    ingredient_id: int = Field(alias="ingredient")
+    recipe_id: int = Field(alias="main")
+    ingredient_id: int = Field(alias="item")
     amount: int | None
     required: bool | None
+
+
+@controller.get("/{recipe_id}/items/")
+def get_ingredients_from_recipe(recipe_id: int) -> list[dict]:
+    return [
+        {
+            "item": entry.ingredient_id,
+            "amount": entry.amount,
+            "required": entry.required,
+        }
+        for entry in Recipe2Ingredient.find_by_recipe(recipe_id)
+    ]
 
 
 @controller.post("/items/")
@@ -65,7 +77,7 @@ def add_ingredient_to_recipe(data: RecipeItemEdit) -> SuccessModel:
     if item is None:
         Recipe2Ingredient.create(**data.dict())
     else:
-        item.update(**data.dict(exclude=["recipe_id", "ingredient_id"]))
+        item.update(**data.dict())
     return SuccessModel()
 
 
