@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Self, Sequence
 
-from sqlalchemy import select, ForeignKey, String, and_
+from sqlalchemy import select, ForeignKey, String, and_, delete
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from medlenno.cafes.recipes_db import Recipe
@@ -32,6 +32,7 @@ class Menu(Base):
             )
         )
 
+    @property
     def recipes(self) -> Sequence[Recipe]:
         return db.get_all(
             select(Recipe).join(
@@ -43,22 +44,34 @@ class Menu(Base):
             )
         )
 
+    def update_recipes(self, recipes: list[int]) -> None:
+        db.session.execute(delete(Menu2Recipe).filter_by(recipe_id=self.id))
+        for recipe in recipes:
+            Menu2Recipe.create(menu_id=self.id, recipe_id=recipe)
+
+    def attach_cafe(self, cafe_id: int) -> None:
+        Cafe2Menu.create(cafe_id=cafe_id, menu_id=self.id)
+
 
 class Cafe2Menu(Base):
+    __tablename__ = "cafe2menu"
+
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    cafe_id: Mapped[int] = mapped_column(ForeignKey("cafes.id"))
+    cafe_id: Mapped[int] = mapped_column(ForeignKey("cafes.id", ondelete="CASCADE"))
     cafe: Mapped[Cafe] = relationship()
 
-    menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id"))
+    menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id", ondelete="CASCADE"))
     menu: Mapped[Menu] = relationship()
 
 
 class Menu2Recipe(Base):
+    __tablename__ = "menu2recipe"
+
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id"))
+    menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id", ondelete="CASCADE"))
     menu: Mapped[Menu] = relationship()
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"))
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id", ondelete="CASCADE"))
     recipe: Mapped[Recipe] = relationship()
