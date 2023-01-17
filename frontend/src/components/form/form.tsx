@@ -8,6 +8,7 @@ export type FormProps<K extends string> = {
   setData: Setter<FormData<K>>,
   buttonText: string,
   clearServerError: () => void,
+  errorCheck?: () => boolean,
   onSuccess: () => void,
   children?: JSXElement
 }
@@ -45,7 +46,11 @@ export default function Form<K extends string>(props: FormProps<K>) {
               )
             ) as FormData<K>
           )
-          if (Object.values<FieldValue>(props.data()).some(({ error }) => error)) return
+
+          const primaryError = Object.values<FieldValue>(props.data()).some(({ error }) => error)
+          const additionalError = !!props.errorCheck && props.errorCheck()
+          if (primaryError || additionalError) return
+
           props.onSuccess()
         }}
       >

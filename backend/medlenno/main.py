@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from medlenno.common.config import sessionmaker, db_meta, engine, manager, db_url
 from medlenno.common.sqla import DBSessionMiddleware
 from medlenno.users import auth_rst, users_rst
+from medlenno.ingredients import units_rst, ingredients_rst
 from medlenno.users.users_db import User
 
 app = FastAPI()
@@ -22,6 +23,9 @@ app.add_middleware(
 
 app.include_router(auth_rst.controller)
 app.include_router(users_rst.controller)
+
+app.include_router(units_rst.controller)
+app.include_router(ingredients_rst.controller)
 
 
 @manager.user_loader()

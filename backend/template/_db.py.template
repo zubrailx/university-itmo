@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Self
+from typing import Self, Sequence
 
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import select, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from medlenno.common.config import Base
+from medlenno.common.sqla import db
 
 
 class Name(Base):
