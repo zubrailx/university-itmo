@@ -1,1 +1,6 @@
 build/
+
+.idea
+
+venv/
+.venv/

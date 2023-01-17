@@ -1,0 +1,5 @@
+sqlalchemy==2.0.0rc1  # ORM framework
+psycopg2-binary~=2.9.5  # psql plugin
+fastapi[all]~=0.88.0  # ReST framework
+fastapi-login~=1.8.3  # User manager
+passlib[bcrypt]~=1.7.4  # Cryptography
