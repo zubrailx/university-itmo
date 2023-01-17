@@ -1,5 +1,5 @@
 import { Box, List, ListItem, ListItemButton, Popover, TextField } from "@suid/material";
-import { Accessor, Setter, createSignal, createEffect, For } from "solid-js";
+import { Accessor, createEffect, createSignal, For, Setter } from "solid-js";
 import { serverURL } from "~/data/fetcher";
 
 export type UnitInputProps = {

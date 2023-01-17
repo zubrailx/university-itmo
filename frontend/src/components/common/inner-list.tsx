@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { Close as ClearIcon, Edit as EditIcon, Search as SearchIcon } from "@suid/icons-material";
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, TextField } from "@suid/material";
+import { Button, Checkbox, Dialog, Divider, IconButton, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, TextField } from "@suid/material";
 import { createEffect, createSignal, For, JSXElement } from "solid-js";
 import { serverURL } from "~/data/fetcher";
 import { getToken } from "~/data/user-store";

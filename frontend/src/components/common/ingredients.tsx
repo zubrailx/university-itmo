@@ -1,4 +1,3 @@
-import { createSignal } from "solid-js";
 import InnerList from "./inner-list";
 
 type Ingredient = {

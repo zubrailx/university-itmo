@@ -1,7 +1,6 @@
-import { AppBar, createTheme, CssBaseline, ThemeProvider } from "@suid/material";
+import { createTheme, CssBaseline, ThemeProvider } from "@suid/material";
 import { Suspense } from "solid-js";
 import {
-  A,
   Body,
   ErrorBoundary,
   FileRoutes,
