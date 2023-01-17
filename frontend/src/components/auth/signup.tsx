@@ -1,6 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from "@suid/material";
 import { createSignal } from "solid-js";
-import Form from "~/components/form/form";
 import { FieldMeta, FormData } from "~/components/form/types";
 import { setServerError } from "./data";
 import AuthForm from "./form";

@@ -3,7 +3,7 @@ import { createEffect, createSignal, JSXElement } from "solid-js"
 import { Title, useNavigate, useParams } from "solid-start"
 import { serverURL } from "~/data/fetcher"
 import { getToken } from "~/data/user-store"
-import InnerList, { AnyItem, AnyLink, InnerListProps, LinkDialogProps } from "../common/inner-list"
+import InnerList, { AnyItem, AnyLink, InnerListProps } from "../common/inner-list"
 import { convertData } from "./data"
 import Form from "./form"
 import { FieldMeta, FormData } from "./types"
@@ -14,7 +14,7 @@ export type FormPageProps<K extends string, I extends AnyItem, L extends AnyLink
   listWidth?: string,
   fields: FieldMeta<K>[],
   errorCheck?: () => boolean,
-  additions?: [string, string | boolean][],
+  additions?: [string, string | boolean | number][],
   children?: JSXElement
   unpackData?: (data: any) => void,
   title: string,
@@ -40,7 +40,7 @@ export default function FormPage<K extends string, I extends AnyItem, L extends 
       }).then(res => {
         if (res.ok) res.json().then(data => {
           setData(() => Object.fromEntries(
-            Object.entries(data).map(([key, value]) => ([key, { value }]))
+            Object.entries(data).map(([key, value]: any) => ([key, { value: value.toString() }]))
           ) as FormData<K>)
           props.unpackData && props.unpackData(data)
         })

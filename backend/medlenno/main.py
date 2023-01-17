@@ -6,6 +6,7 @@ from medlenno.cafes import recipes_rst, menus_rst
 from medlenno.common.config import sessionmaker, db_meta, engine, manager
 from medlenno.common.sqla import DBSessionMiddleware
 from medlenno.ingredients import units_rst, ingredients_rst
+from medlenno.suppliers import prices_rst
 from medlenno.users import auth_rst, users_rst
 from medlenno.users.users_db import User
 
@@ -30,6 +31,8 @@ app.include_router(ingredients_rst.controller)
 
 app.include_router(recipes_rst.controller)
 app.include_router(menus_rst.controller)
+
+app.include_router(prices_rst.controller)
 
 
 @manager.user_loader()

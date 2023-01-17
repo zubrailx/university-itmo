@@ -1,5 +1,5 @@
 import { Button, Stack, TextField } from "@suid/material";
-import { Accessor, For, JSXElement, Setter } from "solid-js";
+import { For, JSXElement } from "solid-js";
 import { FieldMeta, FieldValue, FormData } from "./types";
 
 export type FormProps<K extends string> = {
