@@ -2,9 +2,8 @@ import { ToggleButton, ToggleButtonGroup } from "@suid/material";
 import { createSignal } from "solid-js";
 import Form from "~/components/form/form";
 import { FieldMeta, FormData } from "~/components/form/types";
-import { serverURL } from "~/data/fetcher";
-import { setUserData, userData } from "~/data/user-store";
-import { convertData, setServerError } from "./data";
+import { setServerError } from "./data";
+import AuthForm from "./form";
 
 
 enum FormFieldKeys {
@@ -27,35 +26,20 @@ const fields: FieldMeta<FormFieldKeys>[] = [
 
 const [asCafe, setAsCafe] = createSignal<boolean>(true)
 
-function sendRequest(body: any) {
-  fetch(
-    `${serverURL}/sign-up/`, {
-    method: "POST",
-    credentials: "include",
-    cache: "no-cache",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  }).then(res => {
-    if (res.ok) res.json().then(data => {
-      setUserData({ ...userData, token: data.access_token })
-    })
-    else if (res.status === 401) {
-      setServerError("Username taken")
-      setData({ ...data(), username: { ...data().username, error: true } })
-    }
-    else res.text().then(text => console.log(res.status, text))
-  })
-}
-
 export default function SignUp() {
   return (
-    <Form
+    <AuthForm
+      path="sign-up"
       fields={fields}
       data={data}
       setData={setData}
       clearServerError={() => setServerError(undefined)}
       buttonText="Sign Up"
-      onSuccess={() => sendRequest(convertData(data(), [["as_cafe", asCafe()]]))}
+      additions={[["as_cafe", asCafe()]]}
+      handleError={() => {
+        setServerError("Username taken")
+        setData({ ...data(), username: { ...data().username, error: true } })
+      }}
     >
       <ToggleButtonGroup
         color="primary"
@@ -71,6 +55,6 @@ export default function SignUp() {
           Supplier
         </ToggleButton>
       </ToggleButtonGroup>
-    </Form>
+    </AuthForm>
   )
 }
