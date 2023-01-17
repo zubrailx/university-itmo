@@ -1,8 +1,11 @@
 import { Stack } from "@suid/material";
+import { createEffect } from "solid-js";
 import { Title } from "solid-start";
 import IngredientsList from "~/components/common/ingredients";
+import { getToken } from "~/data/user-store";
 
 export default function Test() {
+  createEffect(() => { console.log(getToken()) })
   return (
     <main>
       <Title>RSS: Ingredients</Title>

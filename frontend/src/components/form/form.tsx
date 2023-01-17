@@ -4,8 +4,8 @@ import { FieldMeta, FieldValue, FormData } from "./types";
 
 export type FormProps<K extends string> = {
   fields: FieldMeta<K>[],
-  data: Accessor<FormData<K>>,
-  setData: Setter<FormData<K>>,
+  data: FormData<K>,
+  setData: (data: FormData<K>) => void,
   buttonText: string,
   clearServerError: () => void,
   errorCheck?: () => boolean,
@@ -23,12 +23,12 @@ export default function Form<K extends string>(props: FormProps<K>) {
               label={label}
               variant="outlined"
               type={type === "number" ? "text" : type}
-              value={props.data()[key]?.value || ""}
-              error={props.data()[key]?.error}
+              value={props.data[key]?.value || ""}
+              error={props.data[key]?.error}
               onChange={({ target: { value: rawValue } }: any) => {
                 const value: string = type === "number" ? rawValue.replaceAll(/[^\-0-9]/g, "").substring(0, 10) : rawValue
                 props.clearServerError()
-                props.setData((prev) => ({ ...prev, [key]: { value } } as FormData<K>))
+                props.setData(({ ...props.data, [key]: { value } } as FormData<K>))
               }}
             />
           </>
@@ -39,15 +39,15 @@ export default function Form<K extends string>(props: FormProps<K>) {
         variant="contained"
         onClick={() => {
           props.setData(
-            () => Object.fromEntries(
+            Object.fromEntries(
               props.fields.map(
                 ({ key, required }) =>
-                  [key, { error: required && !!!props.data()[key]?.value, ...props.data()[key] }]
+                  [key, { error: required && !!!props.data[key]?.value, ...props.data[key] }]
               )
             ) as FormData<K>
           )
 
-          const primaryError = Object.values<FieldValue>(props.data()).some(({ error }) => error)
+          const primaryError = Object.values<FieldValue>(props.data).some(({ error }) => error)
           const additionalError = !!props.errorCheck && props.errorCheck()
           if (primaryError || additionalError) return
 

@@ -8,13 +8,9 @@ type Ingredient = {
   unit: { id: number, name: string }
 }
 
-const [choices, setChoices] = createSignal<number[]>([])
-
 export default function IngredientsList() {
   return <InnerList
     path="ingredients"
     extractText={(item: Ingredient) => `${item.name} (${item.unit.name})`}
-    choices={choices}
-    setChoices={setChoices}
   />
 }

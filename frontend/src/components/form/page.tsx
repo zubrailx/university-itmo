@@ -3,12 +3,12 @@ import { createEffect, createSignal, JSXElement } from "solid-js"
 import { Title, useNavigate, useParams } from "solid-start"
 import { serverURL } from "~/data/fetcher"
 import { getToken } from "~/data/user-store"
-import InnerList, { AnyItem, InnerListProps } from "../common/inner-list"
+import InnerList, { AnyItem, AnyLink, InnerListProps, LinkDialogProps } from "../common/inner-list"
 import { convertData } from "./data"
 import Form from "./form"
 import { FieldMeta, FormData } from "./types"
 
-export type FormPageProps<K extends string, I extends AnyItem> = {
+export type FormPageProps<K extends string, I extends AnyItem, L extends AnyLink> = {
   path: string,
   formWidth: string,
   listWidth?: string,
@@ -18,10 +18,10 @@ export type FormPageProps<K extends string, I extends AnyItem> = {
   children?: JSXElement
   unpackData?: (data: any) => void,
   title: string,
-  innerList?: InnerListProps<I>,
+  innerList?: InnerListProps<I, L>,
 }
 
-export default function FormPage<K extends string, I extends AnyItem>(props: FormPageProps<K, I>) {
+export default function FormPage<K extends string, I extends AnyItem, L extends AnyLink>(props: FormPageProps<K, I, L>) {
   const [data, setData] = createSignal<FormData<K>>({} as FormData<K>)
 
   const params = useParams()
@@ -58,7 +58,6 @@ export default function FormPage<K extends string, I extends AnyItem>(props: For
   )
 
   function sendRequest(body: any) {
-    const innerPath = props.innerList?.path
     fetch(
       `${serverURL}/${props.path}/${id() === undefined ? "" : `${id()}/`}`, {
       method: id() === undefined ? "POST" : "PUT",
@@ -68,13 +67,13 @@ export default function FormPage<K extends string, I extends AnyItem>(props: For
         "Content-Type": "application/json",
         "authorization": `Bearer ${getToken()}`,
       },
-      body: JSON.stringify(
-        innerPath
-          ? { ...body, [innerPath]: props.innerList?.choices() }
-          : body
-      ),
+      body: JSON.stringify(body),
     }).then(res => {
-      if (res.ok) navigator(-1)
+      if (res.ok) {
+        if (id() === undefined && props.innerList !== undefined) {
+          res.json().then(({ id }) => navigator(`/${props.path}/${id}`, { replace: true }))
+        } else navigator(-1)
+      }
       else res.text().then(text => console.log(res.status, text))
     })
   }
@@ -111,7 +110,7 @@ export default function FormPage<K extends string, I extends AnyItem>(props: For
           </Typography>
           <Form
             fields={props.fields}
-            data={data}
+            data={data()}
             setData={setData}
             buttonText={params.id === "new" ? "Create" : "Update"}
             clearServerError={() => { } /*setServerError(undefined)*/}
@@ -121,7 +120,14 @@ export default function FormPage<K extends string, I extends AnyItem>(props: For
             {props.children}
           </Form>
         </Stack>
-        {props.innerList !== undefined && <InnerList {...props.innerList} />}
+        {props.innerList !== undefined
+          && id() !== undefined
+          && <InnerList
+            outerPath={props.path}
+            outerId={id()}
+            width={props.listWidth}
+            {...props.innerList}
+          />}
       </Stack>
     </main>
   )
