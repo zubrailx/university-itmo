@@ -14,7 +14,7 @@ export type FormPageProps<K extends string, I extends AnyItem, L extends AnyLink
   listWidth?: string,
   fields: FieldMeta<K>[],
   errorCheck?: () => boolean,
-  additions?: [string, string | boolean][],
+  additions?: [string, string | boolean | number][],
   children?: JSXElement
   unpackData?: (data: any) => void,
   title: string,
@@ -40,7 +40,7 @@ export default function FormPage<K extends string, I extends AnyItem, L extends 
       }).then(res => {
         if (res.ok) res.json().then(data => {
           setData(() => Object.fromEntries(
-            Object.entries(data).map(([key, value]) => ([key, { value }]))
+            Object.entries(data).map(([key, value]: any) => ([key, { value: value.toString() }]))
           ) as FormData<K>)
           props.unpackData && props.unpackData(data)
         })

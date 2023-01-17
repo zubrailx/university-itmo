@@ -42,7 +42,7 @@ export default function InnerList<Item extends AnyItem, Link extends AnyLink>(pr
       { headers: { "authorization": `Bearer ${getToken()}` } },
     )
       .then(res => {
-        if (res.ok) res.json().then(data => setItems(data as Item[]))
+        if (res.ok) res.json().then(data => { setItems(data as Item[]); console.log(data) })
         else if (res.status === 401) navigator("/")
         else if (res.status === 403) navigator("/supplier")
         else res.text().then(text => console.log(res.status, text))
@@ -118,7 +118,7 @@ export default function InnerList<Item extends AnyItem, Link extends AnyLink>(pr
         ? <ListItem>
           Loading...
         </ListItem>
-        : <For each={items()?.filter(item => item.name.includes(input()))}>
+        : <For each={items()?.filter(item => props.extractText(item).includes(input()))}>
           {(item: Item) => <>
             <ListItem
               disablePadding
