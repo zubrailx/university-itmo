@@ -10,7 +10,7 @@ export type AnyItem = {
   name: string,
 }
 
-type InnerListProps<Item extends AnyItem> = {
+export type InnerListProps<Item extends AnyItem> = {
   path: string,
   choices: Accessor<number[]>,
   setChoices: Setter<number[]>,
@@ -26,8 +26,12 @@ export default function InnerList<Item extends AnyItem>(props: InnerListProps<It
       `${serverURL}/${props.path}/`,
       { headers: { "authorization": `Bearer ${getToken()}` } },
     )
-      .then(res => res.json())
-      .then(data => setItems(data as Item[]))
+      .then(res => {
+        if (res.ok) res.json().then(data => setItems(data as Item[]))
+        else if (res.status === 401) navigator("/")
+        else if (res.status === 403) navigator("/supplier")
+        else res.text().then(text => console.log(res.status, text))
+      })
   })
   const [input, setInput] = createSignal<string>("")
 
@@ -48,7 +52,8 @@ export default function InnerList<Item extends AnyItem>(props: InnerListProps<It
     </Stack>
     <List sx={{
       width: "100%",
-      minHeight: "70vh",
+      height: "70vh",
+      overflow: "auto",
       padding: 0,
       borderTop: "1px solid #E6E6E6",
       borderBottom: "1px solid #E6E6E6",
