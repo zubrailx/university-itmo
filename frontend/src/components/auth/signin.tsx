@@ -1,10 +1,12 @@
+import { Navigator, useNavigate } from "@solidjs/router";
 import { createSignal } from "solid-js";
 
+import { convertData } from "~/components/form/data";
 import Form from "~/components/form/form";
 import { FieldMeta, FormData } from "~/components/form/types";
 import { serverURL } from "~/data/fetcher";
-import { setUserData, userData } from "~/data/user-store";
-import { convertData, setServerError } from "./data";
+import { saveToken } from "~/data/user-store";
+import { setServerError } from "./data";
 
 enum FormFieldKeys {
   USERNAME = "username",
@@ -18,7 +20,7 @@ const fields: FieldMeta<FormFieldKeys>[] = [
   { label: "Password", required: true, key: FormFieldKeys.PASSWORD, type: "password" },
 ]
 
-function sendRequest(body: any) {
+function sendRequest(body: any, navigator: Navigator) {
   fetch(
     `${serverURL}/sign-in/`, {
     method: "POST",
@@ -28,7 +30,8 @@ function sendRequest(body: any) {
     body: JSON.stringify(body),
   }).then(res => {
     if (res.ok) res.json().then(data => {
-      setUserData({ ...userData, token: data.access_token })
+      saveToken(data.access_token)
+      // navigator
     })
     else if (res.status === 401) {
       setData({
@@ -43,6 +46,8 @@ function sendRequest(body: any) {
 }
 
 export default function SignIn() {
+  const navigator = useNavigate()
+
   return (
     <Form
       fields={fields}
@@ -50,7 +55,7 @@ export default function SignIn() {
       setData={setData}
       buttonText="Sign In"
       clearServerError={() => setServerError(undefined)}
-      onSuccess={() => sendRequest(convertData(data()))}
+      onSuccess={() => sendRequest(convertData(data()), navigator)}
     />
   )
 }

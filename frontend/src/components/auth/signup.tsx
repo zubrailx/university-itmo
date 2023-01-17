@@ -1,10 +1,11 @@
 import { ToggleButton, ToggleButtonGroup } from "@suid/material";
 import { createSignal } from "solid-js";
+import { convertData } from "~/components/form/data";
 import Form from "~/components/form/form";
 import { FieldMeta, FormData } from "~/components/form/types";
 import { serverURL } from "~/data/fetcher";
-import { setUserData, userData } from "~/data/user-store";
-import { convertData, setServerError } from "./data";
+import { saveToken } from "~/data/user-store";
+import { setServerError } from "./data";
 
 
 enum FormFieldKeys {
@@ -37,7 +38,8 @@ function sendRequest(body: any) {
     body: JSON.stringify(body),
   }).then(res => {
     if (res.ok) res.json().then(data => {
-      setUserData({ ...userData, token: data.access_token })
+      saveToken(data.access_token)
+      // navigate
     })
     else if (res.status === 401) {
       setServerError("Username taken")

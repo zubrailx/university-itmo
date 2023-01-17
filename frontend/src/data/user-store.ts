@@ -1,7 +1,7 @@
-import { createSignal } from 'solid-js';
-
-export type UserData = {
-  token?: string
+export function saveToken(token: string): void {
+  window.localStorage.setItem("rss-token", token)
 }
 
-export const [userData, setUserData] = createSignal<UserData>({} as UserData)
+export function getToken(): string {
+  return window.localStorage.getItem("rss-token") || ""
+}

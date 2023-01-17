@@ -3,6 +3,7 @@ import { Close as ClearIcon, Edit as EditIcon, Search as SearchIcon } from "@sui
 import { Button, Checkbox, Divider, IconButton, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, TextField } from "@suid/material";
 import { Accessor, createEffect, createSignal, For, Setter } from "solid-js";
 import { serverURL } from "~/data/fetcher";
+import { getToken } from "~/data/user-store";
 
 export type AnyItem = {
   id: number,
@@ -21,7 +22,10 @@ export default function InnerList<Item extends AnyItem>(props: InnerListProps<It
 
   const [items, setItems] = createSignal<Item[] | undefined>(undefined)
   createEffect(() => {
-    fetch(`${serverURL}/${props.path}/`)
+    fetch(
+      `${serverURL}/${props.path}/`,
+      { headers: { "authorization": `Bearer ${getToken()}` } },
+    )
       .then(res => res.json())
       .then(data => setItems(data as Item[]))
   })
