@@ -1,26 +1,15 @@
-import { Button, Stack, TextField, ToggleButton, ToggleButtonGroup } from "@suid/material";
-import { PropsOf } from "@suid/types";
-import { Accessor, For, Setter } from "solid-js";
-
-export type FieldValue = { value?: string, error?: boolean }
-export type FormData<K extends string> = { [key in K]: FieldValue }
-
-export type FieldMeta<K extends string> = {
-  key: K,
-  label: string,
-  required: boolean,
-  type?: PropsOf<"input">["type"],
-}
+import { Button, Stack, TextField } from "@suid/material";
+import { Accessor, For, JSXElement, Setter } from "solid-js";
+import { FieldMeta, FieldValue, FormData } from "./types";
 
 export type FormProps<K extends string> = {
   fields: FieldMeta<K>[],
   data: Accessor<FormData<K>>,
   setData: Setter<FormData<K>>,
-  asCafe?: Accessor<boolean>,
-  setAsCafe?: Setter<boolean>,
   buttonText: string,
   clearServerError: () => void,
-  onSuccess: (data: any) => void,
+  onSuccess: () => void,
+  children?: JSXElement
 }
 
 export default function Form<K extends string>(props: FormProps<K>) {
@@ -44,22 +33,7 @@ export default function Form<K extends string>(props: FormProps<K>) {
           </>
         }
       </For>
-      {props.asCafe !== undefined
-        && <ToggleButtonGroup
-          color="primary"
-          value={props.asCafe()}
-          onChange={(_, value: boolean) => props.setAsCafe && props.setAsCafe(() => value)}
-          fullWidth
-          exclusive
-        >
-          <ToggleButton value={true}>
-            Cafe
-          </ToggleButton>
-          <ToggleButton value={false}>
-            Supplier
-          </ToggleButton>
-        </ToggleButtonGroup>
-      }
+      {props.children}
       <Button
         variant="contained"
         onClick={() => {
@@ -72,14 +46,7 @@ export default function Form<K extends string>(props: FormProps<K>) {
             ) as FormData<K>
           )
           if (Object.values<FieldValue>(props.data()).some(({ error }) => error)) return
-          props.onSuccess(
-            Object.fromEntries(
-              (Object.entries<FieldValue>(props.data())
-                .map(([key, { value }]) => [key, value]) as [string, string | boolean | undefined][])
-                .concat(props.asCafe === undefined ? [] : [["as_cafe", props.asCafe()]])
-                .filter(([_, value]) => !!value)
-            )
-          )
+          props.onSuccess()
         }}
       >
         {props.buttonText}
