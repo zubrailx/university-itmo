@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Self
 
 from fastapi import APIRouter, Depends
@@ -33,7 +34,10 @@ class UserAuth(PydanticModel):
 
     @classmethod
     def from_user(cls, user: User) -> Self:
-        access_token = manager.create_access_token(data={"sub": user.id})
+        access_token = manager.create_access_token(
+            data={"sub": user.id},
+            expires=timedelta(hours=12),
+        )
         return UserAuth(
             id=user.id,
             access_token=access_token,
