@@ -29,11 +29,16 @@ class UserIn(UserBase, SignInModel):
 class UserAuth(PydanticModel):
     id: int
     access_token: str
+    as_cafe: bool
 
     @classmethod
     def from_user(cls, user: User) -> Self:
         access_token = manager.create_access_token(data={"sub": user.id})
-        return UserAuth(id=user.id, access_token=access_token)
+        return UserAuth(
+            id=user.id,
+            access_token=access_token,
+            as_cafe=user.cafe is not None,
+        )
 
 
 @controller.post("/sign-up/", tags=["users"])
