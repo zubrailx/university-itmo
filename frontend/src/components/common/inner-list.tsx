@@ -27,6 +27,7 @@ export type InnerListProps<Item extends AnyItem, Link extends AnyLink> = {
   outerPath?: string,
   outerId?: string,
   width?: string,
+  noChecks?: boolean,
 }
 
 export default function InnerList<Item extends AnyItem, Link extends AnyLink>(props: InnerListProps<Item, Link>) {
@@ -50,24 +51,24 @@ export default function InnerList<Item extends AnyItem, Link extends AnyLink>(pr
 
   const [links, setLinks] = createSignal<Link[] | undefined>(undefined)
   createEffect(() => {
+    if (props.outerId === "") return
     fetch(
       `${serverURL}/${props.outerPath}/${props.outerId}/items/`,
       { headers: { "authorization": `Bearer ${getToken()}` } },
-    )
-      .then(res => {
-        if (res.ok) res.json().then(data => {
-          setLinks(data as Link[]);
-          console.log(links())
-        })
-        else if (res.status === 401) navigator("/")
-        else if (res.status === 403) navigator("/supplier")
-        else res.text().then(text => console.log(res.status, text))
+    ).then(res => {
+      if (res.ok) res.json().then(data => {
+        setLinks(data as Link[]);
+        console.log(links())
       })
+      else if (res.status === 401) navigator("/")
+      else if (res.status === 403) navigator("/supplier")
+      else res.text().then(text => console.log(res.status, text))
+    })
   })
 
   function editLink(itemId: number, newData?: Link) {
     fetch(
-      `${serverURL}/${props.outerPath}/items`, {
+      `${serverURL}/${props.outerPath}/items/`, {
       method: newData === undefined ? "DELETE" : "POST",
       credentials: "include",
       cache: "no-cache",
@@ -113,7 +114,7 @@ export default function InnerList<Item extends AnyItem, Link extends AnyLink>(pr
       borderTop: "1px solid #E6E6E6",
       borderBottom: "1px solid #E6E6E6",
     }}>
-      {items() === undefined || links() === undefined
+      {items() === undefined || (links() === undefined && props.outerId !== "")
         ? <ListItem>
           Loading...
         </ListItem>
@@ -131,12 +132,20 @@ export default function InnerList<Item extends AnyItem, Link extends AnyLink>(pr
                 </IconButton>
               }
             >
-              <ListItemButton onClick={() => setOpenLink(item.id)}>
+              <ListItemButton onClick={props.noChecks ? () => { } : () => {
+                if (!!!props.linkDialog) {
+                  if (links()?.find(link => link.item === item.id) === undefined) {
+                    editLink(item.id, { item: item.id } as Link)
+                  } else editLink(item.id)
+                } else setOpenLink(item.id)
+              }}>
                 <ListItemIcon>
-                  <Checkbox
-                    disableRipple
-                    checked={links()?.find(link => link.item === item.id) !== undefined}
-                  />
+                  {!!!props.noChecks &&
+                    <Checkbox
+                      disableRipple
+                      checked={links()?.find(link => link.item === item.id) !== undefined}
+                    />
+                  }
                 </ListItemIcon>
                 <ListItemText>
                   {props.extractText(item)}

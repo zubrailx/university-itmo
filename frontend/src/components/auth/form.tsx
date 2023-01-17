@@ -43,7 +43,7 @@ export default function AuthForm<K extends string>(props: AuthFormProps<K>) {
 
   return <Form
     fields={props.fields}
-    data={props.data}
+    data={props.data()}
     setData={props.setData}
     buttonText={props.buttonText}
     clearServerError={props.clearServerError}

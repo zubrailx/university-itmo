@@ -19,6 +19,8 @@ export type FormPageProps<K extends string, I extends AnyItem, L extends AnyLink
   unpackData?: (data: any) => void,
   title: string,
   innerList?: InnerListProps<I, L>,
+  editOnly?: boolean,
+  customId?: string,
 }
 
 export default function FormPage<K extends string, I extends AnyItem, L extends AnyLink>(props: FormPageProps<K, I, L>) {
@@ -28,10 +30,10 @@ export default function FormPage<K extends string, I extends AnyItem, L extends 
   const navigator = useNavigate()
 
   createEffect(() => {
-    if (params.id === "new") { }
-    else if (/^[0-9]+$/g.test(params.id)) {
+    if (params.id === "new" && !!!props.editOnly) { }
+    else if (params.id === undefined || /^[0-9]+$/g.test(params.id)) {
       fetch(
-        `${serverURL}/${props.path}/${params.id}/`, {
+        `${serverURL}/${props.path}/${params.id ? `${params.id}/` : ""}`, {
         method: "GET",
         credentials: "include",
         headers: { "authorization": `Bearer ${getToken()}` },
@@ -46,15 +48,21 @@ export default function FormPage<K extends string, I extends AnyItem, L extends 
         else res.text().then(text => console.log(res.status, text))
       })
     }
-    else navigator("/not-found", { replace: true })
+    else { }  //navigator("/not-found", { replace: true })
   })
 
-  const id = (): string | undefined => params.id === "new" ? undefined : params.id
+  const id = (): string | undefined => (
+    props.customId === undefined
+      ? params.id === "new" ? undefined : params.id
+      : props.customId
+  )
 
   const title = () => (
-    params.id === "new"
-      ? `New ${props.title}`
-      : `${props.title} ${params.id}`
+    props.customId === undefined
+      ? params.id === "new"
+        ? `New ${props.title}`
+        : `${props.title} ${params.id}`
+      : props.title
   )
 
   function sendRequest(body: any) {
