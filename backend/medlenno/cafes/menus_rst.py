@@ -1,8 +1,9 @@
 from typing import Sequence
 
 from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import Field
 
-from medlenno.cafes.menus_db import Menu
+from medlenno.cafes.menus_db import Menu, Menu2Recipe
 from medlenno.common.config import manager
 from medlenno.common.models import PydanticModel, AllOptionalMeta, SuccessModel
 from medlenno.cafes.recipes_rst import RecipeOut
@@ -11,20 +12,16 @@ from medlenno.users.users_db import User
 controller = APIRouter(prefix="/menus", tags=["menus"])
 
 
-class MenuBase(PydanticModel):
+class MenuIn(PydanticModel):
     name: str
     description: str | None
-
-
-class MenuIn(MenuBase):
-    recipes: list[int]
 
 
 class MenuEdit(MenuIn, metaclass=AllOptionalMeta):
     pass
 
 
-class MenuOut(MenuBase):
+class MenuOut(MenuIn):
     id: int
     recipes: list[RecipeOut]
 
@@ -40,11 +37,7 @@ def get_all_menus(user: User = Depends(manager)) -> Sequence[Menu]:
 def create_menu(data: MenuIn, user: User = Depends(manager)) -> Menu:
     if user.cafe is None:
         raise HTTPException(status.HTTP_403_FORBIDDEN)
-    data = data.dict()
-    recipes = data.pop("recipes")
-    data["recipe_count"] = len(recipes)
-    menu = Menu.create(**data)
-    menu.update_recipes(recipes)
+    menu = Menu.create(**data.dict(), recipe_count=0)
     menu.attach_cafe(user.cafe.id)
     return menu
 
@@ -62,13 +55,7 @@ def edit_menu(data: MenuEdit, menu_id: int) -> Menu:
     menu = Menu.find_by_id(menu_id)
     if menu is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-
-    data = data.dict()
-    recipes = data.pop("recipes", None)
-    if recipes is not None:
-        data["recipe_count"] = len(recipes)
-        menu.update_recipes(recipes)
-    menu.update(**data)
+    menu.update(**data.dict())
     return menu
 
 
@@ -78,4 +65,29 @@ def delete_menu(menu_id: int) -> SuccessModel:
     if menu is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     menu.delete()
+    return SuccessModel()
+
+
+class MenuItemEdit(PydanticModel):
+    menu_id: int = Field(alias="ingredient")
+    recipe_id: int = Field(alias="recipe")
+    price: int | None
+
+
+@controller.post("/items/")
+def add_ingredient_to_recipe(data: MenuItemEdit) -> SuccessModel:
+    item = Menu2Recipe.find_by_ids(data.recipe_id, data.menu_id)
+    if item is None:
+        Menu2Recipe.create(**data.dict())
+    elif data.price is not None:
+        item.price = data.price
+    return SuccessModel()
+
+
+@controller.delete("/items/")
+def remove_ingredient_from_recipe(data: MenuItemEdit) -> SuccessModel:
+    item = Menu2Recipe.find_by_ids(data.recipe_id, data.menu_id)
+    if item is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    item.delete()
     return SuccessModel()

@@ -38,21 +38,28 @@ class Recipe(Base):
             )
         )
 
-    def update_ingredients(self, ingredients: list[int]) -> None:
-        db.session.execute(delete(Recipe2Ingredient).filter_by(recipe_id=self.id))
-        for ingredient in ingredients:
-            Recipe2Ingredient.create(recipe_id=self.id, ingredient_id=ingredient)
-
 
 class Recipe2Ingredient(Base):
     __tablename__ = "recipe2ingredient"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id", ondelete="CASCADE"))
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipes.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     recipe: Mapped[Recipe] = relationship()
 
     ingredient_id: Mapped[int] = mapped_column(
-        ForeignKey("ingredients.id", ondelete="CASCADE")
+        ForeignKey("ingredients.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     ingredient: Mapped[Ingredient] = relationship()
+
+    amount: Mapped[int] = mapped_column(default=1)
+    required: Mapped[bool] = mapped_column(default=False)
+
+    @classmethod
+    def find_by_ids(cls, recipe_id: int, ingredient_id: int) -> Self | None:
+        return cls.find_first_by_kwargs(
+            recipe_id=recipe_id,
+            ingredient_id=ingredient_id,
+        )

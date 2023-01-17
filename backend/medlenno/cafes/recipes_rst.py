@@ -1,29 +1,26 @@
 from typing import Sequence
 
 from fastapi import APIRouter, HTTPException, status
+from pydantic import Field
 
-from medlenno.cafes.recipes_db import Recipe
-from medlenno.common.models import PydanticModel, AllOptionalMeta
+from medlenno.cafes.recipes_db import Recipe, Recipe2Ingredient
+from medlenno.common.models import PydanticModel, AllOptionalMeta, SuccessModel
 from medlenno.ingredients.ingredients_rst import IngredientOut
 
 controller = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
-class RecipeBase(PydanticModel):
+class RecipeIn(PydanticModel):
     name: str
     description: str | None
     calories: int | None
-
-
-class RecipeIn(RecipeBase):
-    ingredients: list[int]
 
 
 class RecipeEdit(RecipeIn, metaclass=AllOptionalMeta):
     pass
 
 
-class RecipeOut(RecipeBase):
+class RecipeOut(RecipeIn):
     id: int
     ingredients: list[IngredientOut]
 
@@ -35,11 +32,7 @@ def get_all_recipes() -> Sequence[Recipe]:
 
 @controller.post("/", response_model=RecipeOut)
 def create_recipe(data: RecipeIn) -> Recipe:
-    data = data.dict()
-    ingredients = data.pop("ingredients")
-    recipe = Recipe.create(**data)
-    recipe.update_ingredients(ingredients)
-    return recipe
+    return Recipe.create(**data.dict())
 
 
 @controller.get("/{recipe_id}/", response_model=RecipeOut)
@@ -55,10 +48,31 @@ def edit_recipe(data: RecipeEdit, recipe_id: int) -> Recipe:
     recipe = Recipe.find_by_id(recipe_id)
     if recipe is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-
-    data = data.dict()
-    ingredients = data.pop("ingredients", None)
-    recipe.update(**data)
-    if ingredients is not None:
-        recipe.update_ingredients(ingredients)
+    recipe.update(**data.dict())
     return recipe
+
+
+class RecipeItemEdit(PydanticModel):
+    recipe_id: int = Field(alias="recipe")
+    ingredient_id: int = Field(alias="ingredient")
+    amount: int | None
+    required: bool | None
+
+
+@controller.post("/items/")
+def add_ingredient_to_recipe(data: RecipeItemEdit) -> SuccessModel:
+    item = Recipe2Ingredient.find_by_ids(data.recipe_id, data.ingredient_id)
+    if item is None:
+        Recipe2Ingredient.create(**data.dict())
+    else:
+        item.update(**data.dict(exclude=["recipe_id", "ingredient_id"]))
+    return SuccessModel()
+
+
+@controller.delete("/items/")
+def remove_ingredient_from_recipe(data: RecipeItemEdit) -> SuccessModel:
+    item = Recipe2Ingredient.find_by_ids(data.recipe_id, data.ingredient_id)
+    if item is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    item.delete()
+    return SuccessModel()

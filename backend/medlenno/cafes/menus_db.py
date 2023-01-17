@@ -44,11 +44,6 @@ class Menu(Base):
             )
         )
 
-    def update_recipes(self, recipes: list[int]) -> None:
-        db.session.execute(delete(Menu2Recipe).filter_by(recipe_id=self.id))
-        for recipe in recipes:
-            Menu2Recipe.create(menu_id=self.id, recipe_id=recipe)
-
     def attach_cafe(self, cafe_id: int) -> None:
         Cafe2Menu.create(cafe_id=cafe_id, menu_id=self.id)
 
@@ -56,22 +51,46 @@ class Menu(Base):
 class Cafe2Menu(Base):
     __tablename__ = "cafe2menu"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    cafe_id: Mapped[int] = mapped_column(ForeignKey("cafes.id", ondelete="CASCADE"))
+    cafe_id: Mapped[int] = mapped_column(
+        ForeignKey("cafes.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     cafe: Mapped[Cafe] = relationship()
 
-    menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id", ondelete="CASCADE"))
+    menu_id: Mapped[int] = mapped_column(
+        ForeignKey("menus.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     menu: Mapped[Menu] = relationship()
+
+    @classmethod
+    def find_by_ids(cls, cafe_id: int, menu_id: int) -> Self | None:
+        return cls.find_first_by_kwargs(
+            cafe_id=cafe_id,
+            menu_id=menu_id,
+        )
 
 
 class Menu2Recipe(Base):
     __tablename__ = "menu2recipe"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id", ondelete="CASCADE"))
+    menu_id: Mapped[int] = mapped_column(
+        ForeignKey("menus.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     menu: Mapped[Menu] = relationship()
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id", ondelete="CASCADE"))
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipes.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     recipe: Mapped[Recipe] = relationship()
+
+    price: Mapped[int]
+
+    @classmethod
+    def find_by_ids(cls, menu_id: int, recipe_id: int) -> Self | None:
+        return cls.find_first_by_kwargs(
+            menu_id=menu_id,
+            recipe_id=recipe_id,
+        )
