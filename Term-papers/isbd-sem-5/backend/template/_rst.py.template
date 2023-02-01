@@ -1,0 +1,28 @@
+from typing import Sequence
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from medlenno.common.config import manager
+from medlenno.common.models import PydanticModel, SuccessModel, AllOptionalMeta
+from medlenno.users.users_db import User
+
+controller = APIRouter(prefix="/", tags=[""])
+
+
+class Model(PydanticModel):
+    pass
+
+
+@controller.get("", response_model=)
+def get_(user: User = Depends(manager), ):
+    return ...
+
+
+@controller.post("", response_model=)
+def create_(user: User = Depends(manager), ):
+    pass
+
+
+@controller.put("", response_model=)
+def edit_(user: User = Depends(manager), ):
+    pass

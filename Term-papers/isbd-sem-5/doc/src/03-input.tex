@@ -1,0 +1,166 @@
+\begin{markdown}
+# Этап 3
+
+## Запросы
+
+### Для администраторов системы
+* Редактирование доступных единиц измерения
+* Редактирование доступных ингредиентов
+
+### Для поставщика
+* Создание и удаление аккаунта поставщика
+* Размещение цен на товары
+
+### Для владельца кафе
+* Добавление, изменение, удаление кафе 
+* Добавление, удаление, изменение меню
+* Добавление, удаление меню в кафе
+* Добавление, изменение, удаление рецептов
+* Добавление, удаление рецептов в меню
+* Поиск товаров у поставщиков
+* Покупка товара у поставщиков
+* Получение информации о купленных товаров, т.е. кассового чека, и обновление склада при изменении статуса чека на получено
+* Редактирование и удаление записей об инвенторе
+
+### Для пользователя
+* Просмотр меню кафе
+* Просмотр рецептов блюд
+
+## Создание объектов
+
+Идет в правильном порядке запуска скриптов.
+
+### Таблицы
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {create-functions.sql}
+  ]{../../backend/sql/ddl/create-scheme.sql}
+
+\begin{markdown}
+### Функции
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {create-functions.sql}
+  ]{../../backend/sql/ddl/create-functions.sql}
+
+\begin{markdown}
+### Процедуры
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {create-procedures}
+  ]{../../backend/sql/ddl/create-procedures.sql}
+
+\begin{markdown}
+## Удаление объектов
+
+### Таблицы
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-procedures}
+  ]{../../backend/sql/ddl/drop-scheme.sql}
+
+\begin{markdown}
+### Процедуры
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-scheme}
+  ]{../../backend/sql/ddl/drop-procedures.sql}
+
+\begin{markdown}
+### Функции
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/ddl/drop-functions.sql}
+
+\begin{markdown}
+## Начальные значения
+
+### Создание
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/init.sql}
+
+\begin{markdown}
+### Удаление
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/destroy.sql}
+
+\begin{markdown}
+## Примеры запросов выше
+
+### Администратор
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/req/admin.sql}
+
+\begin{markdown}
+### Поставщик
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/req/supplier.sql}
+
+\begin{markdown}
+### Владельцы
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/req/owner.sql}
+
+\begin{markdown}
+### Пользователи
+\end{markdown}
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/req/user.sql}
+
+\begin{markdown}
+## Индексы
+
+### Описание
+По умолчания для primary key PSQL использует btree. На основании полученная даталогической модели и написанным выше запросам были выбраны следующие индексы, исключая индексы по умолчанию:
+\end{markdown}
+
+\begin{itemize}
+  \item \Verb"prices(nominal_price)" - btree. Будет производиться сортировка чисел.
+  \item \Verb"stocks(expiry_date)" - btree. Осуществление сортировки и фильтрации по времени окончания срока хранения.
+  \item \Verb"cafes(name)" - gin. Поиск кафе по паттерну.
+  \item \Verb"menus(name)" - gin. Поиск позиции в меню по паттерну.
+  \item \Verb"recipes(name)" - gin. Поиск рецепта по паттерну.
+  \item \Verb"ingredients(name)" - gin. Поиск ингредиента по паттерну.
+\end{itemize}
+
+Однако поскольку вылетает ошибка при попытке создания gin и мы не имеем достаточными правами доступа к дб, чтобы ее исправить, то обойдемся hash. Описание ошибки:
+
+\begin{lstlisting}[
+  style = User-output
+]
+psql:create-indexes.sql:5: ERROR:  data type character varying has no default operator class for access method "gin"
+ПОДСКАЗКА:  You must specify an operator class for the index or define a default operator class for the data type.
+\end{lstlisting}
+
+\begin{markdown}
+### Реализация
+\end{markdown}
+
+\lstinputlisting[
+  style = User-SQL,
+  % caption = {drop-functions}
+  ]{../../backend/sql/ddl/create-indexes.sql}
