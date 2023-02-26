@@ -1,6 +1,6 @@
 package task3;
 
-public class AbstrHuman {
+public abstract class AbstrHuman implements IRep {
   protected HumanImportance importance;
 
   protected String name;
@@ -14,5 +14,9 @@ public class AbstrHuman {
 
   public AbstrHuman(AbstrHuman human) {
     this(human.importance, human.name, human.surname);
+  }
+
+  public int getRep() {
+    return importance.getRep();
   }
 }

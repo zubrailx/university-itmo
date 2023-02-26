@@ -63,12 +63,13 @@ public class Vehicle {
       return false;
     }
 
+    public boolean isFree() {
+      return this.passenger == null;
+    }
+
     private boolean isEqOwner(AbstrHuman human) {
       return seats[OWNER_SEAT].passenger != null && seats[OWNER_SEAT].passenger == human;
     }
 
-    public boolean isFree() {
-      return this.passenger == null;
-    }
   }
 }

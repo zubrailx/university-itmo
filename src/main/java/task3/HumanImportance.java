@@ -11,7 +11,7 @@ public enum HumanImportance {
     this.importance = importance;
   }
 
-  public boolean isGreater(HumanImportance importance) {
-    return this.importance > importance.importance;
+  public int getRep() {
+    return importance;
   }
 }

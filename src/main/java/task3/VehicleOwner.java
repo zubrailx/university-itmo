@@ -16,7 +16,7 @@ public class VehicleOwner extends AbstrHuman {
   }
 
   public Vehicle.Seat allowSeat(AbstrHuman human) {
-    if (this.importance.isGreater(human.importance)) {
+    if (this.getRep() > human.getRep()) {
       return this.getFirstFreeSeat();  
     } else {
       return null;
