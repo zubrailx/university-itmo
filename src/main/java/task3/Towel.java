@@ -10,6 +10,10 @@ public class Towel implements IRep {
     this.rep = rep;
   }
 
+  public String getBrand() {
+    return brand;
+  }
+
   @Override
   public int getRep() {
     return rep;

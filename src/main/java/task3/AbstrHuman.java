@@ -19,4 +19,12 @@ public abstract class AbstrHuman implements IRep {
   public int getRep() {
     return importance.getRep();
   }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getSurname() {
+    return surname;
+  }
 }

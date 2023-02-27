@@ -9,15 +9,10 @@ public class VehicleOwner extends AbstrHuman {
     this.vehicle = vehicle;
   }
 
-  public boolean sitDriverSeat() {
-    var seats = vehicle.getSeats();
-    seats[Vehicle.OWNER_SEAT].open();
-    return seats[Vehicle.OWNER_SEAT].trySeat(this);
-  }
-
   public Vehicle.Seat allowSeat(AbstrHuman human) {
-    if (this.getRep() > human.getRep()) {
-      return this.getFirstFreeSeat();  
+    if (this.getRep() < human.getRep() ||
+        (this.getName() == human.getName())) {
+      return this.getFirstFreeSeat();
     } else {
       return null;
     }

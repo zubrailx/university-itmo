@@ -13,6 +13,10 @@ public class Front extends AbstrHuman {
     this.towel = towel;
   }
 
+  public Towel getTowel() {
+    return towel;
+  }
+
   @Override
   public int getRep() {
     int rep = super.getRep();

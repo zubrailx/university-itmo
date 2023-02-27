@@ -4,93 +4,87 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class BucketSort {
-  private int[] oldarr, newarr;
-  private int maxval;
-  private int cur_idx = 0;
-  private ArrayList<LinkedList<Integer>> buckets;
 
-  public BucketSort(int[] array, int buckets) {
-    this.oldarr = array;
+  private BucketSort() {
+  };
 
-    this.buckets = new ArrayList<LinkedList<Integer>>(buckets);
-    for (int i = 0; i < buckets; ++i) {
-      this.buckets.set(i, new LinkedList<Integer>());
-    }
-    // get max value in array
-    if (array.length <= 0) {
-      maxval = 0;
-    } else {
-      maxval = array[0];
-      for (int i = 0; i < array.length; ++i) {
-        maxval = Math.max(maxval, array[i]);
-      }
-    }
-  }
+  public static int[] sorted(int[] input, int buckCount) {
+    buckCount = buckCount <= 0 ? 1 : buckCount;
+    int[] output = new int[input.length];
 
-  /*
-   * @return true - something is done, false - perform merging
-   */
-  public boolean sortOne() {
-    if (cur_idx >= oldarr.length) {
-      return false;
+    var buckets = new ArrayList<LinkedList<Integer>>();
+    for (int i = 0; i < buckCount; ++i) {
+      buckets.add(i, new LinkedList<Integer>());
     }
 
-    int val = oldarr[cur_idx++];
-    int bnum = (val * buckets.size()) / maxval;
+    fillBuckets(buckets, input);
 
-    var bucket = buckets.get(bnum);
-
-    boolean has_ins = false;
-    var iter = bucket.listIterator();
-
-    while(iter.hasNext()) {
-      int inb = iter.next();
-      if (val <= inb) {
-        int pos = iter.nextIndex() - 1;
-        bucket.add(pos, val);
-        has_ins = true;
-        break;
-      }
-    }
-    if (!has_ins) {
-      bucket.addLast(val);
-    }
-    return true;
-  }
-
-  /*
-   * @return if do_merge == true then merge array and return it
-   */
-  public boolean merge() {
-    if (cur_idx < oldarr.length) {
-      return false;
-    }
-
-    this.newarr = new int[oldarr.length];
     int pos = 0;
     for (var bucket : buckets) {
       for (var elem : bucket) {
-        this.newarr[pos++] = elem;
+        output[pos++] = elem;
       }
     }
-    return true;
+    return output;
   }
 
-  public int[] getArray() {
-    return newarr;
+  private static Pair getPair(int[] input) {
+    int min = Integer.MAX_VALUE;
+    int max = Integer.MIN_VALUE;
+    for (int i = 0; i < input.length; ++i) {
+      max = Math.max(max, input[i]);
+      min = Math.min(min, input[i]);
+    }
+    return new Pair(min, max);
   }
 
-  /*
-   * Uses BucketSort operations to sort array at once
-   *
-   * @n number of buckets
-   */
-  public static int[] sort(int[] array, int n) {
-    var bs = new BucketSort(array, n);
+  private static int getBuckNum(int val, Pair pair, int buckets) {
+    int bnum = (int) ((long) (val - pair.min) * (long) buckets / ((long) pair.max - (long) pair.min));
+    return bnum >= buckets ? buckets - 1 : bnum;
+  }
 
-    while (bs.sortOne())
-      ;
-    bs.merge();
-    return bs.getArray();
+  private static void fillBuckets(ArrayList<LinkedList<Integer>> buckets, int[] input) {
+    var pair = getPair(input);
+    // then array is already sorted -> insert everything in first bucket
+    if (pair.min == pair.max) {
+      for (var val : input) {
+        buckets.get(0).addFirst(val);
+      }
+      return;
+    }
+
+    int pos = 0;
+    while (pos < input.length) {
+      int ival = input[pos++];
+      int bnum = getBuckNum(ival, pair, buckets.size());
+
+      var bucket = buckets.get(bnum);
+
+      boolean has_ins = false;
+      var iter = bucket.listIterator();
+
+      while (iter.hasNext()) {
+        int bval = iter.next();
+        if (ival <= bval) {
+          int bpos = iter.nextIndex() - 1;
+          bucket.add(bpos, ival);
+          has_ins = true;
+          break;
+        }
+      }
+      if (!has_ins) {
+        bucket.addLast(ival);
+      }
+    }
+  }
+
+  static class Pair {
+    final int min;
+    final int max;
+
+    Pair(int min, int max) {
+      this.min = min;
+      this.max = max;
+    }
   }
 }

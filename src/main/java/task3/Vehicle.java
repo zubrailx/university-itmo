@@ -2,16 +2,29 @@ package task3;
 
 // we live in the world with no keys
 public class Vehicle {
-  public static int OWNER_SEAT = 0;
+  public static int DRIVER_DEAT = 0;
+  public static int MIN_SEATS = 1;
   private Seat seats[]; // first seat is owner seat
 
   public Vehicle(int seats) {
-    seats = seats <= 0 ? 1 : seats;
+    seats = seats <= 0 ? MIN_SEATS : seats;
     this.seats = new Seat[seats];
+    for (int i = 0; i < seats; ++i) {
+      this.seats[i] = new Seat();
+    }
   }
 
   public Seat[] getSeats() {
     return seats;
+  }
+
+  public boolean isDriver(AbstrHuman human) {
+    if (seats[DRIVER_DEAT].passenger != null) {
+      if (seats[DRIVER_DEAT].passenger == human) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // DoorSeat
@@ -25,14 +38,22 @@ public class Vehicle {
       opened = false;
     }
 
+    public boolean isLocked() {
+      return locked;
+    }
+
+    public boolean isOpened() {
+      return opened;
+    }
+
     public void lock(AbstrHuman human) {
-      if (isEqOwner(human)) {
-        this.locked = false;
+      if (isDriver(human)) {
+        this.locked = true;
       }
     }
 
     public void unlock(AbstrHuman human) {
-      if (isEqOwner(human)) {
+      if (isDriver(human)) {
         this.locked = false;
       }
     }
@@ -47,15 +68,19 @@ public class Vehicle {
       this.opened = false;
     }
 
-    public boolean trySeat(AbstrHuman human) {
-      if (passenger == null && !locked && opened) {
-        passenger = human;
-        return true;
+    public boolean sit(AbstrHuman human) {
+      if (passenger == null) {
+        if (!locked) {
+          if (opened) {
+            passenger = human;
+            return true;
+          }
+        }
       }
       return false;
     }
 
-    public boolean tryLeave(AbstrHuman human) {
+    public boolean leave(AbstrHuman human) {
       if (human != null && passenger == human && !locked && opened) {
         passenger = null;
         return true;
@@ -65,10 +90,6 @@ public class Vehicle {
 
     public boolean isFree() {
       return this.passenger == null;
-    }
-
-    private boolean isEqOwner(AbstrHuman human) {
-      return seats[OWNER_SEAT].passenger != null && seats[OWNER_SEAT].passenger == human;
     }
 
   }

@@ -4,13 +4,40 @@ import java.util.ArrayList;
 
 public class Secans {
 
+  private Secans() {}
+
   public static double secans(double x, int n) {
     var table = getBoustrophedonCoef(n);
+
+    // Normalize function cuz it is periodical
+    // and very big error because of large power
+    int sign = 1;
+    {
+      while (x <= -Math.PI) {
+        x += Math.PI * 2;
+      }
+
+      while (x >= Math.PI) {
+        x -= Math.PI * 2;
+      }
+
+      if (x <= -Math.PI / 2) {
+        sign = -1;
+        x += Math.PI;
+      }
+
+      if (x >= Math.PI / 2) {
+        sign = -1;
+        x -= Math.PI;
+      }
+
+    }
+
     double res = 0;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i <= n; i += 2) {
       res += table.get(i)[0] * Math.pow(x, i) / factorial(i);
     }
-    return res;
+    return sign * res;
   }
 
   private static long factorial(int n) {
