@@ -7,7 +7,7 @@ public enum HumanImportance {
 
   private final int importance;
   
-  private HumanImportance(int importance) {
+  HumanImportance(int importance) {
     this.importance = importance;
   }
 

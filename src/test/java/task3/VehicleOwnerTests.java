@@ -1,21 +1,20 @@
 package task3;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 @TestInstance(Lifecycle.PER_CLASS)
-public class VehicleOwnerTests {
+class VehicleOwnerTests {
 
   @Test
   public void Constructor_NoExcept() {
     Human human = new Human("abobich", "vesilbev");
     Vehicle vehicle = new Vehicle(6);
-    VehicleOwner owner = new VehicleOwner(human, vehicle);
+    new VehicleOwner(human, vehicle);
   }
 
   @Test

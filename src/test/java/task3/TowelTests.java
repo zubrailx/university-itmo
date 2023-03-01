@@ -7,11 +7,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class TowelTests {
+class TowelTests {
 
   @Test
   public void Constructor_NoExcept() {
-    Towel towel = new Towel("aboba", 50);
+    new Towel("aboba", 50);
   }
 
   @Test

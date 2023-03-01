@@ -7,11 +7,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class FrontTests {
+class FrontTests {
 
   @Test
   public void Constructor_NoExcept() {
-    Front front = new Front("aboba", "abobich");
+    new Front("aboba", "abobich");
   }
 
   @Test

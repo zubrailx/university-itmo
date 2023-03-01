@@ -4,7 +4,7 @@ package task3;
 public class Vehicle {
   public static int DRIVER_DEAT = 0;
   public static int MIN_SEATS = 1;
-  private Seat seats[]; // first seat is owner seat
+  private final Seat[] seats; // first seat is owner seat
 
   public Vehicle(int seats) {
     seats = seats <= 0 ? MIN_SEATS : seats;
@@ -20,9 +20,7 @@ public class Vehicle {
 
   public boolean isDriver(AbstrHuman human) {
     if (seats[DRIVER_DEAT].passenger != null) {
-      if (seats[DRIVER_DEAT].passenger == human) {
-        return true;
-      }
+      return seats[DRIVER_DEAT].passenger == human;
     }
     return false;
   }

@@ -7,11 +7,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class HumanTests {
+class HumanTests {
 
   @Test
   public void Constructor_NoExcept() {
-    Human human = new Human("aboba", "abobich");
+    new Human("aboba", "abobich");
   }
 
   @Test

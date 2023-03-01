@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class BucketSort {
 
   private BucketSort() {
-  };
+  }
 
   public static int[] sorted(int[] input, int buckCount) {
     buckCount = buckCount <= 0 ? 1 : buckCount;
@@ -14,7 +14,7 @@ public class BucketSort {
 
     var buckets = new ArrayList<LinkedList<Integer>>();
     for (int i = 0; i < buckCount; ++i) {
-      buckets.add(i, new LinkedList<Integer>());
+      buckets.add(i, new LinkedList<>());
     }
 
     fillBuckets(buckets, input);
@@ -31,9 +31,9 @@ public class BucketSort {
   private static Pair getPair(int[] input) {
     int min = Integer.MAX_VALUE;
     int max = Integer.MIN_VALUE;
-    for (int i = 0; i < input.length; ++i) {
-      max = Math.max(max, input[i]);
-      min = Math.min(min, input[i]);
+    for (int i : input) {
+      max = Math.max(max, i);
+      min = Math.min(min, i);
     }
     return new Pair(min, max);
   }

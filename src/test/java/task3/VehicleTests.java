@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class VehicleTests {
+class VehicleTests {
 
   @ParameterizedTest
   @ValueSource(ints = { 5, 10 })

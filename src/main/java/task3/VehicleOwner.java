@@ -1,5 +1,7 @@
 package task3;
 
+import java.util.Objects;
+
 public class VehicleOwner extends AbstrHuman {
 
   private Vehicle vehicle;
@@ -11,7 +13,7 @@ public class VehicleOwner extends AbstrHuman {
 
   public Vehicle.Seat allowSeat(AbstrHuman human) {
     if (this.getRep() < human.getRep() ||
-        (this.getName() == human.getName())) {
+        (Objects.equals(this.getName(), human.getName()))) {
       return this.getFirstFreeSeat();
     } else {
       return null;

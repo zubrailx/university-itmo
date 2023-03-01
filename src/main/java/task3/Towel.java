@@ -2,8 +2,8 @@ package task3;
 
 public class Towel implements IRep {
 
-  private String brand;
-  private int rep;
+  private final String brand;
+  private final int rep;
 
   public Towel(String brand, int rep) {
     this.brand = brand;

@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import task2.BucketSort;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class BucketSortTests {
+class BucketSortTests {
 
   @ParameterizedTest
   @ArgumentsSource(BucketSortArgsProvider.class)
@@ -23,7 +23,7 @@ public class BucketSortTests {
 
   static class BucketSortArgsProvider implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
       return Stream.of(
           // check array sort
           Arguments.of(5, new int[] {}, new int[] {}),

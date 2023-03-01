@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import task1.Secans;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class SecansTests {
+class SecansTests {
 
   int tailor_n;
   double epsilon;
