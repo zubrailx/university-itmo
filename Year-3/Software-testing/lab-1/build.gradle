@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'pmd'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+    implementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
+}
+
+test {
+    useJUnitPlatform()
+    dependsOn pmdMain, pmdTest
+    // finalizedBy jacocoTestReport
+    // finalizedBy jacocoTestCoverageVerification
+}
+
+pmd {
+    consoleOutput = true
+    toolVersion = "6.54.0"
+    ruleSetFiles = files("config/pmd.xml") // Исключения только через внешний файл
+    ruleSets = []
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit {
+                counter = 'CLASS'
+                value = 'MISSEDCOUNT'
+                maximum = 0.9
+            }
+        }
+        rule {
+            limit {
+                counter = 'METHOD'
+                value = 'MISSEDCOUNT'
+                maximum = 0.9
+            }
+        }
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'MISSEDCOUNT'
+                maximum = 0.9
+            }
+        }
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.9
+            }
+        }
+    }
+}
