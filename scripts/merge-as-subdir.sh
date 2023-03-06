@@ -22,3 +22,7 @@ git commit -m "Merge $REMOTE_NAME/$REMOTE_BRANCH as subdir"
 git pull -s subtree $REMOTE_NAME $REMOTE_BRANCH
 
 git checkout $PREV_BRANCH
+
+echo "Manually rebase:"
+echo "git rebase merge-$REMOTE_NAME"
+echo "git branch -D merge-$REMOTE_NAME"
