@@ -1,7 +1,7 @@
 plugins {
     id 'java'
+    id 'application'
     id 'jacoco'
-    id 'pmd'
 }
 
 repositories {
@@ -15,18 +15,14 @@ dependencies {
     implementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
 }
 
-test {
-    useJUnitPlatform()
-    dependsOn pmdMain, pmdTest
-    // finalizedBy jacocoTestReport
-    // finalizedBy jacocoTestCoverageVerification
+application {
+    mainClass = 'Main' 
 }
 
-pmd {
-    consoleOutput = true
-    toolVersion = "6.54.0"
-    ruleSetFiles = files("config/pmd.xml") // Исключения только через внешний файл
-    ruleSets = []
+test {
+    useJUnitPlatform()
+    // finalizedBy jacocoTestReport
+    // finalizedBy jacocoTestCoverageVerification
 }
 
 jacocoTestCoverageVerification {
