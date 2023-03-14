@@ -20,10 +20,10 @@ public class Cos implements NumRFunc {
       return Double.NaN;
     }
     // normalize to minimize error
-    while (x > 0 && x > Math.PI) {
+    while (x > Math.PI) {
       x -= 2 * Math.PI;
     }
-    while (x < 0 && x < -Math.PI) {
+    while (x < -Math.PI) {
       x += 2 * Math.PI;
     }
     
