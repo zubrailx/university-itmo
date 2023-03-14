@@ -13,7 +13,7 @@ public class Main {
     // System.out.println(new Cos(10).calc(Math.PI));
     var writer = new CSVFuncWriter("src/test/data/out");
     try (var printer = writer.getNumRFuncBasePrinter(Log.class)) {
-      printer.printRecord(10, 5, 12);
+      printer.printRecord(10, 5, Double.NaN);
       printer.printRecord(10, 5, 12);
       printer.printRecord(10, 5, 12);
       printer.printRecord(10, 5, 12);
@@ -27,7 +27,7 @@ public class Main {
     try {
       var records = reader.getNumRFuncBaseRecords(Log.class);
       for (var record : records) {
-        System.out.println(record);
+        System.out.println(Double.parseDouble(record.get("y")));
       }
     } catch (IOException e) {
       System.err.println(e.getMessage());

@@ -11,11 +11,11 @@ public class CSVFuncConfig {
   private static final String[] baseHeaders = { "base", "x", "y" };
   private static final String[] headers = { "x", "y" };
 
-  static String[] getBaseHeaders() {
+  public static String[] getBaseHeaders() {
     return baseHeaders;
   }
 
-  static String[] getHeaders() {
+  public static String[] getHeaders() {
     return headers;
   }
 
