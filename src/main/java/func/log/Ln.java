@@ -20,6 +20,8 @@ public class Ln implements NumRFunc {
       return Double.NaN;
     if (x == 0)
       return Double.NEGATIVE_INFINITY;
+    if (x == Double.POSITIVE_INFINITY)
+      return Double.POSITIVE_INFINITY;
 
     // if (0 < x <= 2) { search as ln(1 + x) series with substitution }
     // else res = -ln(1/x) with substitution, where 1/x <= 2 ==> x >= 0.5
