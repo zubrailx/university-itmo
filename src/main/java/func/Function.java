@@ -21,20 +21,22 @@ public class Function implements NumRFunc {
   private Cos cos;
   private Log log;
 
-  public Function(int n) {
+  public Function(int n, int logN) {
     sin = new Sin(n);
     tan = new Tan(n);
     cot = new Cot(n);
     csc = new Csc(n);
     sec = new Sec(n);
     cos = new Cos(n);
-    log = new Log(n);
+    log = new Log(logN);
   }
 
   @Override
   public Double calc(Double x) {
+    Double result;
     if (x <= 0) {
-      return (((((Math.pow((Math.pow((Math.pow((sin.calc(x) / tan.calc(x)), 3) + cot.calc(x)), 2) / csc.calc(x)), 3)
+      // result = ((Math.pow((Math.pow(cos.calc(x), 3) + cot.calc(x)) , 2) - csc.calc(x)) - cos.calc(x));
+      result = (((((Math.pow((Math.pow((Math.pow((sin.calc(x) / tan.calc(x)), 3) + cot.calc(x)), 2) / csc.calc(x)), 3)
           * cot.calc(x)) - cos.calc(x))
           - ((sec.calc(x) - ((cot.calc(x) + (sin.calc(x) * sin.calc(x))) / sin.calc(x)))
               + (((cos.calc(x) - cos.calc(x)) + cot.calc(x))
@@ -47,9 +49,10 @@ public class Function implements NumRFunc {
                   ((Math.pow(sin.calc(x), 3) + Math.pow(sin.calc(x), 3)) - ((cot.calc(x) - cot.calc(x)) * sin.calc(x))),
                   3) - (sec.calc(x) / (csc.calc(x) - csc.calc(x)))) + sec.calc(x))));
     } else {
-      return (((((log.calc(3., x) - log.calc(2., x)) * log.calc(10., x))
+      result = (((((log.calc(3., x) - log.calc(2., x)) * log.calc(10., x))
           / ((log.calc(5., x) + log.calc(3., x)) - (log.calc(5., x) - log.calc(10., x))))
           + (log.calc(10., x) / (log.calc(5., x) - log.calc(10., x)))) / log.calc(2., x));
     }
+    return result;
   }
 }

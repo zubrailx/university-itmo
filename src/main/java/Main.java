@@ -1,3 +1,4 @@
+import func.Function;
 import func.log.Ln;
 import func.log.Log;
 import func.trig.Cos;
@@ -24,7 +25,8 @@ public class Main {
     // System.out.println(cot.calc(0.));
     // trigGenTests();
     // lnTestGen();
-    logTestGen();
+    // logTestGen();
+    funcTestGen();
   }
 
   public static void trigGenTests() {
@@ -168,7 +170,34 @@ public class Main {
 
     CSVFuncReader reader = new CSVFuncReader("src/test/data/unit");
     try {
-      var records = reader.getNumRFuncRecords(Log.class);
+      var records = reader.getNumRFuncBaseRecords(Log.class);
+      for (var record : records) {
+        System.out.println(record);
+      }
+    } catch (IOException e) {
+      System.err.println(e.getMessage());
+    }
+  }
+
+  public static void funcTestGen() {
+    var func = new Function(10, 1000);
+    var writer = new CSVFuncWriter("src/test/data/unit");
+
+    double left = -4;
+    double right = 4;
+    double interval = 0.04;
+
+    try (var printer = writer.getNumRFuncPrinter(Function.class)) {
+      for (double i = left; i < right + interval; i += interval) {
+        printer.printRecord(i, func.calc(i));
+      }
+    } catch (IOException e) {
+      System.err.println(e.getMessage());
+    }
+
+    CSVFuncReader reader = new CSVFuncReader("src/test/data/unit");
+    try {
+      var records = reader.getNumRFuncRecords(Function.class);
       for (var record : records) {
         System.out.println(record);
       }
