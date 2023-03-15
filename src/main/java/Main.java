@@ -1,9 +1,14 @@
 import func.Function;
+import func.NumRFunc;
+import func.NumRFuncBase;
 import func.log.Ln;
 import func.log.Log;
 import func.trig.Cos;
 import func.trig.Cot;
+import func.trig.Csc;
+import func.trig.Sec;
 import func.trig.Sin;
+import func.trig.Tan;
 
 import java.io.IOException;
 
@@ -11,6 +16,10 @@ import csv.CSVFuncReader;
 import csv.CSVFuncWriter;
 
 public class Main {
+
+  static final double leftBound = -4;
+  static final double rightBound = 4;
+  static final double interval = 0.04;
 
   public static Double trigFunc(Double x) {
     return Math.sin(x) / Math.cos(x);
@@ -26,7 +35,8 @@ public class Main {
     // trigGenTests();
     // lnTestGen();
     // logTestGen();
-    funcTestGen();
+    // funcTestGen();
+    mockDataGen();
   }
 
   public static void trigGenTests() {
@@ -183,12 +193,8 @@ public class Main {
     var func = new Function(10, 1000);
     var writer = new CSVFuncWriter("src/test/data/unit");
 
-    double left = -4;
-    double right = 4;
-    double interval = 0.04;
-
     try (var printer = writer.getNumRFuncPrinter(Function.class)) {
-      for (double i = left; i < right + interval; i += interval) {
+      for (double i = leftBound; i < rightBound + interval; i += interval) {
         printer.printRecord(i, func.calc(i));
       }
     } catch (IOException e) {
@@ -204,5 +210,43 @@ public class Main {
     } catch (IOException e) {
       System.err.println(e.getMessage());
     }
+  }
+
+  /*
+   * Generate data for mock objects
+   */
+  public static void mockDataGen() {
+    var numrfuns = new NumRFunc[] { new Cos(10), new Cot(10), new Csc(10),
+        new Sec(10), new Sin(10), new Tan(10), new Ln(1000) };
+
+    var numrfuncbases = new NumRFuncBase[] { new Log(1000) };
+    var bases = new Double[] { 2., 3., 5., 10. };
+
+    var writer = new CSVFuncWriter("src/test/data/mock");
+
+    // For NumRFuncs
+    for (var numrfunc : numrfuns) {
+      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass())) {
+        for (double i = leftBound; i < rightBound + interval; i += interval) {
+          printer.printRecord(i, numrfunc.calc(i));
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+
+    // For NumRFuncBase
+    for (var numrfunc : numrfuncbases) {
+      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass())) {
+        for (var base : bases) {
+          for (double i = leftBound; i < rightBound + interval; i += interval) {
+            printer.printRecord(base, i, numrfunc.calc(base, i));
+          }
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+
   }
 }
