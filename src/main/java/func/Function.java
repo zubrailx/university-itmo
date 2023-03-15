@@ -30,6 +30,16 @@ public class Function implements NumRFunc {
     cos = new Cos(n);
     log = new Log(logN);
   }
+  
+  public Function(Sin sin, Tan tan, Cot cot, Csc csc, Sec sec, Cos cos, Log log) {
+    this.sin = sin;
+    this.tan = tan;
+    this.cot = cot;
+    this.csc = csc;
+    this.sec = sec;
+    this.cos = cos;
+    this.log = log;
+  }
 
   @Override
   public Double calc(Double x) {
