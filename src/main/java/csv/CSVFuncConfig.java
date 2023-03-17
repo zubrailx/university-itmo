@@ -19,8 +19,12 @@ public class CSVFuncConfig {
     return headers;
   }
 
-  static Path getFilePath(String testPath, Class<?> cls) {
-    return Paths.get(testPath, cls.getName() + ".csv");
+  static Path getFilePath(String testPath, Class<?> cls, String suffix) {
+    if (suffix == null) {
+      return Paths.get(testPath, cls.getName() + ".csv");
+    } else {
+      return Paths.get(testPath, cls.getName() + "." + suffix + ".csv");
+    }
   }
 
 }

@@ -19,16 +19,16 @@ public class CSVFuncReader {
     this.testPath = testPath;
   }
 
-  public Iterable<CSVRecord> getNumRFuncBaseRecords(Class<?> cls) throws IOException {
-    return getCSVReaderDepOnHeader(cls, CSVFuncConfig.getBaseHeaders());
+  public Iterable<CSVRecord> getNumRFuncBaseRecords(Class<?> cls, String suffix) throws IOException {
+    return getCSVReaderDepOnHeader(cls, CSVFuncConfig.getBaseHeaders(), suffix);
   }
 
-  public Iterable<CSVRecord> getNumRFuncRecords(Class<?> cls) throws IOException {
-    return getCSVReaderDepOnHeader(cls, CSVFuncConfig.getHeaders());
+  public Iterable<CSVRecord> getNumRFuncRecords(Class<?> cls, String suffix) throws IOException {
+    return getCSVReaderDepOnHeader(cls, CSVFuncConfig.getHeaders(), suffix);
   }
 
-  private Iterable<CSVRecord> getCSVReaderDepOnHeader(Class<?> cls, String[] header) throws IOException {
-    Path filePath = CSVFuncConfig.getFilePath(testPath, cls);
+  private Iterable<CSVRecord> getCSVReaderDepOnHeader(Class<?> cls, String[] header, String suffix) throws IOException {
+    Path filePath = CSVFuncConfig.getFilePath(testPath, cls, suffix);
     Reader reader = new FileReader(filePath.toString());
 
     final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()

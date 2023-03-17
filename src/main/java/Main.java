@@ -30,13 +30,11 @@ public class Main {
   }
 
   public static void main(String[] argv) {
-    // Cot cot = new Cot(10);
-    // System.out.println(cot.calc(0.));
-    // trigGenTests();
-    // lnTestGen();
-    // logTestGen();
+    trigGenTests();
+    lnTestGen();
+    logTestGen();
     funcGraphGen();
-    // mockDataGen();
+    mockDataGen();
   }
 
   public static void trigGenTests() {
@@ -50,7 +48,7 @@ public class Main {
     double[] periodicValues = new double[] { 0.6, 0.2, 1.4 };
     double[] periodic = new double[] { Math.PI, 5 * Math.PI, 10 * Math.PI, 20 * Math.PI };
 
-    try (var printer = writer.getNumRFuncPrinter(Cot.class)) {
+    try (var printer = writer.getNumRFuncPrinter(Cot.class, null)) {
       // bounds
       for (var value : bounds) {
         printer.printRecord(value, trigFunc(value));
@@ -83,7 +81,7 @@ public class Main {
 
     CSVFuncReader reader = new CSVFuncReader("src/test/data/unit");
     try {
-      var records = reader.getNumRFuncRecords(Cot.class);
+      var records = reader.getNumRFuncRecords(Cot.class, null);
       for (var record : records) {
         System.out.println(record);
       }
@@ -100,7 +98,7 @@ public class Main {
     double[] nearTransition = new double[] { 0.5, 0.8, 1.1, 1.4, 1.7, 2.0 };
     double[] nearSmooth = new double[] { 2, 5, 10, 100 };
 
-    try (var printer = writer.getNumRFuncPrinter(Ln.class)) {
+    try (var printer = writer.getNumRFuncPrinter(Ln.class, null)) {
       // bounds
       for (var value : bounds) {
         printer.printRecord(value, logFunc(value, Math.E));
@@ -127,7 +125,7 @@ public class Main {
 
     CSVFuncReader reader = new CSVFuncReader("src/test/data/unit");
     try {
-      var records = reader.getNumRFuncRecords(Ln.class);
+      var records = reader.getNumRFuncRecords(Ln.class, null);
       for (var record : records) {
         System.out.println(record);
       }
@@ -146,7 +144,7 @@ public class Main {
 
     double[] bases = new double[] { Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, -1, 0 };
 
-    try (var printer = writer.getNumRFuncBasePrinter(Log.class)) {
+    try (var printer = writer.getNumRFuncBasePrinter(Log.class, null)) {
       // testBases
       for (var base : bases) {
         for (var value : nearTransition) {
@@ -180,7 +178,7 @@ public class Main {
 
     CSVFuncReader reader = new CSVFuncReader("src/test/data/unit");
     try {
-      var records = reader.getNumRFuncBaseRecords(Log.class);
+      var records = reader.getNumRFuncBaseRecords(Log.class, null);
       for (var record : records) {
         System.out.println(record);
       }
@@ -193,7 +191,7 @@ public class Main {
     var func = new Function(10, 1000);
     var writer = new CSVFuncWriter("src/test/data/graph");
 
-    try (var printer = writer.getNumRFuncPrinter(Function.class)) {
+    try (var printer = writer.getNumRFuncPrinter(Function.class, null)) {
       for (double i = leftBound; i < rightBound + interval; i += interval) {
         printer.printRecord(i, func.calc(i));
       }
@@ -203,7 +201,7 @@ public class Main {
 
     CSVFuncReader reader = new CSVFuncReader("src/test/data/graph");
     try {
-      var records = reader.getNumRFuncRecords(Function.class);
+      var records = reader.getNumRFuncRecords(Function.class, null);
       for (var record : records) {
         System.out.println(record);
       }
@@ -226,7 +224,7 @@ public class Main {
 
     // For NumRFuncs
     for (var numrfunc : numrfuns) {
-      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass())) {
+      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass(), null)) {
         for (double i = leftBound; i < rightBound + interval; i += interval) {
           printer.printRecord(i, numrfunc.calc(i));
         }
@@ -237,7 +235,7 @@ public class Main {
 
     // For NumRFuncBase
     for (var numrfunc : numrfuncbases) {
-      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass())) {
+      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass(), null)) {
         for (var base : bases) {
           for (double i = leftBound; i < rightBound + interval; i += interval) {
             printer.printRecord(base, i, numrfunc.calc(base, i));

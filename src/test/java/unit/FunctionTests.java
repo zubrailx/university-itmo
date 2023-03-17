@@ -57,7 +57,7 @@ public class FunctionTests {
     // Read mockito data
     for (var cls : numrFuncClasses) {
       try {
-        var records = reader.getNumRFuncRecords(cls);
+        var records = reader.getNumRFuncRecords(cls, null);
         for (var record : records) {
           Double x = Double.parseDouble(record.get(0));
           Double y = Double.parseDouble(record.get(1));
@@ -71,7 +71,7 @@ public class FunctionTests {
 
     for (var cls : numrFuncBaseClasses) {
       try {
-        var records = reader.getNumRFuncBaseRecords(cls);
+        var records = reader.getNumRFuncBaseRecords(cls, null);
         for (var record : records) {
           Double base = Double.parseDouble(record.get(0));
           Double x = Double.parseDouble(record.get(1));

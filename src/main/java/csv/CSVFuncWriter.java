@@ -19,16 +19,16 @@ public class CSVFuncWriter {
     this.testPath = testPath;
   }
 
-  public CSVPrinter getNumRFuncBasePrinter(Class<?> cls) throws IOException {
-    return getCSVPrinterDepOnHeader(cls, CSVFuncConfig.getBaseHeaders());
+  public CSVPrinter getNumRFuncBasePrinter(Class<?> cls, String suffix) throws IOException {
+    return getCSVPrinterDepOnHeader(cls, CSVFuncConfig.getBaseHeaders(), suffix);
   }
 
-  public CSVPrinter getNumRFuncPrinter(Class<?> cls) throws IOException {
-    return getCSVPrinterDepOnHeader(cls, CSVFuncConfig.getHeaders());
+  public CSVPrinter getNumRFuncPrinter(Class<?> cls, String suffix) throws IOException {
+    return getCSVPrinterDepOnHeader(cls, CSVFuncConfig.getHeaders(), suffix);
   }
 
-  private CSVPrinter getCSVPrinterDepOnHeader(Class<?> cls, String[] header) throws IOException {
-    Path filePath = CSVFuncConfig.getFilePath(testPath, cls);
+  private CSVPrinter getCSVPrinterDepOnHeader(Class<?> cls, String[] header, String suffix) throws IOException {
+    Path filePath = CSVFuncConfig.getFilePath(testPath, cls, suffix);
     PrintWriter writer = new PrintWriter(filePath.toString(), StandardCharsets.UTF_8);
     final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
         .setHeader(header)
