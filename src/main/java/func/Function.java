@@ -57,7 +57,7 @@ public class Function implements NumRFunc {
               - ((csc.calc(x) + Math.pow((csc.calc(x) * sec.calc(x)), 2)) - (sin.calc(x) / tan.calc(x)))))
               * ((Math.pow(
                   ((Math.pow(sin.calc(x), 3) + Math.pow(sin.calc(x), 3)) - ((cot.calc(x) - cot.calc(x)) * sin.calc(x))),
-                  3) - (sec.calc(x) / (csc.calc(x) - csc.calc(x)))) + sec.calc(x))));
+                  3) - (sec.calc(x) / (csc.calc(x)))) + sec.calc(x))));
     } else {
       result = (((((log.calc(3., x) - log.calc(2., x)) * log.calc(10., x))
           / ((log.calc(5., x) + log.calc(3., x)) - (log.calc(5., x) - log.calc(10., x))))

@@ -17,9 +17,9 @@ import csv.CSVFuncWriter;
 
 public class Main {
 
-  static final double leftBound = -4;
+  static final double leftBound = -2 * Math.PI;
   static final double rightBound = 4;
-  static final double interval = 0.04;
+  static final double interval = 0.01;
 
   public static Double trigFunc(Double x) {
     return Math.sin(x) / Math.cos(x);
@@ -35,8 +35,8 @@ public class Main {
     // trigGenTests();
     // lnTestGen();
     // logTestGen();
-    // funcTestGen();
-    mockDataGen();
+    funcGraphGen();
+    // mockDataGen();
   }
 
   public static void trigGenTests() {
@@ -189,9 +189,9 @@ public class Main {
     }
   }
 
-  public static void funcTestGen() {
+  public static void funcGraphGen() {
     var func = new Function(10, 1000);
-    var writer = new CSVFuncWriter("src/test/data/unit");
+    var writer = new CSVFuncWriter("src/test/data/graph");
 
     try (var printer = writer.getNumRFuncPrinter(Function.class)) {
       for (double i = leftBound; i < rightBound + interval; i += interval) {
@@ -201,7 +201,7 @@ public class Main {
       System.err.println(e.getMessage());
     }
 
-    CSVFuncReader reader = new CSVFuncReader("src/test/data/unit");
+    CSVFuncReader reader = new CSVFuncReader("src/test/data/graph");
     try {
       var records = reader.getNumRFuncRecords(Function.class);
       for (var record : records) {
