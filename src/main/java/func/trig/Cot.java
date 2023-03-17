@@ -15,6 +15,11 @@ public class Cot implements NumRFunc {
     this.sin = new Sin(lastTailor);
   }
 
+  public Cot(Cos cos, Sin sin) {
+    this.cos = cos;
+    this.sin = sin;
+  }
+
   @Override
   public Double calc(Double x) {
     return cos.calc(x) / sin.calc(x);

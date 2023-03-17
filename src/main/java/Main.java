@@ -30,14 +30,116 @@ public class Main {
   }
 
   public static void main(String[] argv) {
-    trigGenTests();
-    lnTestGen();
-    logTestGen();
-    funcGraphGen();
-    mockDataGen();
+    // funcGraphGen();
+    // mockDataGenWithInterval();
+    // trigTestGen();
+    // lnTestGen();
+    // logTestGen();
   }
 
-  public static void trigGenTests() {
+  /*
+   * Generate data for graph
+   */
+  public static void funcGraphGen() {
+    var func = new Function(10, 1000);
+    var writer = new CSVFuncWriter("src/test/data/graph");
+
+    try (var printer = writer.getNumRFuncPrinter(Function.class, "interval")) {
+      for (double i = leftBound; i < rightBound + interval; i += interval) {
+        printer.printRecord(i, func.calc(i));
+      }
+    } catch (IOException e) {
+      System.err.println(e.getMessage());
+    }
+
+    CSVFuncReader reader = new CSVFuncReader("src/test/data/graph");
+    try {
+      var records = reader.getNumRFuncRecords(Function.class, "interval");
+      for (var record : records) {
+        // System.out.println(record);
+      }
+    } catch (IOException e) {
+      System.err.println(e.getMessage());
+    }
+  }
+
+  /*
+   * Generate data for mock objects
+   */
+  public static void mockDataGenWithInterval() {
+    var numrfuns = new NumRFunc[] { new Cos(10), new Cot(10), new Csc(10),
+        new Sec(10), new Sin(10), new Tan(10), new Ln(1000) };
+
+    var numrfuncbases = new NumRFuncBase[] { new Log(1000) };
+    var bases = new Double[] { 2., 3., 5., 10. };
+
+    var writer = new CSVFuncWriter("src/test/data/mock");
+
+    // For NumRFuncs
+    for (var numrfunc : numrfuns) {
+      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass(), "interval")) {
+        for (double i = leftBound; i < rightBound + interval; i += interval) {
+          printer.printRecord(i, numrfunc.calc(i));
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+
+    // For NumRFuncBase
+    for (var numrfunc : numrfuncbases) {
+      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass(), "interval")) {
+        for (var base : bases) {
+          for (double i = leftBound; i < rightBound + interval; i += interval) {
+            printer.printRecord(base, i, numrfunc.calc(base, i));
+          }
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+  }
+
+  public static void mockInCriticalPoints() {
+    var numrfuns = new NumRFunc[] { new Cos(10), new Cot(10), new Csc(10),
+        new Sec(10), new Sin(10), new Tan(10), new Ln(1000) };
+
+    var numrfuncbases = new NumRFuncBase[] { new Log(1000) };
+    var bases = new Double[] { 2., 3., 5., 10. };
+
+    var writer = new CSVFuncWriter("src/test/data/mock");
+
+
+    // For NumRFuncs
+    for (var numrfunc : numrfuns) {
+      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass(), "critical")) {
+        for (double i = leftBound; i < rightBound + interval; i += interval) {
+          printer.printRecord(i, numrfunc.calc(i));
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+
+    // For NumRFuncBase
+    for (var numrfunc : numrfuncbases) {
+      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass(), "critical")) {
+        for (var base : bases) {
+          for (double i = leftBound; i < rightBound + interval; i += interval) {
+            printer.printRecord(base, i, numrfunc.calc(base, i));
+          }
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+
+  }
+
+  /*
+   * TESTS
+   */
+  public static void trigTestGen() {
     var writer = new CSVFuncWriter("src/test/data/unit");
 
     double[] bounds = new double[] { Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY };
@@ -185,66 +287,5 @@ public class Main {
     } catch (IOException e) {
       System.err.println(e.getMessage());
     }
-  }
-
-  public static void funcGraphGen() {
-    var func = new Function(10, 1000);
-    var writer = new CSVFuncWriter("src/test/data/graph");
-
-    try (var printer = writer.getNumRFuncPrinter(Function.class, null)) {
-      for (double i = leftBound; i < rightBound + interval; i += interval) {
-        printer.printRecord(i, func.calc(i));
-      }
-    } catch (IOException e) {
-      System.err.println(e.getMessage());
-    }
-
-    CSVFuncReader reader = new CSVFuncReader("src/test/data/graph");
-    try {
-      var records = reader.getNumRFuncRecords(Function.class, null);
-      for (var record : records) {
-        System.out.println(record);
-      }
-    } catch (IOException e) {
-      System.err.println(e.getMessage());
-    }
-  }
-
-  /*
-   * Generate data for mock objects
-   */
-  public static void mockDataGen() {
-    var numrfuns = new NumRFunc[] { new Cos(10), new Cot(10), new Csc(10),
-        new Sec(10), new Sin(10), new Tan(10), new Ln(1000) };
-
-    var numrfuncbases = new NumRFuncBase[] { new Log(1000) };
-    var bases = new Double[] { 2., 3., 5., 10. };
-
-    var writer = new CSVFuncWriter("src/test/data/mock");
-
-    // For NumRFuncs
-    for (var numrfunc : numrfuns) {
-      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass(), null)) {
-        for (double i = leftBound; i < rightBound + interval; i += interval) {
-          printer.printRecord(i, numrfunc.calc(i));
-        }
-      } catch (IOException e) {
-        System.err.println(e.getMessage());
-      }
-    }
-
-    // For NumRFuncBase
-    for (var numrfunc : numrfuncbases) {
-      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass(), null)) {
-        for (var base : bases) {
-          for (double i = leftBound; i < rightBound + interval; i += interval) {
-            printer.printRecord(base, i, numrfunc.calc(base, i));
-          }
-        }
-      } catch (IOException e) {
-        System.err.println(e.getMessage());
-      }
-    }
-
   }
 }

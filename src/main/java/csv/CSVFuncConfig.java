@@ -23,7 +23,7 @@ public class CSVFuncConfig {
     if (suffix == null) {
       return Paths.get(testPath, cls.getName() + ".csv");
     } else {
-      return Paths.get(testPath, cls.getName() + "." + suffix + ".csv");
+      return Paths.get(testPath, suffix + "-" + cls.getName() + ".csv");
     }
   }
 

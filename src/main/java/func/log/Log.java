@@ -13,6 +13,10 @@ public class Log implements NumRFuncBase {
     this.ln = new Ln(lastTailor);
   }
 
+  public Log(Ln ln) {
+    this.ln = ln;
+  }
+
   @Override
   public Double calc(Double base, Double x) {
     return ln.calc(x) / ln.calc(base);

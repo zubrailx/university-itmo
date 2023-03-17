@@ -13,6 +13,12 @@ public class Sin implements NumRFunc {
     this.cos = new Cos(lastTailor);
   }
 
+
+  public Sin(Cos cos) {
+    this.cos = cos;
+  }
+
+
   @Override
   public Double calc(Double x) {
     return cos.calc(Math.PI / 2 - x);

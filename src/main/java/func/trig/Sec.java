@@ -13,6 +13,11 @@ public class Sec implements NumRFunc {
     this.cos = new Cos(lastTailor);
   }
 
+  public Sec(Cos cos) {
+    this.cos = cos;
+  }
+
+
   @Override
   public Double calc(Double x) {
     return 1 / cos.calc(x);

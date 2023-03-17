@@ -15,6 +15,11 @@ public class Tan implements NumRFunc {
     this.sin = new Sin(lastTailor);
   }
 
+  public Tan(Cos cos, Sin sin) {
+    this.cos = cos;
+    this.sin = sin;
+  }
+
   @Override
   public Double calc(Double x) {
     return sin.calc(x) / cos.calc(x);

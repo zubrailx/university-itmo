@@ -13,6 +13,10 @@ public class Csc implements NumRFunc {
     this.sin = new Sin(lastLailor);
   }
 
+  public Csc(Sin sin) {
+    this.sin = sin;
+  }
+
   @Override
   public Double calc(Double x) {
     return 1 / sin.calc(x);

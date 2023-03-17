@@ -29,35 +29,39 @@ import func.trig.Tan;
  * FunctionTests
  */
 @TestInstance(Lifecycle.PER_CLASS)
-public class FunctionTests {
+public class FunctionIntervalTests {
 
-  int taylorN = 10;
-  int taylorLogN = 1000;
   double epsilon = 0.001;
-  Function function;
 
-  @BeforeAll
-  public void init() {
-    HashMap<Class<?>, Object> clsMocks = new HashMap<>();
+  int lnN = 10;
+  int trigN = 1000;
+  Class<?>[] numRFuncCls = { Ln.class, Cos.class, Cot.class, Csc.class, Sec.class, Sin.class, Tan.class };
+  Class<?>[] numRFuncBaseCls = { Log.class };
+  HashMap<Class<?>, Object> clsMocks;
+  HashMap<Class<?>, Object> clsModules; // inited modules
 
-    // Create mockito objects
-    var numrFuncClasses = new Class<?>[] { Ln.class, Cos.class, Cot.class, Csc.class, Sec.class, Sin.class, Tan.class };
-    var numrFuncBaseClasses = new Class<?>[] { Log.class };
+  private void initModules() {
+    clsModules.put(Ln.class, new Ln(lnN));
+    clsModules.put(Log.class, new Log(lnN));
+    clsModules.put(Cos.class, new Cos(trigN));
+    clsModules.put(Cot.class, new Cot(trigN));
+    clsModules.put(Csc.class, new Csc(trigN));
+    clsModules.put(Sec.class, new Sec(trigN));
+    clsModules.put(Sin.class, new Sin(trigN));
+    clsModules.put(Tan.class, new Tan(trigN));
+  }
 
-    // Put mockito objects
-    for (var n : numrFuncClasses) {
-      clsMocks.put(n, Mockito.mock(n));
-    }
-    for (var n : numrFuncBaseClasses) {
-      clsMocks.put(n, Mockito.mock(n));
+  private void initMocks(HashMap<Class<?>, Object> clsModules) {
+    for (var key : clsModules.keySet()) {
+      clsMocks.put(key.getClass(), Mockito.mock(key.getClass()));
     }
 
     CSVFuncReader reader = new CSVFuncReader("src/test/data/mock");
 
     // Read mockito data
-    for (var cls : numrFuncClasses) {
+    for (var cls : numRFuncCls) {
       try {
-        var records = reader.getNumRFuncRecords(cls, null);
+        var records = reader.getNumRFuncRecords(cls, "interval");
         for (var record : records) {
           Double x = Double.parseDouble(record.get(0));
           Double y = Double.parseDouble(record.get(1));
@@ -69,9 +73,9 @@ public class FunctionTests {
       }
     }
 
-    for (var cls : numrFuncBaseClasses) {
+    for (var cls : numRFuncBaseCls) {
       try {
-        var records = reader.getNumRFuncBaseRecords(cls, null);
+        var records = reader.getNumRFuncBaseRecords(cls, "interval");
         for (var record : records) {
           Double base = Double.parseDouble(record.get(0));
           Double x = Double.parseDouble(record.get(1));
@@ -83,9 +87,22 @@ public class FunctionTests {
         System.err.println(e.getMessage());
       }
     }
+  }
 
-    // Construct function that uses mockito objects
-    function = new Function(
+  @BeforeAll
+  public void init() {
+    clsModules = new HashMap<>();
+    initModules();
+
+    clsMocks = new HashMap<>();
+    initMocks(clsModules);
+
+  }
+
+  @ParameterizedTest
+  @CsvFileSource(files = "src/test/data/unit/func.Function.csv", numLinesToSkip = 1)
+  public void Calc_IntervalAllMocks_EqualsDouble(double x, double y) {
+    Function function = new Function(
         (Sin) clsMocks.get(Sin.class),
         (Tan) clsMocks.get(Tan.class),
         (Cot) clsMocks.get(Cot.class),
@@ -93,11 +110,6 @@ public class FunctionTests {
         (Sec) clsMocks.get(Sec.class),
         (Cos) clsMocks.get(Cos.class),
         (Log) clsMocks.get(Log.class));
-  }
-
-  @ParameterizedTest
-  @CsvFileSource(files = "src/test/data/unit/func.Function.csv", numLinesToSkip = 1)
-  public void Calc_Interval_EqualsDouble(double x, double y) {
     assertEquals(y, function.calc(x));
   }
 }
