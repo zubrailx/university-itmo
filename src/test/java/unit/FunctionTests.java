@@ -40,8 +40,8 @@ public class FunctionTests {
   final double TOP_BOUND = Math.pow(10, 20);
   final double LOWER_BOUND = - Math.pow(10, 20);
 
-  int lnN = 10;
-  int trigN = 1000;
+  int lnN = 1000;
+  int trigN = 10;
 
   Class<?>[] numRFuncCls = { Ln.class, Cos.class, Cot.class, Csc.class, Sec.class, Sin.class, Tan.class };
   Class<?>[] numRFuncBaseCls = { Log.class };
@@ -49,16 +49,12 @@ public class FunctionTests {
   // Modules
   HashMap<Class<?>, Object> clsModules;
   // Mocks
-  HashMap<Class<?>, Object> clsIntervalMocks;
   HashMap<Class<?>, Object> clsCriticalMocks;
 
   @BeforeAll
   public void init() {
     clsModules = new HashMap<>();
     initModules(clsModules);
-
-//    clsIntervalMocks = new HashMap<>();
-//    initIntervalMocks(clsIntervalMocks, clsModules);
 
     clsCriticalMocks = new HashMap<>();
     initCriticalMocks(clsCriticalMocks, clsModules);
@@ -73,44 +69,6 @@ public class FunctionTests {
     clsModules.put(Sec.class, new Sec(trigN));
     clsModules.put(Sin.class, new Sin(trigN));
     clsModules.put(Tan.class, new Tan(trigN));
-  }
-
-  private void initIntervalMocks(HashMap<Class<?>, Object> clsMocks, HashMap<Class<?>, Object> clsModules) {
-    for (var key : clsModules.keySet()) {
-      clsMocks.put(key, Mockito.mock(key));
-    }
-
-    CSVFuncReader reader = new CSVFuncReader("src/test/data/mock/interval");
-
-    // Read mockito data
-    for (var cls : numRFuncCls) {
-      try {
-        var records = reader.getNumRFuncRecords(cls, null);
-        for (var record : records) {
-          Double x = Double.parseDouble(record.get(0));
-          Double y = Double.parseDouble(record.get(1));
-          Mockito.when(((NumRFunc) clsMocks.get(cls)).calc(x)).thenReturn(y);
-        }
-
-      } catch (IOException e) {
-        System.err.println(e.getMessage());
-      }
-    }
-
-    for (var cls : numRFuncBaseCls) {
-      try {
-        var records = reader.getNumRFuncBaseRecords(cls, null);
-        for (var record : records) {
-          Double base = Double.parseDouble(record.get(0));
-          Double x = Double.parseDouble(record.get(1));
-          Double y = Double.parseDouble(record.get(2));
-          Mockito.when(((NumRFuncBase) clsMocks.get(cls)).calc(base, x)).thenReturn(y);
-        }
-
-      } catch (IOException e) {
-        System.err.println(e.getMessage());
-      }
-    }
   }
 
   private void initCriticalMocks(HashMap<Class<?>, Object> clsMocks, HashMap<Class<?>, Object> clsModules) {
@@ -148,23 +106,6 @@ public class FunctionTests {
         System.err.println(e.getMessage());
       }
     }
-  }
-
-  /* Interval */
-  @ParameterizedTest
-  @Disabled
-  @CsvFileSource(files = "src/test/data/unit/interval/func.Function.csv", numLinesToSkip = 1)
-  public void Calc_IntervalAllMocks_EqualsDouble(double x, double y) {
-    Function function = new Function(
-        (Sin) clsIntervalMocks.get(Sin.class),
-        (Tan) clsIntervalMocks.get(Tan.class),
-        (Cot) clsIntervalMocks.get(Cot.class),
-        (Csc) clsIntervalMocks.get(Csc.class),
-        (Sec) clsIntervalMocks.get(Sec.class),
-        (Cos) clsIntervalMocks.get(Cos.class),
-        (Log) clsIntervalMocks.get(Log.class));
-
-    assertEquals(y, function.calc(x));
   }
 
   /* Critical */

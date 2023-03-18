@@ -28,8 +28,8 @@ public class FunctionTests {
   final double TOP_BOUND = Math.pow(10, 20);
   final double LOWER_BOUND = -Math.pow(10, 20);
 
-  int lnN = 10;
-  int trigN = 1000;
+  int lnN = 1000;
+  int trigN = 10;
 
   Function function;
 
