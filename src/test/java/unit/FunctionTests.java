@@ -1,5 +1,9 @@
 package unit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -10,7 +14,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
 import csv.CSVFuncReader;
@@ -25,8 +28,6 @@ import func.trig.Csc;
 import func.trig.Sec;
 import func.trig.Sin;
 import func.trig.Tan;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * FunctionTests
