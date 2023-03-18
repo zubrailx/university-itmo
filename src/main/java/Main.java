@@ -17,7 +17,7 @@ import csv.CSVFuncWriter;
 
 public class Main {
 
-  static final double leftBound = -2 * Math.PI;
+  static final double leftBound = -6.29; // slightly above 2PI
   static final double rightBound = 4;
   static final double interval = 0.01;
 
@@ -30,11 +30,32 @@ public class Main {
   }
 
   public static void main(String[] argv) {
+    getCriticalPoints();
     // funcGraphGen();
     // mockDataGenWithInterval();
     // trigTestGen();
     // lnTestGen();
     // logTestGen();
+  }
+
+  public static void getCriticalPoints() {
+    // Function
+    var writer = new CSVFuncWriter("src/test/data/unit");
+
+    var xs = new Double[]{
+      -2 * Math.PI,
+    };
+    var ys = new Double[]{
+      Double.NaN,
+    };
+
+    try (var printer = writer.getNumRFuncPrinter(Function.class, "critical")) {
+      for (int i = 0; i < xs.length; ++i) {
+        printer.printRecord(xs[i], ys[i]);
+      }
+    } catch (IOException e) {
+      System.err.println(e.getMessage());
+    }
   }
 
   /*
@@ -98,42 +119,6 @@ public class Main {
         System.err.println(e.getMessage());
       }
     }
-  }
-
-  public static void mockInCriticalPoints() {
-    var numrfuns = new NumRFunc[] { new Cos(10), new Cot(10), new Csc(10),
-        new Sec(10), new Sin(10), new Tan(10), new Ln(1000) };
-
-    var numrfuncbases = new NumRFuncBase[] { new Log(1000) };
-    var bases = new Double[] { 2., 3., 5., 10. };
-
-    var writer = new CSVFuncWriter("src/test/data/mock");
-
-
-    // For NumRFuncs
-    for (var numrfunc : numrfuns) {
-      try (var printer = writer.getNumRFuncPrinter(numrfunc.getClass(), "critical")) {
-        for (double i = leftBound; i < rightBound + interval; i += interval) {
-          printer.printRecord(i, numrfunc.calc(i));
-        }
-      } catch (IOException e) {
-        System.err.println(e.getMessage());
-      }
-    }
-
-    // For NumRFuncBase
-    for (var numrfunc : numrfuncbases) {
-      try (var printer = writer.getNumRFuncBasePrinter(numrfunc.getClass(), "critical")) {
-        for (var base : bases) {
-          for (double i = leftBound; i < rightBound + interval; i += interval) {
-            printer.printRecord(base, i, numrfunc.calc(base, i));
-          }
-        }
-      } catch (IOException e) {
-        System.err.println(e.getMessage());
-      }
-    }
-
   }
 
   /*
