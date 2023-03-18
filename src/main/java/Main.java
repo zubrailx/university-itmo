@@ -30,7 +30,8 @@ public class Main {
   }
 
   public static void main(String[] argv) {
-    getCriticalPoints();
+    // getCriticalPoints();
+    getOtherCriticalPoints();
     // getCriticalLogPoints();
     // funcGraphGen();
     // mockDataGenWithInterval();
@@ -66,12 +67,12 @@ public class Main {
     };
 
     var xOthers = new Double[] {
-      0.2,
-      0.5,
-      1.,
-      3.,
-      10.,
-      40.
+        0.2,
+        0.5,
+        1.,
+        3.,
+        10.,
+        40.
     };
 
     var xPers = new Double[] {
@@ -103,11 +104,11 @@ public class Main {
 
     try (var printer = writer.getNumRFuncPrinter(Function.class, "add")) {
       // for (var x : xNaNs) {
-      //   printer.printRecord(x, func.calc(x)); // can be NaN
+      // printer.printRecord(x, func.calc(x)); // can be NaN
       // }
 
       // for (var x : xExtrs) {
-      //   printer.printRecord(x, func.calc(x));
+      // printer.printRecord(x, func.calc(x));
       // }
 
       for (var x : xOthers) {
@@ -115,9 +116,9 @@ public class Main {
       }
 
       // for (var period : periods) {
-      //   for (var x : xPers) {
-      //     printer.printRecord(x + period, func.calc(x + period));
-      //   }
+      // for (var x : xPers) {
+      // printer.printRecord(x + period, func.calc(x + period));
+      // }
       // }
     } catch (IOException e) {
       System.err.println(e.getMessage());
@@ -153,31 +154,31 @@ public class Main {
     var writer = new CSVFuncWriter("src/test/data/mock/critical");
 
     var xNaNs = new Double[] {
-      -1000.,
-      -1.,
-      0.,
-      0.2,
-      0.5,
-      1.,
-      3.,
-      10.,
-      40.
+        -1000.,
+        -1.,
+        0.,
+        0.2,
+        0.5,
+        1.,
+        3.,
+        10.,
+        40.
     };
 
     var bases = new Double[] {
-      2.,
-      3.,
-      5.,
-      10.,
+        2.,
+        3.,
+        5.,
+        10.,
     };
 
     Ln func = new Ln(1000);
 
-    try (var printer = writer.getNumRFuncPrinter(Ln.class, null)) {
+    try (var printer = writer.getNumRFuncPrinter(Ln.class, "additional")) {
       // for (var base: bases) {
-        for (var x : xNaNs) {
-          printer.printRecord(x, func.calc(x));
-        }
+      for (var x : xNaNs) {
+        printer.printRecord(x, func.calc(x));
+      }
       // }
     } catch (IOException e) {
       System.err.println(e.getMessage());
@@ -207,6 +208,31 @@ public class Main {
     // } catch (IOException e) {
     // System.err.println(e.getMessage());
     // }
+  }
+
+  public static void getOtherCriticalPoints() {
+
+    var objects = new NumRFunc[] {
+        new Cos(10),
+        new Sin(10)
+    };
+
+    var xNaNs = new Double[] {
+        -0.38539816339744826
+    };
+
+    var writer = new CSVFuncWriter("src/test/data/mock/additional");
+
+    for (var function : objects) {
+      try (var printer = writer.getNumRFuncPrinter(function.getClass(), null)) {
+        for (var x : xNaNs) {
+          printer.printRecord(x, function.calc(x));
+        }
+      } catch (IOException e) {
+        System.err.println(e.getMessage());
+      }
+    }
+
   }
 
   /*
