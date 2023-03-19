@@ -27,12 +27,14 @@ module counter_tb;
 
         for(i = 0; i < 32; i = i + 1) begin
             $display ("Current loop#%0d ", i);
-            if (i == 16)
+            if (i == 16) begin
                 #5 rst = 1;
                 #5 rst = 0;
+            end
 
-            if (i == 30)
+            if (i == 30) begin
                 #5 en = 0;
+            end
 
             #5 clk = 1;
             #5 clk = 0;
