@@ -5,9 +5,7 @@ module shift_right_tb;
     reg clk;
     reg en;
     reg rst;
- 
     reg[31:0] x;
-    wire[31:0] y;
     wire carry;
  
     shift_right shr (
@@ -15,42 +13,55 @@ module shift_right_tb;
         .en(en),
         .rst(rst),
         .in(x),
-        .out(y),
         .carry(carry)
     );
  
- 
     integer i;
-    reg[31:0] actual = 65536;
+    reg [31:0] value = 65536; // on iter 16 should be 1
+    reg expected;
     initial begin
-        en = 1;
-        x = actual;
-        for(i = 0; i < 32; i = i + 1) begin
+        x = value;
+        
+        rst = 0;
+        en = 0; // load value     
+        clk = 1;
+        #5;
+        clk = 0;
+        #5;
+         
+        en = 1; // start shifting
+        for (i = 0; i < 32; i = i + 1) begin
             $display ("Current loop#%0d ", i);
-            if (i == 16)
-               en = 0;
-               #5
- 
-            if (i == 30)
+            
+            expected = value % 2;
+            
+            if (i == 20) begin
+                en = 0;
+                #5;
+            end
+            
+            if (i == 30) begin
                 rst = 1;
-                #5
+                #5;
                 rst = 0;
-                #5
- 
+                #5;
+            end
+            
             clk = 1;
             #5
             clk = 0;
-            #5
+            #5;
+             
+            if (i < 20) value = value / 2;
+            else if (i >= 30) value = 0;
  
-            if (i < 16) actual = actual / 2;
-            else if (i >= 30) actual = 0;
- 
-            if (actual == y) begin
-                $display("Correct! y=%b", y);
+            if (expected == carry) begin
+                $display("Correct! y=%b", carry);
             end else begin
-                $display("Incorrect! expected=%b, actual=%b", y, actual);
+                $display("Incorrect! expected=%b, actual=%b", expected, carry);
             end
+
         end
-    #10 $stop;
+        #10 $stop;
     end
 endmodule

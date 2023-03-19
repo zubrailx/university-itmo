@@ -1,25 +1,22 @@
 `timescale 1ns / 1ps
  
-module shift_right (
-    input clk,        
-    input en,         
-    input rst,         
-    input wire[31:0] in,  
-    output reg[31:0] out,
-    output reg carry
-    );
+module shift_right
+    #(parameter width = 32)
+   (input                  clk,
+    input                  en,
+    input                  rst,
+    input      [width-1:0] in,
+    output reg             carry);
+    
+    reg [width-1:0] data;
  
-    always @(in) begin
-        out = in;
-    end 
- 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            out = 0;
-        end else if (en) begin
-            carry = out[31];
-            out = out[31:1]; 
-        end
+    always @(posedge clk, posedge rst) begin
+        if (rst) data <= 0;
+        else if (en) begin
+            data <= {1'b0, data[width-1:1]};
+            carry <= data[0];
+        end // if not enabled than read input
+        else data <= in;
     end
- 
+    
 endmodule
