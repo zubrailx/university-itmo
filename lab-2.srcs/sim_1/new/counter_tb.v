@@ -5,24 +5,28 @@ module counter_tb;
     reg clk;
     reg en;
     reg rst;
- 
-    reg[31:0] x;
     wire[31:0] y;
  
     counter cnt(
         .clk(clk),
         .en(en),
         .rst(rst),
-        .in(x),
         .out(y)
     );
  
  
     integer i;
-    reg[31:0] actual;
+    reg[31:0] expected;
     initial begin
+        // reset counter before the start
+        rst = 1;
+        #5
+        rst = 0;
+        #5
+        
+        // start counting
         en = 1;
-        x = 0;
+        
         for(i = 0; i < 32; i = i + 1) begin
             $display ("Current loop#%0d ", i);
             if (i == 16)
@@ -41,14 +45,14 @@ module counter_tb;
             clk = 0;
             #5
  
-            if (i == 15) actual = 16;
-            else if (i < 30) actual = (i + 1) % 16;
-            else actual = 14;
+            if (i == 15) expected = 16;
+            else if (i < 30) expected = (i + 1) % 16;
+            else expected = 14;
  
-            if (actual == y) begin
+            if (expected === y) begin
                 $display("Correct! y=%b", y);
             end else begin
-                $display("Incorrect! expected=%b, actual=%b", y, actual);
+                $display("Incorrect! expected=%b, actual=%b", expected, y);
             end
         end
     #10 $stop;

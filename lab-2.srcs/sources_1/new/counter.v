@@ -1,18 +1,13 @@
 `timescale 1ns / 10ps
  
-module counter(
-    input clk,
-    input en,
-    input rst,
-    input wire[31:0] in,
-    output reg[31:0] out
-    );
+module counter
+    #(parameter width = 32)
+   (input                 clk,
+    input                 en,
+    input                 rst,
+    output reg[width-1:0] out);
  
-    always @(in) begin
-        out = in;
-    end 
- 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk, posedge rst) begin
         if (rst) begin
             out <= 0;
         end else if (en) begin
