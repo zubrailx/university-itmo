@@ -23,6 +23,8 @@ git pull -s subtree $REMOTE_NAME $REMOTE_BRANCH
 
 git checkout $PREV_BRANCH
 
+echo "------------------"
 echo "Manually rebase:"
 echo "git rebase merge-$REMOTE_NAME"
 echo "git branch -D merge-$REMOTE_NAME"
+echo "git remote remove $REMOTE_NAME"
