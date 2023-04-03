@@ -98,7 +98,7 @@ module FSM_4_tb;
         else
             $display("[T=%0t] Tests failed.", $realtime);
         
-        #10 $finish;
+            #10 $finish;
     end
     
 

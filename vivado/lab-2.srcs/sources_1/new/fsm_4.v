@@ -92,13 +92,16 @@ module FSM_4 // moore state machine
         else begin
             case (state)
                 S0: begin
-                    reg1 <= a;
-                    reg2 <= b;
-                    // reset counter and disable it
-                    cnt_rst <= 1;
-                    cnt_en <= 0;
-                    // update state
-                    state <= S1;  
+                    // if fsm is resetted then continue execution
+                    if (!rdy) begin
+                        // reset counter and disable it
+                        cnt_rst <= 1;
+                        cnt_en <= 0;
+                        // update state
+                        state <= S1;  
+                        reg1 <= a;
+                        reg2 <= b;
+                    end
                 end
                 S1: begin
                     
