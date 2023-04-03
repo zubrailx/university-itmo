@@ -14,7 +14,7 @@ module counter_tb;
         .out(out)
     );
 
-    always # 10 clk = ~clk;
+    always #10 clk = ~clk;
 
     reg [31:0] tb_out;
     integer i;
@@ -35,6 +35,7 @@ module counter_tb;
     
     initial begin
         clk <= 0;
+        en <= 0;
         rst <= 0;
         
         repeat (5) @(posedge clk)

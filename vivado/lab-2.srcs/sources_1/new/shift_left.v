@@ -7,19 +7,17 @@ module shift_left
     input                  rst,
     input                  l,
     input      [width-1:0] in,
-    output                 out);
+    output reg             out); // carry flag
     
     reg [width-1:0] data;
  
     always @(posedge clk, posedge rst) begin
-        if (rst) data <= 0;
-        else if (l)
+        if (rst) {out, data} <= 0;
+        else if (l) begin
             data <= in;
-        else if (en)
-            {data[width-1:1]} <= {data[width-2:0], 1'b0};
+        end else if (en)
+            {out, data[width-1:0]} <= {data[width-1:0], 1'b0};
+        else out <= 0;
     end
-    
-    
-    assign out = en ? data[width-1] : 1'b0;
     
 endmodule
