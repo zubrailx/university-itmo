@@ -5,18 +5,21 @@ module shift_left
    (input                  clk,
     input                  en,
     input                  rst,
+    input                  l,
     input      [width-1:0] in,
-    output reg             carry);
+    output                 out);
     
     reg [width-1:0] data;
  
     always @(posedge clk, posedge rst) begin
         if (rst) data <= 0;
-        else if (en) begin
-            data <= {data[width-1:1],1'b0};
-            carry <= data[width-1];
-        end // if not enabled than read input
-        else data <= in;
+        else if (l)
+            data <= in;
+        else if (en)
+            {data[width-1:1]} <= {data[width-2:0], 1'b0};
     end
+    
+    
+    assign out = en ? data[width-1] : 1'b0;
     
 endmodule
