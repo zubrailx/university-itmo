@@ -5,18 +5,19 @@ module shift_right
    (input                  clk,
     input                  en,
     input                  rst,
+    input                  l,
     input      [width-1:0] in,
-    output reg             carry);
+    output reg             out); // carry flag
     
     reg [width-1:0] data;
  
     always @(posedge clk, posedge rst) begin
-        if (rst) data <= 0;
-        else if (en) begin
-            data <= {1'b0, data[width-1:1]};
-            carry <= data[0];
-        end // if not enabled than read input
-        else data <= in;
+        if (rst) {out, data} <= 0;
+        else if (l) begin
+            data <= in;
+        end else if (en)
+            {data[width-1:0], out} <= {1'b0, data[width-1:0]};
+        else out <= 0;
     end
     
 endmodule
