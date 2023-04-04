@@ -14,13 +14,12 @@ module counter_tb;
         .out(out)
     );
 
-    always #10 clk = ~clk;
-
     reg [31:0] tb_out;
-    integer i;
+
     reg passed = 1'b1;
-    
     integer test_calls = 0;
+    
+    integer i;
     
     task test;
         begin
@@ -31,7 +30,8 @@ module counter_tb;
             end
         end
     endtask
-    
+        
+    always #10 clk = ~clk;
     
     initial begin
         clk <= 0;

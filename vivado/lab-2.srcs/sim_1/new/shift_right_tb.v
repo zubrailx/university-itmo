@@ -18,14 +18,14 @@ module shift_right_tb;
         .out(out)
     );
     
-    always #10 clk = ~clk;
-    
     reg tb_out;
     integer i;
     
     reg passed = 1'b1;
-    
     integer test_calls = 0;
+      
+    reg [31:0] test_in1 = 32'hFF0FFAFF;
+    reg [31:0] test_tmp;
     
     task test;
         begin
@@ -36,9 +36,8 @@ module shift_right_tb;
             end
         end
     endtask
-    
-    reg [31:0] test_in1 = 32'hFF0FFAFF;
-    reg [31:0] test_tmp;
+         
+    always #10 clk = ~clk;
     
     initial begin
         clk <= 0;

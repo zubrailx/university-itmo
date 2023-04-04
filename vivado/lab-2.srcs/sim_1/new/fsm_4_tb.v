@@ -17,14 +17,13 @@ module FSM_4_tb;
         .out(out),
         .rdy(rdy)
     );
-        
-    always #10 clk = ~clk;
     
     reg[31:0] tb_out;
     reg       tb_rdy;
     
     reg passed = 1'b1;
     integer test_calls = 0;
+    
     
     task test;
         begin
@@ -45,6 +44,8 @@ module FSM_4_tb;
             res = ((a + b)*4 + b)/2 + (b/2 + a*4);
         end
     endtask
+            
+    always #10 clk = ~clk;
     
     initial begin
     
