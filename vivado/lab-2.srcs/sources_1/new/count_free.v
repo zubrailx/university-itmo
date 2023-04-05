@@ -64,9 +64,9 @@ module count_free
         S_READ = 3'b10,
         S_RUN = 3'b11;
     
-    wire fd_out;
-    
     reg [2:0] state;
+    
+    wire fd_out;
     
     freq_div fd(
         .clk(clk),
