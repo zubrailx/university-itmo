@@ -33,7 +33,7 @@ module buffer_lru
             o_bufs <= 0;
             
             for (i = 0; i < BUF_SIZE; i = i + 1) begin
-                cnt_data[i] = ~i;
+                cnt_data[i] <= ~i;
             end
         end else begin
             if (cnt_en) begin
