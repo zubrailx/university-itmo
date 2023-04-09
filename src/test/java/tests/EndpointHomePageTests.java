@@ -68,8 +68,6 @@ public class EndpointHomePageTests {
     selDriver.tear();
   }
 
-  // NOTE: firefox doesn't pass often, because it's driver writes wrong value in text input
-  // so -> no such element
   @ParameterizedTest
   @MethodSource("helpers.DriverSources#provideDrivers")
   public void createAndDeletePost_WithURLAndPostContentChecks(SeleniumDriver selDriver) {

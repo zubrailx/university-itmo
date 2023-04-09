@@ -83,8 +83,12 @@ public class HomePage extends XingPage {
             .pollingEvery(Duration.of(1000, ChronoUnit.MILLIS));
 
     var element = wait.until(ExpectedConditions.elementToBeClickable(postTextbox));
-    element.sendKeys(Keys.BACK_SPACE);
-    element.sendKeys(data);
+
+    // send char by char to fix result for firefox webdriver
+    for (var key : data.toCharArray()) {
+      element.sendKeys(String.valueOf(key));
+    }
+
     return this;
   }
 

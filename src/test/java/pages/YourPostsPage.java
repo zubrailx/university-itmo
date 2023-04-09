@@ -13,6 +13,8 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
+
 public class YourPostsPage extends XingPage {
 
   @FindBy(xpath = "//button[@data-qa='dot-menu-item-delete']")
@@ -56,6 +58,11 @@ public class YourPostsPage extends XingPage {
   }
 
   public HomePage clickHomeLink() {
+    // wait until fading dialog disappear
+    (new WebDriverWait(driver, Duration.ofSeconds(1)))
+            .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//div[contains(@class, " +
+                    "'dialogFade-exit-active')]")));
+    // click home button
     (new WebDriverWait(driver, getWaitTimeout()))
             .until(ExpectedConditions.elementToBeClickable(homeLink)).click();
     return new HomePage(driver, true);
