@@ -32,6 +32,7 @@ public class SeleniumFirefoxDriver extends SeleniumDriver {
   @Override
   public void tear() {
     driver.close();
+    driver.quit();
   }
 
 }
