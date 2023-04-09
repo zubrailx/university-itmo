@@ -18,4 +18,8 @@ abstract public class Page {
   protected final void driverGet(PageUrl pageUrl) {
     driver.get(pageUrl.getUrl());
   }
+
+  public final String driverGetUrl() {
+    return driver.getCurrentUrl();
+  }
 }

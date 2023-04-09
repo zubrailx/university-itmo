@@ -2,6 +2,7 @@ package helpers;
 
 public enum PageUrl {
   MAIN("https://www.xing.com/"),
+  MAIN_EN("https://www.xing.com/en"),
   LANGUAGE("https://www.xing.com/language");
 
   private final String url;
