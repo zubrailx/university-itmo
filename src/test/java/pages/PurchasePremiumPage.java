@@ -1,9 +1,5 @@
 package pages;
 
-/**
- * YouPage
- */
-import helpers.PageUrl;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -11,21 +7,23 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class YouPage extends XingPage {
+import helpers.PageUrl;
 
-  @FindBy(xpath = "//a[contains(@href, 'your-posts')]")
-  private WebElement yourPostLink;
+public class PurchasePremiumPage extends XingPage {
 
-  public YouPage(WebDriver driver, boolean wasRedir) {
+  @FindBy(xpath = "//a[@href='/' and @data-qa='logo']")
+  private WebElement homeLink;
+
+  public PurchasePremiumPage(WebDriver driver, boolean wasRedir) {
     super(driver);
     if (!wasRedir)
-      driverGet(PageUrl.YOU_PAGE);
+      driverGet(PageUrl.PURCHASE_PREMIUM_PAGE);
     PageFactory.initElements(driver, this);
   }
 
-  public YourPostsPage clickYourPostLink() {
+  public HomePage clickHomeLink() {
     (new WebDriverWait(driver, getWaitTimeout()))
-                .until(ExpectedConditions.elementToBeClickable(yourPostLink)).click();
-    return new YourPostsPage(driver, true);
+        .until(ExpectedConditions.elementToBeClickable(homeLink)).click();
+    return new HomePage(driver, true);
   }
 }

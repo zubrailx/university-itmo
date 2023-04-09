@@ -19,6 +19,27 @@ public class HomePage extends XingPage {
   @FindBy(xpath = "//a[@href='/' and @data-qa='logo']")
   private WebElement homeLink;
 
+  @FindBy(xpath = "//a[contains(@href, '/chats')]")
+  private WebElement messagesLink;
+
+  @FindBy(xpath = "//a[contains(@href, 'you')]")
+  private WebElement youLink;
+
+  @FindBy(xpath = "//a[contains(@href, '/jobs')]")
+  private WebElement jobsLink;
+
+  @FindBy(xpath = "//li/a[contains(@href, '/premium')]")
+  private WebElement premiumLink;
+
+  @FindBy(xpath = "//li/a[contains(@href, '/network')]")
+  private WebElement networkLink;
+
+  @FindBy(xpath = "//li/a[contains(@href, '/news')]")
+  private WebElement newsLink;
+
+  @FindBy(xpath = "//li/a[contains(@href, '/companies')]")
+  private WebElement companies;
+
   @FindBy(xpath = "//button[@data-testid='default-commbox-entry-point']")
   private WebElement postBtn;
 
@@ -37,8 +58,6 @@ public class HomePage extends XingPage {
   @FindBy(xpath = "//button[@data-testid='commboxPost']")
   private WebElement sendPostBtn;
 
-  @FindBy(xpath = "//a[contains(@href, 'you')]")
-  private WebElement youLink;
 
   public HomePage(WebDriver driver, boolean wasRedir) {
     super(driver);
@@ -84,10 +103,17 @@ public class HomePage extends XingPage {
     return new HomePage(driver, true);
   }
 
+  // Links (Can be managed into separate component)
   public HomePage clickHomeLink() {
     (new WebDriverWait(driver, getWaitTimeout()))
             .until(ExpectedConditions.elementToBeClickable(homeLink)).click();
     return new HomePage(driver, true);
+  }
+
+  public MessagesPage clickMessagesLink() {
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(messagesLink)).click();
+    return new MessagesPage(driver, true);
   }
 
   public YouPage clickYouLink() {

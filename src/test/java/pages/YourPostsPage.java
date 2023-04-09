@@ -56,7 +56,8 @@ public class YourPostsPage extends XingPage {
   }
 
   public HomePage clickHomeLink() {
-    homeLink.click();
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(homeLink)).click();
     return new HomePage(driver, true);
   }
 
