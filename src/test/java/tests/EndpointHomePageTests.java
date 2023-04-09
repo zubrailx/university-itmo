@@ -1,10 +1,7 @@
 package tests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import helpers.StringModifier;
-import helpers.WaitHelpers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,9 +13,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import core.SeleniumDriver;
 import helpers.Credentials;
 import helpers.PageUrl;
+import helpers.StringModifier;
+import helpers.WaitHelpers;
 import pages.HomePage;
 import pages.MainPage;
-import pages.YourPostsPage;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EndpointHomePageTests {
@@ -59,6 +57,7 @@ public class EndpointHomePageTests {
         .acceptCookiesIfClickable()
         .clickLoginBtn()
         .authenticate(credentials.getLogin(), credentials.getPassword())
+        .getHomeLogoComponent()
         .clickHomeLink();
 
     assertTrue(

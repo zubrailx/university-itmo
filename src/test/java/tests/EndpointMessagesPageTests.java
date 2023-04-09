@@ -12,7 +12,6 @@ import helpers.Credentials;
 import helpers.PageUrl;
 import helpers.WaitHelpers;
 import pages.LoginPage;
-import pages.MessagesPage;
 
 /**
  * EndpointCompaniesPageTests

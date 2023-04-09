@@ -1,8 +1,9 @@
 package pages;
 
-import helpers.PageUrl;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -11,13 +12,12 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import components.HomeLogoComponent;
+import helpers.PageUrl;
 
 public class HomePage extends XingPage {
 
-  @FindBy(xpath = "//a[@href='/' and @data-qa='logo']")
-  private WebElement homeLink;
+  private HomeLogoComponent homeLogoComponent;
 
   @FindBy(xpath = "//a[contains(@href, '/chats')]")
   private WebElement messagesLink;
@@ -64,6 +64,12 @@ public class HomePage extends XingPage {
     if (!wasRedir)
       driverGet(PageUrl.HOME_PAGE);
     PageFactory.initElements(driver, this);
+
+    homeLogoComponent = new HomeLogoComponent(driver);
+  }
+
+  public HomeLogoComponent getHomeLogoComponent() {
+    return homeLogoComponent;
   }
 
   public HomePage openPost() {
@@ -108,12 +114,6 @@ public class HomePage extends XingPage {
   }
 
   // Links (Can be managed in separate component)
-  public HomePage clickHomeLink() {
-    (new WebDriverWait(driver, getWaitTimeout()))
-            .until(ExpectedConditions.elementToBeClickable(homeLink)).click();
-    return new HomePage(driver, true);
-  }
-
   public MessagesPage clickMessagesLink() {
     (new WebDriverWait(driver, getWaitTimeout()))
             .until(ExpectedConditions.elementToBeClickable(messagesLink)).click();
