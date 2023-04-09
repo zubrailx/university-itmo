@@ -12,3 +12,6 @@ bin
 .project
 
 .~lock*
+
+# Credentials
+credentials.properties

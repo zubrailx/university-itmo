@@ -2,7 +2,6 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import helpers.PageUrl;
@@ -10,7 +9,7 @@ import helpers.PageUrl;
 /**
  * LanguagePage
  */
-public class LanguagePage extends Page {
+public class LanguagePage extends XingPage {
 
   public enum Language {
     GERMAN("de", "Deutsch"),
@@ -53,4 +52,8 @@ public class LanguagePage extends Page {
     return new MainPage(driver, true);
   }
   
+  @Override
+  public LanguagePage acceptCookiesIfClickable() {
+    return (LanguagePage) super.acceptCookiesIfClickable();
+  }
 }

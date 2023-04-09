@@ -15,13 +15,13 @@ import helpers.PageUrl;
 /**
  * MainPage
  */
-public class MainPage extends Page {
-
-  @FindBy(xpath = "//div/descendant::div[contains(@class, 'cookie')]/button[2 and contains(@id, 'accept')]")
-  private WebElement cookiePopup;
+public class MainPage extends XingPage {
 
   @FindBy(xpath = "//child::*[contains(@href, 'language')]")
   private WebElement languageBtn;
+
+  @FindBy(xpath = "//a[contains(@href, 'login')]")
+  private WebElement loginBtn;
 
   String xpathInputContainer = "//form/div[contains(@class, 'Filter')]/descendant::";
 
@@ -64,12 +64,6 @@ public class MainPage extends Page {
     return this;
   }
 
-  public MainPage acceptCookiesIfClickable() {
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    wait.until(ExpectedConditions.elementToBeClickable(cookiePopup)).click();
-    return this;
-  }
-
   public MainPage clickJobsSearch(JobCheckbox name) {
     String xpath = String.format(xpathInputContainer + "input[@name='%s']", name.getName());
     driver.findElement(By.xpath(xpath)).click();
@@ -85,6 +79,16 @@ public class MainPage extends Page {
   public LanguagePage clickLanguageBtn() {
     languageBtn.click();
     return new LanguagePage(driver, true);
+  }
+
+  public LoginPage clickLoginBtn() {
+    loginBtn.click();
+    return new LoginPage(driver, true);
+  }
+
+  @Override
+  public MainPage acceptCookiesIfClickable() {
+    return (MainPage) super.acceptCookiesIfClickable();
   }
 
 }
