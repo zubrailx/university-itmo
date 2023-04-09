@@ -83,8 +83,8 @@ public class EndpointHomePageTests {
             .clickLoginBtn()
             .authenticate(credentials.getLogin(), credentials.getPassword())
             .openPost()
-            .writeToOpenedPost(postContent)
             .setPostPrivate()
+            .writeToOpenedPost(postContent)
             .sendPost();
 
     // validate that got redirected to home page

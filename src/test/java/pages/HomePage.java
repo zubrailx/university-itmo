@@ -38,7 +38,7 @@ public class HomePage extends XingPage {
   private WebElement newsLink;
 
   @FindBy(xpath = "//li/a[contains(@href, '/companies')]")
-  private WebElement companies;
+  private WebElement companiesLink;
 
   @FindBy(xpath = "//button[@data-testid='default-commbox-entry-point']")
   private WebElement postBtn;
@@ -103,7 +103,7 @@ public class HomePage extends XingPage {
     return new HomePage(driver, true);
   }
 
-  // Links (Can be managed into separate component)
+  // Links (Can be managed in separate component)
   public HomePage clickHomeLink() {
     (new WebDriverWait(driver, getWaitTimeout()))
             .until(ExpectedConditions.elementToBeClickable(homeLink)).click();
@@ -120,6 +120,36 @@ public class HomePage extends XingPage {
     (new WebDriverWait(driver, getWaitTimeout()))
             .until(ExpectedConditions.elementToBeClickable(youLink)).click();
     return new YouPage(driver, true);
+  }
+
+  public JobsPage clickJobsLink() {
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(jobsLink)).click();
+    return new JobsPage(driver, true);
+  }
+
+  public PremiumPage clickPremiumLink() {
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(premiumLink)).click();
+    return new PremiumPage(driver, true);
+  }
+
+  public NetworkPage clickNetworkLink() {
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(networkLink)).click();
+    return new NetworkPage(driver, true);
+  }
+
+  public NewsPage clickNewsLink() {
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(newsLink)).click();
+    return new NewsPage(driver, true);
+  }
+
+  public CompaniesPage clickCompaniesLink() {
+    (new WebDriverWait(driver, getWaitTimeout()))
+            .until(ExpectedConditions.elementToBeClickable(companiesLink)).click();
+    return new CompaniesPage(driver, true);
   }
 
 }
