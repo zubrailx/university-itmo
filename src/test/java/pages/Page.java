@@ -1,5 +1,7 @@
 package pages;
 
+import java.time.Duration;
+
 import org.openqa.selenium.WebDriver;
 
 import helpers.PageUrl;
@@ -21,5 +23,9 @@ abstract public class Page {
 
   public final String driverGetUrl() {
     return driver.getCurrentUrl();
+  }
+
+  public final Duration getWaitTimeout() {
+    return driver.manage().timeouts().getImplicitWaitTimeout();
   }
 }

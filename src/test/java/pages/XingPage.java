@@ -1,7 +1,5 @@
 package pages;
 
-import java.time.Duration;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -18,9 +16,9 @@ abstract public class XingPage extends Page {
   }
 
   public XingPage acceptCookiesIfClickable() {
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    wait.until(ExpectedConditions.elementToBeClickable(cookiePopup)).click();
+    (new WebDriverWait(driver, getWaitTimeout()))
+        .until(ExpectedConditions.elementToBeClickable(cookiePopup)).click();
     return this;
   }
-  
+
 }
