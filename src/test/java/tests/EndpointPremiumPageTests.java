@@ -40,7 +40,7 @@ public class EndpointPremiumPageTests {
             selDriver.getDriver(), premiumPage.getWaitTimeout(),
             PageUrl.PREMIUM_PAGE.getUrl()));
 
-    selDriver.tear();
+    selDriver.close();
   }
 
 }

@@ -8,7 +8,7 @@ import helpers.PageUrl;
 
 public class MessagesPage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   public MessagesPage(WebDriver driver, boolean wasRedir) {
     super(driver);

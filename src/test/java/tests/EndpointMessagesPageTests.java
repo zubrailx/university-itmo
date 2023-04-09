@@ -40,7 +40,7 @@ public class EndpointMessagesPageTests {
            selDriver.getDriver(), messagesPage.getWaitTimeout(),
            PageUrl.MESSAGES_PAGE.getUrl()));
 
-    selDriver.tear();
+    selDriver.close();
   }
   
 }

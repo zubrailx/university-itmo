@@ -17,7 +17,7 @@ import helpers.PageUrl;
 
 public class HomePage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   @FindBy(xpath = "//a[contains(@href, '/chats')]")
   private WebElement messagesLink;

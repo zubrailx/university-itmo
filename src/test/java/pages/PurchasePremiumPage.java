@@ -8,7 +8,7 @@ import helpers.PageUrl;
 
 public class PurchasePremiumPage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   public PurchasePremiumPage(WebDriver driver, boolean wasRedir) {
     super(driver);

@@ -8,7 +8,7 @@ import helpers.PageUrl;
 
 public class JobsPage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   public JobsPage(WebDriver driver, boolean wasRedir) {
     super(driver);

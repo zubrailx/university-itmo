@@ -22,7 +22,7 @@ public class EndpointLoginPageTests {
 
     assertTrue(loginPage.isRememberSel());
 
-    selDriver.tear();
+    selDriver.close();
   }
 
   @ParameterizedTest
@@ -36,7 +36,7 @@ public class EndpointLoginPageTests {
 
     assertFalse(loginPage.isRememberSel());
 
-    selDriver.tear();
+    selDriver.close();
   }
 
   @ParameterizedTest
@@ -51,6 +51,6 @@ public class EndpointLoginPageTests {
 
     assertFalse(loginPage.isRememberSel());
 
-    selDriver.tear();
+    selDriver.close();
   }
 }

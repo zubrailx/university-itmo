@@ -12,6 +12,6 @@ public abstract class SeleniumDriver {
 
   public abstract void setup();
 
-  public abstract void tear();
+  public abstract void close();
 
 }

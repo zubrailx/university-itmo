@@ -40,7 +40,7 @@ public class EndpointNewsPageTests {
             selDriver.getDriver(), newsPage.getWaitTimeout(),
             PageUrl.NEWS_PAGE.getUrl()));
 
-    selDriver.tear();
+    selDriver.close();
   }
 
 }

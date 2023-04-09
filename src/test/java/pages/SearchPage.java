@@ -11,7 +11,7 @@ import helpers.PageUrl;
 
 public class SearchPage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   public SearchPage(WebDriver driver, boolean wasRedir) {
     super(driver);

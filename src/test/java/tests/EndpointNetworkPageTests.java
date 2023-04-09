@@ -40,7 +40,7 @@ public class EndpointNetworkPageTests {
             selDriver.getDriver(), networkPage.getWaitTimeout(),
             PageUrl.NETWORK_PAGE.getUrl()));
 
-    selDriver.tear();
+    selDriver.close();
   }
 
 }

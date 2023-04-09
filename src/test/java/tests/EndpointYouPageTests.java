@@ -40,7 +40,7 @@ public class EndpointYouPageTests {
             selDriver.getDriver(), youPage.getWaitTimeout(),
             PageUrl.YOU_PAGE.getUrl()));
 
-    selDriver.tear();
+    selDriver.close();
   }
 
 }

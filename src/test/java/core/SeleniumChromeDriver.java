@@ -23,9 +23,8 @@ public class SeleniumChromeDriver extends SeleniumDriver {
   }
 
   @Override
-  public void tear() {
+  public void close() {
     driver.close();
-    driver.quit();
   }
 
 }

@@ -8,7 +8,7 @@ import helpers.PageUrl;
 
 public class NewsPage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   public NewsPage(WebDriver driver, boolean wasRedir) {
     super(driver);

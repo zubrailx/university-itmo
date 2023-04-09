@@ -8,7 +8,7 @@ import helpers.PageUrl;
 
 public class CompaniesPage extends XingPage {
 
-  private HomeLogoComponent homeLogoComponent;
+  private final HomeLogoComponent homeLogoComponent;
 
   public CompaniesPage(WebDriver driver, boolean wasRedir) {
     super(driver);
@@ -16,7 +16,7 @@ public class CompaniesPage extends XingPage {
       driverGet(PageUrl.COMPANIES_PAGE);
     PageFactory.initElements(driver, this);
 
-    // homeLogoComponent = new HomeLogoComponent(driver);
+    homeLogoComponent = new HomeLogoComponent(driver);
   }
 
   public HomeLogoComponent getHomeLogoComponent() {

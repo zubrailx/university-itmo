@@ -26,7 +26,7 @@ public class EndpointMainPageTests {
     assertEquals("XING - Find the right job for you", main.getTitle());
     assertEquals(PageUrl.MAIN.getUrl(), main.driverGetUrl());
 
-    driver.tear();
+    driver.close();
   }
 
   @ParameterizedTest
@@ -38,7 +38,7 @@ public class EndpointMainPageTests {
 
     assertDoesNotThrow(main::clickCookiePopup);
 
-    driver.tear();
+    driver.close();
   }
 
   @ParameterizedTest
@@ -53,7 +53,7 @@ public class EndpointMainPageTests {
       assertEquals(checkbox.getText(), main.getJobsSearchTitle(checkbox));
     }
 
-    driver.tear();
+    driver.close();
   }
 
   @ParameterizedTest
@@ -69,7 +69,7 @@ public class EndpointMainPageTests {
 
     assertEquals(PageUrl.MAIN_EN.getUrl(), mainPage.driverGetUrl());
 
-    driver.tear();
+    driver.close();
   }
 
 }

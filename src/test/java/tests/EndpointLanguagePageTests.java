@@ -24,6 +24,6 @@ public class EndpointLanguagePageTests {
       assertEquals(language.getText(), languagePage.getLanguage(language));
     }
 
-    selDriver.tear();
+    selDriver.close();
   }
 }

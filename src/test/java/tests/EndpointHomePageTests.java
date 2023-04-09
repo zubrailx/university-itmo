@@ -43,7 +43,7 @@ public class EndpointHomePageTests {
         (new WebDriverWait(driver, homePage.getWaitTimeout()))
             .until((ExpectedCondition<Boolean>) (u) -> PageUrl.HOME_PAGE.getUrl().equals(homePage.driverGetUrl())));
 
-    selDriver.tear();
+    selDriver.close();
   }
 
   @ParameterizedTest
@@ -64,7 +64,7 @@ public class EndpointHomePageTests {
         (new WebDriverWait(driver, homePage.getWaitTimeout()))
             .until((ExpectedCondition<Boolean>) (u) -> PageUrl.HOME_PAGE.getUrl().equals(homePage.driverGetUrl())));
 
-    selDriver.tear();
+    selDriver.close();
   }
 
   @ParameterizedTest
@@ -100,6 +100,6 @@ public class EndpointHomePageTests {
            driver, homePage.getWaitTimeout(),
            PageUrl.HOME_PAGE.getUrl()));
 
-    selDriver.tear();
+    selDriver.close();
   }
 }
