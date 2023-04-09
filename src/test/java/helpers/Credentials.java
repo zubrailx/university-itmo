@@ -13,7 +13,7 @@ public class Credentials {
   private String login;
   private String password;
 
-  public Credentials() {
+  public Credentials() { // btw java constructors can throw exceptions
     try (InputStream inputStream = new FileInputStream("credentials.properties")) {
       Properties props = new Properties();
       props.load(inputStream);
