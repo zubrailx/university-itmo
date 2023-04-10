@@ -60,6 +60,9 @@ public class EndpointCompaniesPageTests {
     companiesPage.clickRecommendedFirstCompanyFollowBtn();
 
     companiesPage.clickFollowingBtn();
+
+    // refresh page to update companies
+    companiesPage.refreshPage();
     assertEquals("Unfollow", companiesPage.getFollowingFirstCompanyUnfollowBtnText());
     companiesPage.clickFollowingFirstCompanyUnfollowBtn();
 
