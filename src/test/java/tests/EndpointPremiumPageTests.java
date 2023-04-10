@@ -31,14 +31,37 @@ public class EndpointPremiumPageTests {
   public void clickLink_FromHome_EqualsPath(SeleniumDriver selDriver) {
     selDriver.setup();
 
-    var premiumPage= new LoginPage(selDriver.getDriver(), false)
-            .acceptCookiesIfClickable()
-            .authenticate(credentials.getLogin(), credentials.getPassword())
-            .clickPremiumLink();
+    var premiumPage = new LoginPage(selDriver.getDriver(), false)
+        .acceptCookiesIfClickable()
+        .authenticate(credentials.getLogin(), credentials.getPassword())
+        .clickPremiumLink();
 
     assertEquals(true, WaitHelpers.waitStringEqual(
-            selDriver.getDriver(), premiumPage.getWaitTimeout(),
-            PageUrl.PREMIUM_PAGE.getUrl()));
+        selDriver.getDriver(), premiumPage.getWaitTimeout(),
+        PageUrl.PREMIUM_PAGE.getUrl()));
+
+    selDriver.close();
+  }
+
+  @ParameterizedTest
+  @MethodSource("helpers.DriverSources#provideDrivers")
+  public void getPremiumOfferText_Equals_AndCheckPrices(SeleniumDriver selDriver) {
+    selDriver.setup();
+
+    var premiumPage = new LoginPage(selDriver.getDriver(), false)
+        .acceptCookiesIfClickable()
+        .authenticate(credentials.getLogin(), credentials.getPassword())
+        .clickPremiumLink();
+
+    assertEquals(true, WaitHelpers.waitStringEqual(
+        selDriver.getDriver(), premiumPage.getWaitTimeout(),
+        PageUrl.PREMIUM_PAGE.getUrl()));
+
+     assertEquals("Go Premium now", premiumPage.getGoPremiumNowText());
+
+    var purchasePremiumPage = premiumPage.clickPurcasePremium();
+
+    assertEquals("$9.45", purchasePremiumPage.getPremiumPrice());
 
     selDriver.close();
   }

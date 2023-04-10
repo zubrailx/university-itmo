@@ -28,4 +28,8 @@ abstract public class Page {
   public final Duration getWaitTimeout() {
     return driver.manage().timeouts().getImplicitWaitTimeout();
   }
+
+  public final void refreshPage() {
+    driver.get(driver.getCurrentUrl());
+  }
 }

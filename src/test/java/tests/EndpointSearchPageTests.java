@@ -9,15 +9,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import core.SeleniumDriver;
 import helpers.Credentials;
-import helpers.PageUrl;
-import helpers.WaitHelpers;
+import helpers.StringModifier;
 import pages.LoginPage;
 
 /**
- * EndpointCompaniesPageTests
+ * EndpointSearchPageTests
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class EndpointYouPageTests {
+public class EndpointSearchPageTests {
 
   Credentials credentials;
 
@@ -28,19 +27,23 @@ public class EndpointYouPageTests {
 
   @ParameterizedTest
   @MethodSource("helpers.DriverSources#provideDrivers")
-  public void clickLink_FromHome_EqualsPath(SeleniumDriver selDriver) {
-    selDriver.setup();
+  public void search_and_getFirstResult_compareWithUsername(SeleniumDriver seleniumDriver) {
+    seleniumDriver.setup();
 
-    var youPage = new LoginPage(selDriver.getDriver(), false)
+
+    var homePage = new LoginPage(seleniumDriver.getDriver(), false)
         .acceptCookiesIfClickable()
-        .authenticate(credentials.getLogin(), credentials.getPassword())
-        .clickYouLink();
+        .authenticate(credentials.getLogin(), credentials.getPassword());
 
-    assertEquals(true, WaitHelpers.waitStringEqual(
-        selDriver.getDriver(), youPage.getWaitTimeout(),
-        PageUrl.YOU_PAGE.getUrl()));
+    var searchPage = homePage.getHeaderSearchComponent().writeEnterSearch(
+      "software engineer"
+    );
 
-    selDriver.close();
+    var searchedUsername = searchPage.getFirstSearchResultUsername();
+
+    assertEquals("Nikita Kulakov", searchedUsername);
+
+    seleniumDriver.close();
   }
 
 }

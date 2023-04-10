@@ -12,12 +12,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import components.HeaderSearchComponent;
 import components.HomeLogoComponent;
 import helpers.PageUrl;
 
 public class HomePage extends XingPage {
 
   private final HomeLogoComponent homeLogoComponent;
+  private final HeaderSearchComponent headerSearchComponent;
 
   @FindBy(xpath = "//a[contains(@href, '/chats')]")
   private WebElement messagesLink;
@@ -58,7 +60,6 @@ public class HomePage extends XingPage {
   @FindBy(xpath = "//button[@data-testid='commboxPost']")
   private WebElement sendPostBtn;
 
-
   public HomePage(WebDriver driver, boolean wasRedir) {
     super(driver);
     if (!wasRedir)
@@ -66,10 +67,15 @@ public class HomePage extends XingPage {
     PageFactory.initElements(driver, this);
 
     homeLogoComponent = new HomeLogoComponent(driver);
+    headerSearchComponent = new HeaderSearchComponent(driver);
   }
 
   public HomeLogoComponent getHomeLogoComponent() {
     return homeLogoComponent;
+  }
+
+  public HeaderSearchComponent getHeaderSearchComponent() {
+    return headerSearchComponent;
   }
 
   public HomePage openPost() {

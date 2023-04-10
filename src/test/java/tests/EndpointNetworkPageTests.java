@@ -11,6 +11,7 @@ import core.SeleniumDriver;
 import helpers.Credentials;
 import helpers.PageUrl;
 import helpers.WaitHelpers;
+import org.openqa.selenium.WebElement;
 import pages.LoginPage;
 
 /**
@@ -31,14 +32,34 @@ public class EndpointNetworkPageTests {
   public void clickLink_FromHome_EqualsPath(SeleniumDriver selDriver) {
     selDriver.setup();
 
-    var networkPage= new LoginPage(selDriver.getDriver(), false)
-            .acceptCookiesIfClickable()
-            .authenticate(credentials.getLogin(), credentials.getPassword())
-            .clickNetworkLink();
+    var networkPage = new LoginPage(selDriver.getDriver(), false)
+        .acceptCookiesIfClickable()
+        .authenticate(credentials.getLogin(), credentials.getPassword())
+        .clickNetworkLink();
 
     assertEquals(true, WaitHelpers.waitStringEqual(
-            selDriver.getDriver(), networkPage.getWaitTimeout(),
-            PageUrl.NETWORK_PAGE.getUrl()));
+        selDriver.getDriver(), networkPage.getWaitTimeout(),
+        PageUrl.NETWORK_PAGE.getUrl()));
+
+    selDriver.close();
+  }
+
+  @ParameterizedTest
+  @MethodSource("helpers.DriverSources#provideDrivers")
+  public void getNetworkPage_ContactsAndBirthdaysAndContactsRequest_Equals(SeleniumDriver selDriver) {
+    selDriver.setup();
+
+    var networkPage = new LoginPage(selDriver.getDriver(), false)
+        .acceptCookiesIfClickable()
+        .authenticate(credentials.getLogin(), credentials.getPassword())
+        .clickNetworkLink();
+
+    assertEquals("No contacts",
+        networkPage.getNoContactsString());
+    assertEquals("No pending contact requests",
+        networkPage.getNoContactRequestsString());
+    assertEquals("None of your contacts are celebrating their birthday today.",
+        networkPage.getNoBirthdaysString());
 
     selDriver.close();
   }

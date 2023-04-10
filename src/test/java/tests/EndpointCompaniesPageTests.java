@@ -43,4 +43,31 @@ public class EndpointCompaniesPageTests {
     selDriver.close();
   }
 
+  @ParameterizedTest
+  @MethodSource("helpers.DriverSources#provideDrivers")
+  public void followUnfollowAndCheckName_EqualsWith(SeleniumDriver selDriver) {
+    selDriver.setup();
+
+    var companiesPage = new LoginPage(selDriver.getDriver(), false)
+      .acceptCookiesIfClickable()
+      .authenticate(credentials.getLogin(), credentials.getPassword())
+      .clickCompaniesLink();
+
+    String firstCompanyName = companiesPage.getFirstCompanyNameText();
+
+    // company is not followed
+    assertEquals("Follow", companiesPage.getRecommendedFirstCompanyFollowBtnText());
+    companiesPage.clickRecommendedFirstCompanyFollowBtn();
+
+    companiesPage.clickFollowingBtn();
+    assertEquals("Unfollow", companiesPage.getFollowingFirstCompanyUnfollowBtnText());
+    companiesPage.clickFollowingFirstCompanyUnfollowBtn();
+
+    assertEquals(firstCompanyName, companiesPage.getFirstCompanyNameText());
+
+    companiesPage.clickRecommendedBtn();
+
+    selDriver.close();
+  }
+
 }
