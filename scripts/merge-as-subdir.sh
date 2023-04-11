@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Example:
+# ./merge-as-subdir.sh tpo-lab1 git@github.com:zubrailx/tpo-lab1.git \
+# main Year-3/Software-testing/lab-1
+
 set -u # Don't allow executing with empty variable
 set -e # Exit when command fails
 
