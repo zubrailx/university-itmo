@@ -2,35 +2,40 @@ module bits2cat_32
      #(parameter REFRESH_CLOCKS = 200_000)
      (
         input clk,
-        input i_rst,
-        input [31:0] i_bits,
+        input rst_i,
+        input [31:0] data_i,
         output CA, CB, CC, CD, CE, CF, CG,
         output reg [7:0] AN
     );
     
+    localparam CNT_WIDTH = $clog2(REFRESH_CLOCKS);
+    
     reg [2:0] cur_digit;
-    reg [$clog2(REFRESH_CLOCKS)-1:0] cnt_ff;
-    wire [$clog2(REFRESH_CLOCKS)-1:0] cnt_next;
     
-    reg [3:0] btc_bits;
+    reg [CNT_WIDTH-1:0] cnt_ff;
+    wire [CNT_WIDTH-1:0] cnt_next;
     
-    assign cnt_next = (cnt_ff == REFRESH_CLOCKS) ? {$clog2(REFRESH_CLOCKS){1'b0}} : cnt_ff + 1'b1;
+    reg [3:0] hex;
+    
+    bits2cat_4 btc4(
+        .hex_i(hex),
+        .CA(CA), .CB(CB), .CC(CC), .CD(CD), .CE(CE), .CF(CF), .CG(CG)
+    );
+    
+    // counter logic
+    assign cnt_next = (cnt_ff == REFRESH_CLOCKS) ? {CNT_WIDTH{1'b0}} : cnt_ff + 1'b1;
     
     always @(posedge clk) begin
-        if (i_rst) begin
+        if (rst_i) begin
             cnt_ff <= {$clog2(REFRESH_CLOCKS){1'b0}};
         end else begin
             cnt_ff <= cnt_next;
         end
     end
     
-    bits2cat_4 btc(
-        btc_bits,
-        CA, CB, CC, CD, CE, CF, CG
-    );
-    
+    // digic logic
     always @(posedge clk) begin
-        if (i_rst) begin
+        if (rst_i) begin
             cur_digit <= 0;
             AN <= 8'b11111110;
         end else if (cnt_ff == REFRESH_CLOCKS) begin
@@ -41,25 +46,26 @@ module bits2cat_32
     
     always @(cur_digit) begin
         case (cur_digit)
-        3'b000: btc_bits = i_bits[3:0];
-        3'b001: btc_bits = i_bits[7:4];
-        3'b010: btc_bits = i_bits[11:8];
-        3'b011: btc_bits = i_bits[15:12];
-        3'b100: btc_bits = i_bits[19:16];
-        3'b101: btc_bits = i_bits[23:20];
-        3'b110: btc_bits = i_bits[27:24];
-        3'b111: btc_bits = i_bits[31:28];
+        3'b000: hex = data_i[3:0];
+        3'b001: hex = data_i[7:4];
+        3'b010: hex = data_i[11:8];
+        3'b011: hex = data_i[15:12];
+        3'b100: hex = data_i[19:16];
+        3'b101: hex = data_i[23:20];
+        3'b110: hex = data_i[27:24];
+        3'b111: hex = data_i[31:28];
         endcase
     end
     
 endmodule
 
+
 module bits2cat_4(
-    input [3:0] i_bits,
+    input [3:0] hex_i,
     output reg CA, CB, CC, CD, CE, CF, CG
     );
     always @(*) begin
-        case (i_bits)
+        case (hex_i)
             4'b0000: begin
                 CA <= 0;
                 CB <= 0;
