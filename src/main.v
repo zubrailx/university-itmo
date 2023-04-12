@@ -19,7 +19,7 @@ module main(
         .clk_i(CLK100MHZ),
         .btnu_i(BTNU), .btnd_i(BTND), .btnl_i(BTNL), .btnr_i(BTNR), .btnc_i(BTNC),
         .sw_i(SW),
-        .btnu_o(btnu), .btnd_o(btnd), .btnl_o(btnl), .btnr_o(btnr), .btnrc_o(btnc),
+        .btnu_o(btnu), .btnd_o(btnd), .btnl_o(btnl), .btnr_o(btnr), .btnc_o(btnc),
         .sw_o(sw)
     );
     
