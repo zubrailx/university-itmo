@@ -4,7 +4,7 @@ module bits2cat_32
         input clk,
         input rst_i,
         input [31:0] data_i,
-        output CA, CB, CC, CD, CE, CF, CG,
+        output [6:0] CAT,
         output reg [7:0] AN
     );
     
@@ -19,7 +19,7 @@ module bits2cat_32
     
     bits2cat_4 btc4(
         .hex_i(hex),
-        .CA(CA), .CB(CB), .CC(CC), .CD(CD), .CE(CE), .CF(CF), .CG(CG)
+        .CAT(CAT)
     );
     
     // reset only on front
@@ -70,153 +70,57 @@ endmodule
 
 module bits2cat_4(
     input [3:0] hex_i,
-    output reg CA, CB, CC, CD, CE, CF, CG
+    output reg [6:0] CAT
     );
     always @(*) begin
         case (hex_i)
             4'b0000: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 0;
-                CD <= 0;
-                CE <= 0;
-                CF <= 0;
-                CG <= 1;
+                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1};
             end
             4'b0001: begin
-                CA <= 1;
-                CB <= 0;
-                CC <= 0;
-                CD <= 1;
-                CE <= 1;
-                CF <= 1;
-                CG <= 1;
+                CAT <= { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1};
             end
             4'b0010: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 1;
-                CD <= 0;
-                CE <= 0;
-                CF <= 1;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0};
             end
             4'b0011: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 0;
-                CD <= 0;
-                CE <= 1;
-                CF <= 1;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0};
             end
             4'b0100: begin
-                CA <= 1;
-                CB <= 0;
-                CC <= 0;
-                CD <= 1;
-                CE <= 1;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0};
             end
             4'b0101: begin
-                CA <= 0;
-                CB <= 1;
-                CC <= 0;
-                CD <= 0;
-                CE <= 1;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
             end
             4'b0110: begin
-                CA <= 0;
-                CB <= 1;
-                CC <= 0;
-                CD <= 0;
-                CE <= 0;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0};
             end
             4'b0111: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 0;
-                CD <= 1;
-                CE <= 1;
-                CF <= 1;
-                CG <= 1;
+                CAT <= { 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1};
             end
             4'b1000: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 0;
-                CD <= 0;
-                CE <= 0;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0};
             end
             4'b1001: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 0;
-                CD <= 0;
-                CE <= 1;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
             end
             4'b1010: begin
-                CA <= 0;
-                CB <= 0;
-                CC <= 0;
-                CD <= 1;
-                CE <= 0;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0};
             end
             4'b1011: begin
-                CA <= 1;
-                CB <= 1;
-                CC <= 0;
-                CD <= 0;
-                CE <= 0;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0};
             end
             4'b1100: begin
-                CA <= 0;
-                CB <= 1;
-                CC <= 1;
-                CD <= 0;
-                CE <= 0;
-                CF <= 0;
-                CG <= 1;
+                CAT <= { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1};
             end
             4'b1101: begin
-                CA <= 1;
-                CB <= 0;
-                CC <= 0;
-                CD <= 0;
-                CE <= 0;
-                CF <= 1;
-                CG <= 0;
+                CAT <= { 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0};
             end
             4'b1110: begin
-                CA <= 0;
-                CB <= 1;
-                CC <= 1;
-                CD <= 0;
-                CE <= 0;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
             end
             4'b1111: begin
-                CA <= 0;
-                CB <= 1;
-                CC <= 1;
-                CD <= 1;
-                CE <= 0;
-                CF <= 0;
-                CG <= 0;
+                CAT <= { 1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0};
             end        
         endcase
     end

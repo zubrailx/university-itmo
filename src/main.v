@@ -86,7 +86,7 @@ module main(
         .clap_state_i(clap_state),  
         .sw_i(sw),
         .data_i(data),
-        .CA(CA), .CB(CB), .CC(CC), .CD(CD), .CE(CE), .CF(CF), .CG(CG),
+        .CAT({CA, CB, CC, CD, CE, CG, CG}),
         .AN(AN),
         .LED(LED),
         .BGR1({LED16_B, LED16_G, LED16_R}),

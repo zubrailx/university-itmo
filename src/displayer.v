@@ -7,7 +7,7 @@ module displayer (
     input [1:0] clap_state_i,
     input [15:0] sw_i,
     input [31:0] data_i,
-    output CA, CB, CC, CD, CE, CF, CG,
+    output [6:0] CAT,
     output [7:0] AN,
     output reg [15:0] LED,
     output [2:0] BGR1, BGR2
@@ -24,7 +24,7 @@ module displayer (
         .clk(clk_i),
         .rst_i(rst_i),
         .data_i(btc_data),
-        .CA(CA), .CB(CB), .CC(CC), .CD(CD), .CE(CE), .CF(CF), .CG(CG),
+        .CAT(CAT),
         .AN(AN)
     );
     
