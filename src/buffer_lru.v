@@ -72,7 +72,7 @@ module buffer_lru
         idx = 0;
         
         for (i = 0; i < BUF_SIZE; i = i + 1) begin
-            if (buf_pres_array_o[i] && val_i == buf_array_o[i]) begin
+            if (buf_pres_array_o[i] && val_i == buf_array_o[i*BUF_WIDTH +: BUF_WIDTH]) begin
                 val_present = 1;
                 idx = i;
             end

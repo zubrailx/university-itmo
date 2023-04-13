@@ -28,25 +28,25 @@ module buffer_lru_sv_tb;
     
     reg [BUF_SIZE-1:0][WIDTH-1:0] tb_bufs_o;
     
-    reg [WIDTH-1:0] tb_data_1 [15] = { 
+    reg [WIDTH-1:0] tb_data_1 [0:14] = '{ 
         100, 101, 102, 103, 101, 104, 105, 106, 107, 108, 109, 110, 110, 111, 112
     };
-    reg [WIDTH-1:0] tb_expected_bufs [15][BUF_SIZE] = {
-        { 100, 0, 0, 0, 0, 0, 0, 0 },
-        { 100, 101, 0, 0, 0, 0, 0, 0 },
-        { 100, 101, 102, 0, 0, 0, 0, 0 },
-        { 100, 101, 102, 103, 0, 0, 0, 0 },
-        { 100, 101, 102, 103, 0, 0, 0, 0 },
-        { 100, 101, 102, 103, 104, 0, 0, 0 },
-        { 100, 101, 102, 103, 104, 105, 0, 0 },
-        { 100, 101, 102, 103, 104, 105, 106, 0 },
-        { 100, 101, 102, 103, 104, 105, 106, 107 },
-        { 108, 101, 102, 103, 104, 105, 106, 107 },
-        { 108, 101, 109, 103, 104, 105, 106, 107 },
-        { 108, 101, 109, 110, 104, 105, 106, 107 },
-        { 108, 101, 109, 110, 104, 105, 106, 107 },
-        { 108, 111, 109, 110, 104, 105, 106, 107 },
-        { 108, 111, 109, 110, 112, 105, 106, 107 }
+    reg [WIDTH-1:0] tb_expected_bufs [0:14][BUF_SIZE] = '{
+        '{ 100, 0, 0, 0, 0, 0, 0, 0 },
+        '{ 100, 101, 0, 0, 0, 0, 0, 0 },
+        '{ 100, 101, 102, 0, 0, 0, 0, 0 },
+        '{ 100, 101, 102, 103, 0, 0, 0, 0 },
+        '{ 100, 101, 102, 103, 0, 0, 0, 0 },
+        '{ 100, 101, 102, 103, 104, 0, 0, 0 },
+        '{ 100, 101, 102, 103, 104, 105, 0, 0 },
+        '{ 100, 101, 102, 103, 104, 105, 106, 0 },
+        '{ 100, 101, 102, 103, 104, 105, 106, 107 },
+        '{ 108, 101, 102, 103, 104, 105, 106, 107 },
+        '{ 108, 101, 109, 103, 104, 105, 106, 107 },
+        '{ 108, 101, 109, 110, 104, 105, 106, 107 },
+        '{ 108, 101, 109, 110, 104, 105, 106, 107 },
+        '{ 108, 111, 109, 110, 104, 105, 106, 107 },
+        '{ 108, 111, 109, 110, 112, 105, 106, 107 }
     };
     
     task test();
@@ -62,7 +62,7 @@ module buffer_lru_sv_tb;
         end
     endtask
           
-    always #10 clk = ~clk;
+    always #1 clk = ~clk;
     
     initial begin
     
@@ -86,7 +86,7 @@ module buffer_lru_sv_tb;
             for (i = 0; i < BUF_SIZE; i = i + 1) tb_bufs_o[i] <= 0;
         end
         
-        repeat (20) @(posedge clk) begin
+        repeat (20) @(negedge clk) begin
             test();
         end
         
@@ -101,12 +101,50 @@ module buffer_lru_sv_tb;
         
  
         for (i = 0; i < 15; i = i + 1) begin
-            @(negedge clk) begin
-                set_i <= 1;
-                val_i <= tb_data_1[i];
+        
+            repeat (5) @(posedge clk);
+            
+            set_i <= 1;
+            val_i <= tb_data_1[i];
+           
+            
+            repeat (5) @(posedge clk);
+            
+            set_i = 0;
+            
+            for (j = 0; j < BUF_SIZE; j = j + 1) begin
+                tb_bufs_o[j] = tb_expected_bufs[i][j];
             end
             
-            repeat (10) @(posedge clk);
+            test();
+        end
+        
+        repeat (10) @(posedge clk);
+        
+        // reset
+        @(negedge clk) begin 
+            rst <= 1;
+            for (i = 0; i < BUF_SIZE; i = i + 1) tb_bufs_o[i] <= 0;
+        end
+        
+        repeat (10) @(negedge clk);
+        
+        rst <= 0;
+          
+        @(posedge clk) test();
+        
+        // test same again
+        for (i = 0; i < 15; i = i + 1) begin
+        
+            repeat (5) @(posedge clk);
+            
+            set_i <= 1;
+            val_i <= tb_data_1[i];
+           
+            
+            repeat (5) @(posedge clk);
+            
+            set_i = 0;
             
             for (j = 0; j < BUF_SIZE; j = j + 1) begin
                 tb_bufs_o[j] = tb_expected_bufs[i][j];

@@ -66,6 +66,7 @@ module logic (
         end
     end
     
+    // state latch
     always @(posedge clk_i) begin
         case (cond)
             COND_CNT_EN : state_o <= COND_CNT_EN;
@@ -74,14 +75,14 @@ module logic (
         endcase
     end
     
-    // logic
+    // connect wires depending on state
     assign {lru_rst, lru_set} = (state_o == COND_LRU_RD || state_o == COND_LRU_WR)
         ? {rst, set} : 1'b0;
 
     assign {evc_rst, evc_set} = (state_o == COND_CNT_EN)
         ? {rst, set} : 1'b0;
     
-    // output result
+    // connect output result wires
     reg [31:0] data;
     assign data_o = data;
     
@@ -106,7 +107,6 @@ module logic (
             end
         endcase
     end
-    
     
 endmodule
 
