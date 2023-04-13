@@ -22,11 +22,19 @@ module bits2cat_32
         .CA(CA), .CB(CB), .CC(CC), .CD(CD), .CE(CE), .CF(CF), .CG(CG)
     );
     
+    // reset only on front
+    reg rst_q;
+    wire rst_chg;
+    
+    always @(posedge clk) rst_q <= rst_i;
+    
+    assign rst_chg = (rst_q != rst_i);
+    
     // counter logic
     assign cnt_next = (cnt_ff == REFRESH_CLOCKS) ? {CNT_WIDTH{1'b0}} : cnt_ff + 1'b1;
     
     always @(posedge clk) begin
-        if (rst_i) begin
+        if (rst_chg && rst_i) begin
             cnt_ff <= {$clog2(REFRESH_CLOCKS){1'b0}};
         end else begin
             cnt_ff <= cnt_next;
@@ -35,7 +43,7 @@ module bits2cat_32
     
     // digic logic
     always @(posedge clk) begin
-        if (rst_i) begin
+        if (rst_chg && rst_i) begin
             cur_digit <= 0;
             AN <= 8'b11111110;
         end else if (cnt_ff == REFRESH_CLOCKS) begin

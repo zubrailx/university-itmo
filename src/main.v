@@ -9,7 +9,8 @@ module main(
     output CA, CB, CC, CD, CE, CF, CG,
     output [7:0] AN,
     // led
-    output [15:0] LED
+    output [15:0] LED,
+    output LED16_B, LED16_G, LED16_R, LED17_B, LED17_G, LED17_R
 );
 
     wire btnu, btnd, btnl, btnr, btnc;
@@ -23,29 +24,33 @@ module main(
         .sw_o(sw)
     );
     
-    wire [31:0] data;
-    wire [3:0] layout;
+    wire [127:0] data;
+    wire [7:0] buf_pres_array;
+    wire [2:0] state;
     
     logic logic(
         .clk_i(CLK100MHZ),
-        .rst_i(btnd),
-        .cnt_i(btnu),
-        .wr_i(btnl),
-        .rd_i(btnr),
-        .ev_i(btnc),
+        .btnu_i(btnu),
+        .btnl_i(btnl),
+        .btnr_i(btnr),
+        .btnd_i(btnd),
+        .btnc_i(btnc),
+        .sw_i(sw),
         .data_o(data),
-        .layout_o(layout)
+        .state_o(state)
     );
     
     displayer displayer (
         .clk_i(CLK100MHZ),
         .rst_i(btnd),
         .data_i(data),
-        .layout_i(layout),
         .sw_i(sw),
+        .state_i(state),
         .CA(CA), .CB(CB), .CC(CC), .CD(CD), .CE(CE), .CF(CF), .CG(CG),
         .AN(AN),
-        .LED(LED)
+        .LED(LED),
+        .BGR1({LED16_B, LED16_G, LED16_R}),
+        .BGR2({LED17_B, LED17_G, LED17_R})
     );
     
     

@@ -52,11 +52,11 @@ module buffer_lru
     always @(posedge clk_i) begin
         if (rst_i) begin
             for (i = 0; i < BUF_SIZE; i = i + 1) begin
-                buf_array_o[i*BUF_WIDTH +: BUF_SIZE] <= 0;
+                buf_array_o[i*BUF_WIDTH +: BUF_WIDTH] <= 0;
                 buf_pres_array_o[i] <= 0;
             end
         end else if (set_chg && set_i) begin
-            buf_array_o[sel_idx*BUF_WIDTH +: BUF_SIZE] <= val_i;
+            buf_array_o[sel_idx*BUF_WIDTH +: BUF_WIDTH] <= val_i;
             buf_pres_array_o[sel_idx] <= 1;
         end
     end
