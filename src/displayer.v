@@ -29,6 +29,8 @@ module displayer (
     );
     
     always @(*) begin
+        LED = 0;
+        
         case (state_i)
             COND_CNT_EN: begin
                 btc_data = data_i;
@@ -41,7 +43,6 @@ module displayer (
             end
             default: begin
                 btc_data = data_i;
-                LED = 0;
             end
         endcase
     end

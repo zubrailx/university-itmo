@@ -52,16 +52,16 @@ module bits2cat_32
         end
     end
     
-    always @(cur_digit) begin
+    always @(*) begin
         case (cur_digit)
-        3'b000: hex = data_i[3:0];
-        3'b001: hex = data_i[7:4];
-        3'b010: hex = data_i[11:8];
-        3'b011: hex = data_i[15:12];
-        3'b100: hex = data_i[19:16];
-        3'b101: hex = data_i[23:20];
-        3'b110: hex = data_i[27:24];
-        3'b111: hex = data_i[31:28];
+            3'b000: hex = data_i[3:0];
+            3'b001: hex = data_i[7:4];
+            3'b010: hex = data_i[11:8];
+            3'b011: hex = data_i[15:12];
+            3'b100: hex = data_i[19:16];
+            3'b101: hex = data_i[23:20];
+            3'b110: hex = data_i[27:24];
+            3'b111: hex = data_i[31:28];
         endcase
     end
     
@@ -71,56 +71,57 @@ endmodule
 module bits2cat_4(
     input [3:0] hex_i,
     output reg [6:0] CAT
-    );
+);
+
     always @(*) begin
         case (hex_i)
             4'b0000: begin
-                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1};
+                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1 };
             end
             4'b0001: begin
-                CAT <= { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1};
+                CAT = { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1 };
             end
             4'b0010: begin
-                CAT <= { 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0};
+                CAT = { 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0 };
             end
             4'b0011: begin
-                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0};
+                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0 };
             end
             4'b0100: begin
-                CAT <= { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0};
+                CAT = { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0 };
             end
             4'b0101: begin
-                CAT <= { 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0 };
             end
             4'b0110: begin
-                CAT <= { 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0 };
             end
             4'b0111: begin
-                CAT <= { 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1};
+                CAT = { 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1 };
             end
             4'b1000: begin
-                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0 };
             end
             4'b1001: begin
-                CAT <= { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0 };
             end
             4'b1010: begin
-                CAT <= { 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0 };
             end
             4'b1011: begin
-                CAT <= { 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0};
+                CAT = { 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0 };
             end
             4'b1100: begin
-                CAT <= { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1};
+                CAT = { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1 };
             end
             4'b1101: begin
-                CAT <= { 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0};
+                CAT = { 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0 };
             end
             4'b1110: begin
-                CAT <= { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0 };
             end
             4'b1111: begin
-                CAT <= { 1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0};
+                CAT = { 1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0 };
             end        
         endcase
     end

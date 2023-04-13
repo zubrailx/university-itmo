@@ -79,6 +79,13 @@ module main(
         .data_o(data)
     );
     
+    wire [6:0] CAT;
+    assign {CA, CB, CC, CD, CE, CF, CG} = CAT;
+    
+    wire [2:0] BGR1, BGR2;
+    assign {LED16_B, LED16_G, LED16_R} = BGR1;
+    assign {LED17_B, LED17_G, LED17_R} = BGR2;
+    
     displayer displayer (
         .clk_i(CLK100MHZ),
         .rst_i(btnd),
@@ -86,11 +93,11 @@ module main(
         .clap_state_i(clap_state),  
         .sw_i(sw),
         .data_i(data),
-        .CAT({CA, CB, CC, CD, CE, CG, CG}),
+        .CAT(CAT),
         .AN(AN),
         .LED(LED),
-        .BGR1({LED16_B, LED16_G, LED16_R}),
-        .BGR2({LED17_B, LED17_G, LED17_R})
+        .BGR1(BGR1),
+        .BGR2(BGR2)
     );
     
 endmodule
