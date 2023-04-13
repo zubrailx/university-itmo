@@ -1,34 +1,21 @@
 `timescale 1ns / 1ps
 
 module logic (
-   input clk_i,
-   // buttons
-   input btnu_i,
-   input btnl_i,
-   input btnr_i,
-   input btnd_i,
-   input btnc_i,
-   // switch
-   input [15:0] sw_i,
-   // result and what to display 
-   output [31:0] data_o,
-   // only to display or not display
-   output reg [2:0] state_o
+    input clk_i,
+    // buttons
+    input rst_i,
+    input set_i,
+    input [2:0] state_i,
+    // switch
+    input [15:0] sw_i,
+    // result and what to display 
+    output [31:0] data_o
 );
 
     localparam [2:0]
         COND_CNT_EN = 3'b100,
         COND_LRU_WR = 3'b010,
         COND_LRU_RD = 3'b001;
-    
-    wire [2:0] cond;
-    wire rst;
-    wire set;
-    
-    assign cond = {btnu_i, btnl_i, btnr_i};
-    assign rst = btnd_i;
-    assign set = btnc_i;
-    
 
     wire [31:0] evc_out;
     wire evc_rst;
@@ -66,21 +53,12 @@ module logic (
         end
     end
     
-    // state latch
-    always @(posedge clk_i) begin
-        case (cond)
-            COND_CNT_EN : state_o <= COND_CNT_EN;
-            COND_LRU_WR : state_o <= COND_LRU_WR;
-            COND_LRU_RD : state_o <= COND_LRU_RD;
-        endcase
-    end
-    
     // connect wires depending on state
-    assign {lru_rst, lru_set} = (state_o == COND_LRU_RD || state_o == COND_LRU_WR)
-        ? {rst, set} : 1'b0;
+    assign {lru_rst, lru_set} = (state_i == COND_LRU_RD || state_i == COND_LRU_WR)
+        ? {rst_i, set_i} : 1'b0;
 
-    assign {evc_rst, evc_set} = (state_o == COND_CNT_EN)
-        ? {rst, set} : 1'b0;
+    assign {evc_rst, evc_set} = (state_i == COND_CNT_EN)
+        ? {rst_i, set_i} : 1'b0;
     
     // connect output result wires
     reg [31:0] data;
@@ -90,7 +68,7 @@ module logic (
     assign buf_idx = sw_i[2:0];
     
     always @(*) begin
-        case (state_o)
+        case (state_i)
             COND_CNT_EN: begin
                 data = evc_out;
             end

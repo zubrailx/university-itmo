@@ -1,12 +1,9 @@
 `timescale 1ns / 1ps
 
-module receiver (
+module button_debouncer (
     input clk_i,
     input btnu_i, btnd_i, btnl_i, btnr_i, btnc_i,
-    input [15:0] sw_i,
-    
-    output btnu_o, btnd_o, btnl_o, btnr_o, btnc_o,
-    output [15:0] sw_o
+    output btnu_o, btnd_o, btnl_o, btnr_o, btnc_o
 );
     
     debouncer deb_u (
@@ -34,8 +31,6 @@ module receiver (
         .btn_i(btnc_i),
         .btn_o(btnc_o)
     );
-    
-    assign sw_i[15:0] = sw_o[15:0];
     
 endmodule
 

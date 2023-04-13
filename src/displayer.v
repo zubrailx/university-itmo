@@ -3,9 +3,10 @@
 module displayer (
     input clk_i,
     input rst_i,
-    input [31:0] data_i,
-    input [15:0] sw_i,
     input [2:0] state_i,
+    input [1:0] clap_state_i,
+    input [15:0] sw_i,
+    input [31:0] data_i,
     output CA, CB, CC, CD, CE, CF, CG,
     output [7:0] AN,
     output reg [15:0] LED,
@@ -48,6 +49,6 @@ module displayer (
     // display current state
     assign BGR1 = state_i;
     // claps
-    assign BGR2 = 3'b0;
+    assign BGR2 = clap_state_i;
 
 endmodule
