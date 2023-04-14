@@ -3,7 +3,10 @@
 // algorithm to detect whether clap occured
 // 7 bits - 128 levels
 module clap_detector_7bit
-    #(parameter CLAP_REPEAT_MIN = 300_000, // 1/3 seconds
+    // 12Hz (max_freq) * 128 (precision) * 2 (>= 2 - Nyquist) = 3072000 Hz
+    // 100MHz / 3072000Hz <= 32 - less than 3.3MHz
+    #(parameter FREQ_DIV = 32,
+      parameter CLAP_REPEAT_MIN = 300_000, // * FREQ_DIV
       parameter CLAP_AMP_THR = 12)
 (
     input clk_i,
@@ -16,10 +19,7 @@ module clap_detector_7bit
     output clap_pulse_o
 );
     // configure mic:
-    //
-    // 12Hz (max_freq) * 128 (precision) * 2 (>= 2 - Nyquist) = 3072000 Hz
-    // 100MHz / 3072000Hz <= 32 - less than 3.3MHz
-    freq_div #(.FREQ_DIV(32)) fd(
+    freq_div #(.FREQ_DIV(FREQ_DIV)) fd(
         .clk_i(clk_i),
         .rst_i(rst_i),
         .fdclk_o(M_CLK)
