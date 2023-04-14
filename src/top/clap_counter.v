@@ -16,7 +16,7 @@ module clap_counter (
 
     wire btnd;
 
-    debouncer dbd(
+    button_debouncer dbd(
         .clk_i(CLK100MHZ),
         .btn_i(BTND),
         .btn_o(btnd)

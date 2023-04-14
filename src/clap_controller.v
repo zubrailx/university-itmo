@@ -1,7 +1,8 @@
 `timescale 1ns / 1ps
 
-module clap_state (
+module clap_controller (
     input clk_i,
+    input rst_i,
     input clap_i,
     output reg [1:0] clap_state_o,
     output clap_set_o
@@ -14,7 +15,10 @@ module clap_state (
     assign clap_set_o = (clap_state_o == CLAP_TWO);
     
     always @(posedge clk_i) begin
-        clap_state_o <= CLAP_ZERO;
+        if (rst_i) begin
+            clap_state_o <= CLAP_ZERO;
+        end else begin
+        end
     end
     
 endmodule

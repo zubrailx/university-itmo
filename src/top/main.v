@@ -19,53 +19,59 @@ module main(
     input M_DATA
 );
 
-    wire btnu, btnd, btnl, btnr, btnc;
-
-    button_debouncer bd(
-        .clk_i(CLK100MHZ),
-        // input buttons
-        .btnu_i(BTNU), 
-        .btnd_i(BTND), 
-        .btnl_i(BTNL), 
-        .btnr_i(BTNR), 
-        .btnc_i(BTNC),
-        // output buttons
-        .btnu_o(btnu), 
-        .btnd_o(btnd), 
-        .btnl_o(btnl), 
-        .btnr_o(btnr), 
-        .btnc_o(btnc)
-    );
+    wire btnu, btnd, btnl, btnr, btnc, cpu_resetn;
     
-    wire clap;
+    wire rst;
+    assign rst = ~cpu_resetn;
+    
+    genvar i; 
+    generate
+        wire [5:0] btns_in, btns_out;
+        
+        assign btns_in = {BTNU, BTND, BTNL, BTNR, BTNC, CPU_RESETN};
+        assign {btnu, btnd, btnl, btnr, btnc, cpu_resetn} = btns_out;
+    
+        for (i = 0; i < 5; i = i + 1) begin
+            button_debouncer bd(
+                .clk_i(CLK100MHZ),
+                .btn_i(btns_in[i]),
+                .btn_o(btns_out[i])
+            );
+        end
+    endgenerate
+    
+    wire clap_pulse;
     
     clap_detector_7bit cd(
         .clk_i(CLK100MHZ),
+        .rst_i(rst),
         .M_DATA(M_DATA),
         .M_LRSEL(M_LRSEL),
         .M_CLK(M_CLK),
-        .clap_o(clap)
+        .clap_pulse_o(clap_pulse)
     );
     
     wire [1:0] clap_state;
     wire clap_set;
     
-    clap_state cs(
+    clap_controller cc(
         .clk_i(CLK100MHZ),
-        .clap_i(clap),
+        .rst_i(rst),
+        .clap_i(clap_pulse),
         .clap_state_o(clap_state),
         .clap_set_o(clap_set)
     );
     
-    wire rst, set;
+    wire lc_rst, lc_set;
     wire [2:0] state;
     
-    state_logic sl(
+    logic_controller lc(
         .clk_i(CLK100MHZ),
+        .rst_i(rst),
         .btnu_i(btnu), .btnl_i(btnl), .btnd_i(btnd), .btnr_i(btnr), .btnc_i(btnc),
         .clap_set_i(clap_set),
-        .rst_o(rst),
-        .set_o(set),
+        .rst_o(lc_rst),
+        .set_o(lc_set),
         .state_o(state)
     );
     
@@ -73,8 +79,8 @@ module main(
     
     logic logic(
         .clk_i(CLK100MHZ),
-        .rst_i(rst),
-        .set_i(set),
+        .rst_i(lc_rst),
+        .set_i(lc_set),
         .state_i(state),
         .sw_i(SW),
         .data_o(data)
