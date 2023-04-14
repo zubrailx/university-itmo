@@ -27,11 +27,10 @@ module clap_detector_7bit
     
     assign M_LRSEL = 1'b0;
     
-    // amplitude and window
+    // counter
     reg [6:0] cnt_ff;
     wire [6:0] cnt_next;
     
-    // counter logic
     assign cnt_next = (cnt_ff == 127) ? {7'b0} : cnt_ff + 1'b1;
     
     always @(posedge M_CLK) begin
@@ -84,20 +83,19 @@ module clap_detector_7bit
         end
     end
         
-    // store if clap front
+    // if clap front
     reg clap_q;
     always @(posedge M_CLK) clap_q <= on_clap;
     
     wire clap_chg;
     assign clap_chg = (on_clap != clap_q);
     
-    // logic to detect two clap fronts and with impulses and exceed CLAP_REPEAT_MIN
+    // logic to detect claps on fronts that exceed CLAP_REPEAT_MIN
     reg [$clog2(CLAP_REPEAT_MIN + 1)-1:0] clap_cnt;
     
     reg clap_pulse;
     
     always @(posedge M_CLK) begin
-        // if on clap pulse and clap_cnt_ff >= CLAP_REPEAT_MIN (it stops)
         if (clap_chg && on_clap && clap_cnt == CLAP_REPEAT_MIN) begin
             clap_pulse <= 1;
             clap_cnt <= 0;
