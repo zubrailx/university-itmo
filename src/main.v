@@ -18,7 +18,6 @@ module main(
 );
 
     wire btnu, btnd, btnl, btnr, btnc;
-    wire [15:0] sw;
 
     button_debouncer bd(
         .clk_i(CLK100MHZ),
@@ -75,7 +74,7 @@ module main(
         .rst_i(rst),
         .set_i(set),
         .state_i(state),
-        .sw_i(sw),
+        .sw_i(SW),
         .data_o(data)
     );
     
@@ -91,7 +90,7 @@ module main(
         .rst_i(btnd),
         .state_i(state),
         .clap_state_i(clap_state),  
-        .sw_i(sw),
+        .sw_i(SW),
         .data_i(data),
         .CAT(CAT),
         .AN(AN),
