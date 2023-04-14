@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module bits2cat_32
      #(parameter REFRESH_CLOCKS = 200_000)
      (

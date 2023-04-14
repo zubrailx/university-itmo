@@ -3,32 +3,29 @@
 // algorithm to detect whether clap occured
 // 7 bits - 128 levels
 module clap_detector_7bit
-    #(parameter CLAP_REPEAT_MIN = 10_000,
-      parameter CLAP_AMP_THR = 16)
+    #(parameter CLAP_REPEAT_MIN = 300_000, // 1/3 seconds
+      parameter CLAP_AMP_THR = 12)
 (
     input clk_i,
     input rst_i,
     // ports to micro
     input M_DATA,
     output M_LRSEL,
-    output M_CLK,
+    inout M_CLK,
     // clap
     output clap_pulse_o
 );
-    // configure freq_div
-    wire fdclk;
-    
+    // configure mic:
+    //
     // 12Hz (max_freq) * 128 (precision) * 2 (>= 2 - Nyquist) = 3072000 Hz
     // 100MHz / 3072000Hz <= 32 - less than 3.3MHz
     freq_div #(.FREQ_DIV(32)) fd(
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .fdclk_o(fdclk)
+        .fdclk_o(M_CLK)
     );
     
-    // configure mic
     assign M_LRSEL = 1'b0;
-    assign M_CLK = fdclk;
     
     // amplitude and window
     reg [6:0] cnt_ff;
@@ -57,7 +54,6 @@ module clap_detector_7bit
             amplitude <= 0;
             prev_bit <= 0;
         end else begin
-            cnt_ff <= cnt_next;
             prev_bit <= window[cnt_next];
             // overwrite prev_bit and update
             amplitude <= (amplitude - prev_bit + M_DATA);
@@ -66,7 +62,6 @@ module clap_detector_7bit
     end
 
     reg [7:0] amp_off_abs;
-    integer i;
     
     // calculate amp_off_abs
     always @(posedge M_CLK) begin
@@ -85,9 +80,7 @@ module clap_detector_7bit
         if (rst_i) begin
             on_clap <= 0;
         end else begin
-            if (amp_off_abs > CLAP_AMP_THR) begin
-                on_clap <= 1;
-            end
+            on_clap <= (amp_off_abs > CLAP_AMP_THR) ? 1'b1 : 1'b0;
         end
     end
         
@@ -117,41 +110,5 @@ module clap_detector_7bit
     end
     
     assign clap_pulse_o = clap_pulse;
-
-endmodule
-
-
-module freq_div
-    #(parameter FREQ_DIV = 32)
-(
-    input clk_i,
-    input rst_i,
-    output reg fdclk_o
-);
-
-    localparam CNT_WIDTH = $clog2(FREQ_DIV);
-    
-    reg [CNT_WIDTH-1:0] cnt_ff;
-    wire [CNT_WIDTH-1:0] cnt_next;
-    
-    // counter logic
-    assign cnt_next = (cnt_ff == FREQ_DIV - 1) ? {CNT_WIDTH{1'b0}} : cnt_ff + 1'b1;
-    
-    always @(posedge clk_i) begin
-        if (rst_i) begin
-            cnt_ff <= {CNT_WIDTH{1'b0}};
-        end else begin
-            cnt_ff <= cnt_next;
-        end
-    end
-    
-    // fdclk logic
-    always @(posedge clk_i) begin
-        if (rst_i) begin
-            fdclk_o <= 0;
-        end else if (cnt_ff == FREQ_DIV - 1) begin
-            fdclk_o <= ~fdclk_o;
-        end
-    end
 
 endmodule

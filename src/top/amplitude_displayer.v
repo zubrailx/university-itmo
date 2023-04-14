@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module test(
+module amplitude_displayer (
     input CLK100MHZ,
     // micro
     output M_LRSEL,
@@ -14,14 +14,14 @@ module test(
     output [7:0] AN
 );
 
-    wire clap;
+    wire clap_pulse;
 
     clap_detector_7bit cd (
         .clk_i(CLK100MHZ),
         .M_DATA(M_DATA),
         .M_LRSEL(M_LRSEL),
         .M_CLK(M_CLK),
-        .clap_o(clap)
+        .clap_pulse_o(clap_pulse)
     );
     
     wire [1:0] clap_state;
@@ -29,7 +29,7 @@ module test(
     
     clap_state cs (
         .clk_i(CLK100MHZ),
-        .clap_i(clap),
+        .clap_i(clap_pulse),
         .clap_state_o(clap_state),
         .clap_set_o(clap_set)
     );

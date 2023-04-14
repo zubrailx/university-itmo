@@ -5,6 +5,8 @@ module main(
     input CLK100MHZ,
     input [15:0] SW,
     input BTNU, BTND, BTNL, BTNR, BTNC,
+    // reset button
+    input CPU_RESETN,
     // 7-segment
     output CA, CB, CC, CD, CE, CF, CG,
     output [7:0] AN,
