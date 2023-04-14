@@ -37,7 +37,7 @@ module main(
     
     wire clap;
     
-    clap_detector cd(
+    clap_detector_7bit cd(
         .clk_i(CLK100MHZ),
         .M_DATA(M_DATA),
         .M_LRSEL(M_LRSEL),
