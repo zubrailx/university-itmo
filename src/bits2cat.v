@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module bits2cat_32
-     #(parameter REFRESH_CLOCKS = 200_000)
+     #(parameter DIGIT_PERIOD = 200_000)
      (
         input clk,
         input rst_i,
@@ -10,7 +10,7 @@ module bits2cat_32
         output reg [7:0] AN
     );
     
-    localparam CNT_WIDTH = $clog2(REFRESH_CLOCKS);
+    localparam CNT_WIDTH = $clog2(DIGIT_PERIOD + 1);
     
     reg [2:0] cur_digit;
     
@@ -24,31 +24,28 @@ module bits2cat_32
         .CAT(CAT)
     );
     
-    // reset only on front
     reg rst_q;
     wire rst_chg;
     
     always @(posedge clk) rst_q <= rst_i;
-    
     assign rst_chg = (rst_q != rst_i);
     
-    // counter logic
-    assign cnt_next = (cnt_ff == REFRESH_CLOCKS) ? {CNT_WIDTH{1'b0}} : cnt_ff + 1'b1;
+    // set counter
+    assign cnt_next = (cnt_ff == DIGIT_PERIOD) ? {CNT_WIDTH{1'b0}} : cnt_ff + 1'b1;
     
     always @(posedge clk) begin
         if (rst_chg && rst_i) begin
-            cnt_ff <= {$clog2(REFRESH_CLOCKS){1'b0}};
+            cnt_ff <= {CNT_WIDTH{1'b0}};
         end else begin
             cnt_ff <= cnt_next;
         end
     end
     
-    // digic logic
     always @(posedge clk) begin
         if (rst_chg && rst_i) begin
             cur_digit <= 0;
             AN <= 8'b11111110;
-        end else if (cnt_ff == REFRESH_CLOCKS) begin
+        end else if (cnt_ff == DIGIT_PERIOD) begin
             cur_digit <= cur_digit + 1;
             AN <= {AN[6:0], AN[7]};
         end
@@ -77,54 +74,22 @@ module bits2cat_4(
 
     always @(*) begin
         case (hex_i)
-            4'b0000: begin
-                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1 };
-            end
-            4'b0001: begin
-                CAT = { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1 };
-            end
-            4'b0010: begin
-                CAT = { 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0 };
-            end
-            4'b0011: begin
-                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0 };
-            end
-            4'b0100: begin
-                CAT = { 1'b1, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0 };
-            end
-            4'b0101: begin
-                CAT = { 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0 };
-            end
-            4'b0110: begin
-                CAT = { 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0 };
-            end
-            4'b0111: begin
-                CAT = { 1'b0, 1'b0, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1 };
-            end
-            4'b1000: begin
-                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0 };
-            end
-            4'b1001: begin
-                CAT = { 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0 };
-            end
-            4'b1010: begin
-                CAT = { 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0 };
-            end
-            4'b1011: begin
-                CAT = { 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0 };
-            end
-            4'b1100: begin
-                CAT = { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1 };
-            end
-            4'b1101: begin
-                CAT = { 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0 };
-            end
-            4'b1110: begin
-                CAT = { 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0 };
-            end
-            4'b1111: begin
-                CAT = { 1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0 };
-            end        
+            4'h0: CAT = 7'b0000001;
+            4'h1: CAT = 7'b1001111;
+            4'h2: CAT = 7'b0010010;
+            4'h3: CAT = 7'b0000110;
+            4'h4: CAT = 7'b1001100;
+            4'h5: CAT = 7'b0100100;
+            4'h6: CAT = 7'b0100000;
+            4'h7: CAT = 7'b0001111;
+            4'h8: CAT = 7'b0000000;
+            4'h9: CAT = 7'b0000100;
+            4'ha: CAT = 7'b0001000;
+            4'hb: CAT = 7'b1100000;
+            4'hc: CAT = 7'b0110001;
+            4'hd: CAT = 7'b1000010;
+            4'he: CAT = 7'b0110000;
+            4'hf: CAT = 7'b0111000;   
         endcase
     end
 endmodule

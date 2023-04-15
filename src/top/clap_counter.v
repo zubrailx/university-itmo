@@ -24,7 +24,7 @@ module clap_counter (
 
     wire clap_pulse;
 
-    clap_detector_7bit cd (
+    clap_detector cd (
         .clk_i(CLK100MHZ),
         .rst_i(btnd),
         .M_DATA(M_DATA),

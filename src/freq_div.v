@@ -13,7 +13,6 @@ module freq_div
     reg [CNT_WIDTH-1:0] cnt_ff;
     wire [CNT_WIDTH-1:0] cnt_next;
     
-    // counter logic
     assign cnt_next = (cnt_ff == FREQ_DIV - 1) ? {CNT_WIDTH{1'b0}} : cnt_ff + 1'b1;
     
     always @(posedge clk_i) begin
@@ -24,7 +23,6 @@ module freq_div
         end
     end
     
-    // fdclk logic
     always @(posedge clk_i) begin
         if (rst_i) begin
             fdclk_o <= 0;

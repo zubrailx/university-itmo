@@ -99,16 +99,15 @@ module ev_counter(
 );
 
     reg set_q;
-    wire set_chg;
+    wire set_posedge;
     
     always @(posedge clk_i) set_q <= set_i;
-    
-    assign set_chg = (set_q != set_i);
+    assign set_posedge = (set_q != set_i) && set_i;
     
     always @(posedge clk_i) begin
         if (rst_i) begin
             cnt_o <= 0;
-        end else if (set_chg && set_i) begin
+        end else if (set_posedge) begin
             cnt_o <= cnt_o + 1; 
         end
     end

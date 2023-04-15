@@ -31,7 +31,7 @@ module main(
         assign btns_in = {BTNU, BTND, BTNL, BTNR, BTNC, CPU_RESETN};
         assign {btnu, btnd, btnl, btnr, btnc, cpu_resetn} = btns_out;
     
-        for (i = 0; i < 5; i = i + 1) begin
+        for (i = 0; i <= 5; i = i + 1) begin
             button_debouncer bd(
                 .clk_i(CLK100MHZ),
                 .btn_i(btns_in[i]),
@@ -42,7 +42,7 @@ module main(
     
     wire clap_pulse;
     
-    clap_detector_7bit cd(
+    clap_detector cd(
         .clk_i(CLK100MHZ),
         .rst_i(rst),
         .M_DATA(M_DATA),
@@ -57,7 +57,7 @@ module main(
     clap_controller cc(
         .clk_i(CLK100MHZ),
         .rst_i(rst),
-        .clap_i(clap_pulse),
+        .clap_pulse_i(clap_pulse),
         .clap_state_o(clap_state),
         .clap_set_o(clap_set)
     );
@@ -95,7 +95,7 @@ module main(
     
     displayer displayer (
         .clk_i(CLK100MHZ),
-        .rst_i(btnd),
+        .rst_i(rst),
         .state_i(state),
         .clap_state_i(clap_state),  
         .sw_i(SW),

@@ -1,13 +1,6 @@
 `timescale 1ns / 1ps
 
-// algorithm to detect whether clap occured
-// 7 bits - 128 levels
-module clap_detector_7bit
-    // 12Hz (max_freq) * 128 (precision) * 2 (>= 2 - Nyquist) = 3072000 Hz
-    // 100MHz / 3072000Hz <= 32 - less than 3.3MHz
-    #(parameter FREQ_DIV = 32,
-      parameter CLAP_REPEAT_MIN = 300_000, // * FREQ_DIV
-      parameter CLAP_AMP_THR = 12)
+module clap_detector
 (
     input clk_i,
     input rst_i,
@@ -18,7 +11,35 @@ module clap_detector_7bit
     // clap
     output clap_pulse_o
 );
-    // configure mic:
+  
+  mic_configurator mc(
+    .clk_i(clk_i),
+    .rst_i(rst_i),
+    .M_CLK(M_CLK),
+    .M_LRSEL(M_LRSEL)
+  );
+  
+  clap_detector_7bit cd(
+    .M_CLK(M_CLK),
+    .rst_i(rst_i),
+    .M_DATA(M_DATA),
+    .clap_pulse_o(clap_pulse_o)
+  );
+
+endmodule
+
+
+module mic_configurator
+    // 12Hz (max_freq) * 128 (precision) * 2 (>= 2 - Nyquist) = 3072000 Hz
+    // 100MHz / 3072000Hz <= 32 - less than 3.3MHz
+    #(parameter FREQ_DIV = 32)
+(
+    input clk_i,
+    input rst_i,
+    output M_CLK,
+    output M_LRSEL
+);
+
     freq_div #(.FREQ_DIV(FREQ_DIV)) fd(
         .clk_i(clk_i),
         .rst_i(rst_i),
@@ -26,8 +47,20 @@ module clap_detector_7bit
     );
     
     assign M_LRSEL = 1'b0;
-    
-    // counter
+
+endmodule
+
+
+module clap_detector_7bit
+    #(parameter  CLAP_REPEAT_MIN = 300_000,
+      parameter CLAP_AMP_THR = 12)
+(
+    input M_CLK,
+    input rst_i,
+    input M_DATA,
+    output clap_pulse_o
+);
+
     reg [6:0] cnt_ff;
     wire [6:0] cnt_next;
     
@@ -41,9 +74,8 @@ module clap_detector_7bit
         end
     end
     
-    // calculate amplitude and set window
+    // calculate amplitude [0-128] and set window
     reg [127:0] window;
-    // [0-128]
     reg [8:0] amplitude;
     reg prev_bit;
     
@@ -60,11 +92,10 @@ module clap_detector_7bit
         end
     end
 
+    // calculate amplitude as offset from center [0-64]
     reg [7:0] amp_off_abs;
     
-    // calculate amp_off_abs
     always @(posedge M_CLK) begin
-        // calculate amplitude from center offset [0-64]
         if (amplitude >= 64) begin
             amp_off_abs <= amplitude - 64;
         end else begin
@@ -85,18 +116,18 @@ module clap_detector_7bit
         
     // if clap front
     reg clap_q;
+    wire clap_posedge;
+    
     always @(posedge M_CLK) clap_q <= on_clap;
+    assign clap_posedge = (on_clap != clap_q) && on_clap;
     
-    wire clap_chg;
-    assign clap_chg = (on_clap != clap_q);
-    
-    // logic to detect claps on fronts that exceed CLAP_REPEAT_MIN
+    // detect claps on fronts that exceed CLAP_REPEAT_MIN
     reg [$clog2(CLAP_REPEAT_MIN + 1)-1:0] clap_cnt;
     
     reg clap_pulse;
     
     always @(posedge M_CLK) begin
-        if (clap_chg && on_clap && clap_cnt == CLAP_REPEAT_MIN) begin
+        if (clap_posedge && clap_cnt == CLAP_REPEAT_MIN) begin
             clap_pulse <= 1;
             clap_cnt <= 0;
         end else begin
@@ -107,6 +138,7 @@ module clap_detector_7bit
         end
     end
     
+    // set ouput signals   
     assign clap_pulse_o = clap_pulse;
-
+    
 endmodule

@@ -9,7 +9,7 @@ module displayer (
     input [31:0] data_i,
     output [6:0] CAT,
     output [7:0] AN,
-    output reg [15:0] LED,
+    output [15:0] LED,
     output [2:0] BGR1, BGR2
 );
 
@@ -29,8 +29,6 @@ module displayer (
     );
     
     always @(*) begin
-        LED = 0;
-        
         case (state_i)
             COND_CNT_EN: begin
                 btc_data = data_i;
@@ -47,9 +45,8 @@ module displayer (
         endcase
     end
     
-    // display current state
     assign BGR1 = state_i;
-    // claps
     assign BGR2 = clap_state_i;
 
+    assign LED = sw_i;
 endmodule

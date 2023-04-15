@@ -16,22 +16,12 @@ module amplitude_displayer (
 
     wire clap_pulse;
 
-    clap_detector_7bit cd (
+    clap_detector cd (
         .clk_i(CLK100MHZ),
         .M_DATA(M_DATA),
         .M_LRSEL(M_LRSEL),
         .M_CLK(M_CLK),
         .clap_pulse_o(clap_pulse)
-    );
-    
-    wire [1:0] clap_state;
-    wire clap_set;
-    
-    clap_state cs (
-        .clk_i(CLK100MHZ),
-        .clap_i(clap_pulse),
-        .clap_state_o(clap_state),
-        .clap_set_o(clap_set)
     );
     
     wire btnd;
