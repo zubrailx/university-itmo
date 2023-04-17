@@ -115,6 +115,7 @@ module main(
         .clap_state_i(clap_state),  
         .sw_i(SW),
         .data_i(data),
+        .amplitude_i(amplitude),
         .CAT(CAT),
         .AN(AN),
         .LED(LED),
