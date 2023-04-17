@@ -50,3 +50,10 @@ module displayer (
 
     assign LED = sw_i;
 endmodule
+
+//module amplitude_displayer
+//(
+//    input [7:0] amp_off_abs;
+//);
+
+//endmodule

@@ -39,15 +39,29 @@ module main(
             );
         end
     endgenerate
+        
+    mic_configurator mc(
+        .clk_i(CLK100MHZ),
+        .rst_i(rst),
+        .M_CLK(M_CLK),
+        .M_LRSEL(M_LRSEL)
+    );
+    
+    wire [8:0] amplitude;
+    
+    amplituder_7bit am7bit(
+        .M_CLK(M_CLK),
+        .rst_i(rst),
+        .M_DATA(M_DATA),
+        .amplitude_o(amplitude)
+    );
     
     wire clap_pulse;
     
     clap_detector cd(
-        .clk_i(CLK100MHZ),
-        .rst_i(rst),
-        .M_DATA(M_DATA),
-        .M_LRSEL(M_LRSEL),
         .M_CLK(M_CLK),
+        .rst_i(rst),
+        .amplitude_i(amplitude),
         .clap_pulse_o(clap_pulse)
     );
     
@@ -79,7 +93,8 @@ module main(
     
     logic logic(
         .clk_i(CLK100MHZ),
-        .rst_i(lc_rst),
+        .rst_i(rst),
+        .mod_rst_i(lc_rst),
         .set_i(lc_set),
         .state_i(state),
         .sw_i(SW),

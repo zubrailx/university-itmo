@@ -2,13 +2,14 @@
 
 module logic (
     input clk_i,
-    // buttons
     input rst_i,
+    // buttons
+    input mod_rst_i,
     input set_i,
     input [2:0] state_i,
     // switch
     input [15:0] sw_i,
-    // result and what to display 
+    // result
     output [31:0] data_o
 );
 
@@ -53,14 +54,19 @@ module logic (
         end
     end
     
-    // connect wires depending on state
-    assign {lru_rst, lru_set} = (state_i == COND_LRU_RD || state_i == COND_LRU_WR)
-        ? {rst_i, set_i} : 1'b0;
-
-    assign {evc_rst, evc_set} = (state_i == COND_CNT_EN)
-        ? {rst_i, set_i} : 1'b0;
+    // lru
+    assign lru_rst = (rst_i) ? rst_i
+        : (state_i == COND_LRU_RD || state_i == COND_LRU_WR) ? mod_rst_i : 1'b0;
+        
+    assign lru_set = (state_i == COND_LRU_RD || state_i == COND_LRU_WR) ? set_i : 1'b0;
+        
+    // evc     
+    assign evc_rst = (rst_i) ? rst_i
+        : (state_i == COND_CNT_EN) ? mod_rst_i : 1'b0;
+        
+    assign evc_set = (state_i == COND_CNT_EN) ? set_i : 1'b0;
     
-    // connect output result wires
+    // output
     reg [31:0] data;
     assign data_o = data;
     

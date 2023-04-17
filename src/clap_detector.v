@@ -2,106 +2,39 @@
 
 module clap_detector
 (
-    input clk_i,
+    input M_CLK,
     input rst_i,
-    // ports to micro
-    input M_DATA,
-    output M_LRSEL,
-    inout M_CLK,
-    // clap
+    input [8:0] amplitude_i,
     output clap_pulse_o
 );
-  
-  mic_configurator mc(
-    .clk_i(clk_i),
-    .rst_i(rst_i),
-    .M_CLK(M_CLK),
-    .M_LRSEL(M_LRSEL)
-  );
-  
+
   clap_detector_7bit cd(
     .M_CLK(M_CLK),
     .rst_i(rst_i),
-    .M_DATA(M_DATA),
+    .amplitude_i(amplitude_i),
     .clap_pulse_o(clap_pulse_o)
   );
 
 endmodule
 
 
-module mic_configurator
-    // 12Hz (max_freq) * 128 (precision) * 2 (>= 2 - Nyquist) = 3072000 Hz
-    // 100MHz / 3072000Hz <= 32 - less than 3.3MHz
-    #(parameter FREQ_DIV = 32)
-(
-    input clk_i,
-    input rst_i,
-    output M_CLK,
-    output M_LRSEL
-);
-
-    freq_div #(.FREQ_DIV(FREQ_DIV)) fd(
-        .clk_i(clk_i),
-        .rst_i(rst_i),
-        .fdclk_o(M_CLK)
-    );
-    
-    assign M_LRSEL = 1'b0;
-
-endmodule
-
-
 module clap_detector_7bit
     #(parameter  CLAP_REPEAT_MIN = 300_000,
-      parameter CLAP_AMP_THR = 12)
+      parameter CLAP_AMP_THR = 8)
 (
     input M_CLK,
     input rst_i,
-    input M_DATA,
+    input [8:0] amplitude_i,
     output clap_pulse_o
 );
-
-    reg [6:0] cnt_ff;
-    wire [6:0] cnt_next;
     
-    assign cnt_next = (cnt_ff == 127) ? {7'b0} : cnt_ff + 1'b1;
-    
-    always @(posedge M_CLK) begin
-        if (rst_i) begin
-            cnt_ff <= 0;   
-        end else begin
-            cnt_ff <= cnt_next;
-        end
-    end
-    
-    // calculate amplitude [0-128] and set window
-    reg [127:0] window;
-    reg [8:0] amplitude;
-    reg prev_bit;
-    
-    always @(posedge M_CLK) begin
-        if (rst_i) begin
-            window <= 0;
-            amplitude <= 0;
-            prev_bit <= 0;
-        end else begin
-            prev_bit <= window[cnt_next];
-            // overwrite prev_bit and update
-            amplitude <= (amplitude - prev_bit + M_DATA);
-            window[cnt_ff] <= M_DATA;
-        end
-    end
-
     // calculate amplitude as offset from center [0-64]
-    reg [7:0] amp_off_abs;
+    wire [7:0] amp_off_abs;
     
-    always @(posedge M_CLK) begin
-        if (amplitude >= 64) begin
-            amp_off_abs <= amplitude - 64;
-        end else begin
-            amp_off_abs <= 64 - amplitude;
-        end
-    end
+    amp2off_7bit ato7bit(
+        .amplitude_i(amplitude_i),
+        .amp_off_abs_o(amp_off_abs)
+    );
     
     // detect if on clap logic
     reg on_clap;

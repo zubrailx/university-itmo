@@ -33,7 +33,7 @@ module logic_controller (
     
     always @(*) begin
         if (clap_posedge) begin
-            case (cond)
+            case (state_o)
                 // cycle
                 COND_CNT_EN: state_next = COND_LRU_WR;
                 COND_LRU_WR: state_next = COND_LRU_RD;
