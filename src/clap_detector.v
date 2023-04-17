@@ -20,7 +20,7 @@ endmodule
 
 module clap_detector_7bit
     #(parameter  CLAP_REPEAT_MIN = 300_000,
-      parameter CLAP_AMP_THR = 8)
+      parameter CLAP_AMP_THR = 16)
 (
     input M_CLK,
     input rst_i,
