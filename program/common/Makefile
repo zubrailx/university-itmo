@@ -35,11 +35,12 @@ rars:
 # software build
 
 # embedded toolchain is prefered
-CROSS_COMPILE ?= riscv64-unknown-elf-
+CROSS_COMPILE ?= riscv64-unknown-linux-gnu-
+
 # but it is not available in ubuntu 18.04 repo
 ifeq (, $(shell which $(CROSS_COMPILE)gcc))
  ifneq (, $(shell which riscv64-linux-gnu-gcc))
-  CROSS_COMPILE = riscv64-linux-gnu-
+  CROSS_COMPILE = riscv64-unknown-linux-gnu-
  endif
 endif
 
@@ -63,8 +64,8 @@ build: program.dis program.hex
 #                               Details: https://www.sifive.com/blog/all-aboard-part-1-compiler-args
 #    -nostdlib                - Do not use the standard system startup files or libraries when linking
 #    -T ../common/program.ld  - Use program.ld as the linker script
-program.elf: main.S
-	$(CC) -o $@ $^ -O0 -march=rv32i -mabi=ilp32 -nostdlib -T ../common/program.ld
+program.elf: main.S ../common/program.ld
+	$(CC) -o $@ $< -O0 -march=rv32i -mabi=ilp32 -nostdlib -static -T ../common/program.ld
 
 #disassemble program
 #  Makefile automatic variables:

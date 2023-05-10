@@ -6,10 +6,17 @@ ENTRY(hwreset)
 
 SECTIONS
 {
-  .text = .;
-  /DISCARD/ :
-  {
+  .text : {
+      *(.text)
+  }
+
+  /DISCARD/ : {
     *(.note.gnu.build-id)
     *(.riscv.attributes)
+    /* *(.dynsym) */
+    /* *(.dynstr) */
+    /* *(.gnu.hash) */
+    /* *(.dynamic) */
+    /* *(.got) */
   }
 }
