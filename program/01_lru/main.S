@@ -1,9 +1,15 @@
             .text
+start:      mv a0, zero
+counter:    addi a0, a0, 5
+      .word 0x51025 # lru.push(a0)
+            mv a1, zero
+      .word 0x59605 # a2 = lru.pop(a1)
+            addi a0, a0, 5
+      .word 0x51025 # lru.push(a0)
+            addi a1, a1, 1
+      .word 0x59605 # a2 = lru.pop(a1)
+            beq zero, zero, counter
 
-start:      mv a0, zero              # t0 = 0
-counter:    addi a0, a0, 1           # t0 = t0 + 1
-            # push: [0000.0000.0000:any][00000:xN][001][00000:any][0100101]
-push:      .word 0x00051025
-            # pop : [0000.0000.0000:any][00000:xN][001][00000:xNo][0000101]
-pop:       .word 0x00051505
-            beq zero, zero, counter  # if t0 == t1 then counter
+
+# push: hex(int('000000000000_01010_001_00000_0100101', 2))
+# pop : hex(int('000000000000_01011_001_01100_0000101', 2))

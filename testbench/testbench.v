@@ -101,6 +101,9 @@ module sm_testbench;
 
             { `RVF7_ANY,  `RVF3_BEQ,  `RVOP_BEQ  } : $write ("beq   $%1d, $%1d, 0x%8h (%1d)", rs1, rs2, immB, immB);
             { `RVF7_ANY,  `RVF3_BNE,  `RVOP_BNE  } : $write ("bne   $%1d, $%1d, 0x%8h (%1d)", rs1, rs2, immB, immB);
+            
+            { `RVF7_ANY, `RVF3_PUSH, `RVOP_PUSH  } : $write ("lru.push($%1d)", rs1);
+            { `RVF7_ANY, `RVF3_POP, `RVOP_POP  } : $write ("$%1d = lru.pop($%1d)", rd, rs1);
         endcase
     end
     endtask

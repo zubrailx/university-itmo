@@ -8,13 +8,16 @@ Disassembly of section .text:
    0:	00000513          	addi	a0,zero,0
 
 00000004 <counter>:
-   4:	00150513          	addi	a0,a0,1
-
-00000008 <push>:
+   4:	00550513          	addi	a0,a0,5
    8:	1025                	.2byte	0x1025
    a:	0005                	.2byte	0x5
-
-0000000c <pop>:
-   c:	1505                	.2byte	0x1505
-   e:	0005                	.2byte	0x5
-  10:	fe000ae3          	beq	zero,zero,4 <counter>
+   c:	00000593          	addi	a1,zero,0
+  10:	9605                	.2byte	0x9605
+  12:	0005                	.2byte	0x5
+  14:	00550513          	addi	a0,a0,5
+  18:	1025                	.2byte	0x1025
+  1a:	0005                	.2byte	0x5
+  1c:	00158593          	addi	a1,a1,1
+  20:	9605                	.2byte	0x9605
+  22:	0005                	.2byte	0x5
+  24:	fe0000e3          	beq	zero,zero,4 <counter>
