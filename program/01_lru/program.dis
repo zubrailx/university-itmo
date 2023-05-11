@@ -18,6 +18,6 @@ Disassembly of section .text:
   18:	1025                	.2byte	0x1025
   1a:	0005                	.2byte	0x5
   1c:	00158593          	addi	a1,a1,1
-  20:	9605                	.2byte	0x9605
+  20:	9705                	.2byte	0x9705
   22:	0005                	.2byte	0x5
   24:	fe0000e3          	beq	zero,zero,4 <counter>
