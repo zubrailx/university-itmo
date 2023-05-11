@@ -5,13 +5,13 @@ module buffer_lru
                 BUF_SIZE = 8)
 (
 
-    input clk_i,
-    input rst_i,
-    input set_i,
-    input wire [BUF_WIDTH-1:0] val_i,
+    input                                   clk_i,
+    input                                   rst_i,
+    input                                   set_i,
+    input   wire  [BUF_WIDTH-1         :0]  val_i,
     // each element in buffer
-    output reg [BUF_SIZE*BUF_WIDTH-1:0] buf_array_o,
-    output reg [BUF_SIZE-1:0] buf_pres_array_o
+    output  reg   [BUF_SIZE*BUF_WIDTH-1:0]  buf_array_o,
+    output  reg   [BUF_SIZE-1          :0]  buf_pres_array_o
 );
     
     localparam IDX_MSB = $clog2(BUF_SIZE) - 1;

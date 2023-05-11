@@ -26,6 +26,8 @@ module sr_cpu
     wire        aluSrc;
     wire        wdSrc;
     wire  [2:0] aluControl;
+    wire        lruSet;
+    wire        lruSel;
 
     //instruction decode wires
     wire [ 6:0] cmdOp;
@@ -97,7 +99,28 @@ module sr_cpu
         .result     ( aluResult    ) 
     );
 
-    assign wd3 = wdSrc ? immU : aluResult;
+    // lru
+    localparam LRU_BUF_SIZE  = 8;
+    localparam LRU_BUF_WIDTH = 16;
+
+    wire [LRU_BUF_SIZE*LRU_BUF_WIDTH-1:0] lruBufs;
+    wire [$clog2(LRU_BUF_SIZE)-1      :0] bufIdx;
+    wire [LRU_BUF_WIDTH-1             :0] lruResult;
+
+    assign bufIdx     = rd1 & {$clog2(LRU_BUF_SIZE){1'b1}};
+    assign lruResult  = lruBufs[bufIdx*LRU_BUF_WIDTH +: LRU_BUF_WIDTH];
+
+    buffer_lru #(.BUF_SIZE(LRU_BUF_SIZE), .BUF_WIDTH(LRU_BUF_WIDTH)) lru (
+      .clk_i        ( clk         ),
+      .rst_i        ( ~rst_n      ),
+      .set_i        ( lruSet      ),
+      .val_i        ( rd1[15:0]   ),
+      .buf_array_o  ( lruBufs     ),
+      .buf_pres_array_o ()
+    );
+
+    wire [31:0] lruOrAlu = lruSel ? lruResult : aluResult;
+    assign wd3 = wdSrc ? immU : lruOrAlu;
 
     //control
     sr_control sm_control (
@@ -109,7 +132,9 @@ module sr_cpu
         .regWrite   ( regWrite     ),
         .aluSrc     ( aluSrc       ),
         .wdSrc      ( wdSrc        ),
-        .aluControl ( aluControl   ) 
+        .aluControl ( aluControl   ),
+        .lruSet     ( lruSet       ),
+        .lruSel     ( lruSel       )
     );
 
 endmodule
@@ -167,7 +192,9 @@ module sr_control
     output reg       regWrite, 
     output reg       aluSrc,
     output reg       wdSrc,
-    output reg [2:0] aluControl
+    output reg [2:0] aluControl,
+    output reg       lruSet,
+    output reg       lruSel
 );
     reg          branch;
     reg          condZero;
@@ -180,6 +207,8 @@ module sr_control
         aluSrc      = 1'b0;
         wdSrc       = 1'b0;
         aluControl  = `ALU_ADD;
+        lruSet      = 1'b0;
+        lruSel      = 1'b0;
 
         casez( {cmdF7, cmdF3, cmdOp} )
             { `RVF7_ADD,  `RVF3_ADD,  `RVOP_ADD  } : begin regWrite = 1'b1; aluControl = `ALU_ADD;  end
@@ -193,6 +222,9 @@ module sr_control
 
             { `RVF7_ANY,  `RVF3_BEQ,  `RVOP_BEQ  } : begin branch = 1'b1; condZero = 1'b1; aluControl = `ALU_SUB; end
             { `RVF7_ANY,  `RVF3_BNE,  `RVOP_BNE  } : begin branch = 1'b1; aluControl = `ALU_SUB; end
+
+            { `RVF7_ANY,  `RVF3_PUSH, `RVOP_PUSH } : begin lruSet = 1'b1; end
+            { `RVF7_ANY,  `RVF3_POP,  `RVOP_POP  } : begin regWrite = 1'b1; lruSel = 1'b1; end
         endcase
     end
 endmodule
