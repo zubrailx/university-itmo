@@ -1,0 +1,3 @@
+[submodule "schoolRISCV"]
+	path = schoolRISCV
+	url = git@github.com:zhelnio/schoolRISCV.git
