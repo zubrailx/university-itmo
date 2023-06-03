@@ -8,18 +8,18 @@ RUN apt-get update \
     && apt-get -y install curl wget sudo \
     && apt-get -y install ca-certificates gnupg
 
-#Postgres 14
+#Postgres 15
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 RUN apt-get -y install postgresql-15
-RUN apt-get -y install pgpool2 postgresql-15-pgpool2
+RUN apt-get -y install pgpool2 libpgpool2 postgresql-15-pgpool2
 
 RUN apt-get -y install ssh iputils-ping vim nano
 
-RUN cp -s /usr/lib/postgresql/14/bin/* /usr/bin 2> dev/null; exit 0
-#Postgres 14
+RUN cp -s /usr/lib/postgresql/15/bin/* /usr/bin 2> dev/null; exit 0
+#Postgres 15
 
 ##Establish the operating directory of OpenSSH
 #RUN mkdir /var/run/sshd
