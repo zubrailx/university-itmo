@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get -y install curl wget sudo
+
+RUN apt-get -y install ca-certificates gnupg
+RUN sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+RUN apt-get update
+RUN apt-get -y install postgresql-14
+RUN apt-get -y install pgpool2 postgresql-14-pgpool2
+
+RUN apt-get -y install ssh iputils-ping vim nano
+
+RUN mkdir -p /app
+WORKDIR /app
