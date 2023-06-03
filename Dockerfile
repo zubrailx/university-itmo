@@ -1,5 +1,5 @@
 #Base Image
-FROM ubuntu:22.04
+FROM ubuntu:23.04
 
 #Update APT repository & Install OpenSSH
 RUN apt-get update \
@@ -13,16 +13,16 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-RUN apt-get -y install postgresql-14
-RUN apt-get -y install pgpool2 postgresql-14-pgpool2
+RUN apt-get -y install postgresql-15
+RUN apt-get -y install pgpool2 postgresql-15-pgpool2
 
 RUN apt-get -y install ssh iputils-ping vim nano
 
 RUN cp -s /usr/lib/postgresql/14/bin/* /usr/bin 2> dev/null; exit 0
 #Postgres 14
 
-#Establish the operating directory of OpenSSH
-RUN mkdir /var/run/sshd
+##Establish the operating directory of OpenSSH
+#RUN mkdir /var/run/sshd
 
 #Set Root password
 RUN echo 'root:root' | chpasswd
