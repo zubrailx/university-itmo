@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "30000:22"
     hostname: ubuntu-a
     container_name: ubuntu-a
     networks:
@@ -15,8 +13,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "30001:22"
     hostname: ubuntu-b
     container_name: ubuntu-b
     networks:
@@ -25,10 +21,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "30002:22"
     hostname: ubuntu-c
     container_name: ubuntu-c
+    networks:
+      ubuntu-net:
+  ubuntu-pool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: ubuntu-pool
+    container_name: ubuntu-pool
     networks:
       ubuntu-net:
 
