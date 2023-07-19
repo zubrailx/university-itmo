@@ -1,0 +1,160 @@
+version: "3.9"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    networks:
+      - overlay-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    # 9092 - external, 29092 - internal
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    networks:
+      - overlay-network
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:32181'
+      KAFKA_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://kafka:9092"
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:29092,EXTERNAL://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # using single node cluster
+      CONFLUENT_SUPPORT_CUSTOMER_ID: "anonymous"
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.4.0
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    networks:
+      - overlay-network
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:29092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.0
+    container_name: kafka-ui
+    ports:
+      - 8080:8080
+    depends_on:
+      - kafka
+      - schema-registry
+      - kafka-connect
+    networks:
+      - overlay-network
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+
+  kafka-connect:
+    container_name: kafka-connect
+    build:
+      context: .
+      dockerfile: connect-mongodb.Dockerfile
+    depends_on:
+      - kafka
+      - schema-registry
+    networks:
+      - overlay-network
+    environment:
+      CONNECT_GROUP_ID: 1
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-mongodb-config"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-mongodb-offset"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-mongodb-status"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
+      CONNECT_ZOOKEEPER_CONNECT: "zookeeper:32181"
+      CONNECT_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_REST_PORT: 8083
+
+  mongodb-source:
+    image: mongo:6.0.5
+    container_name: mongodb-source
+    restart: no
+    networks:
+      - overlay-network
+    command: >
+      bash -c "
+        (sleep 5 && mongosh --eval \"
+          rsconf = {
+            _id: 'rs0',
+            members: [{ _id: 0, host: 'mongodb-source:27017', priority: 1.0 }]
+          };
+          rs.initiate(rsconf);
+          rs.status();                                                             
+        \") &
+        mongod --replSet rs0 --bind_ip_all
+      "
+  
+  # NOTE: first time added mongodb-target without replication, 
+  # but then added it because thought it would help to fix unsupported 'drop' operation
+  mongodb-target:
+    image: mongo:6.0.5
+    container_name: mongodb-target
+    restart: no
+    networks:
+      - overlay-network
+    command: >
+      bash -c "
+        (sleep 5 && mongosh --eval \"
+          rsconf = {
+            _id: 'rs0',
+            members: [{ _id: 0, host: 'mongodb-target:27017', priority: 1.0 }]
+          };
+          rs.initiate(rsconf);
+          rs.status();                                                             
+        \") &
+        mongod --replSet rs0 --bind_ip_all
+      "
+
+  # Самописный worker, который осуществляет роль sink из предыдущей задачи при этом осуществляет конвертацию данных.
+  kafka-mongo-writer:
+    container_name: kafka-mongo-writer
+    build:
+      context: ./kafka-mongo-writer
+    depends_on:
+      - kafka
+      - mongodb-target
+    networks:
+      - overlay-network
+    environment:
+      APP_MONGO_SOCKET: "mongodb-target:27017"
+      APP_MONGO_REPLICA_SET: "rs0"
+      APP_MONGO_DATABASE: "test"
+      APP_MONGO_COLLECTION: "users"
+      APP_KAFKA_BROKER: "kafka:29092"
+      APP_KAFKA_TOPIC: "test.users"
+
+  # used to connect to topics
+  basic-client:
+    image: curlimages/curl:latest
+    container_name: basic-client
+    restart: no
+    networks:
+      - overlay-network
+    command: sleep infinity
+    volumes:
+      - ${PWD}/connector:/home/curl_user/
+
+networks:
+  overlay-network:
+    driver: overlay
+    attachable: true
