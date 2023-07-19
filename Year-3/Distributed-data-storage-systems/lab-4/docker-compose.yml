@@ -1,0 +1,39 @@
+version: "3.6"
+
+services:
+  ubuntu-a:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: ubuntu-a
+    container_name: ubuntu-a
+    networks:
+      ubuntu-net:
+  ubuntu-b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: ubuntu-b
+    container_name: ubuntu-b
+    networks:
+      ubuntu-net:
+  ubuntu-c:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: ubuntu-c
+    container_name: ubuntu-c
+    networks:
+      ubuntu-net:
+  ubuntu-pool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: ubuntu-pool
+    container_name: ubuntu-pool
+    networks:
+      ubuntu-net:
+
+networks:
+  ubuntu-net:
+    driver: bridge
