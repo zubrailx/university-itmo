@@ -1,0 +1,10 @@
+posix
+tests/tests
+Makefile
+tests/doctest.h
+.clang-format
+.gitlab-ci.yml
+
+compile_commands.json
+launch.json
+.cache
