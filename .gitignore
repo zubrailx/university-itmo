@@ -1,7 +1,5 @@
 *.aux
 *.log
-*.gz
-*.zip
 .idea/
 *.iml
 target/
@@ -10,5 +8,3 @@ dist/
 node_modules/
 .ccls-cache/
 *.odt#
-*.zip
-
